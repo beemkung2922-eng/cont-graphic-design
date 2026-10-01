@@ -75,11 +75,6 @@ export async function initShell() {
   document.querySelector("#sidebar-slot")?.replaceWith(document.createRange().createContextualFragment(sidebarHtml(page, access.member)));
   document.querySelector("#topbar-slot")?.replaceWith(document.createRange().createContextualFragment(topbarHtml(page)));
   mountUser(access.member);
-  const demoBannerSlot = document.querySelector("#demo-banner");
-  if (demoBannerSlot) {
-    demoBannerSlot.innerHTML = demoBanner();
-    if (api.isDemo()) demoBannerSlot.querySelector("#demo-banner")?.classList.remove("hidden");
-  }
   qsa("#logout-link").forEach((link) => link.addEventListener("click", (event) => { event.preventDefault(); auth.signOut(); }));
   qs("#menu-toggle")?.addEventListener("click", () => {
     qs("#sidebar")?.classList.toggle("is-open");
@@ -94,15 +89,10 @@ export async function initShell() {
   return { ...access, ...bundle };
 }
 
-export function demoBanner() { return `<div id="demo-banner" class="banner banner-demo hidden"><strong>DEMO MODE</strong><span>ข้อมูลชุดนี้เป็นข้อมูลตัวอย่างสำหรับทดลอง workflow เท่านั้น — เมื่อพร้อมใช้งานจริง ให้ตั้งค่า Supabase และออกจากโหมด DEMO</span><button class="btn btn-xs" id="exit-demo">กลับไป Login จริง</button></div>`; }
-
-export function wireDemoExit() { qs("#exit-demo")?.addEventListener("click", () => { api.setDemo(false); window.location.href = "index.html"; }); }
-
 export async function boot(pageModule) {
   try {
     const context = await initShell();
     if (!context) return;
-    wireDemoExit();
     await pageModule(context);
   } catch (error) {
     console.error(error);

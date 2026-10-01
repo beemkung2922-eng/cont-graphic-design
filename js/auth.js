@@ -1,26 +1,23 @@
 import { api, auth } from "./supabase.js";
-import { roleLabel, avatar, escapeHtml } from "./formatters.js";
+import { roleLabel, avatar } from "./formatters.js";
 
 export async function ensureAccess({ allowPublic = false } = {}) {
-  if (api.isDemo()) return { member: await auth.currentMember(), demo: true };
   const session = await auth.getSession();
   if (!session && !allowPublic) {
     window.location.href = "index.html";
-    return { member: null, demo: false };
+    return { member: null };
   }
-  if (!session) return { member: null, demo: false };
+  if (!session) return { member: null };
   try {
     const member = await auth.currentMember();
-    if (!member && !allowPublic) {
-      throw new Error("ไม่พบสมาชิกในทีม กรุณาติดต่อผู้ดูแลระบบ");
-    }
-    return { member, demo: false };
+    if (!member && !allowPublic) throw new Error("ไม่พบสมาชิกในทีม กรุณาติดต่อผู้ดูแลระบบ");
+    return { member };
   } catch (error) {
     if (!allowPublic) {
       window.location.href = `index.html?error=${encodeURIComponent(error.message)}`;
-      return { member: null, demo: false };
+      return { member: null };
     }
-    return { member: null, demo: false, error };
+    return { member: null, error };
   }
 }
 

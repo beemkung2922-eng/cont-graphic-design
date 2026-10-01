@@ -13,9 +13,6 @@ document.querySelector("#google-login")?.addEventListener("click", async (event)
   catch (error) { errorNode.textContent = error.message || "ไม่สามารถเริ่ม Google Login ได้"; errorNode.classList.remove("hidden"); button.disabled = false; button.innerHTML = "<span style=\"font-size:1.2rem\">G</span> เข้าสู่ระบบด้วย Google"; }
 });
 
-document.querySelectorAll("[data-demo-user]").forEach((button) => button.addEventListener("click", () => auth.enterDemo(button.dataset.demoUser)));
-
-// Supabase may redirect back with access_token in the URL hash after OAuth.
 if (window.location.hash.includes("access_token=")) {
   const hash = new URLSearchParams(window.location.hash.slice(1));
   const session = { access_token: hash.get("access_token"), refresh_token: hash.get("refresh_token"), user: { id: hash.get("user_id") || "" } };
@@ -24,4 +21,7 @@ if (window.location.hash.includes("access_token=")) {
   window.location.href = "dashboard.html";
 }
 
-if (api.isDemo()) window.location.href = "dashboard.html?demo=1";
+if (!api.isConfigured) {
+  errorNode.textContent = "ระบบยังไม่ได้เชื่อมต่อ Supabase กรุณาตรวจสอบค่าการเชื่อมต่อ";
+  errorNode.classList.remove("hidden");
+}
