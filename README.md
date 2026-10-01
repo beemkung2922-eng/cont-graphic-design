@@ -8,7 +8,6 @@
 - Frontend: HTML + CSS + Vanilla JavaScript modules
 - Data/Auth: Supabase REST API + Supabase Auth (Google OAuth)
 - Runtime: Node static server on port `3000`
-- Demo mode: separate local dataset for UI/workflow demonstrations only
 
 ## Run locally
 
@@ -23,10 +22,9 @@ The managed Preview uses the same port. `manus-routes.json` declares all applica
 
 1. Open your Supabase project.
 2. Run `sql/001_cont_schema.sql` in **SQL Editor**.
-3. Optional for presentation data: run `sql/002_demo_seed.sql`. It is clearly labeled demo data and must not be treated as production data.
-4. Create approved rows in `team_members`; the `email` must match the Google account and `auth_user_id` must be mapped after the first sign-in.
-5. Keep RLS enabled. Do not use a `service_role` key in the browser.
-6. Copy `js/config.example.js` to `js/config.local.js` and fill the project URL and **publishable/anon** key. `config.local.js` is gitignored.
+3. Create approved rows in `team_members`; the `email` must match the Google account and `auth_user_id` must be mapped after the first sign-in.
+4. Keep RLS enabled. Do not use a `service_role` key in the browser.
+5. Copy `js/config.example.js` to `js/config.local.js` and fill the project URL and **publishable/anon** key. `config.local.js` is gitignored.
 
 ### Google Login
 
@@ -48,19 +46,6 @@ where lower(email) = lower('designer@your-company.com');
 If the user is not mapped or inactive, CONT shows:
 
 > ไม่พบสมาชิกในทีม กรุณาติดต่อผู้ดูแลระบบ
-
-## Demo mode
-
-The Login page provides Beem and P'Pham demo entries. Demo mode stores data in browser `localStorage` under a separate key, so you can test:
-
-1. Supervisor creates and assigns a task.
-2. Beem moves `brief → drafting → review`.
-3. Supervisor requests a Revision, which increments the Revision number.
-4. The task moves to `completed`; it disappears from Active Kanban but remains in Work History.
-5. Reopen from completed and create another revision.
-6. Team page recalculates workload from points divided by capacity.
-
-To start directly: `/dashboard.html?demo=1`.
 
 ## Workflow rules
 
@@ -92,7 +77,6 @@ A `401 Unauthorized` from `/rest/v1` means the browser key was rejected. Confirm
 - the key was copied without spaces or line breaks;
 - you reloaded the page after editing `config.local.js`.
 
-The app remains previewable in DEMO mode while the real project configuration is corrected.
 
 ## Security notes
 
