@@ -2,6 +2,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./config.
 import { canTransition } from "./constants.js";
 
 const sessionKey = "cont_session";
+const PRODUCTION_ORIGIN = "https://cont-graphic-design-3d3ichkrx-beemkung2922-engs-projects.vercel.app";
 
 export const api = {
   isConfigured: isSupabaseConfigured,
@@ -163,8 +164,9 @@ export const auth = {
   },
 
   async signInWithGoogle() {
-    // ให้ระบบเช็ค URL อัตโนมัติ (ไม่ต้องฮาร์ดโค้ด)
-    const redirect = `${window.location.origin}/index.html`;
+    const isLocalhost = /^https?:\/\/localhost(?::\d+)?$/i.test(window.location.origin);
+    const origin = isLocalhost ? PRODUCTION_ORIGIN : window.location.origin;
+    const redirect = `${origin}/index.html`;
     window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirect)}`;
   },
 
