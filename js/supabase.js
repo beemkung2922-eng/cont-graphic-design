@@ -75,7 +75,7 @@ export const api = {
 
   async createTask(input) {
     const token = this.getAccessToken();
-    const rows = await this.request("/rest/v1/tasks", { method: "POST", headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" }, body: JSON.stringify({ ...input, revision_count: 0, status: "brief" }) });
+    const rows = await this.request("/rest/v1/tasks", { method: "POST", headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" }, body: JSON.stringify({ ...input, revision_count: 0, status: "brief", item_count: Number(input.item_count || 1), task_type: input.task_type || "new_work" }) });
     return rows[0];
   },
 

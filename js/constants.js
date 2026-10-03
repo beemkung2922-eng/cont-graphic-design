@@ -25,8 +25,9 @@ export const STATUS_DOTS = {
   completed: "#1f7a4d",
 };
 
-export const PRIORITY_LABELS = { low: "ต่ำ", medium: "ปกติ", high: "สูง", urgent: "เร่งด่วน" };
-export const PRIORITY_BADGES = { low: "badge-neutral", medium: "badge-slate", high: "badge-warn", urgent: "badge-danger" };
+export const TASK_TYPE_LABELS = { new_work: "เริ่มงานใหม่", resize: "ปรับ Size", revision: "แก้ไขงาน", adaptation: "ดัดแปลงจากชิ้นเดิม", other: "อื่น ๆ" };
+export const PRIORITY_LABELS = {};
+export const PRIORITY_BADGES = {};
 export const ROLE_LABELS = { designer: "Graphic Designer", supervisor: "Supervisor", admin: "Admin" };
 export const PROJECT_STATUS_LABELS = { active: "กำลังดำเนินการ", archived: "เก็บถาวร", completed: "เสร็จแล้ว" };
 
