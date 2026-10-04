@@ -55,17 +55,32 @@ export const api = {
   async loadBundle() {
     const token = this.getAccessToken();
     const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-    const select = encodeURIComponent("*,project:projects(*),assignee:team_members!tasks_assignee_id_fkey(*),creator:team_members!tasks_created_by_fkey(*)");
-    const [members, projects, tasks, subtasks, comments, revisions, history] = await Promise.all([
+    // Keep the core task query flat. PostgREST relationship embedding can fail when
+    // Supabase refreshes its schema cache, which previously left Team completely blank.
+    const [members, projects, tasks] = await Promise.all([
       this.request("/rest/v1/team_members?select=*&is_active=eq.true&order=name.asc", { headers: authHeader }),
       this.request("/rest/v1/projects?select=*&order=name.asc", { headers: authHeader }),
-      this.request(`/rest/v1/tasks?select=${select}&order=deadline.asc.nullslast`, { headers: authHeader }),
+      this.request("/rest/v1/tasks?select=*&order=deadline.asc.nullslast", { headers: authHeader }),
+    ]);
+
+    // These collections are not required to render Team/Dashboard. Load them
+    // independently so an empty or restricted child table cannot blank the app.
+    const optional = await Promise.allSettled([
       this.request("/rest/v1/subtasks?select=*&order=created_at.asc", { headers: authHeader }),
       this.request("/rest/v1/comments?select=*&order=created_at.asc", { headers: authHeader }),
       this.request("/rest/v1/revisions?select=*&order=created_at.asc", { headers: authHeader }),
       this.request("/rest/v1/task_history?select=*&order=created_at.asc", { headers: authHeader }),
     ]);
-    return { members, projects, tasks, subtasks, comments, revisions, history };
+    const [subtasks, comments, revisions, history] = optional.map((result) => result.status === "fulfilled" ? result.value : []);
+    const projectMap = new Map(projects.map((project) => [project.id, project]));
+    const memberMap = new Map(members.map((member) => [member.id, member]));
+    const enrichedTasks = tasks.map((task) => ({
+      ...task,
+      project: task.project || projectMap.get(task.project_id) || null,
+      assignee: task.assignee || memberMap.get(task.assignee_id) || null,
+      creator: task.creator || memberMap.get(task.created_by) || null,
+    }));
+    return { members, projects, tasks: enrichedTasks, subtasks, comments, revisions, history };
   },
 
   async getTask(id) {
