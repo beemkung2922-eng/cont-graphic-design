@@ -4,7 +4,10 @@ import { roleLabel, avatar } from "./formatters.js";
 export async function ensureAccess({ allowPublic = false } = {}) {
   const session = await auth.getSession();
   if (!session && !allowPublic) {
-    window.location.href = "index.html";
+    const mount = document.querySelector("#page-content");
+    if (mount) {
+      mount.innerHTML = `<div class="card"><div class="state"><div class="state-icon">↪</div><div class="state-title">กรุณาเข้าสู่ระบบก่อน</div><div class="state-text">หน้านี้ต้องใช้บัญชี Google ของสมาชิกทีม ให้กดเข้าสู่ระบบ แล้วเปิดหน้านี้จาก URL เดียวกันอีกครั้ง</div><a class="btn btn-primary" href="index.html">ไปหน้าเข้าสู่ระบบ</a></div></div>`;
+    }
     return { member: null };
   }
   if (!session) return { member: null };
@@ -14,7 +17,10 @@ export async function ensureAccess({ allowPublic = false } = {}) {
     return { member };
   } catch (error) {
     if (!allowPublic) {
-      window.location.href = `index.html?error=${encodeURIComponent(error.message)}`;
+      const mount = document.querySelector("#page-content");
+      if (mount) {
+        mount.innerHTML = `<div class="card"><div class="state"><div class="state-icon">!</div><div class="state-title">ไม่สามารถยืนยันสมาชิกได้</div><div class="state-text">${errorMessage(error)}</div><a class="btn" href="index.html">กลับไปหน้า Login</a></div></div>`;
+      }
       return { member: null };
     }
     return { member: null, error };
