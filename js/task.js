@@ -1,5 +1,5 @@
 import { STATUS_LABELS, STATUS_ORDER, TRANSITIONS, canTransition } from "./constants.js";
-import { formatDateLong, formatDateTime, statusBadge, avatar, escapeHtml, progressInfo, projectFor, memberFor, roleLabel, taskTypeLabel, relativeDeadline } from "./formatters.js";
+import { formatDateLong, formatDateTime, statusBadge, avatar, escapeHtml, progressInfo, projectFor, memberFor, roleLabel, taskTypeLabel, relativeDeadline, statusMotionIcon } from "./formatters.js";
 import { qs, toast, openModal, closeModal, errorState } from "./app.js";
 import { api } from "./supabase.js";
 import { canManage, canEditTask, canDeleteTask, isDesigner, isRequester, isViewer, canUploadArtwork, canChangeTaskStatus } from "./auth.js";
@@ -118,7 +118,7 @@ export async function render(ctx) {
 
     const stepper = STATUS_ORDER.map((status, index) => `
       <div class="status-step ${status === task.status ? "is-current" : STATUS_ORDER.indexOf(task.status) > index ? "is-completed" : ""}">
-        <span class="circle">${STATUS_ORDER.indexOf(task.status) > index ? "✓" : index + 1}</span>
+        <span class="circle">${STATUS_ORDER.indexOf(task.status) > index ? "✓" : status === task.status ? statusMotionIcon(status, 14) : index + 1}</span>
         <span>${STATUS_LABELS[status]}</span>
       </div>
     `).join("");
