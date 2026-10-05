@@ -44,6 +44,11 @@ export function isAdmin(member) { return member?.role === "admin"; }
 export function isRequester(member) { return member?.role === "requester"; }
 export function isViewer(member) { return member?.role === "viewer"; }
 export function canMoveTask(member) { return isDesigner(member); }
+export function canChangeTaskStatus(member, task) {
+  if (canManage(member)) return true;
+  if (isDesigner(member) && task?.assignee_id === member?.id) return true;
+  return false;
+}
 export function canCreateTask(member) { return member?.role !== "viewer"; }
 export function canEditTask(member, task) {
   if (canManage(member)) return true;
