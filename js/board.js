@@ -3,7 +3,7 @@ import { taskCard, escapeHtml, projectFor, memberFor, relativeDeadline } from ".
 import { qs, toast, openModal, closeModal } from "./app.js";
 import { api } from "./supabase.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
-import { canMoveTask, isRequester, isViewer, canCreateTask } from "./auth.js";
+import { canMoveTask, canManage, isRequester, isViewer, canCreateTask } from "./auth.js";
 
 export async function render(ctx) {
   window.openCreateTask = () => openCreateTask(ctx);
@@ -87,8 +87,10 @@ export async function render(ctx) {
       : isView
       ? `<span class="badge badge-neutral" style="font-weight:600">โหมดผู้เข้าชม (View-Only)</span>`
       : "";
-    const pageDesc = canMove
+    const pageDesc = canManage(ctx.member)
       ? "ลากการ์ดเพื่อขยับงานตามขั้นตอน Workflow · ฟิลเตอร์ดูงานเฉพาะส่วนตัวหรือทั้งทีม"
+      : canMove
+      ? "ลากการ์ดเพื่อขยับสถานะงานที่คุณรับผิดชอบ · คลิกดูรายละเอียดงานคนอื่นได้ตามปกติ"
       : "ติดตามสถานะงานตามขั้นตอน Workflow · การเปลี่ยนสถานะงานดำเนินการโดยทีม Visual & Design";
 
     // Render HTML Shell
@@ -230,9 +232,18 @@ export async function render(ctx) {
     const columns = document.querySelectorAll(".kcol");
 
     cards.forEach((card) => {
-      if (!canMove) {
+      const taskId = card.dataset.taskId;
+      const task = ctx.tasks.find((t) => t.id === taskId);
+      const isMyTask = task && task.assignee_id === ctx.member?.id;
+      const canDragThisCard = canManage(ctx.member) || (canMove && isMyTask);
+
+      if (!canDragThisCard) {
         card.draggable = false;
         card.style.cursor = "pointer";
+        const assignee = task ? memberFor(task, ctx.members) : null;
+        if (task && !isMyTask && !canManage(ctx.member)) {
+          card.title = `งานของ ${assignee?.name || "ดีไซเนอร์ท่านอื่น"} (คลิกดูรายละเอียดได้ · เฉพาะผู้รับผิดชอบที่เลื่อนย้ายสถานะได้)`;
+        }
         return;
       }
       card.draggable = true;
@@ -277,15 +288,18 @@ export async function render(ctx) {
       col.addEventListener("drop", async (e) => {
         e.preventDefault();
         col.classList.remove("is-dragover", "is-valid-target", "is-invalid-target");
-        if (!canMove) {
-          toast("เฉพาะสมาชิกทีม Visual & Design เท่านั้นที่สามารถเปลี่ยนขั้นตอนงานบนบอร์ดได้", "warn");
-          return;
-        }
         const taskId = window.__dragTaskId;
         const task = ctx.tasks.find((t) => t.id === taskId);
         const nextStatus = col.dataset.status;
 
         if (!task || task.status === nextStatus) return;
+
+        const isMyTask = task.assignee_id === ctx.member?.id;
+        const canDragThisCard = canManage(ctx.member) || (canMove && isMyTask);
+        if (!canDragThisCard) {
+          toast("คุณสามารถเปลี่ยนสถานะได้เฉพาะงานที่ได้รับมอบหมายเท่านั้น", "warn");
+          return;
+        }
 
         if (!canTransition(task.status, nextStatus)) {
           toast(`ขยับจาก "${STATUS_LABELS[task.status]}" ไป "${STATUS_LABELS[nextStatus]}" ไม่ได้ตามกติกา Workflow`, "warn");
