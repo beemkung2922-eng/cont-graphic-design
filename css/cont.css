@@ -76,6 +76,17 @@
 
 .banner-info { background: var(--info-bg); border: 1px solid var(--info-line); color: var(--info); border-radius: 8px; padding: 9px 12px; font-size: 0.8rem; line-height: 1.4; margin-top: 14px; }
 .banner-error { background: var(--danger-bg); border: 1px solid var(--danger-line); color: var(--danger); border-radius: 8px; padding: 9px 12px; font-size: 0.8rem; line-height: 1.4; margin-top: 14px; }
+.banner-warn { background: var(--warn-bg); border: 1px solid var(--warn-line); color: #72460e; border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; line-height: 1.45; margin-top: 14px; }
+
+/* Email Sent & Magic Link Callout */
+.email-sent-card { display: flex; align-items: flex-start; gap: 12px; background: var(--ok-bg); border: 1px solid var(--ok-line); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+.email-sent-icon { font-size: 1.4rem; line-height: 1; flex: 0 0 auto; }
+.magic-link-banner { background: #f0f4ff; border: 1.5px solid #c7d7fe; border-radius: 10px; padding: 14px 16px; margin: 12px 0; text-align: left; box-shadow: var(--shadow-xs); }
+.magic-link-banner-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.magic-link-badge { font-size: 0.7rem; font-weight: 700; background: #4338ca; color: #fff; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; }
+.magic-link-banner strong { font-size: 0.95rem; color: #1e1b4b; }
+.magic-link-banner-desc { font-size: 0.84rem; color: #3730a3; line-height: 1.5; margin: 0; }
+.magic-link-banner-desc strong { color: #1e1b4b; text-decoration: underline; }
 
 .login-footer-security { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.74rem; color: var(--ink-400); margin-top: 24px; text-align: center; }
 
