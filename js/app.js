@@ -444,6 +444,38 @@ export async function boot(pageModule) {
 
 export { icons, canManage, STATUS_LABELS };
 
+// Interactive Mascot Motion Handler: Nong CONT Wake & Nap
+window.wakeNongCont = function(container) {
+  if (!container) return;
+  const bubble = container.querySelector(".bubble-text");
+  const wrapper = container.querySelector(".empty-img-wrapper");
+  const zzz = container.querySelector(".zzz-container");
+  
+  if (wrapper) {
+    wrapper.classList.remove("is-woken");
+    void wrapper.offsetWidth; // trigger reflow
+    wrapper.classList.add("is-woken");
+  }
+  if (zzz) zzz.style.display = "none";
+  if (bubble) {
+    bubble.innerHTML = "✨ ตื่นแล้ว! น้อง CONT พร้อมช่วยลุยบรีฟใหม่เสมอ กดสร้างงานได้เลย 🚀";
+    bubble.parentElement.style.borderColor = "var(--ok)";
+    bubble.parentElement.style.color = "var(--ok)";
+    bubble.parentElement.style.background = "var(--ok-bg)";
+  }
+  
+  clearTimeout(container._wakeTimer);
+  container._wakeTimer = setTimeout(() => {
+    if (bubble) {
+      bubble.innerHTML = "ฮ้าวว... ยังไม่มีงานใหม่ ขอแอบงีบต่ออีกนิดนะ~ 💤";
+      bubble.parentElement.style.borderColor = "";
+      bubble.parentElement.style.color = "";
+      bubble.parentElement.style.background = "";
+    }
+    if (zzz) zzz.style.display = "";
+  }, 4500);
+};
+
 const currentPage = document.body.dataset.page;
 const pageModules = {
   dashboard: "dashboard",
