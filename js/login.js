@@ -121,6 +121,12 @@ function formatAuthError(error) {
     const rem = getRemainingCooldown() || 60;
     return `⏳ ส่งคำขอถี่เกินไป กรุณารออีก ${rem} วินาที แล้วปุ่มจะเปิดให้กดส่งใหม่อัตโนมัติ`;
   }
+  if (msg.includes("access_denied") || msg.includes("Access denied")) {
+    return "การเข้าสู่ระบบถูกยกเลิก หรือบัญชี Google นี้ไม่ได้รับอนุญาต (หากใช้อีเมลบริษัท @kkpfg.com กรุณาใช้การรับรหัส OTP ทางอีเมลด้านบน)";
+  }
+  if (msg.includes("Redirect URL not allowed")) {
+    return "URL ปลายทางไม่ได้รับอนุญาต กรุณาติดต่อผู้ดูแลระบบ";
+  }
   return msg || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
 }
 
@@ -152,11 +158,15 @@ if (getRemainingCooldown() > 0) {
 }
 
 // 1. Check URL Error parameter (from failed OAuth redirect or email verify error)
-const params = new URLSearchParams(window.location.search);
-const urlError = params.get("error_description") || params.get("error");
+const searchParams = new URLSearchParams(window.location.search);
+const hashStr = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
+const hashParams = new URLSearchParams(hashStr);
+const urlError = searchParams.get("error_description") || searchParams.get("error") ||
+                 hashParams.get("error_description") || hashParams.get("error");
 if (urlError) {
   showError(formatAuthError(decodeURIComponent(urlError.replace(/\+/g, " "))));
 }
+const params = searchParams;
 
 // 2. Check token_hash in URL query params
 const tokenHash = params.get("token_hash");
@@ -343,7 +353,8 @@ backToEmailBtn?.addEventListener("click", () => {
 });
 
 // 9. Google OAuth Sign-in
-googleBtn?.addEventListener("click", async () => {
+googleBtn?.addEventListener("click", async (e) => {
+  e?.preventDefault();
   googleBtn.disabled = true;
   googleBtn.innerHTML = "<span>กำลังเชื่อมต่อ Google…</span>";
   clearMessages();
