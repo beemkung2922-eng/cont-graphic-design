@@ -1,8 +1,9 @@
 import { avatar, escapeHtml, roleLabel, projectFor, formatDate, relativeDeadline, taskTypeLabel, statusBadge } from "./formatters.js";
-import { qs, qsa } from "./app.js";
+import { qs, qsa, openModal, closeModal, toast } from "./app.js";
 import { STATUS_LABELS } from "./constants.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { canManage } from "./auth.js";
+import { api } from "./supabase.js";
 
 function parseDeadline(value) {
   if (!value) return null;
@@ -482,7 +483,10 @@ export async function render(ctx) {
           <span class="pulse-circle"></span>
           ${todayThai}
         </span>
-        ${canManage(ctx.member) ? `<button class="btn btn-primary btn-sm" id="team-create-task">＋ มอบหมายงานใหม่</button>` : ""}
+        ${canManage(ctx.member) ? `
+          <button class="btn btn-secondary btn-sm" id="team-manage-members">⚙️ จัดการสิทธิ์ & สมาชิก</button>
+          <button class="btn btn-primary btn-sm" id="team-create-task">＋ มอบหมายงานใหม่</button>
+        ` : ""}
       </div>
     </div>
 
@@ -583,7 +587,171 @@ export async function render(ctx) {
     });
   });
 
+  qs("#team-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
   qs("#team-create-task")?.addEventListener("click", () => openCreateTask(ctx));
 
   renderContent();
 }
+
+export function openManageTeamModal(ctx) {
+  if (!canManage(ctx.member)) {
+    toast("เฉพาะ Team Head of Visual & Design เท่านั้นที่จัดการสิทธิ์ได้", "warn");
+    return;
+  }
+
+  const memberRows = ctx.members.map((m) => `
+    <tr data-member-row="${escapeHtml(m.id)}">
+      <td>
+        <div class="row" style="gap:10px; align-items:center">
+          ${avatar(m, "avatar-sm")}
+          <div>
+            <div style="font-weight:600">${escapeHtml(m.name)}</div>
+            <div class="text-xs text-muted">${escapeHtml(m.email)}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <select class="input-sm" data-role-select="${escapeHtml(m.id)}" style="min-width:180px">
+          <option value="designer" ${m.role === "designer" ? "selected" : ""}>Visual & Design</option>
+          <option value="supervisor" ${["supervisor", "admin"].includes(m.role) ? "selected" : ""}>Team Head of Visual & Design</option>
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-primary btn-sm" data-save-member="${escapeHtml(m.id)}">บันทึก</button>
+      </td>
+    </tr>
+  `).join("");
+
+  const body = `
+    <div class="stack" style="gap:20px">
+      <!-- Member Roles List -->
+      <div>
+        <div style="font-weight:700; margin-bottom:4px">รายชื่อสมาชิกและสิทธิ์การใช้งาน</div>
+        <div class="text-xs text-muted" style="margin-bottom:12px">
+          เปลี่ยนสิทธิ์ระหว่าง <strong>Visual & Design</strong> และ <strong>Team Head of Visual & Design</strong> ได้ทันที
+        </div>
+        <div style="overflow-x:auto; border:1px solid var(--border); border-radius:8px">
+          <table class="table" style="width:100%; font-size:0.88rem; margin:0">
+            <thead>
+              <tr style="background:var(--bg-muted, #f8fafc)">
+                <th>สมาชิก</th>
+                <th>สิทธิ์การใช้งาน</th>
+                <th style="width:90px">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${memberRows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <hr style="border:0; border-top:1px solid var(--border)"/>
+
+      <!-- Pre-configure New Member Form -->
+      <div>
+        <div style="font-weight:700; margin-bottom:4px">＋ เพิ่มสมาชิกล่วงหน้า (Pre-configure Member)</div>
+        <div class="text-xs text-muted" style="margin-bottom:12px">
+          ระบุอีเมลบริษัทไว้ล่วงหน้า เมื่อสมาชิกท่านนั้นล็อกอินด้วยรหัส OTP จะได้รับชื่อและสิทธิ์ที่กำหนดไว้ทันที
+        </div>
+        <form id="pre-add-member-form" class="stack" style="gap:12px">
+          <div class="form-grid">
+            <div class="field field-full">
+              <label for="new-member-email">อีเมลบริษัท (@kkpfg.com) *</label>
+              <input id="new-member-email" type="email" placeholder="เช่น somchai.p@kkpfg.com" required />
+            </div>
+            <div class="field">
+              <label for="new-member-name">ชื่อ-นามสกุล (เว้นว่างไว้จะดึงจากอีเมล)</label>
+              <input id="new-member-name" placeholder="เช่น Somchai Prasert" />
+            </div>
+            <div class="field">
+              <label for="new-member-role">สิทธิ์การใช้งาน</label>
+              <select id="new-member-role">
+                <option value="designer" selected>Visual & Design</option>
+                <option value="supervisor">Team Head of Visual & Design</option>
+              </select>
+            </div>
+          </div>
+          <div id="pre-add-error" class="error-text"></div>
+          <button type="button" class="btn btn-secondary" id="submit-pre-add-member" style="align-self:flex-start">
+            ＋ เพิ่มสมาชิกล่วงหน้า
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+
+  const modal = openModal({
+    title: "จัดการสิทธิ์ & สมาชิกทีม",
+    body,
+    footer: `<button class="btn" data-close-modal>ปิด</button>`,
+  });
+
+  // Bind role save buttons
+  qsa("[data-save-member]", modal).forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const memberId = btn.dataset.saveMember;
+      const select = qs(`[data-role-select="${memberId}"]`, modal);
+      const newRole = select?.value;
+      if (!newRole) return;
+
+      btn.disabled = true;
+      btn.textContent = "…";
+      try {
+        await api.updateMember(memberId, { role: newRole });
+        toast("อัปเดตสิทธิ์เรียบร้อยแล้ว", "success");
+        btn.textContent = "สำเร็จ ✓";
+        window.setTimeout(() => { window.location.reload(); }, 600);
+      } catch (err) {
+        toast(err.message || "ไม่สามารถอัปเดตสิทธิ์ได้", "danger");
+        btn.disabled = false;
+        btn.textContent = "บันทึก";
+      }
+    });
+  });
+
+  // Bind pre-add member
+  qs("#submit-pre-add-member", modal)?.addEventListener("click", async () => {
+    const emailInput = qs("#new-member-email", modal);
+    const nameInput = qs("#new-member-name", modal);
+    const roleInput = qs("#new-member-role", modal);
+    const errNode = qs("#pre-add-error", modal);
+
+    const email = emailInput?.value.trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      if (errNode) errNode.textContent = "กรุณากรอกอีเมลบริษัทให้ถูกต้อง";
+      emailInput?.focus();
+      return;
+    }
+
+    let name = nameInput?.value.trim();
+    if (!name) {
+      const local = email.split("@")[0].replace(/[_-]/g, ".");
+      name = local.split(".").filter(Boolean).map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join(" ");
+    }
+    const role = roleInput?.value || "designer";
+
+    const submitBtn = qs("#submit-pre-add-member", modal);
+    submitBtn.disabled = true;
+    submitBtn.textContent = "กำลังเพิ่มสมาชิก…";
+    if (errNode) errNode.textContent = "";
+
+    try {
+      await api.createMember({
+        email,
+        name: name || "Team Member",
+        role,
+        capacity_points: 10,
+        is_active: true,
+      });
+      toast("เพิ่มสมาชิกล่วงหน้าเรียบร้อยแล้ว", "success");
+      closeModal();
+      window.setTimeout(() => { window.location.reload(); }, 500);
+    } catch (err) {
+      if (errNode) errNode.textContent = err.message || "ไม่สามารถเพิ่มสมาชิกได้";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "＋ เพิ่มสมาชิกล่วงหน้า";
+    }
+  });
+}
+
