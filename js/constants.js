@@ -28,7 +28,13 @@ export const STATUS_DOTS = {
 export const TASK_TYPE_LABELS = { new_work: "เริ่มงานใหม่", resize: "ปรับ Size", revision: "แก้ไขงาน", adaptation: "ดัดแปลงจากชิ้นเดิม", other: "อื่น ๆ" };
 export const PRIORITY_LABELS = {};
 export const PRIORITY_BADGES = {};
-export const ROLE_LABELS = { designer: "Visual & Design", supervisor: "Team Head of Visual & Design", admin: "Team Head of Visual & Design" };
+export const ROLE_LABELS = {
+  designer: "Visual & Design",
+  supervisor: "Team Head of Visual & Design",
+  admin: "Team Head of Visual & Design",
+  requester: "ผู้ขอรับบริการ (Requester)",
+  viewer: "ผู้เข้าชม (Viewer)",
+};
 export const PROJECT_STATUS_LABELS = { active: "กำลังดำเนินการ", archived: "เก็บถาวร", completed: "เสร็จแล้ว" };
 
 export const TRANSITIONS = {
