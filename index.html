@@ -76,27 +76,43 @@
               />
             </div>
             <span class="field-hint">
-              ระบบจะส่งรหัส OTP 6 หลักเข้ากล่องข้อความ Outlook ของคุณทันทีโดยไม่ต้องผ่าน IT
+              ระบบจะส่งลิงก์เข้าสู่ระบบและรหัส OTP ตรงเข้ากล่องข้อความ Outlook ของคุณ
             </span>
           </div>
           <button class="btn btn-primary btn-block btn-lg" id="send-otp-btn" style="margin-top:14px">
-            <span>📩 รับรหัส OTP ทางอีเมล</span>
+            <span>📩 ส่งลิงก์เข้าสู่ระบบ / รหัส OTP</span>
           </button>
         </div>
 
-        <!-- Step 2: 6-Digit OTP Verification (Shown after OTP requested) -->
+        <!-- Step 2: Confirmation / Verification Step -->
         <div id="otp-step" class="auth-step hidden" style="margin-top:16px">
-          <div class="otp-notice">
-            <div class="otp-notice-icon">✉️</div>
-            <div>
-              <div class="otp-notice-title">ส่งรหัสยืนยันแล้ว</div>
-              <div class="otp-notice-sub">
-                ส่งรหัส OTP ไปที่ <strong id="sent-email-display" style="color:#155734"></strong> แล้ว กรุณาตรวจสอบกล่องข้อความ Outlook (หรือโฟลเดอร์ Junk)
+          <div class="email-sent-card">
+            <div class="email-sent-icon">📬</div>
+            <div style="flex:1">
+              <div style="font-weight:700; color:#1e293b; font-size:0.92rem">ส่งอีเมลยืนยันตัวตนแล้ว</div>
+              <div style="font-size:0.82rem; color:#64748b; margin-top:2px">
+                ส่งไปที่ <strong id="sent-email-display" style="color:#4338ca"></strong> ใน Outlook
               </div>
             </div>
           </div>
-          <div class="field" style="margin-top:16px">
-            <label for="otp-code" style="font-weight:600; font-size:0.82rem">กรอกรหัส OTP 6 หลัก</label>
+
+          <!-- Method 1: Magic Link (Primary / Fastest) -->
+          <div class="magic-link-banner">
+            <div class="magic-link-banner-header">
+              <span class="magic-link-badge">วิธีที่ 1 · เร็วที่สุด</span>
+              <strong>คลิกลิงก์ในอีเมล Outlook</strong>
+            </div>
+            <p class="magic-link-banner-desc">
+              เปิดอีเมลล่าสุดใน Outlook แล้วกดปุ่ม <strong>"Confirm email address"</strong> เพื่อเข้าสู่ระบบได้ทันทีโดยไม่ต้องกรอกรหัสใดๆ
+            </p>
+          </div>
+
+          <!-- Method 2: OTP (If code provided) -->
+          <div class="sep" style="margin:16px 0 12px 0">
+            <span>หรือกรอกรหัส OTP (หากในอีเมลมีตัวเลข 6 หลัก)</span>
+          </div>
+
+          <div class="field">
             <input
               id="otp-code"
               type="text"
@@ -107,8 +123,8 @@
               autocomplete="one-time-code"
             />
           </div>
-          <button class="btn btn-primary btn-block btn-lg" id="verify-otp-btn" style="margin-top:14px">
-            <span>ยืนยันรหัสเข้าสู่ระบบ →</span>
+          <button class="btn btn-primary btn-block btn-lg" id="verify-otp-btn" style="margin-top:10px">
+            <span>ยืนยันรหัส OTP →</span>
           </button>
           <div class="row-between" style="margin-top:14px; font-size:0.8rem">
             <button type="button" class="btn-link" id="resend-otp-btn">ส่งรหัสใหม่อีกครั้ง</button>
