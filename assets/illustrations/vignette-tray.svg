@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 220" width="100%" height="100%">
+  <defs>
+    <style>
+      .ink-line { fill: none; stroke: #1e1b2e; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+      .ink-thin { fill: none; stroke: #1e1b2e; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+      .tray-black { fill: #121118; stroke: #121118; stroke-width: 1.2; stroke-linejoin: round; }
+      .eye-white { fill: #ffffff; }
+      .arrow-orange { fill: none; stroke: #f97316; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .arrow-head { fill: #f97316; }
+      .title-text { font-family: 'IBM Plex Sans Thai', sans-serif; font-weight: 700; font-size: 15px; fill: #1e1b2e; text-anchor: middle; }
+      .sub-text { font-family: 'IBM Plex Sans Thai', sans-serif; font-weight: 400; font-size: 11.5px; fill: #6b7280; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Ground Line -->
+  <line x1="45" y1="155" x2="225" y2="155" class="ink-line" />
+  <circle cx="58" cy="158" r="0.8" fill="#1e1b2e" />
+  <circle cx="212" cy="157" r="0.8" fill="#1e1b2e" />
+
+  <!-- Floating Sheet 1: Idea Lightbulb (Left) -->
+  <g transform="translate(38, 38) rotate(-10)">
+    <rect x="0" y="0" width="28" height="34" rx="2" fill="#ffffff" class="ink-line" />
+    <!-- Lightbulb -->
+    <path d="M 14 11 C 11 11 9 13 9 16 C 9 18 11 20 12 21 L 12 23 L 16 23 L 16 21 C 17 20 19 18 19 16 C 19 13 17 11 14 11 Z" class="ink-thin" fill="#fef08a" />
+    <!-- Rays -->
+    <line x1="14" y1="7" x2="14" y2="9" class="ink-thin" />
+    <line x1="8" y1="9" x2="10" y2="11" class="ink-thin" />
+    <line x1="20" y1="9" x2="18" y2="11" class="ink-thin" />
+  </g>
+  <!-- Orange Arrow 1 -->
+  <path d="M 64 80 C 68 90 74 96 82 102" class="arrow-orange" />
+  <polygon points="78,103 84,103 82,97" class="arrow-head" />
+
+  <!-- Floating Sheet 2: Checklist / Content (Center) -->
+  <g transform="translate(112, 28)">
+    <rect x="0" y="0" width="28" height="36" rx="2" fill="#ffffff" class="ink-line" />
+    <circle cx="7" cy="10" r="1.5" class="ink-thin" />
+    <line x1="12" y1="10" x2="22" y2="10" class="ink-thin" />
+    <circle cx="7" cy="17" r="1.5" class="ink-thin" />
+    <line x1="12" y1="17" x2="22" y2="17" class="ink-thin" />
+    <circle cx="7" cy="24" r="1.5" class="ink-thin" />
+    <line x1="12" y1="24" x2="20" y2="24" class="ink-thin" />
+  </g>
+  <!-- Orange Arrow 2 -->
+  <path d="M 126 72 L 126 98" class="arrow-orange" />
+  <polygon points="123,94 126,101 129,94" class="arrow-head" />
+
+  <!-- Floating Sheet 3: Graphic / Image Frame (Right) -->
+  <g transform="translate(182, 38) rotate(10)">
+    <rect x="0" y="0" width="28" height="34" rx="2" fill="#ffffff" class="ink-line" />
+    <circle cx="9" cy="11" r="2" class="ink-thin" fill="#fdba74" />
+    <!-- Mountain path -->
+    <polygon points="5,26 12,17 18,23 23,19 25,26" fill="#fed7aa" class="ink-thin" />
+  </g>
+  <!-- Orange Arrow 3 -->
+  <path d="M 188 80 C 182 90 176 96 168 102" class="arrow-orange" />
+  <polygon points="172,97 166,103 172,103" class="arrow-head" />
+
+  <!-- Papers already inside the Tray -->
+  <path d="M 72 108 L 76 92 L 140 92 L 138 108 Z" fill="#ffffff" class="ink-thin" />
+  <path d="M 85 108 L 90 88 L 155 88 L 150 108 Z" fill="#ffffff" class="ink-thin" />
+  <path d="M 148 108 L 152 90 L 175 90 L 172 108 Z" fill="#fed7aa" class="ink-thin" />
+
+  <!-- Tray Character (Black Tray Body with Eyes & Raised Arms) -->
+  <!-- Left Stick Arm Raised -->
+  <path d="M 64 118 L 52 104 L 54 94" class="ink-line" />
+  <line x1="51" y1="94" x2="57" y2="94" class="ink-thin" />
+  <line x1="49" y1="97" x2="51" y2="92" class="ink-thin" />
+  <!-- Right Stick Arm Raised -->
+  <path d="M 186 118 L 198 104 L 196 94" class="ink-line" />
+  <line x1="193" y1="94" x2="199" y2="94" class="ink-thin" />
+  <line x1="197" y1="92" x2="201" y2="97" class="ink-thin" />
+
+  <!-- Tray Body: 3D perspective box -->
+  <polygon points="62,110 188,110 188,138 62,138" class="tray-black" />
+  <polygon points="62,110 74,102 196,102 188,110" fill="#2d2b38" class="ink-line" />
+  <polygon points="188,110 196,102 196,130 188,138" fill="#1e1b2e" class="ink-line" />
+
+  <!-- White Dot Eyes on Tray Front -->
+  <circle cx="120" cy="125" r="2.8" class="eye-white" />
+  <circle cx="120" cy="125" r="1.3" fill="#121118" />
+  <circle cx="130" cy="125" r="2.8" class="eye-white" />
+  <circle cx="130" cy="125" r="1.3" fill="#121118" />
+
+  <!-- Stick Legs -->
+  <line x1="95" y1="138" x2="92" y2="155" class="ink-line" />
+  <line x1="92" y1="155" x2="86" y2="155" class="ink-line" />
+  <line x1="155" y1="138" x2="158" y2="155" class="ink-line" />
+  <line x1="158" y1="155" x2="164" y2="155" class="ink-line" />
+
+  <!-- Labels -->
+  <text x="130" y="185" class="title-text">เก็บให้ครบ</text>
+  <text x="130" y="204" class="sub-text">รวมทุกไอเดียไว้ที่เดียว</text>
+</svg>
