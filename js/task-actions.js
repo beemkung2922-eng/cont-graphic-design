@@ -96,8 +96,35 @@ export function openCreateTask(ctx) {
     </div>
   `;
 
+  const workflowGuideHtml = `
+    <div class="vignette-mini-steps" style="margin-bottom:14px;">
+      <div class="vignette-mini-step">
+        <img src="assets/illustrations/vignette-tray.svg" alt="เก็บให้ครบ" />
+        <div style="line-height:1.25;">
+          <div style="font-weight:700; font-size:0.8rem; color:var(--ink-900);">1. เก็บให้ครบ</div>
+          <div style="font-size:0.7rem; color:var(--ink-500);">รวมบรีฟ & Asset ให้พร้อม</div>
+        </div>
+      </div>
+      <div class="vignette-mini-step">
+        <img src="assets/illustrations/vignette-cabinet.svg" alt="จัดให้ชัด" />
+        <div style="line-height:1.25;">
+          <div style="font-weight:700; font-size:0.8rem; color:var(--ink-900);">2. จัดให้ชัด</div>
+          <div style="font-size:0.7rem; color:var(--ink-500);">ระบุขนาด & กำหนดส่ง</div>
+        </div>
+      </div>
+      <div class="vignette-mini-step">
+        <img src="assets/illustrations/vignette-paperplane.svg" alt="พร้อมส่งต่อ" />
+        <div style="line-height:1.25;">
+          <div style="font-weight:700; font-size:0.8rem; color:var(--ink-900);">3. พร้อมส่งต่อ</div>
+          <div style="font-size:0.7rem; color:var(--ink-500);">ดีไซเนอร์เริ่มทำได้ทันที</div>
+        </div>
+      </div>
+    </div>
+  `;
+
   const body = `
     <form id="create-task-form" class="stack">
+      ${workflowGuideHtml}
       ${presetsHtml}
 
       <div class="form-grid">
