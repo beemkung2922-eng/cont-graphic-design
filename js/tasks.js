@@ -64,6 +64,7 @@ export async function render(ctx) {
     if (scope === "history") filtered = filtered.filter((task) => task.status === "completed");
     if (query) filtered = filtered.filter((task) => [task.title, task.description, projectFor(task, ctx.projects)?.name, memberFor(task, ctx.members)?.name].some((value) => String(value || "").toLowerCase().includes(query)));
     if (status !== "all") filtered = filtered.filter((task) => task.status === status);
+    const groups = scope === "history" ? ["completed"] : STATUS_ORDER.filter((value) => filtered.some((task) => task.status === value));
     qs("#task-results").innerHTML = groups.length
       ? groups.map((group) => {
           const rows = filtered.filter((task) => task.status === group);
