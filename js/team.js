@@ -214,11 +214,11 @@ export async function render(ctx) {
         <div class="spotlight-box ${isOverdue ? "is-alert" : isDueToday ? "is-today" : !currentTask ? "is-idle" : ""}">
           <div class="spotlight-head">
             <span class="spotlight-tag">
-              ${currentTask ? `⚡ ${isWorkingNow ? "กำลังทำอยู่ตอนนี้" : "งานหลักที่กำลังโฟกัส"}` : "✨ พร้อมรับงานใหม่"}
+              ${currentTask ? `${isWorkingNow ? "กำลังทำอยู่ตอนนี้" : "งานหลักที่กำลังโฟกัส"}` : "พร้อมรับงานใหม่"}
             </span>
             ${currentTask ? `
               <div class="row-wrap" style="gap:4px">
-                ${isDueToday ? `<span class="badge badge-warn">🎯 กำหนดส่งวันนี้</span>` : ""}
+                ${isDueToday ? `<span class="badge badge-warn">กำหนดส่งวันนี้</span>` : ""}
                 ${statusBadge(currentTask.status, true)}
               </div>
             ` : `<span class="badge badge-ok">ว่าง</span>`}
@@ -484,7 +484,7 @@ export async function render(ctx) {
           ${todayThai}
         </span>
         ${canManage(ctx.member) ? `
-          <button class="btn btn-secondary btn-sm" id="team-manage-members">⚙️ จัดการสิทธิ์ & สมาชิก</button>
+          <button class="btn btn-secondary btn-sm" id="team-manage-members">จัดการสิทธิ์ & สมาชิก</button>
           <button class="btn btn-primary btn-sm" id="team-create-task">＋ มอบหมายงานใหม่</button>
         ` : ""}
       </div>
@@ -533,28 +533,28 @@ export async function render(ctx) {
           ทั้งหมด <span class="pill-count">(${members.length})</span>
         </button>
         <button class="filter-pill" data-filter="working">
-          ⚡ กำลังทำอยู่ <span class="pill-count">(${workingMembersAll.length})</span>
+          กำลังทำอยู่ <span class="pill-count">(${workingMembersAll.length})</span>
         </button>
         <button class="filter-pill" data-filter="today">
-          🎯 ส่งวันนี้ <span class="pill-count">(${analyzed.filter((a) => a.todayTasks.length > 0).length})</span>
+          ส่งวันนี้ <span class="pill-count">(${analyzed.filter((a) => a.todayTasks.length > 0).length})</span>
         </button>
         <button class="filter-pill" data-filter="review">
-          💬 รอตรวจ <span class="pill-count">(${analyzed.filter((a) => a.reviewTasks.length > 0).length})</span>
+          รอตรวจ <span class="pill-count">(${analyzed.filter((a) => a.reviewTasks.length > 0).length})</span>
         </button>
         <button class="filter-pill" data-filter="overdue">
-          ⚠️ งานเลท <span class="pill-count">(${analyzed.filter((a) => a.overdueTasks.length > 0).length})</span>
+          งานเลท <span class="pill-count">(${analyzed.filter((a) => a.overdueTasks.length > 0).length})</span>
         </button>
         <button class="filter-pill" data-filter="available">
-          ✨ พร้อมรับงาน <span class="pill-count">(${idleMembersAll.length})</span>
+          พร้อมรับงาน <span class="pill-count">(${idleMembersAll.length})</span>
         </button>
       </div>
 
       <div class="team-view-toggle">
         <button class="team-view-btn is-active" data-view="cards" title="มุมมองการ์ดรายละเอียด">
-          🗂️ การ์ดสมาชิก
+          การ์ดสมาชิก
         </button>
         <button class="team-view-btn" data-view="table" title="มุมมองตารางภาพรวม">
-          📋 ตารางภาพรวม
+          ตารางภาพรวม
         </button>
       </div>
     </div>
