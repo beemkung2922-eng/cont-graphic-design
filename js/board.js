@@ -1,5 +1,5 @@
 import { ACTIVE_STATUSES, STATUS_ORDER, STATUS_LABELS, canTransition } from "./constants.js";
-import { taskCard, escapeHtml, projectFor, memberFor, relativeDeadline } from "./formatters.js";
+import { taskCard, escapeHtml, projectFor, memberFor, relativeDeadline, statusMotionIcon, interactiveEmptyState } from "./formatters.js";
 import { qs, toast, openModal, closeModal } from "./app.js";
 import { api } from "./supabase.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
@@ -165,24 +165,19 @@ export async function render(ctx) {
       <!-- Kanban Grid -->
       ${visibleTasks.length === 0 ? `
         <div class="card" style="margin-top:16px">
-          <div class="state" style="padding:48px 24px">
-            <img class="state-illustration" src="assets/illustrations/cont-empty-state.jpg" alt="พักหัวปากกา - ไม่พบงาน" />
-            <div class="state-title" style="font-size:1.05rem;font-weight:700">ไม่มีการ์ดงานในมุมมองนี้</div>
-            <div class="state-text">พักหัวปากกาได้สักครู่ หรือกด "ล้างตัวกรอง" เพื่อกลับมาดูงานทั้งหมดในบอร์ด</div>
-          </div>
+          ${interactiveEmptyState({ title: "ไม่มีการ์ดงานในมุมมองนี้", subtitle: "พักหัวปากกาได้สักครู่ หรือกด 'ล้างตัวกรอง' เพื่อกลับมาดูงานทั้งหมดในบอร์ด" })}
         </div>
       ` : `
         <div class="kanban-wrap">
           <div class="kanban" style="grid-template-columns: repeat(${columnsToDisplay.length}, minmax(260px, 1fr))">
             ${columnsToDisplay.map((status) => {
               const rows = visibleTasks.filter((t) => t.status === status);
-              const statusDotColor = status === "review" ? "var(--warn)" : status === "revision" ? "var(--danger)" : status === "drafting" ? "var(--info)" : status === "completed" ? "var(--ok)" : "var(--ink-300)";
               return `
                 <section class="kcol" data-status="${status}">
                   <div class="kcol-head">
                     <div class="kcol-title">
-                      <span style="width:8px;height:8px;border-radius:50%;background:${statusDotColor}"></span>
-                      ${STATUS_LABELS[status]}
+                      ${statusMotionIcon(status, 16)}
+                      <span>${STATUS_LABELS[status]}</span>
                     </div>
                     <span class="kcol-head-count">${rows.length}</span>
                   </div>
