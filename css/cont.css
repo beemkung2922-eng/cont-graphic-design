@@ -48,3 +48,35 @@
 .team-table-link { color: var(--ink-900); text-decoration: none; font-weight: 600; }
 .team-table-link:hover { color: var(--kkp-purple); text-decoration: underline; }
 
+/* --- Corporate Login Page Styles --- */
+.login-badge { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--kkp-purple); background: var(--purple-100); border-radius: 6px; padding: 3px 8px; margin-bottom: 8px; }
+.login-sub { font-size: 0.84rem; color: var(--ink-500); margin-top: 4px; margin-bottom: 20px; line-height: 1.4; }
+
+.auth-step { display: flex; flex-direction: column; gap: 4px; transition: opacity 0.2s ease; }
+.auth-step.hidden { display: none !important; }
+
+.input-with-icon { position: relative; display: flex; align-items: center; }
+.input-with-icon .input-icon { position: absolute; left: 12px; width: 17px; height: 17px; color: var(--ink-400); pointer-events: none; }
+.input-with-icon input { width: 100%; padding-left: 38px !important; }
+
+.field-hint { font-size: 0.73rem; color: var(--ink-400); margin-top: 4px; line-height: 1.35; }
+
+.btn-lg { padding: 11px 16px; font-size: 0.88rem; font-weight: 600; }
+
+.otp-input { text-align: center; letter-spacing: 8px; font-size: 1.4rem; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: var(--surface-alt); border: 2px solid var(--purple-200); border-radius: 10px; }
+.otp-input:focus { border-color: var(--kkp-purple); background: #fff; }
+
+.otp-notice { display: flex; align-items: flex-start; gap: 10px; background: var(--ok-bg); border: 1px solid var(--ok-line); border-radius: 9px; padding: 10px 12px; font-size: 0.78rem; color: var(--ok); line-height: 1.4; }
+.otp-notice-icon { font-size: 1.1rem; line-height: 1; flex: 0 0 auto; }
+.otp-notice-title { font-weight: 600; color: #155734; margin-bottom: 2px; }
+.otp-notice-sub { color: #1f7a4d; word-break: break-word; }
+
+.btn-link { background: transparent; border: 0; color: var(--kkp-purple); cursor: pointer; font-weight: 600; padding: 0; font-size: inherit; }
+.btn-link:hover { text-decoration: underline; color: var(--kkp-purple-deep); }
+
+.banner-info { background: var(--info-bg); border: 1px solid var(--info-line); color: var(--info); border-radius: 8px; padding: 9px 12px; font-size: 0.8rem; line-height: 1.4; margin-top: 14px; }
+.banner-error { background: var(--danger-bg); border: 1px solid var(--danger-line); color: var(--danger); border-radius: 8px; padding: 9px 12px; font-size: 0.8rem; line-height: 1.4; margin-top: 14px; }
+
+.login-footer-security { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.74rem; color: var(--ink-400); margin-top: 24px; text-align: center; }
+
+
