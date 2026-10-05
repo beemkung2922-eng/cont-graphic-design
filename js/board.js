@@ -92,10 +92,10 @@ export async function render(ctx) {
           <!-- Scope Toggle -->
           <div class="filter-pills">
             <button class="filter-pill ${currentScope === "all" ? "is-active" : ""}" id="scope-all">
-              👥 งานทั้งหมด <span class="pill-count">(${activeTasksCount})</span>
+              งานทั้งหมด <span class="pill-count">(${activeTasksCount})</span>
             </button>
             <button class="filter-pill ${currentScope === "mine" ? "is-active" : ""}" id="scope-mine">
-              👤 งานของฉัน <span class="pill-count">(${myTasksCount})</span>
+              งานของฉัน <span class="pill-count">(${myTasksCount})</span>
             </button>
           </div>
 
@@ -110,22 +110,22 @@ export async function render(ctx) {
           <div class="board-filters">
             <!-- Member Filter -->
             <select class="board-filter-select" id="filter-member">
-              <option value="">👤 สมาชิกทุกคน</option>
+              <option value="">สมาชิกทุกคน</option>
               ${ctx.members.map((m) => `<option value="${escapeHtml(m.id)}" ${filterMemberId === m.id ? "selected" : ""}>${escapeHtml(m.name)}</option>`).join("")}
             </select>
 
             <!-- Project Filter -->
             <select class="board-filter-select" id="filter-project">
-              <option value="">📁 ทุกโปรเจกต์</option>
+              <option value="">ทุกโปรเจกต์</option>
               ${ctx.projects.map((p) => `<option value="${escapeHtml(p.id)}" ${filterProjectId === p.id ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("")}
             </select>
 
             <!-- Urgency Filter -->
             <select class="board-filter-select" id="filter-urgency">
-              <option value="all" ${filterUrgency === "all" ? "selected" : ""}>⏱️ ทุกระดับกำหนดส่ง</option>
-              <option value="overdue" ${filterUrgency === "overdue" ? "selected" : ""}>🚨 เลยกำหนด (Overdue)</option>
-              <option value="due_soon" ${filterUrgency === "due_soon" ? "selected" : ""}>⏰ ใกล้ส่ง (< 2 ชม.)</option>
-              <option value="normal" ${filterUrgency === "normal" ? "selected" : ""}>✅ ปกติ</option>
+              <option value="all" ${filterUrgency === "all" ? "selected" : ""}>ทุกระดับกำหนดส่ง</option>
+              <option value="overdue" ${filterUrgency === "overdue" ? "selected" : ""}>เลยกำหนด (Overdue)</option>
+              <option value="due_soon" ${filterUrgency === "due_soon" ? "selected" : ""}>ใกล้กำหนดส่ง (< 2 ชม.)</option>
+              <option value="normal" ${filterUrgency === "normal" ? "selected" : ""}>ปกติ</option>
             </select>
 
             <!-- Toggle Completed Column -->
