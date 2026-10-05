@@ -1,4 +1,4 @@
-import { taskCard, escapeHtml, projectFor, memberFor } from "./formatters.js";
+import { taskCard, escapeHtml, projectFor, memberFor, interactiveEmptyState } from "./formatters.js";
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
@@ -70,11 +70,7 @@ export async function render(ctx) {
           return `<section class="section"><div class="section-title">${STATUS_LABELS[group]} <span class="kcol-head-count">${rows.length}</span></div><div class="task-grid">${rows.map((task) => taskCard(task, { projects: ctx.projects, members: ctx.members, subtasks: ctx.subtasks })).join("")}</div></section>`;
         }).join("")
       : `<div class="card">
-          <div class="state" style="padding:48px 24px">
-            <img class="state-illustration" src="assets/illustrations/cont-empty-state.jpg" alt="พักหัวปากกา - ไม่มีงานค้าง" />
-            <div class="state-title" style="font-size:1.05rem;font-weight:700">ไม่มีงานค้างตามตัวกรองนี้</div>
-            <div class="state-text">พักหัวปากกาได้สักครู่ หรือลองเปลี่ยนคำค้นหา / Scope ด้านบน</div>
-          </div>
+          ${interactiveEmptyState({ title: "ไม่มีงานค้างตามตัวกรองนี้", subtitle: "พักหัวปากกาได้สักครู่ หรือลองเปลี่ยนคำค้นหา / Scope ด้านบน" })}
         </div>`;
     bindTaskCards(qs("#task-results"));
   };
