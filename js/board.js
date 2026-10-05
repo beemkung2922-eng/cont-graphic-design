@@ -163,28 +163,38 @@ export async function render(ctx) {
       </div>
 
       <!-- Kanban Grid -->
-      <div class="kanban-wrap">
-        <div class="kanban" style="grid-template-columns: repeat(${columnsToDisplay.length}, minmax(260px, 1fr))">
-          ${columnsToDisplay.map((status) => {
-            const rows = visibleTasks.filter((t) => t.status === status);
-            const statusDotColor = status === "review" ? "var(--warn)" : status === "revision" ? "var(--danger)" : status === "drafting" ? "var(--info)" : status === "completed" ? "var(--ok)" : "var(--ink-300)";
-            return `
-              <section class="kcol" data-status="${status}">
-                <div class="kcol-head">
-                  <div class="kcol-title">
-                    <span style="width:8px;height:8px;border-radius:50%;background:${statusDotColor}"></span>
-                    ${STATUS_LABELS[status]}
-                  </div>
-                  <span class="kcol-head-count">${rows.length}</span>
-                </div>
-                <div class="kcol-body">
-                  ${rows.map((task) => taskCard(task, { projects: ctx.projects, members: ctx.members, subtasks: ctx.subtasks })).join("") || `<div class="kcol-empty">ยังไม่มีงานในขั้นตอนนี้</div>`}
-                </div>
-              </section>
-            `;
-          }).join("")}
+      ${visibleTasks.length === 0 ? `
+        <div class="card" style="margin-top:16px">
+          <div class="state" style="padding:48px 24px">
+            <img class="state-illustration" src="assets/illustrations/cont-empty-state.jpg" alt="พักหัวปากกา - ไม่พบงาน" />
+            <div class="state-title" style="font-size:1.05rem;font-weight:700">ไม่มีการ์ดงานในมุมมองนี้</div>
+            <div class="state-text">พักหัวปากกาได้สักครู่ หรือกด "ล้างตัวกรอง" เพื่อกลับมาดูงานทั้งหมดในบอร์ด</div>
+          </div>
         </div>
-      </div>
+      ` : `
+        <div class="kanban-wrap">
+          <div class="kanban" style="grid-template-columns: repeat(${columnsToDisplay.length}, minmax(260px, 1fr))">
+            ${columnsToDisplay.map((status) => {
+              const rows = visibleTasks.filter((t) => t.status === status);
+              const statusDotColor = status === "review" ? "var(--warn)" : status === "revision" ? "var(--danger)" : status === "drafting" ? "var(--info)" : status === "completed" ? "var(--ok)" : "var(--ink-300)";
+              return `
+                <section class="kcol" data-status="${status}">
+                  <div class="kcol-head">
+                    <div class="kcol-title">
+                      <span style="width:8px;height:8px;border-radius:50%;background:${statusDotColor}"></span>
+                      ${STATUS_LABELS[status]}
+                    </div>
+                    <span class="kcol-head-count">${rows.length}</span>
+                  </div>
+                  <div class="kcol-body">
+                    ${rows.map((task) => taskCard(task, { projects: ctx.projects, members: ctx.members, subtasks: ctx.subtasks })).join("") || `<div class="kcol-empty">ยังไม่มีงานในขั้นตอนนี้</div>`}
+                  </div>
+                </section>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `}
     `;
 
     // Bind Event Listeners
