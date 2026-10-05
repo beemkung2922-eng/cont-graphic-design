@@ -2,7 +2,7 @@ import { STATUS_LABELS, STATUS_ORDER, TRANSITIONS, canTransition } from "./const
 import { formatDateLong, formatDateTime, statusBadge, avatar, escapeHtml, progressInfo, projectFor, memberFor, roleLabel, taskTypeLabel, relativeDeadline } from "./formatters.js";
 import { qs, toast, openModal, closeModal, errorState } from "./app.js";
 import { api } from "./supabase.js";
-import { canManage, canEditTask, canDeleteTask } from "./auth.js";
+import { canManage, canEditTask, canDeleteTask, isDesigner, isRequester, isViewer, canUploadArtwork } from "./auth.js";
 
 export async function render(ctx) {
   const id = new URLSearchParams(window.location.search).get("id");
@@ -110,6 +110,11 @@ export async function render(ctx) {
     const progress = progressInfo(subtasks);
     const allowed = TRANSITIONS[task.status] || [];
 
+    const isDes = isDesigner(ctx.member);
+    const isReq = isRequester(ctx.member);
+    const isView = isViewer(ctx.member);
+    const canUpload = canUploadArtwork(ctx.member, task);
+
     const stepper = STATUS_ORDER.map((status, index) => `
       <div class="status-step ${status === task.status ? "is-current" : STATUS_ORDER.indexOf(task.status) > index ? "is-completed" : ""}">
         <span class="circle">${STATUS_ORDER.indexOf(task.status) > index ? "✓" : index + 1}</span>
@@ -117,15 +122,23 @@ export async function render(ctx) {
       </div>
     `).join("");
 
-    const actions = allowed.map((next) => `
-      <button class="btn ${next === "completed" ? "btn-success" : ""} btn-sm" data-next-status="${next}">
-        ${next === "completed" ? "✓ " : ""}${STATUS_LABELS[next]}
-      </button>
-    `).join("");
+    let actions = "";
+    if (isDes) {
+      actions = allowed.map((next) => `
+        <button class="btn ${next === "completed" ? "btn-success" : ""} btn-sm" data-next-status="${next}">
+          ${next === "completed" ? "✓ " : ""}${STATUS_LABELS[next]}
+        </button>
+      `).join("");
+    } else if (isReq && task.status === "review") {
+      actions = `
+        <button class="btn btn-danger btn-sm" id="request-revision">ขอแก้ไขงาน (Revision)</button>
+        <button class="btn btn-success btn-sm" data-next-status="completed">✓ อนุมัติแบบและรับมอบงาน</button>
+      `;
+    }
 
     const subtaskRows = subtasks.map((item) => `
       <div class="subtask ${item.is_completed ? "is-done" : ""}">
-        <input type="checkbox" data-subtask-id="${item.id}" ${item.is_completed ? "checked" : ""}>
+        <input type="checkbox" data-subtask-id="${item.id}" ${item.is_completed ? "checked" : ""} ${!isDes ? "disabled" : ""}>
         <label style="font-weight:${item.is_completed ? "400" : "500"}">${escapeHtml(item.title)}</label>
       </div>
     `).join("");
@@ -190,7 +203,7 @@ export async function render(ctx) {
           </div>
           <div class="row-wrap" style="gap:8px">
             ${task.design_url ? `<a href="${escapeHtml(task.design_url)}" target="_blank" rel="noopener" class="btn btn-sm">เปิดไฟล์งาน (Figma / Drive) ↗</a>` : ""}
-            <button class="btn btn-sm" id="btn-edit-artwork">แก้ไขรูปภาพ / ลิงก์</button>
+            ${canUpload ? `<button class="btn btn-sm" id="btn-edit-artwork">แก้ไขรูปภาพ / ลิงก์</button>` : ""}
           </div>
         </div>
         <div class="artwork-proof-img-wrap" id="artwork-proof-wrap" title="คลิกเพื่อขยายดูภาพขนาดเต็ม (Zoom)">
@@ -202,7 +215,7 @@ export async function render(ctx) {
       <div class="card" style="border: 2px dashed var(--line-strong); background: var(--surface-alt); text-align: center; padding: 22px 16px;">
         <div style="font-weight: 700; color: var(--ink-900); font-size: 0.95rem; margin-bottom: 4px;">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</div>
         <p class="text-xs text-muted" style="max-width: 440px; margin: 0 auto 14px; font-weight: 400;">ยังไม่ได้แนบรูปภาพตัวอย่างงาน สามารถระบุ URL ภาพและลิงก์ Figma หรือ Google Drive เพื่อพรีวิว</p>
-        <button class="btn btn-primary btn-sm" id="btn-add-artwork">แนบภาพตัวอย่าง & ลิงก์ไฟล์งาน</button>
+        ${canUpload ? `<button class="btn btn-primary btn-sm" id="btn-add-artwork">แนบภาพตัวอย่าง & ลิงก์ไฟล์งาน</button>` : `<span class="badge badge-neutral" style="font-weight:500">รอทีมออกแบบแนบภาพตัวอย่าง</span>`}
       </div>
     `;
 
@@ -218,8 +231,8 @@ export async function render(ctx) {
         </div>
         <div class="detail-actions">
           ${actions}
-          ${task.status === "completed" ? `<button class="btn btn-sm" data-reopen>เปิดกลับมาแก้</button>` : ""}
-          ${canDeleteTask(ctx.member) ? `<button class="btn btn-danger btn-sm" data-delete-task>ลบงาน</button>` : ""}
+          ${task.status === "completed" && isDes ? `<button class="btn btn-sm" data-reopen>เปิดกลับมาแก้</button>` : ""}
+          ${canDeleteTask(ctx.member, task) ? `<button class="btn btn-danger btn-sm" data-delete-task>ลบงาน</button>` : ""}
         </div>
       </div>
 
@@ -269,7 +282,7 @@ export async function render(ctx) {
                 <div class="card-title" style="font-weight:700">Subtasks / Checklist</div>
                 <div class="card-sub" style="font-weight:400">${progress.done}/${progress.total} completed · ${progress.percent}%</div>
               </div>
-              <button class="btn btn-sm" id="add-subtask">＋ เพิ่ม</button>
+              ${isDes ? `<button class="btn btn-sm" id="add-subtask">＋ เพิ่ม</button>` : ""}
             </div>
             <div class="progress ${progress.percent === 100 ? "is-ok" : ""}" style="margin-bottom:10px">
               <span style="width:${progress.percent}%"></span>
