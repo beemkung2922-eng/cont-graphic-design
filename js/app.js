@@ -63,7 +63,7 @@ function sidebarHtml(page, member) {
 }
 
 function topbarHtml(page) {
-  const titles = { dashboard: ["ภาพรวม", "สถานะงานและทีมแบบเรียลไทม์"], tasks: ["งานของฉัน", "จัดการงานที่รับผิดชอบและงานของทีม"], board: ["บอร์ดงาน", "เห็น workflow ทั้งทีมในมุมมองเดียว"], calendar: ["ปฏิทิน", "ติดตามกำหนดส่งและงานที่ชนกัน"], team: ["ทีม & สรุปงาน", "ดูงานและจำนวนชิ้นงานของแต่ละคน"], reports: ["Performance Report", "รายงานเพื่อปรับปรุงกระบวนการทำงาน"], task: ["Task Detail", "รายละเอียด งานย่อย คอมเมนต์ และประวัติ"] };
+  const titles = { dashboard: ["ภาพรวม", "สถานะงานและทีมแบบเรียลไทม์"], tasks: ["งานของฉัน", "จัดการงานที่รับผิดชอบและงานของทีม"], board: ["บอร์ดงาน", "เห็น workflow ทั้งทีมในมุมมองเดียว"], calendar: ["ปฏิทิน", "ติดตามกำหนดส่งและงานที่ชนกัน"], team: ["ทีม & กำลังงาน", "ภาพรวมการทำงานของทีม วันนี้ใครทำอะไร กำลังทำอะไรอยู่"], reports: ["Performance Report", "รายงานเพื่อปรับปรุงกระบวนการทำงาน"], task: ["Task Detail", "รายละเอียด งานย่อย คอมเมนต์ และประวัติ"] };
   const [title, sub] = titles[page] || ["CONT", ""];
   return `<header class="topbar"><button class="icon-btn menu-toggle" id="menu-toggle" aria-label="เปิดเมนู">${icons.menu}</button><div><h1>${title}</h1><div class="topbar-sub">${sub}</div></div><div class="spacer"></div><div class="search-inline">${icons.search}<input id="global-search" type="search" placeholder="ค้นหางาน…" /></div><button class="icon-btn" id="notifications-btn" aria-label="การแจ้งเตือน">${icons.bell}</button><button class="btn btn-primary btn-sm" id="quick-create">${icons.plus}<span>สร้างงาน</span></button></header>`;
 }
