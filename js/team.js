@@ -165,7 +165,10 @@ export async function render(ctx) {
   const members = Array.isArray(ctx.members) ? ctx.members : [];
   const projects = Array.isArray(ctx.projects) ? ctx.projects : [];
 
-  const analyzed = members.map((m) => analyzeMember(m, tasks, projects));
+  const designers = members.filter((m) => ["designer", "supervisor", "admin"].includes(m.role));
+  const requesters = members.filter((m) => ["requester", "viewer"].includes(m.role));
+
+  const analyzed = designers.map((m) => analyzeMember(m, tasks, projects));
 
   const activeAll = tasks.filter((task) => task.status !== "completed");
   const lateAll = activeAll.filter((task) => relativeDeadline(task.deadline_at || task.deadline).className === "is-overdue");
@@ -463,11 +466,67 @@ export async function render(ctx) {
       return;
     }
 
+    let designersHtml = "";
     if (currentView === "cards") {
-      resultsContainer.innerHTML = `<div class="grid grid-2">${list.map(renderMemberCard).join("")}</div>`;
+      designersHtml = `<div class="grid grid-2">${list.map(renderMemberCard).join("")}</div>`;
     } else {
-      resultsContainer.innerHTML = renderTableView(list);
+      designersHtml = renderTableView(list);
     }
+
+    let requestersHtml = "";
+    if (requesters.length > 0) {
+      const requesterRows = requesters.map((req) => {
+        const reqTasks = tasks.filter((t) => t.created_by === req.id);
+        const reqActive = reqTasks.filter((t) => t.status !== "completed");
+        return `
+          <tr>
+            <td>
+              <div class="user-inline">
+                ${avatar(req, "avatar-sm")}
+                <div>
+                  <strong style="color:var(--ink-900)">${escapeHtml(req.name)}</strong>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--ink-700)">${escapeHtml(req.email)}</td>
+            <td><span class="badge ${req.role === "requester" ? "badge-info" : "badge-neutral"}">${escapeHtml(roleLabel(req.role))}</span></td>
+            <td>
+              <strong>${reqTasks.length} งาน</strong>
+              <span class="text-xs text-muted">(${reqActive.length} กำลังดำเนินการ)</span>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      requestersHtml = `
+        <section class="card" style="margin-top:24px">
+          <div class="card-header">
+            <div>
+              <div class="card-title" style="font-weight:700">ผู้ขอรับบริการ & สมาชิกทั่วไป (Requesters & Viewers)</div>
+              <div class="card-sub" style="font-weight:400">พนักงานหน่วยงานอื่นใน KKP ที่ส่งคำขอเปิดงานและติดตามสถานะงาน</div>
+            </div>
+            <span class="chip">${requesters.length} ท่าน</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data" style="margin:0">
+              <thead>
+                <tr>
+                  <th>ผู้ใช้งาน</th>
+                  <th>อีเมล</th>
+                  <th>สิทธิ์การใช้งาน</th>
+                  <th>งานที่ส่งบรีฟ (คำขอ)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${requesterRows}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
+    resultsContainer.innerHTML = designersHtml + requestersHtml;
   };
 
   // Main Page Layout
@@ -611,9 +670,11 @@ export function openManageTeamModal(ctx) {
         </div>
       </td>
       <td>
-        <select class="input-sm" data-role-select="${escapeHtml(m.id)}" style="min-width:180px">
+        <select class="input-sm" data-role-select="${escapeHtml(m.id)}" style="min-width:210px">
           <option value="designer" ${m.role === "designer" ? "selected" : ""}>Visual & Design</option>
           <option value="supervisor" ${["supervisor", "admin"].includes(m.role) ? "selected" : ""}>Team Head of Visual & Design</option>
+          <option value="requester" ${m.role === "requester" ? "selected" : ""}>ผู้ขอรับบริการ (Requester)</option>
+          <option value="viewer" ${m.role === "viewer" ? "selected" : ""}>ผู้เข้าชมทั่วไป (Viewer)</option>
         </select>
       </td>
       <td>
@@ -628,7 +689,7 @@ export function openManageTeamModal(ctx) {
       <div>
         <div style="font-weight:700; margin-bottom:4px">รายชื่อสมาชิกและสิทธิ์การใช้งาน</div>
         <div class="text-xs text-muted" style="margin-bottom:12px">
-          เปลี่ยนสิทธิ์ระหว่าง <strong>Visual & Design</strong> และ <strong>Team Head of Visual & Design</strong> ได้ทันที
+          กำหนดสิทธิ์ระหว่าง <strong>Visual & Design</strong>, <strong>Team Head</strong>, <strong>ผู้ขอรับบริการ (Requester)</strong> หรือ <strong>ผู้เข้าชม (Viewer)</strong> ได้ทันที
         </div>
         <div style="overflow-x:auto; border:1px solid var(--border); border-radius:8px">
           <table class="table" style="width:100%; font-size:0.88rem; margin:0">
@@ -667,8 +728,10 @@ export function openManageTeamModal(ctx) {
             <div class="field">
               <label for="new-member-role">สิทธิ์การใช้งาน</label>
               <select id="new-member-role">
-                <option value="designer" selected>Visual & Design</option>
+                <option value="designer">Visual & Design (Designer)</option>
                 <option value="supervisor">Team Head of Visual & Design</option>
+                <option value="requester" selected>ผู้ขอรับบริการ (Requester)</option>
+                <option value="viewer">ผู้เข้าชมทั่วไป (Viewer)</option>
               </select>
             </div>
           </div>
@@ -698,7 +761,8 @@ export function openManageTeamModal(ctx) {
       btn.disabled = true;
       btn.textContent = "…";
       try {
-        await api.updateMember(memberId, { role: newRole });
+        const cap = ["requester", "viewer"].includes(newRole) ? 0 : 10;
+        await api.updateMember(memberId, { role: newRole, capacity_points: cap });
         toast("อัปเดตสิทธิ์เรียบร้อยแล้ว", "success");
         btn.textContent = "สำเร็จ ✓";
         window.setTimeout(() => { window.location.reload(); }, 600);
@@ -737,11 +801,12 @@ export function openManageTeamModal(ctx) {
     if (errNode) errNode.textContent = "";
 
     try {
+      const cap = ["requester", "viewer"].includes(role) ? 0 : 10;
       await api.createMember({
         email,
         name: name || "Team Member",
         role,
-        capacity_points: 10,
+        capacity_points: cap,
         is_active: true,
       });
       toast("เพิ่มสมาชิกล่วงหน้าเรียบร้อยแล้ว", "success");
