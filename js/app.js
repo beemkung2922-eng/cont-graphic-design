@@ -100,6 +100,15 @@ function sidebarHtml(page, member) {
       <nav class="nav">
         <div class="nav-label">Workspace</div>
         ${links}
+        <div class="nav-label">Help & Guide</div>
+        <a class="nav-item" href="#" id="workflow-guide-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>คู่มือ CONT Workflow</span>
+        </a>
         <div class="nav-label">Account</div>
         <a class="nav-item" href="#" id="logout-link">${icons.logout}<span>ออกจากระบบ</span></a>
       </nav>
@@ -389,6 +398,25 @@ export async function initShell() {
     if (event.key === "Enter" && event.target.value.trim()) {
       window.location.href = `tasks.html?q=${encodeURIComponent(event.target.value.trim())}`;
     }
+  });
+
+  qs("#workflow-guide-link")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    openModal({
+      title: "CONT Design Workflow Guide",
+      body: `
+        <div class="stack" style="gap:14px">
+          <img class="workflow-modal-img" src="assets/illustrations/cont-workflow.jpg" alt="CONT Workflow Guide" />
+          <div style="font-size:0.86rem;color:var(--ink-700);line-height:1.6">
+            <strong style="color:var(--ink-900)">กระบวนการทำงานของระบบ CONT (Graphic Design Team):</strong><br/>
+            • <strong>บรีฟเข้า (Brief):</strong> รับบรีฟ ความต้องการ ขนาด และช่องทางจัดส่งจาก Requester<br/>
+            • <strong>ดัดเส้น (Drafting):</strong> ดีไซเนอร์เริ่มออกแบบ ดัดเส้น Bézier และเตรียมดราฟต์ชิ้นงาน<br/>
+            • <strong>ตรวจงาน (Review):</strong> ตรวจเช็คคุณภาพ ความถูกต้อง และคอมเมนต์ขอแก้ไข (Revision) หากจำเป็น<br/>
+            • <strong>ไฟนอล (Completed):</strong> ชิ้นงานผ่านเกณฑ์ ปิดจ๊อบสำเร็จ พร้อมส่งมอบไฟล์เพื่อนำไปใช้งาน
+          </div>
+        </div>
+      `
+    });
   });
 
   const bundle = await api.loadBundle();
