@@ -2,6 +2,43 @@
 @media(max-width:900px){.dashboard-grid,.dashboard-grid.equal,.detail-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:760px){.topbar .search-inline{min-width:34px;width:34px;height:34px;padding:0;justify-content:center;background:transparent;border:0}.topbar .search-inline input{display:none}.topbar .search-inline svg{width:17px;height:17px}}
 
+/* --- Illustration Styles (Ian Xiaohei Style for CONT) --- */
+.state-illustration {
+  width: 100%;
+  max-width: 340px;
+  border-radius: 12px;
+  margin: 0 auto 10px;
+  display: block;
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+.state-illustration-sm {
+  width: 100%;
+  max-width: 240px;
+  border-radius: 10px;
+  margin: 0 auto 8px;
+  display: block;
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+.state-illustration-lg {
+  width: 100%;
+  max-width: 580px;
+  border-radius: 14px;
+  margin: 0 auto 14px;
+  display: block;
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+.workflow-modal-img {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 12px;
+  display: block;
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+
 /* --- Team & Today Overview Styles --- */
 .team-view-toggle { display: inline-flex; align-items: center; gap: 4px; background: var(--surface-alt); border: 1px solid var(--line); border-radius: 9px; padding: 3px; }
 .team-view-btn { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; color: var(--ink-500); border-radius: 7px; padding: 6px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
