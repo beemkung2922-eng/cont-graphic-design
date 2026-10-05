@@ -64,8 +64,18 @@ export async function render(ctx) {
     if (scope === "history") filtered = filtered.filter((task) => task.status === "completed");
     if (query) filtered = filtered.filter((task) => [task.title, task.description, projectFor(task, ctx.projects)?.name, memberFor(task, ctx.members)?.name].some((value) => String(value || "").toLowerCase().includes(query)));
     if (status !== "all") filtered = filtered.filter((task) => task.status === status);
-    const groups = scope === "history" ? ["completed"] : STATUS_ORDER.filter((value) => filtered.some((task) => task.status === value));
-    qs("#task-results").innerHTML = groups.length ? groups.map((group) => { const rows = filtered.filter((task) => task.status === group); return `<section class="section"><div class="section-title">${STATUS_LABELS[group]} <span class="kcol-head-count">${rows.length}</span></div><div class="task-grid">${rows.map((task) => taskCard(task, { projects: ctx.projects, members: ctx.members, subtasks: ctx.subtasks })).join("")}</div></section>`; }).join("") : `<div class="card">${`<div class="state"><div class="state-icon">○</div><div class="state-title">ยังไม่มีงานตามตัวกรองนี้</div><div class="state-text">ลองเปลี่ยน scope หรือค้นหาด้วยคำอื่น</div></div>`}</div>`;
+    qs("#task-results").innerHTML = groups.length
+      ? groups.map((group) => {
+          const rows = filtered.filter((task) => task.status === group);
+          return `<section class="section"><div class="section-title">${STATUS_LABELS[group]} <span class="kcol-head-count">${rows.length}</span></div><div class="task-grid">${rows.map((task) => taskCard(task, { projects: ctx.projects, members: ctx.members, subtasks: ctx.subtasks })).join("")}</div></section>`;
+        }).join("")
+      : `<div class="card">
+          <div class="state" style="padding:48px 24px">
+            <img class="state-illustration" src="assets/illustrations/cont-empty-state.jpg" alt="พักหัวปากกา - ไม่มีงานค้าง" />
+            <div class="state-title" style="font-size:1.05rem;font-weight:700">ไม่มีงานค้างตามตัวกรองนี้</div>
+            <div class="state-text">พักหัวปากกาได้สักครู่ หรือลองเปลี่ยนคำค้นหา / Scope ด้านบน</div>
+          </div>
+        </div>`;
     bindTaskCards(qs("#task-results"));
   };
   ["#task-search", "#task-status", "#task-scope"].forEach((selector) => qs(selector).addEventListener(selector === "#task-search" ? "input" : "change", renderResults));
