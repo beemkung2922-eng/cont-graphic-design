@@ -2,7 +2,7 @@ import { STATUS_LABELS, STATUS_ORDER, TRANSITIONS, canTransition } from "./const
 import { formatDateLong, formatDateTime, statusBadge, avatar, escapeHtml, progressInfo, projectFor, memberFor, roleLabel, taskTypeLabel, relativeDeadline } from "./formatters.js";
 import { qs, toast, openModal, closeModal, errorState } from "./app.js";
 import { api } from "./supabase.js";
-import { canManage, canEditTask, canDeleteTask, isDesigner, isRequester, isViewer, canUploadArtwork } from "./auth.js";
+import { canManage, canEditTask, canDeleteTask, isDesigner, isRequester, isViewer, canUploadArtwork, canChangeTaskStatus } from "./auth.js";
 
 export async function render(ctx) {
   const id = new URLSearchParams(window.location.search).get("id");
@@ -114,6 +114,7 @@ export async function render(ctx) {
     const isReq = isRequester(ctx.member);
     const isView = isViewer(ctx.member);
     const canUpload = canUploadArtwork(ctx.member, task);
+    const canChangeStatus = canChangeTaskStatus(ctx.member, task);
 
     const stepper = STATUS_ORDER.map((status, index) => `
       <div class="status-step ${status === task.status ? "is-current" : STATUS_ORDER.indexOf(task.status) > index ? "is-completed" : ""}">
@@ -123,7 +124,7 @@ export async function render(ctx) {
     `).join("");
 
     let actions = "";
-    if (isDes) {
+    if (canChangeStatus) {
       actions = allowed.map((next) => `
         <button class="btn ${next === "completed" ? "btn-success" : ""} btn-sm" data-next-status="${next}">
           ${next === "completed" ? "✓ " : ""}${STATUS_LABELS[next]}
@@ -134,11 +135,17 @@ export async function render(ctx) {
         <button class="btn btn-danger btn-sm" id="request-revision">ขอแก้ไขงาน (Revision)</button>
         <button class="btn btn-success btn-sm" data-next-status="completed">✓ อนุมัติแบบและรับมอบงาน</button>
       `;
+    } else if (!canChangeStatus) {
+      actions = `
+        <span class="chip" style="font-weight:500; color:var(--ink-600)">
+          งานของ ${escapeHtml(member?.name || "ดีไซเนอร์ท่านอื่น")} (ดูได้อย่างเดียว)
+        </span>
+      `;
     }
 
     const subtaskRows = subtasks.map((item) => `
       <div class="subtask ${item.is_completed ? "is-done" : ""}">
-        <input type="checkbox" data-subtask-id="${item.id}" ${item.is_completed ? "checked" : ""} ${!isDes ? "disabled" : ""}>
+        <input type="checkbox" data-subtask-id="${item.id}" ${item.is_completed ? "checked" : ""} ${!canChangeStatus ? "disabled" : ""}>
         <label style="font-weight:${item.is_completed ? "400" : "500"}">${escapeHtml(item.title)}</label>
       </div>
     `).join("");
@@ -231,7 +238,7 @@ export async function render(ctx) {
         </div>
         <div class="detail-actions">
           ${actions}
-          ${task.status === "completed" && isDes ? `<button class="btn btn-sm" data-reopen>เปิดกลับมาแก้</button>` : ""}
+          ${task.status === "completed" && canChangeStatus ? `<button class="btn btn-sm" data-reopen>เปิดกลับมาแก้</button>` : ""}
           ${canDeleteTask(ctx.member, task) ? `<button class="btn btn-danger btn-sm" data-delete-task>ลบงาน</button>` : ""}
         </div>
       </div>
@@ -282,7 +289,7 @@ export async function render(ctx) {
                 <div class="card-title" style="font-weight:700">Subtasks / Checklist</div>
                 <div class="card-sub" style="font-weight:400">${progress.done}/${progress.total} completed · ${progress.percent}%</div>
               </div>
-              ${isDes ? `<button class="btn btn-sm" id="add-subtask">＋ เพิ่ม</button>` : ""}
+              ${canChangeStatus ? `<button class="btn btn-sm" id="add-subtask">＋ เพิ่ม</button>` : ""}
             </div>
             <div class="progress ${progress.percent === 100 ? "is-ok" : ""}" style="margin-bottom:10px">
               <span style="width:${progress.percent}%"></span>
@@ -356,6 +363,10 @@ export async function render(ctx) {
 
     document.querySelectorAll("[data-next-status]").forEach((button) =>
       button.addEventListener("click", async () => {
+        if (!canChangeStatus && !(isReq && task.status === "review" && button.dataset.nextStatus === "completed")) {
+          toast("คุณสามารถเปลี่ยนสถานะได้เฉพาะงานที่ได้รับมอบหมายเท่านั้น", "warn");
+          return;
+        }
         try {
           await api.changeStatus(id, button.dataset.nextStatus, "อัปเดตจาก Task Detail");
           toast("เปลี่ยนสถานะเรียบร้อยแล้ว", "success");
@@ -368,6 +379,10 @@ export async function render(ctx) {
     );
 
     qs("[data-reopen]")?.addEventListener("click", async () => {
+      if (!canChangeStatus) {
+        toast("คุณสามารถเปิดงานกลับมาแก้ได้เฉพาะงานที่ได้รับมอบหมายเท่านั้น", "warn");
+        return;
+      }
       try {
         await api.changeStatus(id, "revision", "Reopen งานที่ส่งมอบแล้ว");
         toast("เปิดงานกลับมาแก้แล้ว", "success");
