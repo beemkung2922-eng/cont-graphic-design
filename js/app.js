@@ -16,7 +16,6 @@ const icons = {
   bell: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>`,
   logout: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-5"/></svg>`,
   close: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>`,
-  palette: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.5-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16c3.3 0 6-2.7 6-6 0-5.5-4.5-10-10-10z"/></svg>`,
 };
 
 export const qs = (selector, root = document) => root.querySelector(selector);
@@ -27,7 +26,7 @@ export function toast(message, type = "info", title = "") {
   const node = document.createElement("div");
   node.className = `toast is-${type}`;
   node.innerHTML = `
-    <div class="toast-icon">${type === "success" ? "✓" : type === "error" ? "!" : type === "warn" ? "⚠" : "i"}</div>
+    <div class="toast-icon">${type === "success" ? "✓" : type === "error" ? "!" : type === "warn" ? "!" : "i"}</div>
     <div class="toast-content">
       ${title ? `<div class="toast-title">${escapeHtml(title)}</div>` : ""}
       <div>${escapeHtml(message)}</div>
@@ -78,102 +77,6 @@ export function closeModal() {
   qs("#modal-backdrop")?.remove();
 }
 
-// --- KKP Brand Assets Hub Modal ---
-export function openBrandKitModal() {
-  const KKP_COLORS = [
-    { name: "KKP Primary Purple", hex: "#544C70", desc: "สีม่วงหลักประจำอัตลักษณ์องค์กร KKP" },
-    { name: "KKP Deep Purple", hex: "#3F3A56", desc: "สีม่วงเข้ม คอนทราสต์สูงสำหรับข้อความ/หัวข้อ" },
-    { name: "KKP Soft Purple", hex: "#6E6790", desc: "สีม่วงละมุน สำหรับเส้นขอบและป้ายกำกับ" },
-    { name: "KKP Light Surface", hex: "#F6F5F9", desc: "สีพื้นหลังซอฟต์ของระบบ" },
-    { name: "Corporate Green", hex: "#1F7A4D", desc: "สีเขียวสถานะ สำเร็จ/ส่งมอบงาน" },
-    { name: "Corporate Gold", hex: "#A9701B", desc: "สีทองพรีเมียม / สถานะรอตรวจแบบ" },
-    { name: "Corporate Red", hex: "#B3261E", desc: "สีแดงแจ้งเตือน / งานด่วน / แก้งาน" },
-    { name: "KKP Dark Ink", hex: "#1C1A2B", desc: "สีตัวอักษรเนื้อหาหลัก" },
-  ];
-
-  const body = `
-    <div class="stack">
-      <div>
-        <div style="font-weight:600;font-size:0.9rem;margin-bottom:4px;color:var(--ink-900)">
-          🎨 จานสีประจำแบรนด์ KKP (Official Color Palette)
-        </div>
-        <p class="text-xs text-muted" style="margin-bottom:12px">คลิกที่การ์ดสีเพื่อคัดลอกรหัส HEX Code ไปใช้งานใน Figma / Photoshop ทันที</p>
-      </div>
-
-      <div class="brand-hub-grid">
-        ${KKP_COLORS.map((c) => `
-          <div class="brand-color-card" data-copy-hex="${c.hex}" title="คลิกเพื่อคัดลอก ${c.hex}">
-            <div class="brand-color-swatch" style="background:${c.hex}"></div>
-            <div class="brand-color-meta">
-              <div class="brand-color-name">${c.name}</div>
-              <div class="brand-color-hex">
-                <span>${c.hex}</span>
-                <span style="font-size:0.65rem;color:var(--kkp-purple)">📋 คัดลอก</span>
-              </div>
-            </div>
-          </div>
-        `).join("")}
-      </div>
-
-      <div class="divider"></div>
-
-      <div>
-        <div style="font-weight:600;font-size:0.9rem;margin-bottom:8px;color:var(--ink-900)">
-          🔤 แบบอักษรทางการ (Typography)
-        </div>
-        <div class="card" style="padding:12px;background:var(--surface-alt)">
-          <div style="font-weight:600;color:var(--ink-900)">Primary Web/App Font: IBM Plex Sans Thai</div>
-          <div class="text-xs text-muted" style="margin-top:2px">
-            น้ำหนักแนะนำ: Regular 400 (เนื้อหาทั่วไป), Medium 500 (ปุ่มและแท็ก), SemiBold 600 (หัวข้อใหญ่)
-          </div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div>
-        <div style="font-weight:600;font-size:0.9rem;margin-bottom:8px;color:var(--ink-900)">
-          📦 ทรัพยากรและไฟล์ดาวน์โหลด (Official Assets)
-        </div>
-        <div class="brand-links-list">
-          <div class="brand-link-item">
-            <div>
-              <strong>📐 Standard Dimensions Cheatsheet</strong>
-              <div class="text-xs text-muted">ขนาดมาตรฐาน: 1080x1080 (1:1), 1080x1920 (9:16), 1920x1080 (16:9), GDN 300x250</div>
-            </div>
-            <span class="badge badge-neutral">Standard</span>
-          </div>
-          <div class="brand-link-item">
-            <div>
-              <strong>📘 KKP Visual & Design Guidelines 2026</strong>
-              <div class="text-xs text-muted">คู่มือการใช้โลโก้ พื้นที่ว่าง และข้อห้ามในการจัดวาง</div>
-            </div>
-            <span class="badge badge-info">PDF</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  const modal = openModal({
-    title: "🎨 KKP Brand Assets & Color Kit",
-    body,
-    size: "lg",
-    footer: `<button class="btn btn-primary" data-close-modal>ปิด</button>`
-  });
-
-  qsa("[data-copy-hex]", modal).forEach((card) => {
-    card.addEventListener("click", () => {
-      const hex = card.dataset.copyHex;
-      navigator.clipboard.writeText(hex).then(() => {
-        toast(`คัดลอกรหัสสี ${hex} เรียบร้อยแล้ว!`, "success");
-      }).catch(() => {
-        toast(`รหัสสี: ${hex}`, "info");
-      });
-    });
-  });
-}
-
 function sidebarHtml(page, member) {
   const links = NAV_ITEMS.map((item) => `
     <a class="nav-item ${item.page === page ? "is-active" : ""}" href="${item.href}">
@@ -197,11 +100,6 @@ function sidebarHtml(page, member) {
       <nav class="nav">
         <div class="nav-label">Workspace</div>
         ${links}
-        <div class="nav-label">Brand & Assets</div>
-        <a class="nav-item" href="#" id="brand-kit-sidebar">
-          ${icons.palette}
-          <span>KKP Brand Kit</span>
-        </a>
         <div class="nav-label">Account</div>
         <a class="nav-item" href="#" id="logout-link">${icons.logout}<span>ออกจากระบบ</span></a>
       </nav>
@@ -243,11 +141,6 @@ function topbarHtml(page) {
         <input id="global-search" type="search" placeholder="ค้นหางาน…" />
       </div>
 
-      <!-- KKP Brand Assets Hub Button -->
-      <button class="icon-btn" id="brand-kit-topbar" title="🎨 KKP Brand Assets & Colors" aria-label="Brand Kit">
-        ${icons.palette}
-      </button>
-
       <!-- In-app Notification Bell -->
       <div class="notif-container">
         <button class="icon-btn" id="notifications-btn" title="การแจ้งเตือน" aria-label="การแจ้งเตือน">
@@ -275,6 +168,14 @@ function buildNotifications(bundle, currentMember) {
 
   const isSupervisor = currentMember.role === "supervisor" || currentMember.role === "admin";
 
+  // SVG Icons for clean professional look (no excessive emojis)
+  const notifIcons = {
+    review: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    revision: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
+    urgent: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+    comment: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
+  };
+
   // 1. Review status notifications
   bundle.tasks.filter((t) => t.status === "review").forEach((t) => {
     const isMine = t.assignee_id === currentMember.id;
@@ -284,10 +185,10 @@ function buildNotifications(bundle, currentMember) {
         id: `review_${t.id}`,
         taskId: t.id,
         type: "is-review",
-        icon: "👀",
+        icon: notifIcons.review,
         text: isSupervisor
-          ? `งาน "<strong>${escapeHtml(t.title)}</strong>" ส่งตรวจแบบแล้ว (โดย ${escapeHtml(assignee?.name || "สมาชิก")})`
-          : `งาน "<strong>${escapeHtml(t.title)}</strong>" อยู่ในขั้นตอนรอคอมเมนต์ตรวจแบบ`,
+          ? `งาน <strong>${escapeHtml(t.title)}</strong> ส่งตรวจแบบแล้ว (โดย ${escapeHtml(assignee?.name || "สมาชิก")})`
+          : `งาน <strong>${escapeHtml(t.title)}</strong> อยู่ในขั้นตอนรอคอมเมนต์ตรวจแบบ`,
         time: t.updated_at || t.created_at,
       });
     }
@@ -299,13 +200,12 @@ function buildNotifications(bundle, currentMember) {
     if (!task) return;
     const isMine = task.assignee_id === currentMember.id;
     if (isMine || isSupervisor) {
-      const requester = bundle.members.find((m) => m.id === rev.requested_by);
       notifications.push({
         id: `rev_${rev.id}`,
         taskId: task.id,
         type: "is-revision",
-        icon: "⚠️",
-        text: `มีคำขอแก้ Version ${Number(rev.revision_number) + 1} ในงาน "<strong>${escapeHtml(task.title)}</strong>": ${escapeHtml(rev.reason.slice(0, 50))}`,
+        icon: notifIcons.revision,
+        text: `มีคำขอแก้ Version ${Number(rev.revision_number) + 1} ในงาน <strong>${escapeHtml(task.title)}</strong>: ${escapeHtml(rev.reason.slice(0, 50))}`,
         time: rev.created_at,
       });
     }
@@ -322,8 +222,8 @@ function buildNotifications(bundle, currentMember) {
         id: `overdue_${t.id}_${String(t.deadline_at || t.deadline).slice(0, 10)}`,
         taskId: t.id,
         type: "is-urgent",
-        icon: "🚨",
-        text: `งาน "<strong>${escapeHtml(t.title)}</strong>" เลยกำหนดส่งแล้ว! (${escapeHtml(urgency.label)})`,
+        icon: notifIcons.urgent,
+        text: `งาน <strong>${escapeHtml(t.title)}</strong> เลยกำหนดส่งแล้ว (${escapeHtml(urgency.label)})`,
         time: t.deadline_at || t.deadline,
       });
     } else if (urgency.className === "is-due-soon") {
@@ -331,8 +231,8 @@ function buildNotifications(bundle, currentMember) {
         id: `duesoon_${t.id}_${String(t.deadline_at || t.deadline).slice(0, 10)}`,
         taskId: t.id,
         type: "is-urgent",
-        icon: "⏰",
-        text: `งาน "<strong>${escapeHtml(t.title)}</strong>" ใกล้ถึงกำหนดส่ง (${escapeHtml(urgency.label)})`,
+        icon: notifIcons.urgent,
+        text: `งาน <strong>${escapeHtml(t.title)}</strong> ใกล้ถึงกำหนดส่ง (${escapeHtml(urgency.label)})`,
         time: t.deadline_at || t.deadline,
       });
     }
@@ -349,8 +249,8 @@ function buildNotifications(bundle, currentMember) {
         id: `cmt_${c.id}`,
         taskId: task.id,
         type: "is-comment",
-        icon: "💬",
-        text: `${escapeHtml(author?.name || "สมาชิก")} คอมเมนต์ใน "<strong>${escapeHtml(task.title)}</strong>": "${escapeHtml(c.content.slice(0, 45))}"`,
+        icon: notifIcons.comment,
+        text: `${escapeHtml(author?.name || "สมาชิก")} คอมเมนต์ใน <strong>${escapeHtml(task.title)}</strong>: "${escapeHtml(c.content.slice(0, 45))}"`,
         time: c.created_at,
       });
     }
@@ -390,10 +290,10 @@ function mountNotificationCenter(bundle, currentMember) {
     dropdown.innerHTML = `
       <div class="notif-header">
         <div class="notif-header-title">
-          <span>🔔 การแจ้งเตือน</span>
-          ${data.unreadCount > 0 ? `<span class="chip" style="background:var(--purple-100);color:var(--kkp-purple)">${data.unreadCount} ใหม่</span>` : ""}
+          <span>การแจ้งเตือน</span>
+          ${data.unreadCount > 0 ? `<span class="chip" style="background:var(--purple-100);color:var(--kkp-purple);font-weight:600">${data.unreadCount} ใหม่</span>` : ""}
         </div>
-        <button class="btn-link" id="mark-all-read" style="font-size:0.75rem">✓ อ่านทั้งหมด</button>
+        <button class="btn-link" id="mark-all-read" style="font-size:0.75rem">ทำเครื่องหมายว่าอ่านทั้งหมด</button>
       </div>
       <div class="notif-list">
         ${data.items.length ? data.items.map((n) => `
@@ -484,13 +384,6 @@ export async function initShell() {
   });
 
   qs("#quick-create")?.addEventListener("click", () => window.openCreateTask?.());
-
-  // Brand Kit buttons
-  qs("#brand-kit-topbar")?.addEventListener("click", openBrandKitModal);
-  qs("#brand-kit-sidebar")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    openBrandKitModal();
-  });
 
   qs("#global-search")?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && event.target.value.trim()) {
