@@ -192,12 +192,19 @@ if (authCode) {
   showInfo("กำลังแลกเปลี่ยนรหัสเพื่อเข้าสู่ระบบ…");
   try {
     await auth.exchangeCode(authCode);
-    showInfo("เข้าสู่ระบบสำเร็จ กำลังพาไปยังแดชบอร์ด…");
-    localStorage.removeItem(COOLDOWN_KEY);
-    localStorage.removeItem(SAVED_EMAIL_KEY);
-    window.setTimeout(() => {
-      window.location.href = "dashboard.html";
-    }, 400);
+    showInfo("กำลังตรวจสอบสิทธิ์สมาชิก…");
+    const member = await auth.currentMember();
+    if (!member) {
+      localStorage.removeItem("cont_session");
+      showError("⚠️ บัญชีนี้ยังไม่ได้รับอนุญาตในระบบ CONT กรุณาติดต่อ Team Head เพื่อขอรับสิทธิ์เข้าใช้งาน หรือใช้อีเมลบริษัท @kkpfg.com ด้านบน");
+    } else {
+      showInfo(`เข้าสู่ระบบสำเร็จ ยินดีต้อนรับคุณ ${member.name}…`);
+      localStorage.removeItem(COOLDOWN_KEY);
+      localStorage.removeItem(SAVED_EMAIL_KEY);
+      window.setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 500);
+    }
   } catch (err) {
     showError(formatAuthError(err));
   }
@@ -209,22 +216,36 @@ if (window.location.hash.includes("access_token=")) {
   const accessToken = hash.get("access_token");
   const refreshToken = hash.get("refresh_token");
   const jwt = accessToken ? parseJwt(accessToken) : null;
+  const userEmail = hash.get("email") || jwt?.email || "";
   const session = {
     access_token: accessToken,
     refresh_token: refreshToken,
     user: {
       id: hash.get("user_id") || jwt?.sub || "",
-      email: jwt?.email || "",
+      email: userEmail,
     },
   };
   localStorage.setItem("cont_session", JSON.stringify(session));
   window.location.hash = "";
-  showInfo("เข้าสู่ระบบสำเร็จ กำลังพาไปยังแดชบอร์ด…");
-  localStorage.removeItem(COOLDOWN_KEY);
-  localStorage.removeItem(SAVED_EMAIL_KEY);
-  window.setTimeout(() => {
-    window.location.href = "dashboard.html";
-  }, 400);
+
+  showInfo("กำลังตรวจสอบสิทธิ์สมาชิก…");
+  try {
+    const member = await auth.currentMember();
+    if (!member) {
+      localStorage.removeItem("cont_session");
+      showError(`⚠️ บัญชี Google (${userEmail || "นี้"}) ยังไม่ได้รับอนุญาตในระบบ CONT กรุณาติดต่อ Team Head เพื่อขอรับสิทธิ์เข้าใช้งาน หรือหากคุณมีอีเมลบริษัท กรุณาเข้าสู่ระบบด้วย @kkpfg.com ทางด้านบน`);
+    } else {
+      showInfo(`เข้าสู่ระบบสำเร็จ ยินดีต้อนรับคุณ ${member.name}…`);
+      localStorage.removeItem(COOLDOWN_KEY);
+      localStorage.removeItem(SAVED_EMAIL_KEY);
+      window.setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 500);
+    }
+  } catch (err) {
+    localStorage.removeItem("cont_session");
+    showError("ไม่สามารถยืนยันสิทธิ์สมาชิกได้ กรุณาลองใหม่อีกครั้ง");
+  }
 }
 
 // 5. Send OTP
@@ -238,6 +259,11 @@ sendOtpBtn?.addEventListener("click", async () => {
   }
   if (!email.includes("@")) {
     showError("รูปแบบอีเมลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง");
+    workEmailInput?.focus();
+    return;
+  }
+  if (!email.endsWith("@kkpfg.com")) {
+    showError("⚠️ ช่องนี้สำหรับอีเมลบริษัท (@kkpfg.com) เท่านั้น ไม่สามารถใช้อีเมลอื่นได้ หากต้องการใช้อีเมลส่วนตัว/Gmail กรุณาเข้าสู่ระบบด้วย Google ด้านล่าง");
     workEmailInput?.focus();
     return;
   }
@@ -323,6 +349,10 @@ resendOtpBtn?.addEventListener("click", async () => {
   if (getRemainingCooldown() > 0) return;
   const email = (workEmailInput?.value || localStorage.getItem(SAVED_EMAIL_KEY) || "").trim().toLowerCase();
   if (!email) return;
+  if (!email.endsWith("@kkpfg.com")) {
+    showError("⚠️ ระบบส่งรหัส OTP เฉพาะอีเมลบริษัท (@kkpfg.com) เท่านั้น");
+    return;
+  }
   clearMessages();
   resendOtpBtn.disabled = true;
   resendOtpBtn.textContent = "กำลังส่งรหัสใหม่…";
