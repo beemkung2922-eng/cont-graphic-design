@@ -68,7 +68,7 @@ export function taskCard(task, { projects = [], members = [], subtasks = [], sho
   const progress = progressInfo(subtasks.filter((item) => item.task_id === task.id));
   const urgency = relativeDeadline(task.deadline_at || task.deadline);
   const previewHtml = task.preview_url ? `<div class="task-card-preview"><img src="${escapeHtml(task.preview_url)}" alt="Artwork" loading="lazy" /></div>` : "";
-  const designLinkHtml = task.design_url ? `<a href="${escapeHtml(task.design_url)}" target="_blank" rel="noopener" class="task-card-link-badge" title="เปิดไฟล์งานออกแบบ (Figma/Drive)" onclick="event.stopPropagation()">🎨 Design ↗</a>` : "";
+  const designLinkHtml = task.design_url ? `<a href="${escapeHtml(task.design_url)}" target="_blank" rel="noopener" class="task-card-link-badge" title="เปิดไฟล์งานออกแบบ (Figma/Drive)" onclick="event.stopPropagation()">Design File ↗</a>` : "";
   const formatTagHtml = task.dimensions ? `<span class="task-card-format-tag" title="ขนาด">${escapeHtml(task.dimensions)}</span>` : (task.channel ? `<span class="task-card-format-tag">${escapeHtml(task.channel)}</span>` : "");
 
   return `<article class="task-card ${urgency.className} ${task.status === "completed" ? "is-done" : ""}" data-task-id="${escapeHtml(task.id)}" tabindex="0" role="button">
