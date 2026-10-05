@@ -117,7 +117,7 @@ function formatAuthError(error) {
     return "ไม่อนุญาตให้อีเมลนี้ลงทะเบียน กรุณาติดต่อผู้ดูแลระบบ";
   }
   if (msg.includes("rate limit") || msg.includes("too many") || msg.includes("over_email_send_rate_limit") || msg.includes("60 seconds")) {
-    startCooldown(60);
+    startCooldown(15);
     const rem = getRemainingCooldown() || 60;
     return `⏳ ส่งคำขอถี่เกินไป กรุณารออีก ${rem} วินาที แล้วปุ่มจะเปิดให้กดส่งใหม่อัตโนมัติ`;
   }
@@ -236,7 +236,7 @@ sendOtpBtn?.addEventListener("click", async () => {
     if (sentEmailDisplay) sentEmailDisplay.textContent = email;
     emailStep?.classList.add("hidden");
     otpStep?.classList.remove("hidden");
-    startCooldown(60);
+    startCooldown(15);
     showInfo(`ระบบส่งรหัส OTP 6 หลักไปที่ ${email} เรียบร้อยแล้ว`);
     if (otpCodeInput) {
       otpCodeInput.value = "";
@@ -312,7 +312,7 @@ resendOtpBtn?.addEventListener("click", async () => {
 
   try {
     await auth.signInWithOtp(email);
-    startCooldown(60);
+    startCooldown(15);
     showInfo(`ส่งรหัส OTP ชุดใหม่ไปที่ ${email} เรียบร้อยแล้ว`);
     if (otpCodeInput) {
       otpCodeInput.value = "";
