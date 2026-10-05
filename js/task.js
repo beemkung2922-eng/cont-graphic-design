@@ -29,8 +29,8 @@ export async function render(ctx) {
       <div class="lightbox-img-wrap">
         <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(title)}" />
       </div>
-      <div style="color:#fff;font-size:0.85rem;margin-top:14px;opacity:0.9;">
-        ${escapeHtml(title)} · กดที่ไหนก็ได้หรือกด [×] เพื่อปิด
+      <div style="color:#fff;font-size:0.85rem;margin-top:14px;opacity:0.85;font-weight:400">
+        ${escapeHtml(title)} · คลิกที่ไหนก็ได้หรือกด [×] เพื่อปิด
       </div>
     `;
     box.addEventListener("click", (e) => {
@@ -44,29 +44,29 @@ export async function render(ctx) {
     const body = `
       <form id="artwork-form" class="stack">
         <div class="field">
-          <label>URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</label>
+          <label style="font-weight:600;color:var(--ink-900)">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</label>
           <input name="preview_url" placeholder="https://example.com/mockup.png" value="${escapeHtml(task.preview_url || "")}">
-          <span class="hint">ใส่ลิงก์รูปภาพตัวอย่างงาน (JPG, PNG, WebP) เพื่อให้พรีวิวบนหน้าบอร์ดและหน้ารายละเอียด</span>
+          <span class="hint" style="font-weight:400;color:var(--ink-500)">ใส่ลิงก์รูปภาพตัวอย่างงาน (JPG, PNG, WebP) เพื่อให้พรีวิวบนหน้าบอร์ดและหน้ารายละเอียด</span>
         </div>
         <div class="field">
-          <label>ลิงก์ไฟล์ออกแบบ (Figma / Google Drive / OneDrive)</label>
+          <label style="font-weight:600;color:var(--ink-900)">ลิงก์ไฟล์ออกแบบ (Figma / Google Drive / OneDrive)</label>
           <input name="design_url" placeholder="https://www.figma.com/file/... หรือ ลิงก์ Drive" value="${escapeHtml(task.design_url || "")}">
-          <span class="hint">ลิงก์ต้นฉบับเพื่อให้ทีมกดเปิดไฟล์งานจริงได้ทันที</span>
+          <span class="hint" style="font-weight:400;color:var(--ink-500)">ลิงก์ต้นฉบับเพื่อให้ทีมกดเปิดไฟล์งานจริงได้ทันที</span>
         </div>
         <div class="form-grid">
           <div class="field">
-            <label>ขนาด / Dimensions</label>
-            <input name="dimensions" placeholder="เช่น 1080x1080 px (1:1)" value="${escapeHtml(task.dimensions || "")}">
+            <label style="font-weight:600;color:var(--ink-900)">ขนาด / Dimensions</label>
+            <input name="dimensions" placeholder="เช่น 1080x1920 px (9:16)" value="${escapeHtml(task.dimensions || "")}">
           </div>
           <div class="field">
-            <label>ช่องทางเผยแพร่ / Channel</label>
-            <input name="channel" placeholder="เช่น Facebook, IG Story, GDN, Print" value="${escapeHtml(task.channel || "")}">
+            <label style="font-weight:600;color:var(--ink-900)">ช่องทางเผยแพร่ / Channel</label>
+            <input name="channel" placeholder="เช่น Instagram / FB Story" value="${escapeHtml(task.channel || "")}">
           </div>
         </div>
       </form>
     `;
     const modal = openModal({
-      title: "🎨 จัดการ Artwork & ลิงก์ไฟล์งาน",
+      title: "URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)",
       body,
       footer: `
         <button class="btn" data-close-modal>ยกเลิก</button>
@@ -85,7 +85,7 @@ export async function render(ctx) {
           channel: data.channel.trim() || null,
         });
         closeModal();
-        toast("อัปเดตข้อมูล Artwork เรียบร้อยแล้ว", "success");
+        toast("อัปเดตข้อมูลเรียบร้อยแล้ว", "success");
         bundle = await api.loadBundle();
         draw();
       } catch (err) {
@@ -126,7 +126,7 @@ export async function render(ctx) {
     const subtaskRows = subtasks.map((item) => `
       <div class="subtask ${item.is_completed ? "is-done" : ""}">
         <input type="checkbox" data-subtask-id="${item.id}" ${item.is_completed ? "checked" : ""}>
-        <label>${escapeHtml(item.title)}</label>
+        <label style="font-weight:${item.is_completed ? "400" : "500"}">${escapeHtml(item.title)}</label>
       </div>
     `).join("");
 
@@ -137,10 +137,10 @@ export async function render(ctx) {
           ${avatar(author, "avatar-sm")}
           <div class="comment-body">
             <div class="comment-head">
-              <span class="comment-author">${escapeHtml(author?.name || "สมาชิก")}</span>
-              <span class="comment-time">${formatDateTime(comment.created_at)}</span>
+              <span class="comment-author" style="font-weight:600">${escapeHtml(author?.name || "สมาชิก")}</span>
+              <span class="comment-time" style="font-weight:400">${formatDateTime(comment.created_at)}</span>
             </div>
-            <div class="comment-text">${escapeHtml(comment.content)}</div>
+            <div class="comment-text" style="font-weight:400">${escapeHtml(comment.content)}</div>
           </div>
         </div>
       `;
@@ -155,10 +155,10 @@ export async function render(ctx) {
           </div>
           <div class="list-item-main">
             <div class="list-item-title">
-              <strong>Version ${Number(revision.revision_number) + 1} (Revision #${revision.revision_number})</strong>
-              <div style="margin-top:2px;color:var(--ink-800)">${escapeHtml(revision.reason || "ไม่ได้ระบุเหตุผล")}</div>
+              <strong style="color:var(--ink-900)">Version ${Number(revision.revision_number) + 1} (Revision #${revision.revision_number})</strong>
+              <div style="margin-top:2px;color:var(--ink-700);font-weight:400">${escapeHtml(revision.reason || "ไม่ได้ระบุเหตุผล")}</div>
             </div>
-            <div class="list-item-sub">
+            <div class="list-item-sub" style="font-weight:400;color:var(--ink-500)">
               ขอแก้ไขโดย ${escapeHtml(requester?.name || "—")} · ${formatDateTime(revision.created_at)}
             </div>
           </div>
@@ -171,9 +171,9 @@ export async function render(ctx) {
       const actor = bundle.members.find((m) => m.id === item.user_id);
       return `
         <div class="timeline-item ${item.to_status === "completed" ? "is-completed" : item.action?.includes("revision") ? "is-revision" : item.to_status === task.status ? "is-current" : ""}">
-          <div class="timeline-title">${escapeHtml(item.action === "status_changed" ? `${item.from_status ? STATUS_LABELS[item.from_status] : "เริ่มงาน"} → ${STATUS_LABELS[item.to_status]}` : item.action === "created" ? "สร้างงาน" : item.action === "completed" ? "ส่งมอบไฟล์สำเร็จ" : item.action === "revision_requested" ? `Revision #${item.revision_number} · ขอแก้ไข` : item.action || "อัปเดต")}</div>
-          <div class="timeline-meta">${escapeHtml(actor?.name || "สมาชิก")} · ${formatDateTime(item.created_at)}</div>
-          ${item.note ? `<div class="timeline-note">${escapeHtml(item.note)}</div>` : ""}
+          <div class="timeline-title" style="font-weight:600">${escapeHtml(item.action === "status_changed" ? `${item.from_status ? STATUS_LABELS[item.from_status] : "เริ่มงาน"} → ${STATUS_LABELS[item.to_status]}` : item.action === "created" ? "สร้างงาน" : item.action === "completed" ? "ส่งมอบไฟล์สำเร็จ" : item.action === "revision_requested" ? `Revision #${item.revision_number} · ขอแก้ไข` : item.action || "อัปเดต")}</div>
+          <div class="timeline-meta" style="font-weight:400">${escapeHtml(actor?.name || "สมาชิก")} · ${formatDateTime(item.created_at)}</div>
+          ${item.note ? `<div class="timeline-note" style="font-weight:400">${escapeHtml(item.note)}</div>` : ""}
         </div>
       `;
     }).join("");
@@ -182,28 +182,27 @@ export async function render(ctx) {
     const proofingHtml = task.preview_url ? `
       <div class="artwork-proof-box">
         <div class="artwork-proof-header">
-          <div class="row-wrap" style="gap:8px">
-            <strong>🎨 Artwork Proofing</strong>
-            ${task.revision_count ? `<span class="chip" style="background:var(--danger-bg);color:var(--danger);font-weight:600">v${Number(task.revision_count) + 1} (Rev #${task.revision_count})</span>` : `<span class="chip">v1 (Initial Draft)</span>`}
-            ${task.dimensions ? `<span class="task-card-format-tag">📐 ${escapeHtml(task.dimensions)}</span>` : ""}
-            ${task.channel ? `<span class="task-card-format-tag">📢 ${escapeHtml(task.channel)}</span>` : ""}
+          <div class="row-wrap" style="gap:8px; align-items:center;">
+            <strong style="font-size:0.92rem; font-weight:700; color:var(--ink-900);">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</strong>
+            ${task.revision_count ? `<span class="chip" style="background:var(--danger-bg);color:var(--danger);font-weight:600">Version ${Number(task.revision_count) + 1} (Rev #${task.revision_count})</span>` : `<span class="chip" style="font-weight:500">Version 1 (Initial Draft)</span>`}
+            ${task.dimensions ? `<span class="task-card-format-tag" style="font-weight:500">${escapeHtml(task.dimensions)}</span>` : ""}
+            ${task.channel ? `<span class="task-card-format-tag" style="font-weight:500">${escapeHtml(task.channel)}</span>` : ""}
           </div>
           <div class="row-wrap" style="gap:8px">
-            ${task.design_url ? `<a href="${escapeHtml(task.design_url)}" target="_blank" rel="noopener" class="btn btn-sm">🎨 เปิดไฟล์งาน (Figma/Drive) ↗</a>` : ""}
-            <button class="btn btn-sm" id="btn-edit-artwork">✏️ เปลี่ยนภาพ / ลิงก์</button>
+            ${task.design_url ? `<a href="${escapeHtml(task.design_url)}" target="_blank" rel="noopener" class="btn btn-sm">เปิดไฟล์งาน (Figma / Drive) ↗</a>` : ""}
+            <button class="btn btn-sm" id="btn-edit-artwork">แก้ไขรูปภาพ / ลิงก์</button>
           </div>
         </div>
         <div class="artwork-proof-img-wrap" id="artwork-proof-wrap" title="คลิกเพื่อขยายดูภาพขนาดเต็ม (Zoom)">
           <img src="${escapeHtml(task.preview_url)}" alt="${escapeHtml(task.title)}" />
-          <div class="artwork-proof-zoom-hint">🔍 คลิกเพื่อขยายเต็มจอ (Zoom)</div>
+          <div class="artwork-proof-zoom-hint" style="font-weight:500">คลิกเพื่อขยายเต็มจอ (Zoom)</div>
         </div>
       </div>
     ` : `
       <div class="card" style="border: 2px dashed var(--line-strong); background: var(--surface-alt); text-align: center; padding: 22px 16px;">
-        <div style="font-size: 2rem; margin-bottom: 6px;">🎨</div>
-        <div style="font-weight: 600; color: var(--ink-900); font-size: 0.95rem; margin-bottom: 4px;">ยังไม่ได้แนบภาพตัวอย่างงาน (Artwork Preview)</div>
-        <p class="text-xs text-muted" style="max-width: 420px; margin: 0 auto 14px;">แนบภาพตัวอย่างเพื่อให้ทีมและหัวหน้าตรวจแบบได้ทันที พร้อมระบุลิงก์ Figma หรือ Google Drive</p>
-        <button class="btn btn-primary btn-sm" id="btn-add-artwork">＋ แนบภาพพรีวิว & ลิงก์ไฟล์งาน</button>
+        <div style="font-weight: 700; color: var(--ink-900); font-size: 0.95rem; margin-bottom: 4px;">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</div>
+        <p class="text-xs text-muted" style="max-width: 440px; margin: 0 auto 14px; font-weight: 400;">ยังไม่ได้แนบรูปภาพตัวอย่างงาน สามารถระบุ URL ภาพและลิงก์ Figma หรือ Google Drive เพื่อพรีวิว</p>
+        <button class="btn btn-primary btn-sm" id="btn-add-artwork">แนบภาพตัวอย่าง & ลิงก์ไฟล์งาน</button>
       </div>
     `;
 
@@ -211,11 +210,11 @@ export async function render(ctx) {
       <div class="page-header">
         <div>
           <div class="row-wrap">
-            <a class="text-sm" href="tasks.html">← กลับไปหน้ารวมงาน</a>
+            <a class="text-sm" href="tasks.html" style="font-weight:500">← กลับไปหน้ารวมงาน</a>
             ${statusBadge(task.status)}
           </div>
-          <h2 class="detail-title" style="margin-top:8px">${escapeHtml(task.title)}</h2>
-          <p class="page-desc">${escapeHtml(project?.name || "ไม่ระบุโปรเจกต์")} · อัปเดตล่าสุด ${formatDateTime(task.updated_at)}</p>
+          <h2 class="detail-title" style="margin-top:8px;font-weight:700">${escapeHtml(task.title)}</h2>
+          <p class="page-desc" style="font-weight:400">${escapeHtml(project?.name || "ไม่ระบุโปรเจกต์")} · อัปเดตล่าสุด ${formatDateTime(task.updated_at)}</p>
         </div>
         <div class="detail-actions">
           ${actions}
@@ -227,8 +226,8 @@ export async function render(ctx) {
       <div class="card card-tight" style="margin-bottom:16px">
         <div class="status-stepper">${stepper}</div>
         <div class="row-wrap" style="justify-content:space-between">
-          <span class="small-note">Workflow CONT · Version ${Number(task.revision_count || 0) + 1} (แก้แล้ว ${task.revision_count || 0} ครั้ง)</span>
-          ${task.completed_at ? `<span class="badge badge-ok">ส่งมอบสำเร็จเมื่อ ${formatDateLong(task.completed_at)}</span>` : ""}
+          <span class="small-note" style="font-weight:400">Workflow CONT · Version ${Number(task.revision_count || 0) + 1} (แก้แล้ว ${task.revision_count || 0} ครั้ง)</span>
+          ${task.completed_at ? `<span class="badge badge-ok" style="font-weight:600">ส่งมอบสำเร็จเมื่อ ${formatDateLong(task.completed_at)}</span>` : ""}
         </div>
       </div>
 
@@ -241,25 +240,25 @@ export async function render(ctx) {
           <!-- Brief Section -->
           <section class="card">
             <div class="card-header">
-              <div class="card-title">Design Brief</div>
+              <div class="card-title" style="font-weight:700">Design Brief</div>
               <div class="row-wrap" style="gap:6px">
-                <span class="chip">${escapeHtml(taskTypeLabel(task.task_type))}</span>
-                ${task.dimensions ? `<span class="chip">${escapeHtml(task.dimensions)}</span>` : ""}
+                <span class="chip" style="font-weight:500">${escapeHtml(taskTypeLabel(task.task_type))}</span>
+                ${task.dimensions ? `<span class="chip" style="font-weight:500">${escapeHtml(task.dimensions)}</span>` : ""}
               </div>
             </div>
-            <p style="white-space:pre-wrap;color:var(--ink-700);line-height:1.6">${escapeHtml(task.description || "ยังไม่มี Brief")}</p>
+            <p style="white-space:pre-wrap;color:var(--ink-700);line-height:1.6;font-weight:400">${escapeHtml(task.description || "ยังไม่มี Brief")}</p>
             <div class="divider"></div>
             <div class="kv-list">
-              <div><div class="k">Project</div><div class="v">${escapeHtml(project?.name || "—")}</div></div>
-              <div><div class="k">Deadline</div><div class="v">${formatDateTime(task.deadline_at || task.deadline)}</div></div>
-              <div><div class="k">Assignee</div><div class="v">${member ? `<span class="user-inline">${avatar(member, "avatar-sm")}${escapeHtml(member.name)}</span>` : "—"}</div></div>
-              <div><div class="k">ผู้มอบหมาย</div><div class="v">${escapeHtml(creator?.name || "—")}</div></div>
-              <div><div class="k">ประเภทงาน</div><div class="v">${escapeHtml(taskTypeLabel(task.task_type))}</div></div>
-              <div><div class="k">จำนวนชิ้นงาน</div><div class="v">${Number(task.item_count || 1)} ชิ้น</div></div>
-              <div><div class="k">ขนาด / Format</div><div class="v">${escapeHtml(task.dimensions || "—")}</div></div>
-              <div><div class="k">ช่องทาง (Channel)</div><div class="v">${escapeHtml(task.channel || "—")}</div></div>
-              <div><div class="k">สถานะเวลา</div><div class="v">${escapeHtml(relativeDeadline(task.deadline_at || task.deadline).label)}</div></div>
-              <div><div class="k">Version ปัจจุบัน</div><div class="v">v${Number(task.revision_count || 0) + 1} (แก้แล้ว ${task.revision_count || 0} รอบ)</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">Project</div><div class="v" style="font-weight:600;color:var(--ink-900)">${escapeHtml(project?.name || "—")}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">Deadline</div><div class="v" style="font-weight:600;color:var(--ink-900)">${formatDateTime(task.deadline_at || task.deadline)}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">Assignee</div><div class="v" style="font-weight:600;color:var(--ink-900)">${member ? `<span class="user-inline">${avatar(member, "avatar-sm")}${escapeHtml(member.name)}</span>` : "—"}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">ผู้มอบหมาย</div><div class="v" style="font-weight:600;color:var(--ink-900)">${escapeHtml(creator?.name || "—")}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">ประเภทงาน</div><div class="v" style="font-weight:600;color:var(--ink-900)">${escapeHtml(taskTypeLabel(task.task_type))}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">จำนวนชิ้นงาน</div><div class="v" style="font-weight:600;color:var(--ink-900)">${Number(task.item_count || 1)} ชิ้น</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">ขนาด / Format</div><div class="v" style="font-weight:600;color:var(--ink-900)">${escapeHtml(task.dimensions || "—")}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">ช่องทาง (Channel)</div><div class="v" style="font-weight:600;color:var(--ink-900)">${escapeHtml(task.channel || "—")}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">สถานะเวลา</div><div class="v" style="font-weight:600;color:var(--ink-900)">${escapeHtml(relativeDeadline(task.deadline_at || task.deadline).label)}</div></div>
+              <div><div class="k" style="font-weight:400;color:var(--ink-500)">Version ปัจจุบัน</div><div class="v" style="font-weight:600;color:var(--ink-900)">Version ${Number(task.revision_count || 0) + 1} (แก้แล้ว ${task.revision_count || 0} รอบ)</div></div>
             </div>
           </section>
 
@@ -267,24 +266,24 @@ export async function render(ctx) {
           <section class="card">
             <div class="card-header">
               <div>
-                <div class="card-title">Subtasks / Checklist</div>
-                <div class="card-sub">${progress.done}/${progress.total} completed · ${progress.percent}%</div>
+                <div class="card-title" style="font-weight:700">Subtasks / Checklist</div>
+                <div class="card-sub" style="font-weight:400">${progress.done}/${progress.total} completed · ${progress.percent}%</div>
               </div>
               <button class="btn btn-sm" id="add-subtask">＋ เพิ่ม</button>
             </div>
             <div class="progress ${progress.percent === 100 ? "is-ok" : ""}" style="margin-bottom:10px">
               <span style="width:${progress.percent}%"></span>
             </div>
-            ${subtaskRows || `<div class="state" style="padding:18px">ยังไม่มี Subtask</div>`}
+            ${subtaskRows || `<div class="state" style="padding:18px;font-weight:400">ยังไม่มี Subtask</div>`}
           </section>
 
           <!-- Comments Section -->
           <section class="card">
             <div class="card-header">
-              <div class="card-title">Comment / Feedback ในทีม</div>
+              <div class="card-title" style="font-weight:700">ความคิดเห็นในทีม (Comments & Feedback)</div>
             </div>
             <div>
-              ${commentRows || `<div class="text-sm text-muted" style="padding:10px 0">ยังไม่มีคอมเมนต์ในงานนี้</div>`}
+              ${commentRows || `<div class="text-sm text-muted" style="padding:10px 0;font-weight:400">ยังไม่มีคอมเมนต์ในงานนี้</div>`}
             </div>
             <form id="comment-form" class="inline-form" style="margin-top:12px">
               <div class="field">
@@ -301,31 +300,33 @@ export async function render(ctx) {
           <section class="card">
             <div class="card-header">
               <div>
-                <div class="card-title">ประวัติรอบการแก้งาน (Versions)</div>
-                <div class="card-sub">ปัจจุบัน: Version ${Number(task.revision_count || 0) + 1}</div>
+                <div class="card-title" style="font-weight:700">ประวัติรอบการแก้งาน (Versions)</div>
+                <div class="card-sub" style="font-weight:400">ปัจจุบัน: Version ${Number(task.revision_count || 0) + 1}</div>
               </div>
               ${task.status === "review" || task.status === "completed" ? `<button class="btn btn-danger btn-sm" id="request-revision">ขอแก้ไขงาน</button>` : ""}
             </div>
             <div class="stack" style="gap:8px">
-              ${revisionRows || `<div class="state" style="padding:18px">ยังไม่มีการขอแก้ไข (ยังอยู่รอบ Version 1)</div>`}
+              ${revisionRows || `<div class="state" style="padding:18px;font-weight:400">ยังไม่มีการขอแก้ไข (ยังอยู่รอบ Version 1)</div>`}
               <div class="list-item" style="border-top:1px dashed var(--line);padding-top:8px">
                 <div class="avatar avatar-sm" style="background:var(--purple-100);color:var(--kkp-purple);font-weight:700">v1</div>
                 <div class="list-item-main">
-                  <div class="list-item-title">Version 1 (Initial Draft)</div>
-                  <div class="list-item-sub">สร้างงานโดย ${escapeHtml(creator?.name || "—")} · ${formatDateTime(task.created_at)}</div>
+                  <div class="list-item-title">
+                    <strong style="color:var(--ink-900)">Version 1 (Initial Draft)</strong>
+                  </div>
+                  <div class="list-item-sub" style="font-weight:400;color:var(--ink-500)">สร้างงานโดย ${escapeHtml(creator?.name || "—")} · ${formatDateTime(task.created_at)}</div>
                 </div>
-                <span class="badge badge-neutral">ดราฟต์แรก</span>
+                <span class="badge badge-neutral" style="font-weight:500">ดราฟต์แรก</span>
               </div>
             </div>
           </section>
 
           <section class="card">
             <div class="card-header">
-              <div class="card-title">Work History & Activity</div>
-              <span class="chip">${history.length} events</span>
+              <div class="card-title" style="font-weight:700">ประวัติการทำงาน (Work History)</div>
+              <span class="chip" style="font-weight:500">${history.length} events</span>
             </div>
             <div class="timeline">
-              ${timeline || `<div class="state" style="padding:18px">ยังไม่มีประวัติ</div>`}
+              ${timeline || `<div class="state" style="padding:18px;font-weight:400">ยังไม่มีประวัติ</div>`}
             </div>
           </section>
         </div>
@@ -390,7 +391,7 @@ export async function render(ctx) {
     qs("#add-subtask")?.addEventListener("click", () => {
       const modal = openModal({
         title: "เพิ่ม Subtask",
-        body: `<form id="subtask-form"><div class="field"><label>ชื่องานย่อย *</label><input name="title" required placeholder="เช่น ตรวจ CI, ปรับขนาด Story"></div></form>`,
+        body: `<form id="subtask-form"><div class="field"><label style="font-weight:600">ชื่องานย่อย *</label><input name="title" required placeholder="เช่น ตรวจ CI, ปรับขนาด Story"></div></form>`,
         footer: `<button class="btn" data-close-modal>ยกเลิก</button><button class="btn btn-primary" id="save-subtask">เพิ่ม Subtask</button>`
       });
       qs("#save-subtask", modal).addEventListener("click", async () => {
@@ -426,7 +427,7 @@ export async function render(ctx) {
         body: `
           <form id="revision-form" class="stack">
             <div class="field">
-              <label>เหตุผลและจุดที่ต้องปรับแก้ *</label>
+              <label style="font-weight:600">เหตุผลและจุดที่ต้องปรับแก้ *</label>
               <textarea name="reason" required placeholder="ระบุสิ่งที่ต้องการให้ดีไซเนอร์ปรับแก้ให้ละเอียดและชัดเจน..."></textarea>
             </div>
           </form>
