@@ -14,57 +14,57 @@ export function bindTaskCards(root = document) {
 const BRIEF_PRESETS = [
   {
     id: "fb_post",
-    label: "📱 Facebook Post",
+    label: "Facebook Post",
     sub: "1:1 (1080x1080)",
     dimensions: "1080x1080 px (1:1)",
     channel: "Facebook",
     type: "new_work",
-    template: `📌 วัตถุประสงค์ (Objective): ประชาสัมพันธ์ข้อมูลแคมเปญ\n🎯 กลุ่มเป้าหมาย: ลูกค้าทั่วไป\n💬 ข้อความหลัก (Headline): \n🎨 Mood & Tone: เรียบหรู ตาม CI แบรนด์ KKP\n📁 ลิงก์ Drive / Assets: `
+    template: `วัตถุประสงค์ (Objective): ประชาสัมพันธ์ข้อมูลแคมเปญ\nกลุ่มเป้าหมาย: ลูกค้าทั่วไป\nข้อความหลัก (Headline): \nMood & Tone: เรียบหรู ตาม CI แบรนด์ KKP\nลิงก์ Drive / Assets: `
   },
   {
     id: "story_reels",
-    label: "📱 Story / Reels",
+    label: "Story / Reels",
     sub: "9:16 (1080x1920)",
     dimensions: "1080x1920 px (9:16)",
     channel: "Instagram / FB Story",
     type: "new_work",
-    template: `📌 วัตถุประสงค์: Vertical Story ดึงดูดสายตา\n🎯 กลุ่มเป้าหมาย: วัยทำงาน / คนรุ่นใหม่\n💬 ข้อความสำคัญ (Key Visual): \n🎨 โทนสีและสไตล์: ทันสมัย ชัดเจน กระชับ\n📁 ลิงก์ Reference: `
+    template: `วัตถุประสงค์: Vertical Story ดึงดูดสายตา\nกลุ่มเป้าหมาย: วัยทำงาน / คนรุ่นใหม่\nข้อความสำคัญ (Key Visual): \nMood & Tone: ทันสมัย ชัดเจน กระชับ\nลิงก์ Reference: `
   },
   {
     id: "fb_cover",
-    label: "🖥️ Facebook Cover",
-    sub: "1920x1080",
+    label: "Facebook Cover",
+    sub: "16:9 (1920x1080)",
     dimensions: "1920x1080 px",
     channel: "Facebook Page",
     type: "new_work",
-    template: `📌 วัตถุประสงค์: อัปเดต Cover Page ประจำเดือน\n💬 Headline หลัก: \n🎨 องค์ประกอบสำคัญ: โลโก้ KKP, ข้อมูลสิทธิประโยชน์\n📁 ไฟล์ต้นฉบับ: `
+    template: `วัตถุประสงค์: อัปเดต Cover Page ประจำเดือน\nHeadline หลัก: \nองค์ประกอบสำคัญ: โลโก้ KKP, ข้อมูลสิทธิประโยชน์\nไฟล์ต้นฉบับ: `
   },
   {
     id: "gdn_banner",
-    label: "💻 GDN Web Banner",
+    label: "GDN Web Banner",
     sub: "Standard Sizes",
     dimensions: "300x250, 728x90, 160x600 px",
     channel: "GDN / Online Ads",
     type: "new_work",
-    template: `📌 วัตถุประสงค์: แบนเนอร์โฆษณาออนไลน์\n💬 Call-To-Action (ปุ่ม CTA): คลิกดูรายละเอียด\n🎨 สัดส่วนที่ต้องทำ: 300x250, 728x90, 160x600 px\n📁 โฟลเดอร์ Key Visual: `
+    template: `วัตถุประสงค์: แบนเนอร์โฆษณาออนไลน์\nCall-To-Action (ปุ่ม CTA): คลิกดูรายละเอียด\nสัดส่วนที่ต้องทำ: 300x250, 728x90, 160x600 px\nโฟลเดอร์ Key Visual: `
   },
   {
     id: "print_a4",
-    label: "🖨️ สิ่งพิมพ์ / A4",
+    label: "สิ่งพิมพ์ / A4",
     sub: "300 DPI (CMYK)",
     dimensions: "210x297 mm (300 DPI)",
     channel: "Print / Brochure",
     type: "new_work",
-    template: `📌 วัตถุประสงค์: โบรชัวร์ / ใบปลิว A4 สำหรับสาขา\n💬 ข้อมูลและเนื้อหา: \n🎨 ระบบสี: CMYK (High-Resolution 300 DPI มี Bleed 3mm)\n📁 ลิงก์ข้อความ Word / CI: `
+    template: `วัตถุประสงค์: โบรชัวร์ / ใบปลิว A4 สำหรับสาขา\nข้อมูลและเนื้อหา: \nระบบสี: CMYK (High-Resolution 300 DPI มี Bleed 3mm)\nลิงก์ข้อความ Word / CI: `
   },
   {
     id: "resize_pack",
-    label: "📐 ปรับ Size / Resize",
+    label: "ปรับขยาย Size (Resize)",
     sub: "หลายขนาดจากชิ้นเดิม",
     dimensions: "ตามแพ็กเกจสื่อ",
     channel: "Multi-channel",
     type: "resize",
-    template: `📌 งานปรับขยาย Size จากชิ้นงานเดิม:\n🔗 ลิงก์งานต้นแบบ: \n📐 ขนาดที่ต้องการเพิ่ม:\n- ขนาด 1:\n- ขนาด 2: `
+    template: `งานปรับขยาย Size จากชิ้นงานเดิม:\nลิงก์งานต้นแบบ: \nขนาดที่ต้องการเพิ่ม:\n- ขนาด 1:\n- ขนาด 2: `
   }
 ];
 
@@ -82,14 +82,14 @@ export function openCreateTask(ctx) {
 
   const presetsHtml = `
     <div class="brief-presets-wrap">
-      <div class="brief-presets-label">
-        <span>⚡ เลือกเทมเพลตบรีฟด่วน (Smart Brief Presets):</span>
+      <div class="brief-presets-label" style="font-weight:600;color:var(--ink-700)">
+        <span>เลือกเทมเพลตบรีฟงาน (Smart Brief Presets):</span>
       </div>
       <div class="brief-preset-grid">
         ${BRIEF_PRESETS.map((p) => `
           <button type="button" class="brief-preset-btn" data-preset-id="${p.id}">
-            <span>${p.label}</span>
-            <small>${p.sub}</small>
+            <span style="font-weight:600">${escapeHtml(p.label)}</span>
+            <small style="font-weight:400">${escapeHtml(p.sub)}</small>
           </button>
         `).join("")}
       </div>
@@ -102,12 +102,12 @@ export function openCreateTask(ctx) {
 
       <div class="form-grid">
         <div class="field field-full">
-          <label for="task-title">ชื่องาน *</label>
+          <label for="task-title" style="font-weight:600;color:var(--ink-900)">ชื่องาน *</label>
           <input id="task-title" name="title" required placeholder="เช่น RRN — แบนเนอร์สินเชื่อบ้าน ก.พ. 2026">
         </div>
 
         <div class="field">
-          <label for="task-project">Project / แคมเปญ *</label>
+          <label for="task-project" style="font-weight:600;color:var(--ink-900)">Project / แคมเปญ *</label>
           <select id="task-project" name="project_id" required>
             <option value="">เลือก Project</option>
             ${ctx.projects.map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join("")}
@@ -115,7 +115,7 @@ export function openCreateTask(ctx) {
         </div>
 
         <div class="field">
-          <label for="task-type">ประเภทงาน *</label>
+          <label for="task-type" style="font-weight:600;color:var(--ink-900)">ประเภทงาน *</label>
           <select id="task-type" name="task_type" required>
             <option value="new_work">เริ่มงานใหม่</option>
             <option value="resize">ปรับ Size</option>
@@ -126,7 +126,7 @@ export function openCreateTask(ctx) {
         </div>
 
         <div class="field">
-          <label for="task-assignee">ผู้รับผิดชอบ (Designer) *</label>
+          <label for="task-assignee" style="font-weight:600;color:var(--ink-900)">ผู้รับผิดชอบ (Designer) *</label>
           <select id="task-assignee" name="assignee_id" required>
             <option value="">เลือกสมาชิกในทีม</option>
             ${ctx.members.filter((m) => m.is_active !== false).map((m) => `
@@ -136,39 +136,40 @@ export function openCreateTask(ctx) {
         </div>
 
         <div class="field">
-          <label for="task-deadline">กำหนดส่ง *</label>
+          <label for="task-deadline" style="font-weight:600;color:var(--ink-900)">กำหนดส่ง *</label>
           <input id="task-deadline" type="datetime-local" name="deadline_at" value="${defaultDeadline}" required>
-          <span class="hint">ระบบจะคำนวณเวลานับถอยหลังและแจ้งเตือนให้อัตโนมัติ</span>
+          <span class="hint" style="font-weight:400;color:var(--ink-500)">ระบบจะคำนวณเวลานับถอยหลังและแจ้งเตือนให้อัตโนมัติ</span>
         </div>
 
         <div class="field">
-          <label for="task-dimensions">ขนาด / Dimensions</label>
-          <input id="task-dimensions" name="dimensions" placeholder="เช่น 1080x1080 px (1:1)">
+          <label for="task-dimensions" style="font-weight:600;color:var(--ink-900)">ขนาด / Dimensions</label>
+          <input id="task-dimensions" name="dimensions" placeholder="เช่น 1080x1920 px (9:16)">
         </div>
 
         <div class="field">
-          <label for="task-channel">ช่องทางสื่อ (Channel)</label>
-          <input id="task-channel" name="channel" placeholder="เช่น Facebook, IG Story, GDN, Print">
+          <label for="task-channel" style="font-weight:600;color:var(--ink-900)">ช่องทางสื่อ (Channel)</label>
+          <input id="task-channel" name="channel" placeholder="เช่น Instagram / FB Story, GDN, Print">
         </div>
 
         <div class="field">
-          <label for="task-item-count">จำนวนชิ้นงาน *</label>
+          <label for="task-item-count" style="font-weight:600;color:var(--ink-900)">จำนวนชิ้นงาน *</label>
           <input id="task-item-count" type="number" name="item_count" min="1" max="10000" value="1" required>
         </div>
 
         <div class="field">
-          <label for="task-design-url">ลิงก์ Figma / Drive (ถ้ามี)</label>
+          <label for="task-design-url" style="font-weight:600;color:var(--ink-900)">ลิงก์ไฟล์ออกแบบ (Figma / Drive)</label>
           <input id="task-design-url" name="design_url" placeholder="https://www.figma.com/file/... หรือ ลิงก์ Drive">
+          <span class="hint" style="font-weight:400;color:var(--ink-500)">ลิงก์ต้นฉบับเพื่อให้ทีมกดเปิดไฟล์งานจริงได้ทันที</span>
         </div>
 
         <div class="field field-full">
-          <label for="task-preview-url">ลิงก์ภาพตัวอย่าง / Mockup (ถ้ามี)</label>
+          <label for="task-preview-url" style="font-weight:600;color:var(--ink-900)">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</label>
           <input id="task-preview-url" name="preview_url" placeholder="https://example.com/artwork.jpg">
-          <span class="hint">รูปภาพจะถูกนำไปพรีวิวบนหน้าบอร์ดและหน้ารายละเอียด</span>
+          <span class="hint" style="font-weight:400;color:var(--ink-500)">ใส่ลิงก์รูปภาพตัวอย่างงาน (JPG, PNG, WebP) เพื่อให้พรีวิวบนหน้าบอร์ดและหน้ารายละเอียด</span>
         </div>
 
         <div class="field field-full">
-          <label for="task-brief">Design Brief (รายละเอียดโจทย์ & สิ่งที่ต้องส่งมอบ)</label>
+          <label for="task-brief" style="font-weight:600;color:var(--ink-900)">Design Brief (รายละเอียดโจทย์ & สิ่งที่ต้องส่งมอบ)</label>
           <textarea id="task-brief" name="description" rows="5" placeholder="ระบุวัตถุประสงค์ ข้อความหลัก Mood & Tone และลิงก์ไฟล์ที่เกี่ยวข้อง..."></textarea>
         </div>
       </div>
@@ -178,7 +179,7 @@ export function openCreateTask(ctx) {
   `;
 
   const modal = openModal({
-    title: "✨ สร้างงานใหม่ (Create Design Task)",
+    title: "สร้างงานใหม่ (Create Design Task)",
     body,
     size: "lg",
     footer: `
@@ -227,7 +228,7 @@ export function openCreateTask(ctx) {
       });
 
       closeModal();
-      toast("สร้างงานใหม่เรียบร้อยแล้ว!", "success");
+      toast("สร้างงานใหม่เรียบร้อยแล้ว", "success");
       window.setTimeout(() => {
         window.location.href = `task.html?id=${encodeURIComponent(created.id)}`;
       }, 350);
