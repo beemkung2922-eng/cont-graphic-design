@@ -90,8 +90,8 @@ function formatAuthError(error) {
   if (msg.includes("company email addresses")) {
     return "ระบบจำกัดเฉพาะอีเมลบริษัท (@kkpfg.com) เท่านั้น หรือกรุณาเข้าสู่ระบบด้วย Google";
   }
-  if (msg.includes("otp_expired") || msg.includes("Token has expired") || msg.includes("is invalid")) {
-    return "รหัส OTP ไม่ถูกต้องหรือหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง หรือกดปุ่มในอีเมล Outlook ล่าสุด";
+  if (msg.includes("otp_expired") || msg.includes("Token has expired") || msg.includes("is invalid") || msg.includes("has expired")) {
+    return "⚠️ ลิงก์หรือรหัสนี้หมดอายุแล้ว (เนื่องจากมีการกดขอใหม่) กรุณาเปิดอีเมลฉบับล่าสุดใน Outlook หรือกดขอส่งใหม่อีกครั้ง";
   }
   if (msg.includes("Signups not allowed")) {
     return "ไม่อนุญาตให้อีเมลนี้ลงทะเบียน กรุณาติดต่อผู้ดูแลระบบ";
@@ -103,14 +103,53 @@ function formatAuthError(error) {
   return msg || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
 }
 
+// 0. Check existing session
+try {
+  const existing = await auth.getSession();
+  if (existing?.access_token) {
+    window.location.href = "dashboard.html";
+  }
+} catch (e) {}
+
 // 1. Check URL Error parameter (from failed OAuth redirect or email verify error)
 const params = new URLSearchParams(window.location.search);
 const urlError = params.get("error_description") || params.get("error");
 if (urlError) {
-  showError(decodeURIComponent(urlError.replace(/\+/g, " ")));
+  showError(formatAuthError(decodeURIComponent(urlError.replace(/\+/g, " "))));
 }
 
-// 2. Check Magic Link / OAuth Hash (#access_token=...)
+// 2. Check token_hash in URL query params
+const tokenHash = params.get("token_hash");
+const tokenType = params.get("type") || "email";
+if (tokenHash) {
+  showInfo("กำลังยืนยันตัวตนจากอีเมล Outlook…");
+  try {
+    await auth.verifyOtpHash(tokenHash, tokenType);
+    showInfo("ยืนยันตัวตนสำเร็จ กำลังเข้าสู่ระบบ…");
+    window.setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 400);
+  } catch (err) {
+    showError(formatAuthError(err));
+  }
+}
+
+// 3. Check authorization code in URL query params
+const authCode = params.get("code");
+if (authCode) {
+  showInfo("กำลังแลกเปลี่ยนรหัสเพื่อเข้าสู่ระบบ…");
+  try {
+    await auth.exchangeCode(authCode);
+    showInfo("เข้าสู่ระบบสำเร็จ กำลังพาไปยังแดชบอร์ด…");
+    window.setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 400);
+  } catch (err) {
+    showError(formatAuthError(err));
+  }
+}
+
+// 4. Check Magic Link / OAuth Hash (#access_token=...)
 if (window.location.hash.includes("access_token=")) {
   const hash = new URLSearchParams(window.location.hash.slice(1));
   const accessToken = hash.get("access_token");
