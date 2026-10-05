@@ -38,10 +38,27 @@ export function mountUser(member) {
   window.CONT_MEMBER = member;
 }
 
+export function isDesigner(member) { return ["designer", "supervisor", "admin"].includes(member?.role); }
 export function canManage(member) { return ["supervisor", "admin"].includes(member?.role); }
 export function isAdmin(member) { return member?.role === "admin"; }
-export function canEditTask(member, task) { return canManage(member) || task?.assignee_id === member?.id; }
-export function canDeleteTask(member) { return canManage(member); }
+export function isRequester(member) { return member?.role === "requester"; }
+export function isViewer(member) { return member?.role === "viewer"; }
+export function canMoveTask(member) { return isDesigner(member); }
+export function canCreateTask(member) { return member?.role !== "viewer"; }
+export function canEditTask(member, task) {
+  if (canManage(member)) return true;
+  if (isDesigner(member) && task?.assignee_id === member?.id) return true;
+  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief") return true;
+  return false;
+}
+export function canDeleteTask(member, task) {
+  if (canManage(member)) return true;
+  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief") return true;
+  return false;
+}
+export function canUploadArtwork(member, task) {
+  return canManage(member) || (isDesigner(member) && task?.assignee_id === member?.id);
+}
 
 export function errorMessage(error) {
   if (error?.status === 401) return "Supabase ไม่ยอมรับ API key นี้ (401) — ตรวจสอบว่าเป็น publishable/anon key ของ project นี้และ API ยังเปิดใช้งาน";
