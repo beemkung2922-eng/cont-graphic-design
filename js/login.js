@@ -128,9 +128,16 @@ function formatAuthError(error) {
 try {
   const existing = await auth.getSession();
   if (existing?.access_token) {
-    window.location.href = "dashboard.html";
+    const member = await auth.currentMember();
+    if (member) {
+      window.location.href = "dashboard.html";
+    } else {
+      localStorage.removeItem("cont_session");
+    }
   }
-} catch (e) {}
+} catch (e) {
+  localStorage.removeItem("cont_session");
+}
 
 // Restore saved email if user previously requested
 const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
