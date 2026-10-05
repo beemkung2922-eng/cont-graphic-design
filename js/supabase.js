@@ -245,15 +245,25 @@ export const auth = {
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
           .join(" ");
 
+        const CORE_DESIGN_EMAILS = [
+          "pisit.sin@kkpfg.com",
+          "yutiporn.tho@kkpfg.com",
+          "porntipa.jai@kkpfg.com",
+          "naraporn.leu@kkpfg.com",
+          "peerapisit.roja@kkpfg.com",
+          "pongsathorn.pang@kkpfg.com",
+        ];
+        const isCoreDesigner = CORE_DESIGN_EMAILS.includes(email.toLowerCase());
+
         const rows = await api.request("/rest/v1/team_members", {
           method: "POST",
           headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" },
           body: JSON.stringify({
-            name: formattedName || "Team Member",
+            name: formattedName || "Corporate Member",
             email: email.toLowerCase(),
-            role: "designer",
+            role: isCoreDesigner ? "designer" : "requester",
             auth_user_id: session.user.id,
-            capacity_points: 10,
+            capacity_points: isCoreDesigner ? 10 : 0,
             is_active: true,
           }),
         });
