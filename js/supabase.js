@@ -178,6 +178,35 @@ export const auth = {
     } catch { return null; }
   },
 
+  async signInWithOtp(email) {
+    const origin = window.location.origin;
+    const redirect = `${origin}/index.html`;
+    return await api.authRequest("/otp", {
+      method: "POST",
+      body: JSON.stringify({
+        email: email.trim().toLowerCase(),
+        options: {
+          email_redirect_to: redirect,
+        },
+      }),
+    });
+  },
+
+  async verifyOtp(email, token) {
+    const session = await api.authRequest("/verify", {
+      method: "POST",
+      body: JSON.stringify({
+        type: "email",
+        email: email.trim().toLowerCase(),
+        token: token.trim(),
+      }),
+    });
+    if (session?.access_token) {
+      localStorage.setItem(sessionKey, JSON.stringify(session));
+    }
+    return session;
+  },
+
   async signInWithGoogle() {
     const isLocalhost = /^https?:\/\/localhost(?::\d+)?$/i.test(window.location.origin);
     const origin = isLocalhost ? PRODUCTION_ORIGIN : window.location.origin;
