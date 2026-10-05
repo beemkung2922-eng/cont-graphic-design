@@ -1,7 +1,7 @@
 import { openModal, closeModal, toast, qs, qsa } from "./app.js";
 import { api } from "./supabase.js";
 import { escapeHtml, roleLabel } from "./formatters.js";
-import { canManage } from "./auth.js";
+import { canManage, isRequester, isViewer } from "./auth.js";
 
 export function bindTaskCards(root = document) {
   qsa("[data-task-id]", root).forEach((card) => {
@@ -128,8 +128,8 @@ export function openCreateTask(ctx) {
         <div class="field">
           <label for="task-assignee" style="font-weight:600;color:var(--ink-900)">ผู้รับผิดชอบ (Designer) *</label>
           <select id="task-assignee" name="assignee_id" required>
-            <option value="">เลือกสมาชิกในทีม</option>
-            ${ctx.members.filter((m) => m.is_active !== false).map((m) => `
+            <option value="">เลือกดีไซเนอร์ในทีม</option>
+            ${ctx.members.filter((m) => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role)).map((m) => `
               <option value="${escapeHtml(m.id)}">${escapeHtml(m.name)} · ${escapeHtml(roleLabel(m.role))}</option>
             `).join("")}
           </select>
@@ -178,13 +178,14 @@ export function openCreateTask(ctx) {
     </form>
   `;
 
+  const isReq = isRequester(ctx.member);
   const modal = openModal({
-    title: "สร้างงานใหม่ (Create Design Task)",
-    body,
+    title: isReq ? "ส่งคำของานออกแบบใหม่ (Request Design Work)" : "สร้างงานใหม่ (Create Design Task)",
+    body: (isReq ? `<div class="chip" style="margin-bottom:12px; font-weight:600">ผู้ส่งบรีฟ (Requester): ${escapeHtml(ctx.member?.name || "")}</div>` : "") + body,
     size: "lg",
     footer: `
       <button class="btn" data-close-modal>ยกเลิก</button>
-      <button class="btn btn-primary" id="submit-create-task">สร้างงานและบันทึก</button>
+      <button class="btn btn-primary" id="submit-create-task">${isReq ? "ส่งคำของานออกแบบ" : "สร้างงานและบันทึก"}</button>
     `
   });
 
