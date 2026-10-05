@@ -3,6 +3,7 @@ import { taskCard, escapeHtml, projectFor, memberFor, relativeDeadline } from ".
 import { qs, toast, openModal, closeModal } from "./app.js";
 import { api } from "./supabase.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
+import { canMoveTask, isRequester, isViewer, canCreateTask } from "./auth.js";
 
 export async function render(ctx) {
   window.openCreateTask = () => openCreateTask(ctx);
@@ -25,9 +26,14 @@ export async function render(ctx) {
     // 1. Base tasks
     let visibleTasks = [...ctx.tasks];
 
+    const isReq = isRequester(ctx.member);
+    const isView = isViewer(ctx.member);
+    const canMove = canMoveTask(ctx.member);
+    const canCreate = canCreateTask(ctx.member);
+
     // Filter by Scope
     if (currentScope === "mine") {
-      visibleTasks = visibleTasks.filter((t) => t.assignee_id === ctx.member?.id);
+      visibleTasks = visibleTasks.filter((t) => t.assignee_id === ctx.member?.id || (isReq && t.created_by === ctx.member?.id));
     }
 
     // Filter by Search Query
@@ -71,18 +77,33 @@ export async function render(ctx) {
     // Columns to display
     const columnsToDisplay = showCompleted ? STATUS_ORDER : ACTIVE_STATUSES;
     const activeTasksCount = ctx.tasks.filter((t) => t.status !== "completed").length;
-    const myTasksCount = ctx.tasks.filter((t) => t.status !== "completed" && t.assignee_id === ctx.member?.id).length;
+    const myTasksCount = ctx.tasks.filter((t) => t.status !== "completed" && (t.assignee_id === ctx.member?.id || (isReq && t.created_by === ctx.member?.id))).length;
+
+    const createBtnHtml = canCreate
+      ? `<button class="btn btn-primary" id="board-create">${isReq ? "＋ ส่งคำของาน / บรีฟงานใหม่" : "＋ สร้างงานใหม่"}</button>`
+      : "";
+    const roleBadgeHtml = isReq
+      ? `<span class="badge badge-info" style="font-weight:600">โหมดผู้ขอรับบริการ (Requester)</span>`
+      : isView
+      ? `<span class="badge badge-neutral" style="font-weight:600">โหมดผู้เข้าชม (View-Only)</span>`
+      : "";
+    const pageDesc = canMove
+      ? "ลากการ์ดเพื่อขยับงานตามขั้นตอน Workflow · ฟิลเตอร์ดูงานเฉพาะส่วนตัวหรือทั้งทีม"
+      : "ติดตามสถานะงานตามขั้นตอน Workflow · การเปลี่ยนสถานะงานดำเนินการโดยทีม Visual & Design";
 
     // Render HTML Shell
     qs("#page-content").innerHTML = `
       <div class="page-header">
         <div>
-          <h2>Workflow Board</h2>
-          <p class="page-desc">ลากการ์ดเพื่อขยับงานตามขั้นตอน Workflow · ฟิลเตอร์ดูงานเฉพาะส่วนตัวหรือทั้งทีม</p>
+          <div class="row-wrap" style="gap:8px; align-items:center; margin-bottom:4px">
+            <h2 style="margin:0">Workflow Board</h2>
+            ${roleBadgeHtml}
+          </div>
+          <p class="page-desc">${pageDesc}</p>
         </div>
         <div class="row-wrap" style="gap:8px">
           <span class="chip">Active ${activeTasksCount} งาน</span>
-          <button class="btn btn-primary" id="board-create">＋ สร้างงานใหม่</button>
+          ${createBtnHtml}
         </div>
       </div>
 
@@ -209,6 +230,11 @@ export async function render(ctx) {
     const columns = document.querySelectorAll(".kcol");
 
     cards.forEach((card) => {
+      if (!canMove) {
+        card.draggable = false;
+        card.style.cursor = "pointer";
+        return;
+      }
       card.draggable = true;
       card.addEventListener("dragstart", (e) => {
         card.classList.add("is-dragging");
@@ -251,6 +277,10 @@ export async function render(ctx) {
       col.addEventListener("drop", async (e) => {
         e.preventDefault();
         col.classList.remove("is-dragover", "is-valid-target", "is-invalid-target");
+        if (!canMove) {
+          toast("เฉพาะสมาชิกทีม Visual & Design เท่านั้นที่สามารถเปลี่ยนขั้นตอนงานบนบอร์ดได้", "warn");
+          return;
+        }
         const taskId = window.__dragTaskId;
         const task = ctx.tasks.find((t) => t.id === taskId);
         const nextStatus = col.dataset.status;
