@@ -100,6 +100,31 @@ export const api = {
     return rows[0];
   },
 
+  async createMember(input) {
+    const token = this.getAccessToken();
+    const rows = await this.request("/rest/v1/team_members", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" },
+      body: JSON.stringify({
+        ...input,
+        email: input.email.trim().toLowerCase(),
+        capacity_points: Number(input.capacity_points || 10),
+        is_active: input.is_active !== false,
+      }),
+    });
+    return rows[0];
+  },
+
+  async updateMember(id, patch) {
+    const token = this.getAccessToken();
+    const rows = await this.request(`/rest/v1/team_members?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" },
+      body: JSON.stringify(patch),
+    });
+    return rows[0];
+  },
+
   async changeStatus(id, nextStatus, note = "") {
     const bundle = await this.loadBundle();
     const task = bundle.tasks.find((item) => item.id === id);
@@ -188,8 +213,31 @@ export const auth = {
           }
           return member;
         }
+    // 3. Fallback auto-provision for corporate email if not pre-seeded
+    if (email && email.toLowerCase().endsWith("@kkpfg.com")) {
+      try {
+        const localPart = email.split("@")[0].replace(/[_-]/g, ".");
+        const formattedName = localPart
+          .split(".")
+          .filter(Boolean)
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+          .join(" ");
+
+        const rows = await api.request("/rest/v1/team_members", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" },
+          body: JSON.stringify({
+            name: formattedName || "Team Member",
+            email: email.toLowerCase(),
+            role: "designer",
+            auth_user_id: session.user.id,
+            capacity_points: 10,
+            is_active: true,
+          }),
+        });
+        if (rows && rows[0]) return rows[0];
       } catch (e) {
-        console.warn("Could not query member by email:", e);
+        console.warn("Fallback auto-provision member error:", e);
       }
     }
 
