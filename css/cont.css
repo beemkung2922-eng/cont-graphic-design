@@ -526,68 +526,55 @@
   color: var(--ink-400);
 }
 
-/* --- KKP Brand Assets Hub Modal --- */
-.brand-hub-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.brand-color-card {
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.brand-color-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-  border-color: var(--purple-300);
-}
-.brand-color-swatch {
-  height: 64px;
-  width: 100%;
-}
-.brand-color-meta {
-  padding: 8px 10px;
-}
-.brand-color-name {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--ink-900);
-}
-.brand-color-hex {
-  font-size: 0.72rem;
-  color: var(--ink-500);
-  font-family: monospace;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 3px;
-}
-.brand-links-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.brand-link-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  text-decoration: none;
-  color: var(--ink-800);
+/* --- Typography & Visual Hierarchy --- */
+.field label {
+  font-weight: 600 !important;
+  color: var(--ink-900) !important;
   font-size: 0.82rem;
-  font-weight: 500;
-  transition: all 0.15s ease;
 }
-.brand-link-item:hover {
-  background: var(--purple-50);
-  border-color: var(--purple-200);
-  color: var(--kkp-purple);
+.field .hint, .field-hint {
+  font-weight: 400 !important;
+  color: var(--ink-500) !important;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+.task-card-title {
+  font-weight: 700 !important;
+  color: var(--ink-900) !important;
+}
+.task-card-project {
+  font-weight: 400 !important;
+  color: var(--ink-500) !important;
+}
+.task-card-meta .v {
+  font-weight: 700 !important;
+  color: var(--ink-900) !important;
+}
+.task-card-meta .k {
+  font-weight: 500 !important;
+  color: var(--ink-400) !important;
+}
+.detail-title {
+  font-weight: 700 !important;
+  color: var(--ink-900) !important;
+}
+.page-desc {
+  font-weight: 400 !important;
+  color: var(--ink-500) !important;
+}
+.card-title {
+  font-weight: 700 !important;
+  color: var(--ink-900) !important;
+}
+.card-sub {
+  font-weight: 400 !important;
+  color: var(--ink-500) !important;
+}
+.kv-list .k {
+  font-weight: 400 !important;
+  color: var(--ink-500) !important;
+}
+.kv-list .v {
+  font-weight: 600 !important;
+  color: var(--ink-900) !important;
 }
