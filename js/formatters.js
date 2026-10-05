@@ -67,10 +67,25 @@ export function taskCard(task, { projects = [], members = [], subtasks = [], sho
   const member = memberFor(task, members);
   const progress = progressInfo(subtasks.filter((item) => item.task_id === task.id));
   const urgency = relativeDeadline(task.deadline_at || task.deadline);
+  const previewHtml = task.preview_url ? `<div class="task-card-preview"><img src="${escapeHtml(task.preview_url)}" alt="Artwork" loading="lazy" /></div>` : "";
+  const designLinkHtml = task.design_url ? `<a href="${escapeHtml(task.design_url)}" target="_blank" rel="noopener" class="task-card-link-badge" title="เปิดไฟล์งานออกแบบ (Figma/Drive)" onclick="event.stopPropagation()">🎨 Design ↗</a>` : "";
+  const formatTagHtml = task.dimensions ? `<span class="task-card-format-tag" title="ขนาด">${escapeHtml(task.dimensions)}</span>` : (task.channel ? `<span class="task-card-format-tag">${escapeHtml(task.channel)}</span>` : "");
+
   return `<article class="task-card ${urgency.className} ${task.status === "completed" ? "is-done" : ""}" data-task-id="${escapeHtml(task.id)}" tabindex="0" role="button">
-    <div class="row-between"><span class="task-card-project">${escapeHtml(project?.name || "ไม่ระบุโปรเจกต์")}</span><span class="chip">${escapeHtml(taskTypeLabel(task.task_type))}</span></div>
+    ${previewHtml}
+    <div class="row-between">
+      <span class="task-card-project">${escapeHtml(project?.name || "ไม่ระบุโปรเจกต์")}</span>
+      <div class="row-wrap" style="gap:4px">
+        ${designLinkHtml}
+        <span class="chip">${escapeHtml(taskTypeLabel(task.task_type))}</span>
+      </div>
+    </div>
     <div class="task-card-title">${escapeHtml(task.title)}</div>
-    <div class="row-wrap">${statusBadge(task.status)} ${task.revision_count ? `<span class="chip">Revision ${task.revision_count}</span>` : ""}</div>
+    <div class="row-wrap" style="gap:5px">
+      ${statusBadge(task.status)}
+      ${task.revision_count ? `<span class="chip" style="background:var(--danger-bg);color:var(--danger);border-color:var(--danger-line)">v${Number(task.revision_count) + 1} (Rev ${task.revision_count})</span>` : `<span class="chip">v1 (Initial)</span>`}
+      ${formatTagHtml}
+    </div>
     <div class="task-card-meta">
       <div><div class="k">กำหนดส่ง</div><div class="v ${urgency.className === "is-overdue" ? "text-danger" : ""}">${formatDate(task.deadline_at || task.deadline)}</div><div class="text-xs text-muted">${escapeHtml(urgency.label)}</div></div>
       <div><div class="k">จำนวนชิ้น</div><div class="v">${Number(task.item_count || 1)} <small>ชิ้น</small></div></div>
