@@ -213,6 +213,11 @@ export const auth = {
           }
           return member;
         }
+      } catch (e) {
+        console.warn("Could not query member by email:", e);
+      }
+    }
+
     // 3. Fallback auto-provision for corporate email if not pre-seeded
     if (email && email.toLowerCase().endsWith("@kkpfg.com")) {
       try {
