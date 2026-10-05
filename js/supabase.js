@@ -239,6 +239,33 @@ export const auth = {
     return session;
   },
 
+  async verifyOtpHash(tokenHash, type = "email") {
+    const session = await api.authRequest("/verify", {
+      method: "POST",
+      body: JSON.stringify({
+        type: type,
+        token_hash: tokenHash.trim(),
+      }),
+    });
+    if (session?.access_token) {
+      localStorage.setItem(sessionKey, JSON.stringify(session));
+    }
+    return session;
+  },
+
+  async exchangeCode(code) {
+    const session = await api.authRequest("/token?grant_type=authorization_code", {
+      method: "POST",
+      body: JSON.stringify({
+        code: code.trim(),
+      }),
+    });
+    if (session?.access_token) {
+      localStorage.setItem(sessionKey, JSON.stringify(session));
+    }
+    return session;
+  },
+
   async signInWithGoogle() {
     const isLocalhost = /^https?:\/\/localhost(?::\d+)?$/i.test(window.location.origin);
     const origin = isLocalhost ? PRODUCTION_ORIGIN : window.location.origin;
