@@ -326,6 +326,13 @@ export async function render(ctx) {
               ${task.status === "review" || task.status === "completed" ? `<button class="btn btn-danger btn-sm" id="request-revision">ขอแก้ไขงาน</button>` : ""}
             </div>
             <div class="stack" style="gap:8px">
+              ${Number(task.revision_count || 0) >= 2 ? `
+                <div style="background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:12px;text-align:center;margin-bottom:6px">
+                  <img src="assets/illustrations/cont-revision-loop.jpg" alt="ขอแก้อีกนิด" style="width:100%;max-width:240px;border-radius:8px;margin:0 auto 8px;display:block;border:1px solid var(--line);background:#fff" />
+                  <div style="font-size:0.78rem;font-weight:700;color:#72460e">งานนี้ผ่านการแก้มาแล้ว ${task.revision_count} รอบ</div>
+                  <div style="font-size:0.72rem;color:#855416;margin-top:2px">ระวังติด Revision Loop: ควรสรุปข้อแก้ไขให้ครบถ้วนก่อนส่งตรวจรอบถัดไป</div>
+                </div>
+              ` : ""}
               ${revisionRows || `<div class="state" style="padding:18px;font-weight:400">ยังไม่มีการขอแก้ไข (ยังอยู่รอบ Version 1)</div>`}
               <div class="list-item" style="border-top:1px dashed var(--line);padding-top:8px">
                 <div class="avatar avatar-sm" style="background:var(--purple-100);color:var(--kkp-purple);font-weight:700">v1</div>
