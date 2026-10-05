@@ -90,7 +90,24 @@ export const api = {
 
   async createTask(input) {
     const token = this.getAccessToken();
-    const rows = await this.request("/rest/v1/tasks", { method: "POST", headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" }, body: JSON.stringify({ ...input, revision_count: 0, status: "brief", item_count: Number(input.item_count || 1), task_type: input.task_type || "new_work" }) });
+    const deadlineDate = input.deadline_at ? input.deadline_at.split("T")[0] : (input.deadline || new Date().toISOString().split("T")[0]);
+    const cleanPayload = {
+      ...input,
+      deadline: deadlineDate,
+      revision_count: 0,
+      status: "brief",
+      item_count: Number(input.item_count || 1),
+      task_type: input.task_type || "new_work",
+      preview_url: input.preview_url ? input.preview_url.trim() : null,
+      design_url: input.design_url ? input.design_url.trim() : null,
+      dimensions: input.dimensions ? input.dimensions.trim() : null,
+      channel: input.channel ? input.channel.trim() : null,
+    };
+    const rows = await this.request("/rest/v1/tasks", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" },
+      body: JSON.stringify(cleanPayload)
+    });
     return rows[0];
   },
 
