@@ -13,13 +13,17 @@ export async function ensureAccess({ allowPublic = false } = {}) {
   if (!session) return { member: null };
   try {
     const member = await auth.currentMember();
-    if (!member && !allowPublic) throw new Error("ไม่พบสมาชิกในทีม กรุณาติดต่อผู้ดูแลระบบ");
+    if (!member && !allowPublic) {
+      localStorage.removeItem("cont_session");
+      throw new Error("ไม่พบสมาชิกในทีม หรือเซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+    }
     return { member };
   } catch (error) {
+    localStorage.removeItem("cont_session");
     if (!allowPublic) {
       const mount = document.querySelector("#page-content");
       if (mount) {
-        mount.innerHTML = `<div class="card"><div class="state"><div class="state-icon">!</div><div class="state-title">ไม่สามารถยืนยันสมาชิกได้</div><div class="state-text">${errorMessage(error)}</div><a class="btn" href="index.html">กลับไปหน้า Login</a></div></div>`;
+        mount.innerHTML = `<div class="card"><div class="state"><div class="state-icon">!</div><div class="state-title">ไม่สามารถยืนยันสมาชิกได้</div><div class="state-text">${errorMessage(error)}</div><a class="btn btn-primary" href="index.html" onclick="localStorage.removeItem('cont_session')">กลับไปหน้า Login</a></div></div>`;
       }
       return { member: null };
     }
