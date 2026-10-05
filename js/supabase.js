@@ -2,7 +2,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./config.
 import { canTransition } from "./constants.js";
 
 const sessionKey = "cont_session";
-const PRODUCTION_ORIGIN = "https://cont-graphic-design-3d3ichkrx-beemkung2922-engs-projects.vercel.app";
+const PRODUCTION_ORIGIN = "https://cont-graphic-design-beemkung2922-engs-projects.vercel.app";
 
 export const api = {
   isConfigured: isSupabaseConfigured,
@@ -159,9 +159,41 @@ export const auth = {
   async currentMember() {
     const token = api.getAccessToken();
     const session = JSON.parse(localStorage.getItem(sessionKey) || "null");
-    if (!token || !session?.user?.id) return null;
-    const rows = await api.request(`/rest/v1/team_members?select=*&auth_user_id=eq.${encodeURIComponent(session.user.id)}&is_active=eq.true&limit=1`, { headers: { Authorization: `Bearer ${token}` } });
-    return rows[0] || null;
+    if (!token || !session?.user) return null;
+
+    // 1. Match by auth_user_id
+    if (session.user.id) {
+      try {
+        const rows = await api.request(`/rest/v1/team_members?select=*&auth_user_id=eq.${encodeURIComponent(session.user.id)}&is_active=eq.true&limit=1`, { headers: { Authorization: `Bearer ${token}` } });
+        if (rows && rows[0]) return rows[0];
+      } catch (e) {
+        console.warn("Could not query member by auth_user_id:", e);
+      }
+    }
+
+    // 2. Match by email (for first-time corporate email / OTP sign-in)
+    const email = session.user.email;
+    if (email) {
+      try {
+        const rows = await api.request(`/rest/v1/team_members?select=*&email=eq.${encodeURIComponent(email.toLowerCase())}&is_active=eq.true&limit=1`, { headers: { Authorization: `Bearer ${token}` } });
+        if (rows && rows[0]) {
+          const member = rows[0];
+          // Auto-link auth_user_id if not set yet
+          if (!member.auth_user_id && session.user.id) {
+            api.request(`/rest/v1/team_members?id=eq.${encodeURIComponent(member.id)}`, {
+              method: "PATCH",
+              headers: { Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+              body: JSON.stringify({ auth_user_id: session.user.id })
+            }).catch(() => {});
+          }
+          return member;
+        }
+      } catch (e) {
+        console.warn("Could not query member by email:", e);
+      }
+    }
+
+    return null;
   },
 
   async getSession() {
