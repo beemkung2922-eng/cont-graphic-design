@@ -13,6 +13,9 @@ const resendOtpBtn = document.querySelector("#resend-otp-btn");
 const backToEmailBtn = document.querySelector("#back-to-email-btn");
 const googleBtn = document.querySelector("#google-login");
 
+let cooldownSeconds = 0;
+let cooldownTimer = null;
+
 const showError = (msg) => {
   if (!errorNode) return;
   errorNode.textContent = msg;
@@ -32,46 +35,106 @@ const clearMessages = () => {
   infoNode?.classList.add("hidden");
 };
 
+function startCooldown(seconds = 60) {
+  cooldownSeconds = seconds;
+  if (cooldownTimer) clearInterval(cooldownTimer);
+
+  const tick = () => {
+    if (cooldownSeconds <= 0) {
+      clearInterval(cooldownTimer);
+      cooldownTimer = null;
+      if (resendOtpBtn) {
+        resendOtpBtn.disabled = false;
+        resendOtpBtn.textContent = "ส่งรหัสใหม่อีกครั้ง";
+      }
+      if (sendOtpBtn) {
+        sendOtpBtn.disabled = false;
+        sendOtpBtn.innerHTML = "<span>📩 ส่งลิงก์เข้าสู่ระบบ / รหัส OTP</span>";
+      }
+      return;
+    }
+
+    if (resendOtpBtn) {
+      resendOtpBtn.disabled = true;
+      resendOtpBtn.textContent = `ส่งรหัสใหม่ได้ใน (${cooldownSeconds}s)`;
+    }
+    if (sendOtpBtn) {
+      sendOtpBtn.disabled = true;
+      sendOtpBtn.innerHTML = `<span>⏳ รอส่งใหม่ใน (${cooldownSeconds}s)</span>`;
+    }
+    cooldownSeconds--;
+  };
+
+  tick();
+  cooldownTimer = setInterval(tick, 1000);
+}
+
+function parseJwt(token) {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 function formatAuthError(error) {
-  const msg = error?.message || error?.payload?.msg || String(error);
+  const msg = error?.message || error?.payload?.msg || error?.payload?.error_description || String(error);
   if (msg.includes("company email addresses")) {
     return "ระบบจำกัดเฉพาะอีเมลบริษัท (@kkpfg.com) เท่านั้น หรือกรุณาเข้าสู่ระบบด้วย Google";
   }
   if (msg.includes("otp_expired") || msg.includes("Token has expired") || msg.includes("is invalid")) {
-    return "รหัส OTP 6 หลักไม่ถูกต้องหรือหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง";
+    return "รหัส OTP ไม่ถูกต้องหรือหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง หรือกดปุ่มในอีเมล Outlook ล่าสุด";
   }
   if (msg.includes("Signups not allowed")) {
     return "ไม่อนุญาตให้อีเมลนี้ลงทะเบียน กรุณาติดต่อผู้ดูแลระบบ";
   }
-  if (msg.includes("rate limit") || msg.includes("too many") || msg.includes("over_email_send_rate_limit")) {
-    return "ส่งคำขอถี่เกินไป กรุณารอสักครู่ (ประมาณ 1 นาที) แล้วลองใหม่อีกครั้ง";
+  if (msg.includes("rate limit") || msg.includes("too many") || msg.includes("over_email_send_rate_limit") || msg.includes("60 seconds")) {
+    startCooldown(60);
+    return "⏳ ส่งคำขอถี่เกินไป กรุณารอสักครู่ (ประมาณ 1 นาที) หรือเปิด Outlook แล้วกดปุ่ม \"Confirm email address\" ในอีเมลล่าสุดได้ทันที";
   }
   return msg || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
 }
 
-// 1. Check URL Error parameter (from failed OAuth redirect)
+// 1. Check URL Error parameter (from failed OAuth redirect or email verify error)
 const params = new URLSearchParams(window.location.search);
-const urlError = params.get("error");
+const urlError = params.get("error_description") || params.get("error");
 if (urlError) {
-  showError(decodeURIComponent(urlError));
+  showError(decodeURIComponent(urlError.replace(/\+/g, " ")));
 }
 
 // 2. Check Magic Link / OAuth Hash (#access_token=...)
 if (window.location.hash.includes("access_token=")) {
   const hash = new URLSearchParams(window.location.hash.slice(1));
+  const accessToken = hash.get("access_token");
+  const refreshToken = hash.get("refresh_token");
+  const jwt = accessToken ? parseJwt(accessToken) : null;
   const session = {
-    access_token: hash.get("access_token"),
-    refresh_token: hash.get("refresh_token"),
-    user: { id: hash.get("user_id") || "" },
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    user: {
+      id: hash.get("user_id") || jwt?.sub || "",
+      email: jwt?.email || "",
+    },
   };
   localStorage.setItem("cont_session", JSON.stringify(session));
   window.location.hash = "";
   showInfo("เข้าสู่ระบบสำเร็จ กำลังพาไปยังแดชบอร์ด…");
-  window.location.href = "dashboard.html";
+  window.setTimeout(() => {
+    window.location.href = "dashboard.html";
+  }, 400);
 }
 
-// 3. Send OTP
+// 3. Send OTP / Magic Link
 sendOtpBtn?.addEventListener("click", async () => {
+  if (cooldownSeconds > 0) return;
   const email = workEmailInput?.value.trim().toLowerCase();
   if (!email) {
     showError("กรุณากรอกอีเมลบริษัทของคุณ");
@@ -87,22 +150,25 @@ sendOtpBtn?.addEventListener("click", async () => {
   clearMessages();
   sendOtpBtn.disabled = true;
   const originalText = sendOtpBtn.innerHTML;
-  sendOtpBtn.innerHTML = "<span>⏳ กำลังส่งรหัส OTP…</span>";
+  sendOtpBtn.innerHTML = "<span>⏳ กำลังส่งลิงก์ / รหัส OTP…</span>";
 
   try {
     await auth.signInWithOtp(email);
     if (sentEmailDisplay) sentEmailDisplay.textContent = email;
     emailStep?.classList.add("hidden");
     otpStep?.classList.remove("hidden");
+    startCooldown(60);
+    showInfo(`ระบบส่งอีเมลไปที่ ${email} เรียบร้อยแล้ว เปิด Outlook แล้วกดยืนยันได้ทันที`);
     if (otpCodeInput) {
       otpCodeInput.value = "";
       otpCodeInput.focus();
     }
-    showInfo(`ส่งรหัส OTP 6 หลักไปที่ ${email} เรียบร้อยแล้ว`);
   } catch (error) {
     showError(formatAuthError(error));
-    sendOtpBtn.disabled = false;
-    sendOtpBtn.innerHTML = originalText;
+    if (cooldownSeconds <= 0) {
+      sendOtpBtn.disabled = false;
+      sendOtpBtn.innerHTML = originalText;
+    }
   }
 });
 
@@ -113,12 +179,12 @@ workEmailInput?.addEventListener("keydown", (e) => {
   }
 });
 
-// 4. Verify OTP
+// 4. Verify OTP (if user inputs 6-digit code)
 const handleVerify = async () => {
   const email = workEmailInput?.value.trim().toLowerCase();
   const token = otpCodeInput?.value.trim();
   if (!token || token.length < 6) {
-    showError("กรุณากรอกรหัส OTP 6 หลักให้ครบถ้วน");
+    showError("กรุณากรอกรหัส OTP 6 หลักให้ครบถ้วน หรือกดปุ่ม Confirm ในอีเมล Outlook");
     otpCodeInput?.focus();
     return;
   }
@@ -150,8 +216,9 @@ otpCodeInput?.addEventListener("keydown", (e) => {
   }
 });
 
-// 5. Resend OTP
+// 5. Resend OTP / Magic Link
 resendOtpBtn?.addEventListener("click", async () => {
+  if (cooldownSeconds > 0) return;
   const email = workEmailInput?.value.trim().toLowerCase();
   if (!email) return;
   clearMessages();
@@ -160,12 +227,10 @@ resendOtpBtn?.addEventListener("click", async () => {
 
   try {
     await auth.signInWithOtp(email);
-    showInfo(`ส่งรหัส OTP ชุดใหม่ไปที่ ${email} แล้ว`);
+    startCooldown(60);
+    showInfo(`ส่งอีเมลยืนยันชุดใหม่ไปที่ ${email} เรียบร้อยแล้ว`);
   } catch (error) {
     showError(formatAuthError(error));
-  } finally {
-    resendOtpBtn.disabled = false;
-    resendOtpBtn.textContent = "ส่งรหัสใหม่อีกครั้ง";
   }
 });
 
@@ -173,9 +238,9 @@ resendOtpBtn?.addEventListener("click", async () => {
 backToEmailBtn?.addEventListener("click", () => {
   otpStep?.classList.add("hidden");
   emailStep?.classList.remove("hidden");
-  if (sendOtpBtn) {
+  if (sendOtpBtn && cooldownSeconds <= 0) {
     sendOtpBtn.disabled = false;
-    sendOtpBtn.innerHTML = "<span>📩 รับรหัส OTP ทางอีเมล</span>";
+    sendOtpBtn.innerHTML = "<span>📩 ส่งลิงก์เข้าสู่ระบบ / รหัส OTP</span>";
   }
   clearMessages();
   workEmailInput?.focus();
