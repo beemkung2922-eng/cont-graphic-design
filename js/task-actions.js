@@ -1,7 +1,7 @@
 import { openModal, closeModal, toast, qs, qsa } from "./app.js";
 import { api } from "./supabase.js";
 import { escapeHtml, roleLabel } from "./formatters.js";
-import { canManage, isRequester, isViewer } from "./auth.js";
+import { canManage, canCreateTask, isRequester, isViewer } from "./auth.js";
 
 export function bindTaskCards(root = document) {
   qsa("[data-task-id]", root).forEach((card) => {
@@ -15,62 +15,74 @@ const BRIEF_PRESETS = [
   {
     id: "fb_post",
     label: "Facebook Post",
-    sub: "1:1 (1080x1080)",
+    sub: "1:1 (1080×1080 px)",
+    tag: "Feed / Ads",
     dimensions: "1080x1080 px (1:1)",
     channel: "Facebook",
     type: "new_work",
-    template: `วัตถุประสงค์ (Objective): ประชาสัมพันธ์ข้อมูลแคมเปญ\nกลุ่มเป้าหมาย: ลูกค้าทั่วไป\nข้อความหลัก (Headline): \nMood & Tone: เรียบหรู ตาม CI แบรนด์ KKP\nลิงก์ Drive / Assets: `
+    icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+    template: `วัตถุประสงค์ (Objective): ประชาสัมพันธ์ข้อมูลแคมเปญ\nกลุ่มเป้าหมาย (Target Audience): ลูกค้าทั่วไป\nข้อความหลัก (Headline / Copy): \nMood & Tone: เรียบหรู ตาม CI แบรนด์ KKP\nลิงก์โฟลเดอร์ Asset ต้นฉบับ / Reference: `
   },
   {
     id: "story_reels",
     label: "Story / Reels",
-    sub: "9:16 (1080x1920)",
+    sub: "9:16 (1080×1920 px)",
+    tag: "Vertical Screen",
     dimensions: "1080x1920 px (9:16)",
     channel: "Instagram / FB Story",
     type: "new_work",
-    template: `วัตถุประสงค์: Vertical Story ดึงดูดสายตา\nกลุ่มเป้าหมาย: วัยทำงาน / คนรุ่นใหม่\nข้อความสำคัญ (Key Visual): \nMood & Tone: ทันสมัย ชัดเจน กระชับ\nลิงก์ Reference: `
+    icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`,
+    template: `วัตถุประสงค์ (Objective): Vertical Story ดึงดูดสายตา\nกลุ่มเป้าหมาย (Target Audience): วัยทำงาน / คนรุ่นใหม่\nข้อความสำคัญ (Key Message / Call-to-Action): \nMood & Tone: ทันสมัย ชัดเจน กระชับ\nลิงก์ไฟล์รูปภาพ / Reference: `
   },
   {
     id: "fb_cover",
     label: "Facebook Cover",
-    sub: "16:9 (1920x1080)",
-    dimensions: "1920x1080 px",
+    sub: "16:9 (1920×1080 px)",
+    tag: "Header Banner",
+    dimensions: "1920x1080 px (16:9)",
     channel: "Facebook Page",
     type: "new_work",
-    template: `วัตถุประสงค์: อัปเดต Cover Page ประจำเดือน\nHeadline หลัก: \nองค์ประกอบสำคัญ: โลโก้ KKP, ข้อมูลสิทธิประโยชน์\nไฟล์ต้นฉบับ: `
+    icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg>`,
+    template: `วัตถุประสงค์: อัปเดต Cover Page ประจำเดือน\nHeadline หลัก: \nองค์ประกอบสำคัญ: โลโก้ KKP, ข้อมูลสิทธิประโยชน์แคมเปญ\nลิงก์ไฟล์ Key Visual ต้นฉบับ: `
   },
   {
     id: "gdn_banner",
     label: "GDN Web Banner",
-    sub: "Standard Sizes",
+    sub: "Display Ad Package",
+    tag: "Standard Sizes",
     dimensions: "300x250, 728x90, 160x600 px",
     channel: "GDN / Online Ads",
     type: "new_work",
-    template: `วัตถุประสงค์: แบนเนอร์โฆษณาออนไลน์\nCall-To-Action (ปุ่ม CTA): คลิกดูรายละเอียด\nสัดส่วนที่ต้องทำ: 300x250, 728x90, 160x600 px\nโฟลเดอร์ Key Visual: `
+    icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+    template: `วัตถุประสงค์: แบนเนอร์โฆษณาออนไลน์ (GDN)\nCall-To-Action (ปุ่ม CTA): คลิกดูรายละเอียด\nสัดส่วนที่ต้องทำ: 300x250 (Medium Rectangle), 728x90 (Leaderboard), 160x600 px\nลิงก์โฟลเดอร์ภาพ Key Visual: `
   },
   {
     id: "print_a4",
-    label: "สิ่งพิมพ์ / A4",
+    label: "สื่อสิ่งพิมพ์ / A4",
     sub: "300 DPI (CMYK)",
+    tag: "Brochure / Leaflet",
     dimensions: "210x297 mm (300 DPI)",
-    channel: "Print / Brochure",
+    channel: "Print / Branch",
     type: "new_work",
-    template: `วัตถุประสงค์: โบรชัวร์ / ใบปลิว A4 สำหรับสาขา\nข้อมูลและเนื้อหา: \nระบบสี: CMYK (High-Resolution 300 DPI มี Bleed 3mm)\nลิงก์ข้อความ Word / CI: `
+    icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
+    template: `วัตถุประสงค์: โบรชัวร์ / ใบปลิว A4 สำหรับสาขาธนาคาร\nข้อมูลและเนื้อหา (Word / Text): \nระบบสี: CMYK (High-Resolution 300 DPI มี Bleed 3mm)\nลิงก์โฟลเดอร์ CI และโลโก้ความละเอียดสูง: `
   },
   {
     id: "resize_pack",
     label: "ปรับขยาย Size (Resize)",
-    sub: "หลายขนาดจากชิ้นเดิม",
+    sub: "Adaptation Package",
+    tag: "Multi-channel",
     dimensions: "ตามแพ็กเกจสื่อ",
     channel: "Multi-channel",
     type: "resize",
-    template: `งานปรับขยาย Size จากชิ้นงานเดิม:\nลิงก์งานต้นแบบ: \nขนาดที่ต้องการเพิ่ม:\n- ขนาด 1:\n- ขนาด 2: `
+    icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+    template: `งานปรับขยาย Size จากชิ้นงานเดิม:\nลิงก์งานต้นแบบ (Master Key Visual): \nขนาดที่ต้องการเพิ่ม:\n- ขนาด 1 (เช่น 1200x628 px):\n- ขนาด 2 (เช่น 1080x1920 px): `
   }
 ];
 
 export function openCreateTask(ctx) {
-  if (!canManage(ctx.member)) {
-    toast("เฉพาะ Team Head of Visual & Design ที่สร้างงานได้", "warn");
+  if (!canCreateTask(ctx.member)) {
+    toast("ไม่มีสิทธิ์สร้างงาน (Read-only / Viewer)", "warn");
     return;
   }
 
@@ -82,14 +94,23 @@ export function openCreateTask(ctx) {
 
   const presetsHtml = `
     <div class="brief-presets-wrap">
-      <div class="brief-presets-label" style="font-weight:600;color:var(--ink-700)">
-        <span>เลือกเทมเพลตบรีฟงาน (Smart Brief Presets):</span>
+      <div class="brief-presets-header">
+        <div class="brief-presets-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>เลือกเทมเพลตบรีฟงานด่วน (Smart Brief Presets)</span>
+        </div>
+        <span class="brief-presets-hint">คลิกเพื่อใส่สเปกและฟอร์แมตอัตโนมัติ</span>
       </div>
       <div class="brief-preset-grid">
         ${BRIEF_PRESETS.map((p) => `
           <button type="button" class="brief-preset-btn" data-preset-id="${p.id}">
-            <span style="font-weight:600">${escapeHtml(p.label)}</span>
-            <small style="font-weight:400">${escapeHtml(p.sub)}</small>
+            <div class="preset-icon">${p.icon}</div>
+            <div class="preset-info">
+              <span class="preset-title">${escapeHtml(p.label)}</span>
+              <span class="preset-sub">${escapeHtml(p.sub)}</span>
+              <span class="preset-tag">${escapeHtml(p.tag)}</span>
+            </div>
+            <div class="preset-check-badge">✓</div>
           </button>
         `).join("")}
       </div>
@@ -97,36 +118,54 @@ export function openCreateTask(ctx) {
   `;
 
   const body = `
-    <form id="create-task-form" class="stack">
+    <form id="create-task-form" class="stack" style="gap:16px;">
       ${presetsHtml}
+
+      <!-- Section 1: ข้อมูลงานและแคมเปญ -->
+      <div class="form-section-divider">
+        <span class="form-section-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          1. ข้อมูลงานและแคมเปญ (Task & Project Details)
+        </span>
+      </div>
 
       <div class="form-grid">
         <div class="field field-full">
-          <label for="task-title" style="font-weight:600;color:var(--ink-900)">ชื่องาน *</label>
-          <input id="task-title" name="title" required placeholder="เช่น RRN — แบนเนอร์สินเชื่อบ้าน ก.พ. 2026">
+          <label for="task-title">ชื่องาน *</label>
+          <input id="task-title" name="title" class="input-hero" required placeholder="เช่น RRN — แบนเนอร์สินเชื่อบ้าน ก.พ. 2026">
         </div>
 
         <div class="field">
-          <label for="task-project" style="font-weight:600;color:var(--ink-900)">Project / แคมเปญ *</label>
+          <label for="task-project">Project / แคมเปญ *</label>
           <select id="task-project" name="project_id" required>
-            <option value="">เลือก Project</option>
+            <option value="">เลือก Project / แคมเปญ</option>
             ${ctx.projects.map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join("")}
           </select>
         </div>
 
         <div class="field">
-          <label for="task-type" style="font-weight:600;color:var(--ink-900)">ประเภทงาน *</label>
+          <label for="task-type">ประเภทงาน *</label>
           <select id="task-type" name="task_type" required>
-            <option value="new_work">เริ่มงานใหม่</option>
-            <option value="resize">ปรับ Size</option>
-            <option value="revision">แก้ไขงาน</option>
-            <option value="adaptation">ดัดแปลงจากชิ้นเดิม</option>
-            <option value="other">อื่น ๆ</option>
+            <option value="new_work">เริ่มงานใหม่ (New Creative)</option>
+            <option value="resize">ปรับขยาย Size (Resize / Adaptation)</option>
+            <option value="revision">แก้ไขงานเดิม (Revision)</option>
+            <option value="adaptation">ดัดแปลงจากชิ้นเดิม (Derivative)</option>
+            <option value="other">อื่น ๆ (Other)</option>
           </select>
         </div>
+      </div>
 
+      <!-- Section 2: การมอบหมายและกำหนดเวลา -->
+      <div class="form-section-divider">
+        <span class="form-section-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          2. การมอบหมายและกำหนดส่งมอบ (Assignment & SLA Target)
+        </span>
+      </div>
+
+      <div class="form-grid">
         <div class="field">
-          <label for="task-assignee" style="font-weight:600;color:var(--ink-900)">ผู้รับผิดชอบ (Designer) *</label>
+          <label for="task-assignee">ผู้รับผิดชอบ (Designer) *</label>
           <select id="task-assignee" name="assignee_id" required>
             <option value="">เลือกดีไซเนอร์ในทีม</option>
             ${ctx.members.filter((m) => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role)).map((m) => `
@@ -136,42 +175,55 @@ export function openCreateTask(ctx) {
         </div>
 
         <div class="field">
-          <label for="task-deadline" style="font-weight:600;color:var(--ink-900)">กำหนดส่ง *</label>
+          <label for="task-deadline">กำหนดส่งมอบ (Target Deadline) *</label>
           <input id="task-deadline" type="datetime-local" name="deadline_at" value="${defaultDeadline}" required>
-          <span class="hint" style="font-weight:400;color:var(--ink-500)">ระบบจะคำนวณเวลานับถอยหลังและแจ้งเตือนให้อัตโนมัติ</span>
+          <span class="field-hint-pill">⏱️ <strong>ระบบคำนวณเวลานับถอยหลัง</strong> และแจ้งเตือนอัตโนมัติ</span>
+        </div>
+      </div>
+
+      <!-- Section 3: สเปกชิ้นงานและปริมาณงาน -->
+      <div class="form-section-divider">
+        <span class="form-section-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          3. สเปกชิ้นงานและปริมาณงาน (Deliverables Scope & Workload)
+        </span>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="field">
+          <label for="task-dimensions">ขนาด / Dimensions</label>
+          <input id="task-dimensions" name="dimensions" placeholder="เช่น 1080x1080 px (1:1)">
         </div>
 
         <div class="field">
-          <label for="task-dimensions" style="font-weight:600;color:var(--ink-900)">ขนาด / Dimensions</label>
-          <input id="task-dimensions" name="dimensions" placeholder="เช่น 1080x1920 px (9:16)">
+          <label for="task-channel">ช่องทางสื่อ (Channel)</label>
+          <input id="task-channel" name="channel" placeholder="เช่น Facebook, IG Story, GDN, สิ่งพิมพ์">
         </div>
 
         <div class="field">
-          <label for="task-channel" style="font-weight:600;color:var(--ink-900)">ช่องทางสื่อ (Channel)</label>
-          <input id="task-channel" name="channel" placeholder="เช่น Instagram / FB Story, GDN, Print">
-        </div>
-
-        <div class="field">
-          <label for="task-item-count" style="font-weight:600;color:var(--ink-900)">จำนวนชิ้นงาน *</label>
+          <label for="task-item-count">จำนวนชิ้นงาน *</label>
           <input id="task-item-count" type="number" name="item_count" min="1" max="10000" value="1" required>
+          <span class="field-hint-pill">⚖️ <strong>นับชิ้นงานจริง</strong> ใช้วัด Workload ทีม</span>
         </div>
+      </div>
 
-        <div class="field">
-          <label for="task-design-url" style="font-weight:600;color:var(--ink-900)">ลิงก์ไฟล์ออกแบบ (Figma / Drive)</label>
-          <input id="task-design-url" name="design_url" placeholder="https://www.figma.com/file/... หรือ ลิงก์ Drive">
-          <span class="hint" style="font-weight:400;color:var(--ink-500)">ลิงก์ต้นฉบับเพื่อให้ทีมกดเปิดไฟล์งานจริงได้ทันที</span>
-        </div>
+      <!-- Section 4: รายละเอียดบรีฟ -->
+      <div class="form-section-divider">
+        <span class="form-section-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          4. รายละเอียดบรีฟและข้อกำหนดงาน (Design Brief & Requirements)
+        </span>
+      </div>
 
-        <div class="field field-full">
-          <label for="task-preview-url" style="font-weight:600;color:var(--ink-900)">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</label>
-          <input id="task-preview-url" name="preview_url" placeholder="https://example.com/artwork.jpg">
-          <span class="hint" style="font-weight:400;color:var(--ink-500)">ใส่ลิงก์รูปภาพตัวอย่างงาน (JPG, PNG, WebP) เพื่อให้พรีวิวบนหน้าบอร์ดและหน้ารายละเอียด</span>
-        </div>
+      <div class="field field-full">
+        <label for="task-brief">Design Brief (รายละเอียดโจทย์, วัตถุประสงค์ & สิ่งที่ต้องส่งมอบ)</label>
+        <textarea id="task-brief" name="description" rows="5" placeholder="ระบุวัตถุประสงค์, ข้อความหลัก, Mood & Tone, และลิงก์โฟลเดอร์ไฟล์บรีฟ/Asset อ้างอิง..."></textarea>
+      </div>
 
-        <div class="field field-full">
-          <label for="task-brief" style="font-weight:600;color:var(--ink-900)">Design Brief (รายละเอียดโจทย์ & สิ่งที่ต้องส่งมอบ)</label>
-          <textarea id="task-brief" name="description" rows="5" placeholder="ระบุวัตถุประสงค์ ข้อความหลัก Mood & Tone และลิงก์ไฟล์ที่เกี่ยวข้อง..."></textarea>
-        </div>
+      <div class="field field-full">
+        <label for="task-preview-url">URL รูปภาพตัวอย่างงาน / Reference Artwork (ถ้ามี)</label>
+        <input id="task-preview-url" name="preview_url" placeholder="https://example.com/reference-mockup.jpg">
+        <span class="hint">ใส่ลิงก์รูปภาพตัวอย่างงานหรือ Moodboard (JPG, PNG, WebP) เพื่อแสดงพรีวิวบนหน้าบอร์ด</span>
       </div>
 
       <div id="create-task-error" class="error-text"></div>
@@ -180,12 +232,32 @@ export function openCreateTask(ctx) {
 
   const isReq = isRequester(ctx.member);
   const modal = openModal({
-    title: isReq ? "ส่งคำของานออกแบบใหม่ (Request Design Work)" : "สร้างงานใหม่ (Create Design Task)",
-    body: (isReq ? `<div class="chip" style="margin-bottom:12px; font-weight:600">ผู้ส่งบรีฟ (Requester): ${escapeHtml(ctx.member?.name || "")}</div>` : "") + body,
+    title: `
+      <div class="create-task-modal-header">
+        <div class="modal-header-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div class="modal-header-text">
+          <div class="modal-header-title">${isReq ? "ส่งคำของานออกแบบใหม่ (Request Design Work)" : "สร้างงานใหม่ (Create Design Task)"}</div>
+          <div class="modal-header-subtitle">กรอกรายละเอียดบรีฟเพื่อเปิดคำขอและลงทะเบียนคิวงานของทีม Creative Operations</div>
+        </div>
+      </div>
+    `,
+    body: (isReq ? `<div class="requester-info-strip"><span>👤 ผู้ส่งบรีฟ (Requester): <strong>${escapeHtml(ctx.member?.name || "")}</strong></span></div>` : "") + body,
     size: "lg",
     footer: `
-      <button class="btn" data-close-modal>ยกเลิก</button>
-      <button class="btn btn-primary" id="submit-create-task">${isReq ? "ส่งคำของานออกแบบ" : "สร้างงานและบันทึก"}</button>
+      <div class="modal-footer-wrap">
+        <div class="modal-footer-note">
+          <span class="dot"></span> <span>ข้อมูลจะลงทะเบียนเข้าสู่คิวงาน Creative Operations ทันที</span>
+        </div>
+        <div class="modal-footer-actions">
+          <button class="btn" data-close-modal>ยกเลิก</button>
+          <button class="btn btn-primary btn-save-task" id="submit-create-task">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>${isReq ? "ส่งคำของานออกแบบ" : "สร้างงานและบันทึก"}</span>
+          </button>
+        </div>
+      </div>
     `
   });
 
