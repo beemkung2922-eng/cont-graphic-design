@@ -3,6 +3,7 @@ import { formatDateLong, formatDateTime, statusBadge, avatar, escapeHtml, progre
 import { qs, toast, openModal, closeModal, errorState } from "./app.js";
 import { api } from "./supabase.js";
 import { canManage, canEditTask, canDeleteTask, isDesigner, isRequester, isViewer, canUploadArtwork, canChangeTaskStatus } from "./auth.js";
+import { renderImageUploaderHtml, bindImageUploader } from "./image-uploader.js";
 
 export async function render(ctx) {
   const id = new URLSearchParams(window.location.search).get("id");
@@ -42,17 +43,14 @@ export async function render(ctx) {
 
   const openEditArtworkModal = () => {
     const body = `
-      <form id="artwork-form" class="stack">
-        <div class="field">
-          <label style="font-weight:600;color:var(--ink-900)">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</label>
-          <input name="preview_url" placeholder="https://example.com/mockup.png" value="${escapeHtml(task.preview_url || "")}">
-          <span class="hint" style="font-weight:400;color:var(--ink-500)">ใส่ลิงก์รูปภาพตัวอย่างงาน (JPG, PNG, WebP) เพื่อให้พรีวิวบนหน้าบอร์ดและหน้ารายละเอียด</span>
-        </div>
-        <div class="field">
-          <label style="font-weight:600;color:var(--ink-900)">ลิงก์ไฟล์ออกแบบ (Figma / Google Drive / OneDrive)</label>
-          <input name="design_url" placeholder="https://www.figma.com/file/... หรือ ลิงก์ Drive" value="${escapeHtml(task.design_url || "")}">
-          <span class="hint" style="font-weight:400;color:var(--ink-500)">ลิงก์ต้นฉบับเพื่อให้ทีมกดเปิดไฟล์งานจริงได้ทันที</span>
-        </div>
+      <form id="artwork-form" class="stack" style="gap:16px;">
+        ${renderImageUploaderHtml({
+          id: "task-artwork-uploader",
+          label: "รูปภาพตัวอย่างงาน / Reference Artwork",
+          hint: "สามารถแนบไฟล์ภาพจากในเครื่อง (PNG, JPG, WebP, SVG) หรือใส่ลิงก์รูปภาพเว็บ เพื่อแสดงพรีวิวบนระบบ",
+          initialUrl: task.preview_url || "",
+          fieldName: "preview_url"
+        })}
         <div class="form-grid">
           <div class="field">
             <label style="font-weight:600;color:var(--ink-900)">ขนาด / Dimensions</label>
@@ -66,7 +64,7 @@ export async function render(ctx) {
       </form>
     `;
     const modal = openModal({
-      title: "URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)",
+      title: "รูปภาพตัวอย่างงานและสเปก (Artwork Preview & Specs)",
       body,
       footer: `
         <button class="btn" data-close-modal>ยกเลิก</button>
@@ -74,15 +72,17 @@ export async function render(ctx) {
       `
     });
 
+    const uploader = bindImageUploader(modal, { id: "task-artwork-uploader" });
+
     qs("#save-artwork", modal).addEventListener("click", async () => {
       const form = qs("#artwork-form", modal);
       const data = Object.fromEntries(new FormData(form));
+      const previewUrl = uploader ? uploader.getValue() : (data.preview_url || "");
       try {
         await api.updateTask(task.id, {
-          preview_url: data.preview_url.trim() || null,
-          design_url: data.design_url.trim() || null,
-          dimensions: data.dimensions.trim() || null,
-          channel: data.channel.trim() || null,
+          preview_url: previewUrl ? previewUrl.trim() : null,
+          dimensions: data.dimensions ? data.dimensions.trim() || null : null,
+          channel: data.channel ? data.channel.trim() || null : null,
         });
         closeModal();
         toast("อัปเดตข้อมูลเรียบร้อยแล้ว", "success");
@@ -203,14 +203,13 @@ export async function render(ctx) {
       <div class="artwork-proof-box">
         <div class="artwork-proof-header">
           <div class="row-wrap" style="gap:8px; align-items:center;">
-            <strong style="font-size:0.92rem; font-weight:700; color:var(--ink-900);">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</strong>
+            <strong style="font-size:0.92rem; font-weight:700; color:var(--ink-900);">รูปภาพตัวอย่างงาน (Artwork Preview)</strong>
             ${task.revision_count ? `<span class="chip" style="background:var(--danger-bg);color:var(--danger);font-weight:600">Version ${Number(task.revision_count) + 1} (Rev #${task.revision_count})</span>` : `<span class="chip" style="font-weight:500">Version 1 (Initial Draft)</span>`}
             ${task.dimensions ? `<span class="task-card-format-tag" style="font-weight:500">${escapeHtml(task.dimensions)}</span>` : ""}
             ${task.channel ? `<span class="task-card-format-tag" style="font-weight:500">${escapeHtml(task.channel)}</span>` : ""}
           </div>
           <div class="row-wrap" style="gap:8px">
-            ${task.design_url ? `<a href="${escapeHtml(task.design_url)}" target="_blank" rel="noopener" class="btn btn-sm">เปิดไฟล์งาน (Figma / Drive) ↗</a>` : ""}
-            ${canUpload ? `<button class="btn btn-sm" id="btn-edit-artwork">แก้ไขรูปภาพ / ลิงก์</button>` : ""}
+            ${canUpload ? `<button class="btn btn-sm" id="btn-edit-artwork">แก้ไขรูปภาพตัวอย่างงาน</button>` : ""}
           </div>
         </div>
         <div class="artwork-proof-img-wrap" id="artwork-proof-wrap" title="คลิกเพื่อขยายดูภาพขนาดเต็ม (Zoom)">
@@ -220,9 +219,9 @@ export async function render(ctx) {
       </div>
     ` : `
       <div class="card" style="border: 2px dashed var(--line-strong); background: var(--surface-alt); text-align: center; padding: 22px 16px;">
-        <div style="font-weight: 700; color: var(--ink-900); font-size: 0.95rem; margin-bottom: 4px;">URL รูปภาพตัวอย่างงาน (Artwork Preview Image URL)</div>
-        <p class="text-xs text-muted" style="max-width: 440px; margin: 0 auto 14px; font-weight: 400;">ยังไม่ได้แนบรูปภาพตัวอย่างงาน สามารถระบุ URL ภาพและลิงก์ Figma หรือ Google Drive เพื่อพรีวิว</p>
-        ${canUpload ? `<button class="btn btn-primary btn-sm" id="btn-add-artwork">แนบภาพตัวอย่าง & ลิงก์ไฟล์งาน</button>` : `<span class="badge badge-neutral" style="font-weight:500">รอทีมออกแบบแนบภาพตัวอย่าง</span>`}
+        <div style="font-weight: 700; color: var(--ink-900); font-size: 0.95rem; margin-bottom: 4px;">รูปภาพตัวอย่างงาน (Artwork Preview)</div>
+        <p class="text-xs text-muted" style="max-width: 440px; margin: 0 auto 14px; font-weight: 400;">ยังไม่ได้แนบรูปภาพตัวอย่างงาน สามารถอัปโหลดไฟล์ภาพจากในเครื่องหรือใส่ URL เพื่อพรีวิว</p>
+        ${canUpload ? `<button class="btn btn-primary btn-sm" id="btn-add-artwork">แนบภาพตัวอย่างงาน</button>` : `<span class="badge badge-neutral" style="font-weight:500">รอทีมออกแบบแนบภาพตัวอย่าง</span>`}
       </div>
     `;
 
