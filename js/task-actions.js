@@ -2,6 +2,7 @@ import { openModal, closeModal, toast, qs, qsa } from "./app.js";
 import { api } from "./supabase.js";
 import { escapeHtml, roleLabel } from "./formatters.js";
 import { canManage, canCreateTask, isRequester, isViewer } from "./auth.js";
+import { renderImageUploaderHtml, bindImageUploader } from "./image-uploader.js";
 
 export function bindTaskCards(root = document) {
   qsa("[data-task-id]", root).forEach((card) => {
@@ -221,9 +222,13 @@ export function openCreateTask(ctx) {
       </div>
 
       <div class="field field-full">
-        <label for="task-preview-url">URL รูปภาพตัวอย่างงาน / Reference Artwork (ถ้ามี)</label>
-        <input id="task-preview-url" name="preview_url" placeholder="https://example.com/reference-mockup.jpg">
-        <span class="hint">ใส่ลิงก์รูปภาพตัวอย่างงานหรือ Moodboard (JPG, PNG, WebP) เพื่อแสดงพรีวิวบนหน้าบอร์ด</span>
+        ${renderImageUploaderHtml({
+          id: "create-task-artwork-uploader",
+          label: "รูปภาพตัวอย่างงาน / Reference Artwork (ถ้ามี)",
+          hint: "สามารถแนบไฟล์ภาพจากในเครื่อง (PNG, JPG, WebP, SVG) หรือใส่ลิงก์รูปภาพเว็บ เพื่อแสดงพรีวิวบนหน้าบอร์ด",
+          initialUrl: "",
+          fieldName: "preview_url"
+        })}
       </div>
 
       <div id="create-task-error" class="error-text"></div>
@@ -261,6 +266,9 @@ export function openCreateTask(ctx) {
     `
   });
 
+  // Initialize Dual Image Uploader
+  const uploader = bindImageUploader(modal, { id: "create-task-artwork-uploader" });
+
   // Handle Preset Clicks
   qsa(".brief-preset-btn", modal).forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -290,12 +298,14 @@ export function openCreateTask(ctx) {
     if (!form.reportValidity()) return;
 
     const data = Object.fromEntries(new FormData(form));
+    const previewUrl = uploader ? uploader.getValue() : (data.preview_url || "");
     const errorNode = qs("#create-task-error", modal);
     errorNode.textContent = "";
 
     try {
       const created = await api.createTask({
         ...data,
+        preview_url: previewUrl ? previewUrl.trim() : null,
         item_count: Number(data.item_count || 1),
         created_by: ctx.member.id,
       });
