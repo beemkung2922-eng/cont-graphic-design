@@ -712,56 +712,325 @@
   font-size: 0.82rem;
 }
 
-/* --- Smart Design Brief Templates --- */
-.brief-presets-wrap {
-  margin-bottom: 12px;
-}
-.brief-presets-label {
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--ink-500);
-  margin-bottom: 6px;
+/* --- High-End Executive Create Task Modal & Presets --- */
+.create-task-modal-header {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 12px;
 }
-.brief-preset-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 6px;
+.modal-header-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(84, 76, 112, 0.15), rgba(84, 76, 112, 0.28));
+  border: 1px solid rgba(84, 76, 112, 0.35);
+  color: var(--kkp-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(84, 76, 112, 0.12);
 }
-.brief-preset-btn {
-  background: var(--surface-alt);
-  border: 1px solid var(--line-strong);
-  border-radius: 7px;
-  padding: 6px 8px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--ink-700);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
+.modal-header-text {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.brief-preset-btn:hover {
-  background: var(--purple-50);
-  border-color: var(--purple-300);
-  color: var(--kkp-purple);
+.modal-header-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  line-height: 1.25;
 }
-.brief-preset-btn.is-active {
-  background: var(--purple-100);
-  border-color: var(--kkp-purple);
-  color: var(--kkp-purple-deep);
+.modal-header-subtitle {
+  font-size: 0.74rem;
+  color: var(--ink-500);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.requester-info-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, rgba(84, 76, 112, 0.08), rgba(84, 76, 112, 0.02));
+  border: 1px solid rgba(84, 76, 112, 0.2);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 0.78rem;
+  color: var(--ink-800);
+}
+.requester-info-strip strong {
+  color: var(--kkp-purple);
   font-weight: 600;
 }
-.brief-preset-btn small {
-  font-size: 0.66rem;
+
+/* Preset Cards Section */
+.brief-presets-wrap {
+  background: #fbfbfe;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin-bottom: 16px;
+}
+.brief-presets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.brief-presets-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-800);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brief-presets-hint {
+  font-size: 0.7rem;
   color: var(--ink-400);
+  font-weight: 400;
+}
+.brief-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+@media (max-width: 680px) {
+  .brief-preset-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.brief-preset-btn {
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+.brief-preset-btn:hover {
+  background: #faf9fd;
+  border-color: var(--kkp-purple-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(84, 76, 112, 0.08);
+}
+.brief-preset-btn.is-active {
+  background: #f5f3fa;
+  border-color: var(--kkp-purple);
+  box-shadow: 0 0 0 2px rgba(84, 76, 112, 0.2), 0 4px 12px rgba(84, 76, 112, 0.1);
+}
+.preset-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--surface-alt);
+  color: var(--ink-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.brief-preset-btn:hover .preset-icon {
+  background: rgba(84, 76, 112, 0.1);
+  color: var(--kkp-purple);
+}
+.brief-preset-btn.is-active .preset-icon {
+  background: var(--kkp-purple);
+  color: #ffffff;
+}
+.preset-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.preset-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-900);
+  line-height: 1.25;
+}
+.brief-preset-btn.is-active .preset-title {
+  color: var(--kkp-purple-deep);
+}
+.preset-sub {
+  font-size: 0.68rem;
+  color: var(--ink-500);
+  font-weight: 400;
+  line-height: 1.25;
+}
+.preset-tag {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-alt);
+  color: var(--ink-500);
+  margin-top: 2px;
+  width: fit-content;
+}
+.brief-preset-btn.is-active .preset-tag {
+  background: rgba(84, 76, 112, 0.15);
+  color: var(--kkp-purple);
+  font-weight: 600;
+}
+.preset-check-badge {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--kkp-purple);
+  color: #fff;
+  font-size: 9px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.brief-preset-btn.is-active .preset-check-badge {
+  display: flex;
+}
+
+/* Form Sections */
+.form-section-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 12px 0;
+}
+.form-section-divider::before,
+.form-section-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.form-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ink-500);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+/* 3-column Scope Grid */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 680px) {
+  .form-grid-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Hero Title Input */
+.input-hero {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  padding: 10px 14px !important;
+  border-color: var(--purple-200) !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(84, 76, 112, 0.04) !important;
+}
+.input-hero:focus {
+  border-color: var(--kkp-purple) !important;
+  box-shadow: 0 0 0 3px rgba(84, 76, 112, 0.16) !important;
+}
+
+/* Hint Pills & Badges */
+.field-hint-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--ink-500);
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  padding: 3px 7px;
+  border-radius: 5px;
+  margin-top: 4px;
+  width: fit-content;
+}
+.field-hint-pill strong {
+  color: var(--kkp-purple);
+}
+
+/* Modal Foot Layout */
+.modal-footer-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.modal-footer-note {
+  font-size: 0.73rem;
+  color: var(--ink-500);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.modal-footer-note .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  display: inline-block;
+}
+.modal-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-save-task {
+  padding: 9px 18px !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(84, 76, 112, 0.25);
 }
 
 /* --- Typography & Visual Hierarchy --- */
+input, select, textarea {
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--ink-800);
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--kkp-purple-soft);
+  box-shadow: 0 0 0 3px rgba(110, 103, 144, 0.15);
+}
+
 .field label {
   font-weight: 600 !important;
   color: var(--ink-900) !important;
