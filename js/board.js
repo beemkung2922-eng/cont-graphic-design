@@ -4,6 +4,7 @@ import { qs, toast, openModal, closeModal } from "./app.js";
 import { api } from "./supabase.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { canMoveTask, canManage, isRequester, isViewer, canCreateTask } from "./auth.js";
+import { filterTasksByTimeRange, MONTH_NAMES_TH } from "./analytics.js";
 
 export async function render(ctx) {
   window.openCreateTask = () => openCreateTask(ctx);
@@ -14,6 +15,9 @@ export async function render(ctx) {
   let filterMemberId = "";
   let filterProjectId = "";
   let filterUrgency = "all"; // "all" | "overdue" | "due_soon" | "normal"
+  let filterPeriod = "all";
+  let filterYear = "all";
+  let filterMonth = "all";
   let showCompleted = false;
 
   const rerender = async () => {
@@ -73,6 +77,14 @@ export async function render(ctx) {
         return true;
       });
     }
+
+    // Filter by Date / Period
+    visibleTasks = filterTasksByTimeRange(visibleTasks, {
+      period: filterPeriod,
+      year: filterYear,
+      month: filterMonth,
+      dateField: "created_at"
+    });
 
     // Columns to display
     const columnsToDisplay = showCompleted ? STATUS_ORDER : ACTIVE_STATUSES;
@@ -151,6 +163,21 @@ export async function render(ctx) {
               <option value="normal" ${filterUrgency === "normal" ? "selected" : ""}>ปกติ</option>
             </select>
 
+            <!-- Date Period Filter -->
+            <select class="board-filter-select" id="filter-period">
+              <option value="all" ${filterPeriod === "all" ? "selected" : ""}>ทุกช่วงเวลา</option>
+              <option value="today" ${filterPeriod === "today" ? "selected" : ""}>วันนี้</option>
+              <option value="7days" ${filterPeriod === "7days" ? "selected" : ""}>7 วันล่าสุด</option>
+              <option value="month" ${filterPeriod === "month" ? "selected" : ""}>เดือนนี้</option>
+              <option value="year" ${filterPeriod === "year" ? "selected" : ""}>ปีนี้</option>
+            </select>
+
+            <!-- Month Filter -->
+            <select class="board-filter-select" id="filter-month">
+              <option value="all" ${filterMonth === "all" ? "selected" : ""}>ทุกเดือน</option>
+              ${MONTH_NAMES_TH.map((name, idx) => `<option value="${idx + 1}" ${String(filterMonth) === String(idx + 1) ? "selected" : ""}>${name}</option>`).join("")}
+            </select>
+
             <!-- Toggle Completed Column -->
             <label class="board-completed-toggle">
               <input type="checkbox" id="toggle-completed" ${showCompleted ? "checked" : ""}>
@@ -216,6 +243,8 @@ export async function render(ctx) {
     qs("#filter-member")?.addEventListener("change", (e) => { filterMemberId = e.target.value; draw(); });
     qs("#filter-project")?.addEventListener("change", (e) => { filterProjectId = e.target.value; draw(); });
     qs("#filter-urgency")?.addEventListener("change", (e) => { filterUrgency = e.target.value; draw(); });
+    qs("#filter-period")?.addEventListener("change", (e) => { filterPeriod = e.target.value; draw(); });
+    qs("#filter-month")?.addEventListener("change", (e) => { filterMonth = e.target.value; draw(); });
     qs("#toggle-completed")?.addEventListener("change", (e) => { showCompleted = e.target.checked; draw(); });
 
     // Reset filters
@@ -225,6 +254,9 @@ export async function render(ctx) {
       filterMemberId = "";
       filterProjectId = "";
       filterUrgency = "all";
+      filterPeriod = "all";
+      filterYear = "all";
+      filterMonth = "all";
       showCompleted = false;
       draw();
     });
