@@ -22,19 +22,21 @@
   --purple-300: #adacb9;              /* Grandeur Grey */
 
   /* --- Brand Secondary (15% Accents) --- */
-  --accent-cyan: #00a3d7;             /* Cyan / Sky */
-  --accent-magenta: #e6007e;          /* Magenta / Hot Pink */
-  --accent-orange: #f25c2b;           /* Vibrant Orange */
-  --accent-lime: #8cc63f;             /* Lime Green */
-  --accent-violet: #7f00ff;           /* Electric Violet */
-  --accent-slate: #2e2a3b;            /* Dark Navy Slate */
+  --accent-cyan: #00A3D9;             /* Cyan / Turquoise */
+  --accent-magenta: #E6007E;          /* Magenta / Hot Pink */
+  --accent-orange: #F05A28;           /* Vibrant Orange */
+  --accent-lime: #8DC63F;             /* Lime Green */
+  --accent-violet: #7F00FF;           /* Electric Violet */
+  --accent-slate: #3D3550;            /* Dark Grey Purple */
+  --accent-mint: #00F0B5;             /* Mint Neon */
+  --accent-navy: #112347;             /* Dark Navy Blue */
 
   /* --- Workflow Status Colors (Mapped to CI) --- */
-  --status-brief: #adacb9;            /* รอรับบรีฟ: Grandeur Grey */
-  --status-drafting: #615b99;         /* กำลังดราฟต์: Royal Purple */
-  --status-review: #f25c2b;           /* รอคอมเมนต์: Brand Orange */
-  --status-revision: #e6007e;         /* แก้ไขงาน: Brand Magenta */
-  --status-completed: #8cc63f;        /* ส่งมอบสำเร็จ: Brand Lime Green */
+  --status-brief: #ADACB9;            /* รอรับบรีฟ: Grandeur Grey */
+  --status-drafting: #615B99;         /* กำลังดราฟต์: Royal Purple */
+  --status-review: #F05A28;           /* รอคอมเมนต์: Brand Orange */
+  --status-revision: #E6007E;         /* แก้ไขงาน: Brand Magenta */
+  --status-completed: #8DC63F;        /* ส่งมอบสำเร็จ: Brand Lime Green */
 
   /* --- Neutral & Surface --- */
   --ink-900: #1c1a27;
