@@ -393,6 +393,16 @@ export async function render(ctx) {
       destroyChart("trend");
       const trendCtx = document.getElementById("chart-trend");
       if (trendCtx) {
+        // Create glowing gradient for Active tasks
+        const ctx = trendCtx.getContext("2d");
+        const activeGradient = ctx.createLinearGradient(0, 0, 0, 220);
+        activeGradient.addColorStop(0, "rgba(127, 0, 255, 0.4)");
+        activeGradient.addColorStop(1, "rgba(127, 0, 255, 0.0)");
+
+        const completedGradient = ctx.createLinearGradient(0, 0, 0, 220);
+        completedGradient.addColorStop(0, "rgba(141, 198, 63, 0.2)");
+        completedGradient.addColorStop(1, "rgba(141, 198, 63, 0.0)");
+
         _chartInstances["trend"] = new Chart(trendCtx, {
           type: "line",
           data: {
@@ -402,23 +412,27 @@ export async function render(ctx) {
                 label: "ส่งมอบแล้ว",
                 data: monthCompleted,
                 borderColor: BRAND.lime,
-                backgroundColor: BRAND.lime + "22",
+                backgroundColor: completedGradient,
                 fill: true,
                 tension: 0.4,
                 pointBackgroundColor: BRAND.lime,
+                pointBorderColor: "#151321",
                 pointRadius: 5,
+                pointHoverRadius: 7,
                 borderWidth: 2.5,
               },
               {
                 label: "งาน Active",
                 data: monthActive,
-                borderColor: BRAND.royalPurple,
-                backgroundColor: BRAND.royalPurple + "22",
+                borderColor: BRAND.violet, // Use bright violet for the line
+                backgroundColor: activeGradient,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: BRAND.royalPurple,
+                pointBackgroundColor: BRAND.violet,
+                pointBorderColor: "#151321",
                 pointRadius: 5,
-                borderWidth: 2.5,
+                pointHoverRadius: 7,
+                borderWidth: 3,
               },
             ],
           },
@@ -427,12 +441,12 @@ export async function render(ctx) {
             maintainAspectRatio: false,
             interaction: { mode: "index", intersect: false },
             plugins: {
-              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#3f3a52", usePointStyle: true, padding: 16 } },
-              tooltip: { backgroundColor: "#2e2a3b", titleColor: "#fff", bodyColor: "#e7e7ed", padding: 10, cornerRadius: 8 },
+              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#a19eac", usePointStyle: true, padding: 16 } },
+              tooltip: { backgroundColor: "#1d1a2c", titleColor: "#fff", bodyColor: "#eae8f2", padding: 12, cornerRadius: 8, borderColor: "#2a263e", borderWidth: 1 },
             },
             scales: {
-              x: { grid: { color: "#e7e7ed" }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 } } },
-              y: { beginAtZero: true, grid: { color: "#e7e7ed" }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
+              x: { grid: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 } } },
+              y: { beginAtZero: true, grid: { color: "#211e2f" }, border: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
             },
           },
         });
@@ -449,18 +463,18 @@ export async function render(ctx) {
             datasets: [{
               data: STATUS_ORDER.map(s => statusCounts.find(x => x.status === s)?.count || 0),
               backgroundColor: STATUS_ORDER.map(s => STATUS_CHART_COLORS[s].bg),
-              borderColor: STATUS_ORDER.map(s => STATUS_CHART_COLORS[s].border),
-              borderWidth: 2,
+              borderColor: "#151321", // Match card surface background
+              borderWidth: 3,
               hoverOffset: 8,
             }],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: "62%",
+            cutout: "68%", // slightly thinner donut looks more modern
             plugins: {
               legend: { display: false },
-              tooltip: { backgroundColor: "#2e2a3b", titleColor: "#fff", bodyColor: "#e7e7ed", padding: 10, cornerRadius: 8 },
+              tooltip: { backgroundColor: "#1d1a2c", titleColor: "#fff", bodyColor: "#eae8f2", padding: 12, cornerRadius: 8, borderColor: "#2a263e", borderWidth: 1 },
             },
           },
         });
@@ -478,18 +492,14 @@ export async function render(ctx) {
               {
                 label: "Active",
                 data: memberWorkload.map(m => m.active),
-                backgroundColor: BRAND.royalPurple + "cc",
-                borderColor: BRAND.royalPurple,
-                borderWidth: 1.5,
-                borderRadius: 6,
+                backgroundColor: BRAND.violet,
+                borderRadius: 4,
               },
               {
                 label: "ส่งมอบแล้ว",
                 data: memberWorkload.map(m => m.completed),
-                backgroundColor: BRAND.lime + "cc",
-                borderColor: BRAND.lime,
-                borderWidth: 1.5,
-                borderRadius: 6,
+                backgroundColor: BRAND.lime,
+                borderRadius: 4,
               },
             ],
           },
@@ -498,12 +508,12 @@ export async function render(ctx) {
             maintainAspectRatio: false,
             interaction: { mode: "index", intersect: false },
             plugins: {
-              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#3f3a52", usePointStyle: true, padding: 16 } },
-              tooltip: { backgroundColor: "#2e2a3b", titleColor: "#fff", bodyColor: "#e7e7ed", padding: 10, cornerRadius: 8 },
+              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#a19eac", usePointStyle: true, padding: 16 } },
+              tooltip: { backgroundColor: "#1d1a2c", titleColor: "#fff", bodyColor: "#eae8f2", padding: 12, cornerRadius: 8, borderColor: "#2a263e", borderWidth: 1 },
             },
             scales: {
-              x: { grid: { display: false }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 } } },
-              y: { beginAtZero: true, grid: { color: "#e7e7ed" }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
+              x: { grid: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 } } },
+              y: { beginAtZero: true, grid: { color: "#211e2f" }, border: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
             },
           },
         });
