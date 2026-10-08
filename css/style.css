@@ -6,43 +6,64 @@
    ========================================================================== */
 
 :root {
-  /* --- Brand (sampled จาก CI ของ KKP: purple + cool gray) --- */
-  --kkp-purple: #544c70;
-  --kkp-purple-deep: #3f3a56;
-  --kkp-purple-soft: #6e6790;
-  --purple-50: #f6f5f9;
-  --purple-100: #eceaf3;
-  --purple-200: #d9d5e6;
-  --purple-300: #bdb7d1;
+  /* --- Brand Primary (85%) จาก CI แบรนด์ KKP x CONT --- */
+  --legacy-purple: #594f74;           /* WEB: #594F74 | RGB: 89, 79, 116 */
+  --royal-purple: #615b99;            /* WEB: #615B99 | RGB: 97, 91, 153 */
+  --grandeur-grey: #adacb9;           /* WEB: #ADACB9 | PANTONE 7543C */
+  --grandeur-grey-lite: #e7e7ed;      /* WEB: #E7E7ED | PANTONE 7541C */
 
-  /* --- Neutral --- */
-  --ink-900: #1c1a2b;
-  --ink-800: #2b2840;
-  --ink-700: #3d3a55;
-  --ink-600: #55526b;
-  --ink-500: #6f6c82;
+  --kkp-purple: #594f74;              /* Primary Legacy Purple */
+  --kkp-purple-royal: #615b99;        /* Royal Purple Accent */
+  --kkp-purple-deep: #2e2a3b;         /* Deep Slate */
+  --kkp-purple-soft: #7a7298;         /* Medium Purple */
+  --purple-50: #f8f7fb;
+  --purple-100: #e7e7ed;              /* Grandeur Grey Lite */
+  --purple-200: #d5d3e0;
+  --purple-300: #adacb9;              /* Grandeur Grey */
+
+  /* --- Brand Secondary (15% Accents) --- */
+  --accent-cyan: #00a3d7;             /* Cyan / Sky */
+  --accent-magenta: #e6007e;          /* Magenta / Hot Pink */
+  --accent-orange: #f25c2b;           /* Vibrant Orange */
+  --accent-lime: #8cc63f;             /* Lime Green */
+  --accent-violet: #7f00ff;           /* Electric Violet */
+  --accent-slate: #2e2a3b;            /* Dark Navy Slate */
+
+  /* --- Workflow Status Colors (Mapped to CI) --- */
+  --status-brief: #adacb9;            /* รอรับบรีฟ: Grandeur Grey */
+  --status-drafting: #615b99;         /* กำลังดราฟต์: Royal Purple */
+  --status-review: #f25c2b;           /* รอคอมเมนต์: Brand Orange */
+  --status-revision: #e6007e;         /* แก้ไขงาน: Brand Magenta */
+  --status-completed: #8cc63f;        /* ส่งมอบสำเร็จ: Brand Lime Green */
+
+  /* --- Neutral & Surface --- */
+  --ink-900: #1c1a27;
+  --ink-800: #2e2a3b;
+  --ink-700: #3f3a52;
+  --ink-600: #594f74;
+  --ink-500: #6f6b85;
   --ink-400: #8f8ca0;
-  --ink-300: #b6b4c3;
-  --ink-200: #d6d5df;
-  --line: #e6e5ee;
-  --line-strong: #d5d4e0;
-  --bg: #f6f6f9;
+  --ink-300: #adacb9;
+  --ink-200: #d5d3e0;
+  --line: #e7e7ed;                    /* Grandeur Grey Lite */
+  --line-strong: #adacb9;             /* Grandeur Grey */
+  --bg: #f8f8fb;
   --surface: #ffffff;
-  --surface-alt: #fafafc;
+  --surface-alt: #f4f4f7;
 
-  /* --- Semantic (ใช้อย่างระมัดระวัง) --- */
-  --ok: #1f7a4d;
-  --ok-bg: #e9f5ef;
-  --ok-line: #bde0cd;
-  --warn: #a9701b;
-  --warn-bg: #fdf5e6;
-  --warn-line: #edd9ac;
-  --danger: #b3261e;
-  --danger-bg: #fbecea;
-  --danger-line: #f0c6c2;
-  --info: #2a5fa8;
-  --info-bg: #ecf2fa;
-  --info-line: #c3d6ee;
+  /* --- Semantic Accents --- */
+  --ok: #2e8540;
+  --ok-bg: #eaf6ee;
+  --ok-line: #b2dfbe;
+  --warn: #f25c2b;
+  --warn-bg: #fef4ec;
+  --warn-line: #fad1be;
+  --danger: #e6007e;
+  --danger-bg: #fde8f2;
+  --danger-line: #f7b5d8;
+  --info: #00a3d7;
+  --info-bg: #e6f6fa;
+  --info-line: #b3e7f4;
 
   /* --- Layout --- */
   --sidebar-w: 248px;
