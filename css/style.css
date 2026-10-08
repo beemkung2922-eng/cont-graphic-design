@@ -12,14 +12,17 @@
   --grandeur-grey: #adacb9;           /* WEB: #ADACB9 | PANTONE 7543C */
   --grandeur-grey-lite: #e7e7ed;      /* WEB: #E7E7ED | PANTONE 7541C */
 
-  --kkp-purple: #594f74;              /* Primary Legacy Purple */
+  /* --- โทนสีหลักประจำระบบ (KKP Brand / Purple) --- */
+  --kkp-purple: #544c70;              /* สีหลัก (Primary): ปุ่มกด, แถบสถานะ Active, หัวข้อหลัก */
   --kkp-purple-royal: #615b99;        /* Royal Purple Accent */
-  --kkp-purple-deep: #2e2a3b;         /* Deep Slate */
-  --kkp-purple-soft: #7a7298;         /* Medium Purple */
-  --purple-50: #f8f7fb;
-  --purple-100: #e7e7ed;              /* Grandeur Grey Lite */
-  --purple-200: #d5d3e0;
-  --purple-300: #adacb9;              /* Grandeur Grey */
+  --kkp-purple-deep: #3f3a56;         /* สีม่วงเข้ม: พื้นหลังฝั่ง Hero หน้า Login, แถบนำทางด้านข้าง */
+  --kkp-purple-soft: #6e6790;         /* สีม่วงนุ่ม: ใช้ตอน Hover หรือสถานะรอง */
+  --purple-300: #bdb7d1;              /* เส้นขอบเวลา Hover หรือโฟกัส */
+  --purple-200: #d9d5e6;              /* เส้นขอบปุ่ม Preset / Badge */
+  --purple-100: #eceaf3;              /* พื้นหลัง Chip ป้ายสถานะม่วง */
+  --purple-50: #f6f5f9;               /* พื้นหลังไฮไลต์จางๆ */
+  --royal-purple: #544c70;
+  --legacy-purple: #3f3a56;
 
   /* --- Brand Secondary (15% Accents) --- */
   --accent-cyan: #00A3D9;             /* Cyan / Turquoise */
