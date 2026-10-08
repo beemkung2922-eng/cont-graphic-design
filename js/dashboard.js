@@ -1,18 +1,62 @@
-import { taskCard, interactiveEmptyState, formatDate, formatDateLong, relativeDeadline, avatar, escapeHtml, roleLabel, memberFor, projectFor, taskTypeLabel } from "./formatters.js";
+import { taskCard, interactiveEmptyState, formatDate, relativeDeadline, avatar, escapeHtml, roleLabel, memberFor, projectFor } from "./formatters.js";
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isRequester, isViewer, canCreateTask } from "./auth.js";
-import { filterTasksByTimeRange, calculateTeamAnalytics, renderTimeFilterBarHtml, renderMemberComparisonHtml, bindTimeFilterBar, bindMemberComparison } from "./analytics.js";
+import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH } from "./analytics.js";
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Brand palette (exact hex codes from CI)
+───────────────────────────────────────────────────────────────────────── */
+const BRAND = {
+  legacyPurple: "#594F74",
+  royalPurple: "#615B99",
+  grandeurGrey: "#ADACB9",
+  grandeurGreyLite: "#E7E7ED",
+  cyan: "#00A3D9",
+  magenta: "#E6007E",
+  orange: "#F05A28",
+  lime: "#8DC63F",
+  violet: "#7F00FF",
+  darkSlate: "#3D3550",
+  mintNeon: "#00F0B5",
+  darkNavy: "#112347",
+};
+
+const STATUS_CHART_COLORS = {
+  brief:     { bg: "#ADACB9", border: "#8f8ca0" },
+  drafting:  { bg: "#615B99", border: "#4d4880" },
+  review:    { bg: "#F05A28", border: "#c44016" },
+  revision:  { bg: "#E6007E", border: "#b3005f" },
+  completed: { bg: "#8DC63F", border: "#6a9f2a" },
+};
+
+const STATUS_TH = {
+  brief: "รอรับบรีฟ",
+  drafting: "กำลังดราฟต์",
+  review: "รอคอมเมนต์",
+  revision: "แก้ไขงาน",
+  completed: "ส่งมอบสำเร็จ",
+};
+
+/* ─── Destroy existing Chart.js instances before redraw ─── */
+const _chartInstances = {};
+function destroyChart(id) {
+  if (_chartInstances[id]) {
+    _chartInstances[id].destroy();
+    delete _chartInstances[id];
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   MAIN RENDER
+───────────────────────────────────────────────────────────────────────── */
 export async function render(ctx) {
   const { tasks, members, projects, subtasks } = ctx;
   window.openCreateTask = () => openCreateTask(ctx);
   const isReq = isRequester(ctx.member);
-  const isView = isViewer(ctx.member);
   const canCreate = canCreateTask(ctx.member);
 
-  // Filter state for Date, Member, and Status
   const filterState = {
     period: "all",
     year: "all",
@@ -26,203 +70,447 @@ export async function render(ctx) {
   };
 
   const draw = () => {
-    // 1. Filter tasks according to Time/Date & Member & Status
-    const filteredTasks = filterTasksByTimeRange(tasks, filterState);
-    const analytics = calculateTeamAnalytics(filteredTasks, members, filterState.memberId);
+    const filtered = filterTasksByTimeRange(tasks, filterState);
+    const active    = filtered.filter(t => t.status !== "completed");
+    const dueSoon   = filtered.filter(t => t.status !== "completed" && relativeDeadline(t.deadline_at || t.deadline).className);
+    const review    = filtered.filter(t => t.status === "review");
+    const revision  = filtered.filter(t => t.status === "revision");
+    const completed = filtered.filter(t => t.status === "completed");
+    const myTasks   = filtered.filter(t =>
+      (t.assignee_id === ctx.member?.id || (isReq && t.created_by === ctx.member?.id))
+      && t.status !== "completed"
+    );
+    const lateCount = active.filter(t => relativeDeadline(t.deadline_at || t.deadline).className === "is-overdue").length;
 
-    const active = filteredTasks.filter((t) => t.status !== "completed");
-    const dueSoon = filteredTasks.filter((t) => t.status !== "completed" && relativeDeadline(t.deadline_at || t.deadline).className);
-    const review = filteredTasks.filter((t) => t.status === "review");
-    const revision = filteredTasks.filter((t) => t.status === "revision");
-    const completed = filteredTasks.filter((t) => t.status === "completed");
-    const myTasks = filteredTasks.filter((t) => (t.assignee_id === ctx.member?.id || (isReq && t.created_by === ctx.member?.id)) && t.status !== "completed");
-    const lateCount = active.filter((t) => relativeDeadline(t.deadline_at || t.deadline).className === "is-overdue").length;
-
-    // Header create button
     const createBtnHtml = canCreate
-      ? `<button class="btn btn-primary" id="dashboard-create">${isReq ? "＋ ส่งคำของาน / บรีฟงานใหม่" : "＋ สร้างงานใหม่"}</button>`
+      ? `<button class="btn btn-primary" id="dashboard-create">${isReq ? "＋ ส่งคำของาน" : "＋ สร้างงานใหม่"}</button>`
       : "";
 
-    // Answer cards
-    const answerCards = `
-      <div class="answer-grid">
-        <div class="answer"><div class="q">${isReq ? "งานที่คุณส่งบรีฟ" : "งานที่คุณรับผิดชอบ"}</div><div class="a">${myTasks.length} งานอยู่ในกระบวนการ</div></div>
-        <div class="answer"><div class="q">งานไหนใกล้ Deadline?</div><div class="a">${dueSoon.length} งานต้องติดตาม</div></div>
-        <div class="answer"><div class="q">งานอยู่ขั้นตอนรีวิว?</div><div class="a">${review.length} งานรอคอมเมนต์</div></div>
-        <div class="answer"><div class="q">งานกำลังแก้ไข?</div><div class="a">${revision.length} งานส่งกลับมาแก้</div></div>
+    /* ── Build years list for year selector ── */
+    const allYears = [...new Set(tasks.map(t => {
+      const d = getTaskDate(t, "created_at");
+      return d ? d.getFullYear() : null;
+    }).filter(Boolean))].sort((a, b) => b - a);
+
+    /* ── Period filter bar HTML ── */
+    const periodFilterHtml = `
+      <div class="dash-filter-bar" id="dash-filter-bar">
+        <div class="dfb-group">
+          <label class="dfb-label">ช่วงเวลา</label>
+          <div class="dfb-chips">
+            ${["all","today","7days","month","year"].map(p => `
+              <button class="dfb-chip${filterState.period===p?" is-active":""}" data-period="${p}">
+                ${{ all:"ทั้งหมด", today:"วันนี้", "7days":"7 วัน", month:"เดือนนี้", year:"ปีนี้" }[p]}
+              </button>`).join("")}
+          </div>
+        </div>
+        <div class="dfb-group">
+          <label class="dfb-label">ปี</label>
+          <select class="dfb-select" id="dfb-year">
+            <option value="all"${filterState.year==="all"?" selected":""}>ทุกปี</option>
+            ${allYears.map(y => `<option value="${y}"${filterState.year==y?" selected":""}>${y + 543}</option>`).join("")}
+          </select>
+        </div>
+        <div class="dfb-group">
+          <label class="dfb-label">เดือน</label>
+          <select class="dfb-select" id="dfb-month">
+            <option value="all"${filterState.month==="all"?" selected":""}>ทุกเดือน</option>
+            ${MONTH_NAMES_TH.map((m, i) => `<option value="${i+1}"${filterState.month==i+1?" selected":""}>${m}</option>`).join("")}
+          </select>
+        </div>
+        <div class="dfb-group">
+          <label class="dfb-label">สมาชิก</label>
+          <select class="dfb-select" id="dfb-member">
+            <option value="all"${filterState.memberId==="all"?" selected":""}>ทุกคน</option>
+            ${members.map(m => `<option value="${m.id}"${filterState.memberId===m.id?" selected":""}>${escapeHtml(m.name)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="dfb-group">
+          <label class="dfb-label">สถานะ</label>
+          <select class="dfb-select" id="dfb-status">
+            <option value="all"${filterState.status==="all"?" selected":""}>ทุกสถานะ</option>
+            ${STATUS_ORDER.map(s => `<option value="${s}"${filterState.status===s?" selected":""}>${STATUS_TH[s]}</option>`).join("")}
+          </select>
+        </div>
+        <div class="dfb-group dfb-range">
+          <label class="dfb-label">ช่วงวันที่</label>
+          <input type="date" class="dfb-input" id="dfb-start" value="${filterState.startDate}" placeholder="วันเริ่ม">
+          <span class="dfb-sep">–</span>
+          <input type="date" class="dfb-input" id="dfb-end" value="${filterState.endDate}" placeholder="วันสิ้นสุด">
+        </div>
+        <button class="dfb-reset" id="dfb-reset">× ล้างตัวกรอง</button>
       </div>
     `;
 
-    // Overview Stats
-    const statsHtml = `
-      <section class="section" style="margin-top:16px">
-        <div class="stat-grid">
-          <div class="stat is-primary">
-            <div class="stat-label">งานทั้งหมดในช่วงนี้</div>
-            <div class="stat-value">${filteredTasks.length}</div>
-            <div class="stat-hint">ทั้ง Active และ Completed</div>
-          </div>
-          <div class="stat is-info">
-            <div class="stat-label">กำลังทำ (Active)</div>
-            <div class="stat-value">${active.length}</div>
-            <div class="stat-hint">อยู่ในขั้นตอนการออกแบบ</div>
-          </div>
-          <div class="stat is-warn">
-            <div class="stat-label">รอตรวจ (Review)</div>
-            <div class="stat-value">${review.length}</div>
-            <div class="stat-hint">ส่งดราฟต์ให้ตรวจแล้ว</div>
-          </div>
-          <div class="stat is-danger">
-            <div class="stat-label">แก้ไขงาน (Revision)</div>
-            <div class="stat-value">${revision.length}</div>
-            <div class="stat-hint">มีคอมเมนต์สั่งปรับแก้</div>
-          </div>
-          <div class="stat is-ok">
-            <div class="stat-label">ส่งมอบแล้ว (Completed)</div>
-            <div class="stat-value">${completed.length}</div>
-            <div class="stat-hint">อนุมัติและปิดงานแล้ว</div>
-          </div>
+    /* ── KPI Cards ── */
+    const kpiCards = [
+      { label: isReq ? "งานที่คุณส่งบรีฟ" : "งานของฉัน", value: myTasks.length, hint: "ในกระบวนการ", color: BRAND.royalPurple, icon: "👤" },
+      { label: "งานทั้งหมด (กรองแล้ว)", value: filtered.length, hint: "ทั้ง Active & Completed", color: BRAND.legacyPurple, icon: "📋" },
+      { label: "งาน Active", value: active.length, hint: "อยู่ในกระบวนการออกแบบ", color: BRAND.cyan, icon: "⚡" },
+      { label: "รอคอมเมนต์", value: review.length, hint: "ส่งดราฟต์ให้ตรวจแล้ว", color: BRAND.orange, icon: "🔍" },
+      { label: "กำลังแก้ไข", value: revision.length, hint: "มีคอมเมนต์สั่งปรับแก้", color: BRAND.magenta, icon: "✏️" },
+      { label: "ส่งมอบแล้ว", value: completed.length, hint: "อนุมัติและปิดงาน", color: BRAND.lime, icon: "✅" },
+      { label: "ใกล้ Deadline", value: dueSoon.length, hint: "ต้องติดตามด่วน", color: BRAND.orange, icon: "⏰" },
+      { label: "เกิน Deadline", value: lateCount, hint: "เกินกำหนดส่งแล้ว", color: "#E6007E", icon: "🚨" },
+    ].map(k => `
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:${k.color}18;color:${k.color}">${k.icon}</div>
+        <div class="kpi-body">
+          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-value" style="color:${k.color}">${k.value}</div>
+          <div class="kpi-hint">${k.hint}</div>
         </div>
-      </section>
-    `;
+      </div>
+    `).join("");
 
-    // Activity list
-    const activityList = active.slice(0, 5).map((task) => {
+    /* ── Build monthly trend data for line chart ── */
+    const now = new Date();
+    const monthLabels = [];
+    const monthCompleted = [];
+    const monthActive = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthLabels.push(MONTH_NAMES_TH[d.getMonth()].slice(0, 3) + " " + (d.getFullYear() + 543).toString().slice(2));
+      const mComp = tasks.filter(t => {
+        const td = getTaskDate(t, "created_at");
+        return td && td.getFullYear() === d.getFullYear() && td.getMonth() === d.getMonth() && t.status === "completed";
+      }).length;
+      const mActive = tasks.filter(t => {
+        const td = getTaskDate(t, "created_at");
+        return td && td.getFullYear() === d.getFullYear() && td.getMonth() === d.getMonth() && t.status !== "completed";
+      }).length;
+      monthCompleted.push(mComp);
+      monthActive.push(mActive);
+    }
+
+    /* ── Member workload data for bar chart ── */
+    const memberWorkload = members.map(m => ({
+      name: m.name,
+      active: filtered.filter(t => t.assignee_id === m.id && t.status !== "completed").length,
+      completed: filtered.filter(t => t.assignee_id === m.id && t.status === "completed").length,
+    })).filter(m => m.active + m.completed > 0);
+
+    /* ── Status distribution for donut chart ── */
+    const statusCounts = STATUS_ORDER.map(s => ({
+      status: s,
+      count: filtered.filter(t => t.status === s).length,
+    }));
+
+    /* ── Activity feed ── */
+    const activityHtml = active.slice(0, 6).map(task => {
       const member = memberFor(task, members);
-      const dotColor = task.status === "review" ? "var(--status-review)" : task.status === "revision" ? "var(--status-revision)" : "var(--status-drafting)";
+      const project = projectFor(task, projects);
+      const urgency = relativeDeadline(task.deadline_at || task.deadline);
+      const dotColor = STATUS_CHART_COLORS[task.status]?.bg || "#adacb9";
       return `
-        <div class="activity-item">
-          <div class="activity-dot" style="background:${dotColor};"></div>
-          <div class="activity-main">
-            <div class="activity-name">${escapeHtml(member?.name || "ไม่ระบุผู้รับผิดชอบ")} <span class="text-muted" style="font-weight:400">· ${escapeHtml(roleLabel(member?.role))}</span></div>
-            <div class="activity-task"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;font-weight:600;">${escapeHtml(task.title)}</a> · ${escapeHtml(STATUS_LABELS[task.status])}</div>
+        <div class="feed-item">
+          <div class="feed-dot" style="background:${dotColor}"></div>
+          <div class="feed-body">
+            <div class="feed-title"><a href="task.html?id=${encodeURIComponent(task.id)}">${escapeHtml(task.title)}</a></div>
+            <div class="feed-meta">
+              ${avatar(member, 20)}
+              <span>${escapeHtml(member?.name || "—")}</span>
+              <span class="feed-dot-sep">·</span>
+              <span>${escapeHtml(project?.name || "—")}</span>
+              <span class="feed-dot-sep">·</span>
+              <span class="badge ${urgency.className === "is-overdue" ? "badge-danger" : urgency.className ? "badge-warn" : "badge-neutral"}" style="font-size:0.68rem">${escapeHtml(STATUS_TH[task.status])}</span>
+            </div>
           </div>
-          <div class="activity-right">
-            <div class="text-xs text-muted">${Number(task.item_count || 1)} ชิ้น</div>
+          <div class="feed-right">
             <div class="text-xs text-muted">${formatDate(task.deadline_at || task.deadline)}</div>
           </div>
         </div>
       `;
-    }).join("");
+    }).join("") || `<div class="state-empty">ไม่มีงาน Active ในช่วงเวลานี้</div>`;
 
-    // Deadlines list
-    const deadlinesList = [...filteredTasks].filter((t) => t.status !== "completed")
+    /* ── Upcoming deadlines ── */
+    const deadlinesHtml = [...filtered]
+      .filter(t => t.status !== "completed")
       .sort((a, b) => String(a.deadline_at || a.deadline).localeCompare(String(b.deadline_at || b.deadline)))
-      .slice(0, 5).map((task) => {
+      .slice(0, 6)
+      .map(task => {
         const project = projectFor(task, projects);
         const member = memberFor(task, members);
         const date = task.deadline_at ? new Date(task.deadline_at) : task.deadline ? new Date(`${task.deadline}T12:00:00`) : null;
         const urgency = relativeDeadline(task.deadline_at || task.deadline);
         return `
-          <div class="deadline-item">
-            <div class="deadline-date">
-              <span class="day">${date ? date.getDate() : "—"}</span>
-              <span class="month">${date ? date.toLocaleDateString("th-TH", { month: "short" }) : "—"}</span>
+          <div class="deadline-row">
+            <div class="deadline-date-block">
+              <span class="dl-day">${date ? date.getDate() : "—"}</span>
+              <span class="dl-month">${date ? date.toLocaleDateString("th-TH", { month: "short" }) : "—"}</span>
             </div>
-            <div class="deadline-main">
-              <div class="deadline-title"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;">${escapeHtml(task.title)}</a></div>
-              <div class="deadline-sub">${escapeHtml(project?.name || "—")} · ${escapeHtml(member?.name || "—")}</div>
+            <div class="deadline-info">
+              <div class="deadline-task-name"><a href="task.html?id=${encodeURIComponent(task.id)}">${escapeHtml(task.title)}</a></div>
+              <div class="deadline-task-sub">${escapeHtml(project?.name || "—")} · ${escapeHtml(member?.name || "—")}</div>
             </div>
-            <span class="badge ${urgency.className === "is-overdue" ? "badge-danger" : urgency.className ? "badge-warn" : "badge-neutral"}">${escapeHtml(urgency.label)}</span>
+            <span class="badge ${urgency.className === "is-overdue" ? "badge-danger" : urgency.className ? "badge-warn" : "badge-ok"}">${escapeHtml(urgency.label)}</span>
           </div>
         `;
-      }).join("");
+      }).join("") || `<div class="state-empty">ไม่มี deadline ที่ต้องติดตาม</div>`;
 
-    // Urgent cards
-    const urgentCards = dueSoon.slice(0, 3).map((task) => taskCard(task, { projects, members, subtasks })).join("");
-    const emptyUrgentHtml = interactiveEmptyState({
-      title: "ไม่มีงานเร่งด่วนในช่วงเวลานี้",
-      subtitle: "งานทั้งหมดอยู่ในกำหนดส่งตามแผน หรือไม่มีงานค้างตามตัวกรองที่เลือก",
-      small: true
-    });
-
-    // Putting everything together into #page-content
+    /* ─────────── Render HTML ─────────── */
     qs("#page-content").innerHTML = `
-      <div class="page-header">
+      <div class="dash-header">
         <div>
-          <h2>ภาพรวมคิวงาน & สถิติทีมออกแบบ</h2>
-          <p class="page-desc">วิเคราะห์ Workflow, กำหนดส่ง และเปรียบเทียบภาระงานของทีมในจุดเดียว</p>
+          <h2 class="dash-title">ภาพรวมคิวงาน & สถิติทีม</h2>
+          <p class="dash-sub">วิเคราะห์ Workflow · กำหนดส่ง · เปรียบเทียบภาระงานของทีม</p>
         </div>
-        <div class="row-wrap" style="gap:10px;">
-          <span class="chip">อัปเดตล่าสุด ${new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" }).format(new Date())}</span>
+        <div class="row-wrap" style="gap:8px">
+          <span class="chip">อัปเดต ${new Intl.DateTimeFormat("th-TH",{hour:"2-digit",minute:"2-digit"}).format(new Date())}</span>
           ${createBtnHtml}
         </div>
       </div>
 
-      <!-- Time & Date Filter Card -->
-      ${renderTimeFilterBarHtml({ ...filterState, matchCount: filteredTasks.length })}
+      ${periodFilterHtml}
 
-      <!-- Answer Grid & Stats -->
-      ${answerCards}
-      ${statsHtml}
+      <!-- KPI Cards -->
+      <div class="kpi-grid">${kpiCards}</div>
 
-      <!-- Member Comparison & Status Breakdown Chart -->
-      ${renderMemberComparisonHtml({
-        memberStats: analytics.memberStats,
-        teamTotals: analytics.teamTotals,
-        selectedMemberId: filterState.memberId,
-        selectedStatus: filterState.status,
-        projects,
-        filteredTasks
-      })}
-
-      <!-- Current Activity & Upcoming Deadlines -->
-      <div class="dashboard-grid">
-        <section class="card">
-          <div class="card-header">
+      <!-- Charts Row: Line + Donut -->
+      <div class="charts-row">
+        <div class="chart-card chart-card-wide">
+          <div class="chart-card-header">
             <div>
-              <div class="card-title">ความเคลื่อนไหวในทีม (Current Activity)</div>
-              <div class="card-sub">งานที่กำลังเคลื่อนไหวตามช่วงเวลาที่เลือก</div>
+              <div class="chart-card-title">แนวโน้มงาน 6 เดือน</div>
+              <div class="chart-card-sub">เปรียบเทียบงาน Active vs ส่งมอบแล้ว รายเดือน</div>
             </div>
-            <a class="btn btn-ghost btn-sm" href="team.html">ดูทีมทั้งหมด →</a>
           </div>
-          ${activityList || `<div class="state" style="padding:24px;">ไม่มีความเคลื่อนไหวในช่วงเวลานี้</div>`}
-        </section>
-
-        <section class="card">
-          <div class="card-header">
+          <div class="chart-wrap">
+            <canvas id="chart-trend" height="220"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
             <div>
-              <div class="card-title">กำหนดส่งเร็วๆ นี้ (Upcoming Deadlines)</div>
-              <div class="card-sub">งานที่ต้องติดตามส่งมอบ</div>
+              <div class="chart-card-title">สัดส่วนสถานะงาน</div>
+              <div class="chart-card-sub">งานในช่วงเวลาที่กรอง</div>
             </div>
-            <a class="btn btn-ghost btn-sm" href="calendar.html">เปิดปฏิทิน →</a>
           </div>
-          ${deadlinesList || `<div class="state" style="padding:24px;">ไม่มีกำหนดส่งในช่วงเวลานี้</div>`}
-        </section>
+          <div class="chart-wrap chart-wrap-donut">
+            <canvas id="chart-donut" height="220"></canvas>
+          </div>
+          <div class="donut-legend">
+            ${STATUS_ORDER.map(s => `
+              <div class="donut-legend-item">
+                <span class="donut-legend-dot" style="background:${STATUS_CHART_COLORS[s].bg}"></span>
+                <span>${STATUS_TH[s]}</span>
+                <span class="donut-legend-count">${statusCounts.find(x => x.status === s)?.count || 0}</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
       </div>
 
-      <!-- Urgent Tasks Grid -->
-      <div class="card" style="margin-top:16px;">
-        <div class="card-header">
+      <!-- Member Comparison Bar Chart -->
+      <div class="chart-card" style="margin-bottom:18px">
+        <div class="chart-card-header">
           <div>
-            <div class="card-title">งานที่ต้องจับตาเป็นพิเศษ</div>
-            <div class="card-sub">งานใกล้กำหนดส่งและงานที่กำลังรอความเห็น</div>
+            <div class="chart-card-title">เปรียบเทียบภาระงานรายคน</div>
+            <div class="chart-card-sub">จำนวนงาน Active และส่งมอบแล้ว แยกตามสมาชิกทีม</div>
           </div>
-          <a class="btn btn-ghost btn-sm" href="board.html">เปิดบอร์ด Kanban →</a>
+          <a class="btn btn-ghost btn-sm" href="team.html">ดูทีมทั้งหมด →</a>
         </div>
-        <div class="task-grid" style="grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));">
-          ${urgentCards || emptyUrgentHtml}
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="chart-members" height="260"></canvas>
+        </div>
+      </div>
+
+      <!-- Activity + Deadlines -->
+      <div class="dash-two-col">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <div class="chart-card-title">ความเคลื่อนไหวล่าสุด</div>
+              <div class="chart-card-sub">งานที่กำลังดำเนินอยู่ในช่วงเวลานี้</div>
+            </div>
+            <a class="btn btn-ghost btn-sm" href="board.html">บอร์ด Kanban →</a>
+          </div>
+          <div class="feed-list">${activityHtml}</div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <div class="chart-card-title">กำหนดส่งใกล้มา</div>
+              <div class="chart-card-sub">งานที่ต้องติดตามส่งมอบ</div>
+            </div>
+            <a class="btn btn-ghost btn-sm" href="calendar.html">ปฏิทิน →</a>
+          </div>
+          <div class="deadline-list">${deadlinesHtml}</div>
+        </div>
+      </div>
+
+      <!-- Urgent Tasks -->
+      <div class="chart-card" style="margin-top:0">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">งานที่ต้องจับตา</div>
+            <div class="chart-card-sub">งานใกล้กำหนดส่งและรอความเห็น</div>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="tasks.html">งานทั้งหมด →</a>
+        </div>
+        <div class="task-grid" style="grid-template-columns:repeat(auto-fill,minmax(290px,1fr))">
+          ${dueSoon.slice(0, 3).map(task => taskCard(task, { projects, members, subtasks })).join("") || interactiveEmptyState({ title: "ไม่มีงานเร่งด่วนในช่วงนี้", subtitle: "งานทั้งหมดอยู่ในกำหนดส่งตามแผน", small: true })}
         </div>
       </div>
     `;
 
-    // Bind event listeners
+    /* ─────────── Bind filter events ─────────── */
+    const bar = qs("#dash-filter-bar");
+
+    bar.querySelectorAll(".dfb-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        filterState.period = btn.dataset.period;
+        filterState.startDate = "";
+        filterState.endDate = "";
+        draw();
+      });
+    });
+    qs("#dfb-year")?.addEventListener("change", e => { filterState.year = e.target.value; draw(); });
+    qs("#dfb-month")?.addEventListener("change", e => { filterState.month = e.target.value; draw(); });
+    qs("#dfb-member")?.addEventListener("change", e => { filterState.memberId = e.target.value; draw(); });
+    qs("#dfb-status")?.addEventListener("change", e => { filterState.status = e.target.value; draw(); });
+    qs("#dfb-start")?.addEventListener("change", e => {
+      filterState.startDate = e.target.value;
+      if (filterState.startDate || filterState.endDate) filterState.period = "custom";
+      draw();
+    });
+    qs("#dfb-end")?.addEventListener("change", e => {
+      filterState.endDate = e.target.value;
+      if (filterState.startDate || filterState.endDate) filterState.period = "custom";
+      draw();
+    });
+    qs("#dfb-reset")?.addEventListener("click", () => {
+      Object.assign(filterState, { period:"all", year:"all", month:"all", specificDay:"", startDate:"", endDate:"", memberId:"all", status:"all" });
+      draw();
+    });
+
     qs("#dashboard-create")?.addEventListener("click", () => openCreateTask(ctx));
-    bindTimeFilterBar(qs("#page-content"), {
-      state: filterState,
-      onChange: () => draw()
-    });
-    bindMemberComparison(qs("#page-content"), {
-      onSelectMember: (memberId) => {
-        filterState.memberId = memberId;
-        draw();
-      },
-      onSelectStatus: (statusKey) => {
-        filterState.status = filterState.status === statusKey ? "all" : statusKey;
-        draw();
-      }
-    });
     bindTaskCards(qs("#page-content"));
+
+    /* ─────────── Render Charts ─────────── */
+    setTimeout(() => {
+      // 1) Line chart: 6-month trend
+      destroyChart("trend");
+      const trendCtx = document.getElementById("chart-trend");
+      if (trendCtx) {
+        _chartInstances["trend"] = new Chart(trendCtx, {
+          type: "line",
+          data: {
+            labels: monthLabels,
+            datasets: [
+              {
+                label: "ส่งมอบแล้ว",
+                data: monthCompleted,
+                borderColor: BRAND.lime,
+                backgroundColor: BRAND.lime + "22",
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: BRAND.lime,
+                pointRadius: 5,
+                borderWidth: 2.5,
+              },
+              {
+                label: "งาน Active",
+                data: monthActive,
+                borderColor: BRAND.royalPurple,
+                backgroundColor: BRAND.royalPurple + "22",
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: BRAND.royalPurple,
+                pointRadius: 5,
+                borderWidth: 2.5,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#3f3a52", usePointStyle: true, padding: 16 } },
+              tooltip: { backgroundColor: "#2e2a3b", titleColor: "#fff", bodyColor: "#e7e7ed", padding: 10, cornerRadius: 8 },
+            },
+            scales: {
+              x: { grid: { color: "#e7e7ed" }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 } } },
+              y: { beginAtZero: true, grid: { color: "#e7e7ed" }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
+            },
+          },
+        });
+      }
+
+      // 2) Donut chart: status distribution
+      destroyChart("donut");
+      const donutCtx = document.getElementById("chart-donut");
+      if (donutCtx) {
+        _chartInstances["donut"] = new Chart(donutCtx, {
+          type: "doughnut",
+          data: {
+            labels: STATUS_ORDER.map(s => STATUS_TH[s]),
+            datasets: [{
+              data: STATUS_ORDER.map(s => statusCounts.find(x => x.status === s)?.count || 0),
+              backgroundColor: STATUS_ORDER.map(s => STATUS_CHART_COLORS[s].bg),
+              borderColor: STATUS_ORDER.map(s => STATUS_CHART_COLORS[s].border),
+              borderWidth: 2,
+              hoverOffset: 8,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "62%",
+            plugins: {
+              legend: { display: false },
+              tooltip: { backgroundColor: "#2e2a3b", titleColor: "#fff", bodyColor: "#e7e7ed", padding: 10, cornerRadius: 8 },
+            },
+          },
+        });
+      }
+
+      // 3) Bar chart: member workload
+      destroyChart("members");
+      const membersCtx = document.getElementById("chart-members");
+      if (membersCtx && memberWorkload.length > 0) {
+        _chartInstances["members"] = new Chart(membersCtx, {
+          type: "bar",
+          data: {
+            labels: memberWorkload.map(m => m.name),
+            datasets: [
+              {
+                label: "Active",
+                data: memberWorkload.map(m => m.active),
+                backgroundColor: BRAND.royalPurple + "cc",
+                borderColor: BRAND.royalPurple,
+                borderWidth: 1.5,
+                borderRadius: 6,
+              },
+              {
+                label: "ส่งมอบแล้ว",
+                data: memberWorkload.map(m => m.completed),
+                backgroundColor: BRAND.lime + "cc",
+                borderColor: BRAND.lime,
+                borderWidth: 1.5,
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#3f3a52", usePointStyle: true, padding: 16 } },
+              tooltip: { backgroundColor: "#2e2a3b", titleColor: "#fff", bodyColor: "#e7e7ed", padding: 10, cornerRadius: 8 },
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 } } },
+              y: { beginAtZero: true, grid: { color: "#e7e7ed" }, ticks: { color: "#6f6b85", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
+            },
+          },
+        });
+      } else if (membersCtx) {
+        membersCtx.parentElement.innerHTML = `<div class="state-empty">ยังไม่มีข้อมูลสมาชิกทีมในช่วงเวลานี้</div>`;
+      }
+    }, 0);
   };
 
   draw();
