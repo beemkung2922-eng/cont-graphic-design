@@ -7,11 +7,11 @@ export const MONTH_NAMES_TH = [
 ];
 
 export const STATUS_COLORS = {
-  brief: { color: "var(--status-brief, #adacb9)", label: "รอรับบรีฟ", hex: "#adacb9" },
-  drafting: { color: "var(--status-drafting, #615b99)", label: "กำลังดราฟต์", hex: "#615b99" },
-  review: { color: "var(--status-review, #f25c2b)", label: "รอคอมเมนต์", hex: "#f25c2b" },
-  revision: { color: "var(--status-revision, #e6007e)", label: "แก้ไขงาน", hex: "#e6007e" },
-  completed: { color: "var(--status-completed, #8cc63f)", label: "ส่งมอบสำเร็จ", hex: "#8cc63f" },
+  brief: { color: "var(--status-brief, #bdb7d1)", label: "รอรับบรีฟ", hex: "#bdb7d1" },
+  drafting: { color: "var(--status-drafting, #544c70)", label: "กำลังดราฟต์", hex: "#544c70" },
+  review: { color: "var(--status-review, #F05A28)", label: "รอคอมเมนต์", hex: "#F05A28" },
+  revision: { color: "var(--status-revision, #E6007E)", label: "แก้ไขงาน", hex: "#E6007E" },
+  completed: { color: "var(--status-completed, #8DC63F)", label: "ส่งมอบสำเร็จ", hex: "#8DC63F" },
 };
 
 /**
