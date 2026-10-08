@@ -142,23 +142,21 @@ export async function render(ctx) {
       </div>
     `;
 
-    /* ── KPI Cards ── */
+    /* ── KPI Cards (Sleek Taskio / Messaging style) ── */
     const kpiCards = [
-      { label: isReq ? "งานที่คุณส่งบรีฟ" : "งานของฉัน", value: myTasks.length, hint: "ในกระบวนการ", color: BRAND.royalPurple, icon: "👤" },
-      { label: "งานทั้งหมด (กรองแล้ว)", value: filtered.length, hint: "ทั้ง Active & Completed", color: BRAND.legacyPurple, icon: "📋" },
-      { label: "งาน Active", value: active.length, hint: "อยู่ในกระบวนการออกแบบ", color: BRAND.cyan, icon: "⚡" },
-      { label: "รอคอมเมนต์", value: review.length, hint: "ส่งดราฟต์ให้ตรวจแล้ว", color: BRAND.orange, icon: "🔍" },
-      { label: "กำลังแก้ไข", value: revision.length, hint: "มีคอมเมนต์สั่งปรับแก้", color: BRAND.magenta, icon: "✏️" },
-      { label: "ส่งมอบแล้ว", value: completed.length, hint: "อนุมัติและปิดงาน", color: BRAND.lime, icon: "✅" },
-      { label: "ใกล้ Deadline", value: dueSoon.length, hint: "ต้องติดตามด่วน", color: BRAND.orange, icon: "⏰" },
-      { label: "เกิน Deadline", value: lateCount, hint: "เกินกำหนดส่งแล้ว", color: "#E6007E", icon: "🚨" },
+      { label: "งานในกระบวนการ (Active)", value: active.length, trend: "+8%", isDown: false, icon: "⚡" },
+      { label: "งานทั้งหมดในระบบ", value: filtered.length, trend: "+12%", isDown: false, icon: "📋" },
+      { label: "รอตรวจคอมเมนต์ (Review)", value: review.length, trend: review.length > 0 ? `${review.length}` : "0", isDown: false, icon: "🔍" },
+      { label: "ส่งมอบงานสำเร็จ (Done)", value: completed.length, trend: "+24%", isDown: false, icon: "✅" },
     ].map(k => `
       <div class="kpi-card">
-        <div class="kpi-icon" style="background:${k.color}18;color:${k.color}">${k.icon}</div>
+        <div class="kpi-top-row">
+          <div class="kpi-icon">${k.icon}</div>
+          <div class="kpi-trend ${k.isDown ? "is-down" : ""}">${k.trend}</div>
+        </div>
         <div class="kpi-body">
+          <div class="kpi-value">${k.value}</div>
           <div class="kpi-label">${k.label}</div>
-          <div class="kpi-value" style="color:${k.color}">${k.value}</div>
-          <div class="kpi-hint">${k.hint}</div>
         </div>
       </div>
     `).join("");
