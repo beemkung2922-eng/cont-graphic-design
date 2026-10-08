@@ -38,45 +38,45 @@
   --status-revision: #E6007E;         /* แก้ไขงาน: Brand Magenta */
   --status-completed: #8DC63F;        /* ส่งมอบสำเร็จ: Brand Lime Green */
 
-  /* --- Neutral & Surface --- */
-  --ink-900: #1c1a27;
-  --ink-800: #2e2a3b;
-  --ink-700: #3f3a52;
-  --ink-600: #594f74;
-  --ink-500: #6f6b85;
-  --ink-400: #8f8ca0;
-  --ink-300: #adacb9;
-  --ink-200: #d5d3e0;
-  --line: #e7e7ed;                    /* Grandeur Grey Lite */
-  --line-strong: #adacb9;             /* Grandeur Grey */
-  --bg: #f8f8fb;
-  --surface: #ffffff;
-  --surface-alt: #f4f4f7;
+  /* --- Neutral & Surface (Dark Theme) --- */
+  --ink-900: #ffffff;
+  --ink-800: #eae8f2;
+  --ink-700: #c3c0ce;
+  --ink-600: #a19eac;
+  --ink-500: #7e7b89;
+  --ink-400: #615e6a;
+  --ink-300: #423f4a;
+  --ink-200: #2c2933;
+  --line: #211e2f;                    /* Darker borders */
+  --line-strong: #2a263e;             /* Slightly lighter borders */
+  --bg: #0b0a12;                      /* Main App Background (Dark Navy/Purple) */
+  --surface: #151321;                 /* Cards (Slightly lighter than bg) */
+  --surface-alt: #1d1a2c;             /* Hover surfaces / inputs */
 
   /* --- Semantic Accents --- */
-  --ok: #2e8540;
-  --ok-bg: #eaf6ee;
-  --ok-line: #b2dfbe;
-  --warn: #f25c2b;
-  --warn-bg: #fef4ec;
-  --warn-line: #fad1be;
-  --danger: #e6007e;
-  --danger-bg: #fde8f2;
-  --danger-line: #f7b5d8;
-  --info: #00a3d7;
-  --info-bg: #e6f6fa;
-  --info-line: #b3e7f4;
+  --ok: #00F0B5;                      /* Mint Neon for success */
+  --ok-bg: rgba(0, 240, 181, 0.1);
+  --ok-line: rgba(0, 240, 181, 0.2);
+  --warn: #F05A28;                    /* Orange */
+  --warn-bg: rgba(240, 90, 40, 0.1);
+  --warn-line: rgba(240, 90, 40, 0.2);
+  --danger: #E6007E;                  /* Magenta */
+  --danger-bg: rgba(230, 0, 126, 0.1);
+  --danger-line: rgba(230, 0, 126, 0.2);
+  --info: #00A3D9;                    /* Cyan */
+  --info-bg: rgba(0, 163, 217, 0.1);
+  --info-line: rgba(0, 163, 217, 0.2);
 
   /* --- Layout --- */
-  --sidebar-w: 248px;
-  --topbar-h: 60px;
+  --sidebar-w: 260px;
+  --topbar-h: 70px;
   --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --shadow-xs: 0 1px 2px rgba(28, 26, 43, 0.05);
-  --shadow-sm: 0 1px 3px rgba(28, 26, 43, 0.07), 0 1px 2px rgba(28, 26, 43, 0.04);
-  --shadow-md: 0 8px 24px rgba(28, 26, 43, 0.08);
-  --shadow-lg: 0 18px 48px rgba(28, 26, 43, 0.16);
+  --radius: 16px;
+  --radius-lg: 20px;
+  --shadow-xs: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
 
   --font: "IBM Plex Sans Thai", "Noto Sans Thai", "IBM Plex Sans", -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -183,7 +183,7 @@ img { max-width: 100%; }
 }
 
 .sidebar {
-  background: var(--kkp-purple-deep);
+  background: #08070d;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -191,11 +191,12 @@ img { max-width: 100%; }
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  border-right: 1px solid var(--line);
 }
 
 .brand {
   padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid var(--line);
 }
 
 .brand-mark {
@@ -208,8 +209,8 @@ img { max-width: 100%; }
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: #fff;
-  color: var(--kkp-purple-deep);
+  background: var(--royal-purple);
+  color: #fff;
   display: grid;
   place-items: center;
   font-weight: 700;
