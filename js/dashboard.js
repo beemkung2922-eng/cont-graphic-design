@@ -1,9 +1,9 @@
-import { taskCard, interactiveEmptyState } from "./formatters.js";
-import { formatDate, formatDateLong, relativeDeadline, avatar, escapeHtml, roleLabel, memberFor, projectFor, taskTypeLabel } from "./formatters.js";
+import { taskCard, interactiveEmptyState, formatDate, formatDateLong, relativeDeadline, avatar, escapeHtml, roleLabel, memberFor, projectFor, taskTypeLabel } from "./formatters.js";
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isRequester, isViewer, canCreateTask } from "./auth.js";
+import { filterTasksByTimeRange, calculateTeamAnalytics, renderTimeFilterBarHtml, renderMemberComparisonHtml, bindTimeFilterBar, bindMemberComparison } from "./analytics.js";
 
 export async function render(ctx) {
   const { tasks, members, projects, subtasks } = ctx;
@@ -12,34 +12,218 @@ export async function render(ctx) {
   const isView = isViewer(ctx.member);
   const canCreate = canCreateTask(ctx.member);
 
-  const active = tasks.filter((task) => task.status !== "completed");
-  const dueSoon = tasks.filter((task) => task.status !== "completed" && relativeDeadline(task.deadline_at || task.deadline).className);
-  const review = tasks.filter((task) => task.status === "review");
-  const completed = tasks.filter((task) => task.status === "completed");
-  const myTasks = tasks.filter((task) => (task.assignee_id === ctx.member?.id || (isReq && task.created_by === ctx.member?.id)) && task.status !== "completed");
-  
-  // Filter teamLoad to actual design team members only
-  const designMembers = members.filter((member) => ["designer", "supervisor", "admin"].includes(member.role));
-  const teamLoad = designMembers.map((member) => ({ member, tasks: tasks.filter((task) => task.assignee_id === member.id) }));
-  
-  const lateCount = active.filter((task) => relativeDeadline(task.deadline_at || task.deadline).className === "is-overdue").length;
-  const answerCards = `<div class="answer-grid"><div class="answer"><div class="q">${isReq ? "งานที่คุณส่งบรีฟ" : "วันนี้มีงานอะไร?"}</div><div class="a">${myTasks.length} งานของคุณกำลังเดินอยู่</div></div><div class="answer"><div class="q">งานไหนใกล้ Deadline?</div><div class="a">${dueSoon.length} งานต้องจับตา</div></div><div class="answer"><div class="q">งานอยู่ขั้นตอนไหน?</div><div class="a">${review.length} งานกำลังรอคอมเมนต์</div></div><div class="answer"><div class="q">งานเลทกี่งาน?</div><div class="a">${lateCount} งานต้องติดตาม</div></div></div>`;
-  const activity = active.slice(0, 5).map((task) => { const member = memberFor(task, members); return `<div class="activity-item"><div class="activity-dot" style="background:${task.status === "review" ? "var(--warn)" : task.status === "revision" ? "var(--danger)" : "var(--kkp-purple)"}"></div><div class="activity-main"><div class="activity-name">${escapeHtml(member?.name || "ไม่ระบุ")} <span class="text-muted" style="font-weight:400">กำลังทำ</span></div><div class="activity-task">${escapeHtml(task.title)} · ${escapeHtml(STATUS_LABELS[task.status])}</div></div><div class="activity-right"><div class="text-xs text-muted">${Number(task.item_count || 1)} ชิ้น</div><div class="text-xs text-muted">${formatDate(task.deadline_at || task.deadline)}</div></div></div>`; }).join("");
-  const deadlines = [...tasks].filter((task) => task.status !== "completed").sort((a, b) => String(a.deadline_at || a.deadline).localeCompare(String(b.deadline_at || b.deadline))).slice(0, 5).map((task) => { const project = projectFor(task, projects); const member = memberFor(task, members); const date = task.deadline_at ? new Date(task.deadline_at) : task.deadline ? new Date(`${task.deadline}T12:00:00`) : null; return `<div class="deadline-item"><div class="deadline-date"><span class="day">${date ? date.getDate() : "—"}</span><span class="month">${date ? date.toLocaleDateString("en-US", { month: "short" }) : "—"}</span></div><div class="deadline-main"><div class="deadline-title">${escapeHtml(task.title)}</div><div class="deadline-sub">${escapeHtml(project?.name || "—")} · ${escapeHtml(member?.name || "—")}</div></div><span class="badge ${relativeDeadline(task.deadline_at || task.deadline).className === "is-overdue" ? "badge-danger" : relativeDeadline(task.deadline_at || task.deadline).className ? "badge-warn" : "badge-neutral"}">${escapeHtml(relativeDeadline(task.deadline_at || task.deadline).label)}</span></div>`; }).join("");
-  const loadRows = teamLoad.map(({ member, tasks: memberTasks }) => { const activeTasks = memberTasks.filter((task) => task.status !== "completed"); const reviewTasks = activeTasks.filter((task) => ["review", "revision"].includes(task.status)).length; const doneTasks = memberTasks.filter((task) => task.status === "completed").length; const items = activeTasks.reduce((sum, task) => sum + Number(task.item_count || 1), 0); return `<div class="team-mini"><div>${avatar(member, "avatar-sm")}</div><div class="team-mini-main"><div class="team-mini-name">${escapeHtml(member.name)}</div><div class="team-mini-meta">${escapeHtml(roleLabel(member.role))} · ${activeTasks.length} งาน · ${items} ชิ้น · ${doneTasks} เสร็จแล้ว</div></div><div class="chip">${reviewTasks} รอรีวิว</div></div>`; }).join("");
-  const urgentCards = dueSoon.slice(0, 3).map((task) => taskCard(task, { projects, members, subtasks })).join("");
-  
-  const createBtnHtml = canCreate
-    ? `<button class="btn btn-primary" id="dashboard-create">${isReq ? "＋ ส่งคำของาน / บรีฟงานใหม่" : "＋ สร้างงานใหม่"}</button>`
-    : "";
+  // Filter state for Date, Member, and Status
+  const filterState = {
+    period: "all",
+    year: "all",
+    month: "all",
+    specificDay: "",
+    startDate: "",
+    endDate: "",
+    dateField: "created_at",
+    memberId: "all",
+    status: "all",
+  };
 
-  const emptyUrgentHtml = interactiveEmptyState({
-    title: "ไม่มีงานเร่งด่วนในขณะนี้",
-    subtitle: "ทุกงานอยู่ในกำหนดส่งตามแผน พักหัวปากกาได้สักครู่",
-    small: true
-  });
+  const draw = () => {
+    // 1. Filter tasks according to Time/Date & Member & Status
+    const filteredTasks = filterTasksByTimeRange(tasks, filterState);
+    const analytics = calculateTeamAnalytics(filteredTasks, members, filterState.memberId);
 
-  qs("#page-content").innerHTML = `<div class="page-header"><div><h2>วันนี้ทีมกำลังขยับงานอะไรอยู่</h2><p class="page-desc">ภาพรวม workflow, deadline และภาระงานของทีมในจุดเดียว</p></div><div class="row-wrap"><span class="chip">อัปเดตล่าสุด ${new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" }).format(new Date())}</span>${createBtnHtml}</div></div>${answerCards}<section class="section" style="margin-top:18px"><div class="stat-grid"><div class="stat is-primary"><div class="stat-label">งานทั้งหมด</div><div class="stat-value">${tasks.length}</div><div class="stat-hint">ทั้ง Active และ History</div></div><div class="stat is-info"><div class="stat-label">กำลังทำ</div><div class="stat-value">${active.length}</div><div class="stat-hint">ยังอยู่ใน workflow</div></div><div class="stat is-warn"><div class="stat-label">รอคอมเมนต์</div><div class="stat-value">${review.length}</div><div class="stat-hint">ต้องการการตัดสินใจ</div></div><div class="stat is-danger"><div class="stat-label">ใกล้ Deadline</div><div class="stat-value">${dueSoon.length}</div><div class="stat-hint">ภายใน 2 วัน / เลยกำหนด</div></div><div class="stat is-ok"><div class="stat-label">เสร็จแล้ว</div><div class="stat-value">${completed.length}</div><div class="stat-hint">อยู่ใน Work History</div></div></div></section><div class="dashboard-grid"><section class="card"><div class="card-header"><div><div class="card-title">Current Team Activity</div><div class="card-sub">ใครกำลังทำอะไรอยู่ตอนนี้</div></div><a class="btn btn-ghost btn-sm" href="team.html">ดูทีมทั้งหมด →</a></div>${activity || `<div class="state">ยังไม่มีงานกำลังทำ</div>`}</section><section class="card"><div class="card-header"><div><div class="card-title">Upcoming Deadline</div><div class="card-sub">งานที่ควรจับตาเป็นลำดับแรก</div></div><a class="btn btn-ghost btn-sm" href="calendar.html">เปิดปฏิทิน →</a></div>${deadlines || `<div class="state">ยังไม่มี deadline</div>`}</section></div><div class="dashboard-grid" style="margin-top:16px"><section class="card"><div class="card-header"><div><div class="card-title">สรุปงานทีมออกแบบ</div><div class="card-sub">จำนวนงานที่กำลังทำ งานรอรีวิว และงานที่เสร็จแล้ว</div></div><a class="btn btn-ghost btn-sm" href="team.html">จัดสรรงาน →</a></div>${loadRows}</section><section class="card"><div class="card-header"><div><div class="card-title">งานที่ต้องขยับเร็ว</div><div class="card-sub">งานใกล้กำหนดและงานที่กำลังติด review</div></div><a class="btn btn-ghost btn-sm" href="board.html">เปิด Board →</a></div><div class="task-grid" style="grid-template-columns:1fr">${urgentCards || emptyUrgentHtml}</div></section></div>`;
-  qs("#dashboard-create")?.addEventListener("click", () => openCreateTask(ctx));
-  bindTaskCards(qs("#page-content"));
+    const active = filteredTasks.filter((t) => t.status !== "completed");
+    const dueSoon = filteredTasks.filter((t) => t.status !== "completed" && relativeDeadline(t.deadline_at || t.deadline).className);
+    const review = filteredTasks.filter((t) => t.status === "review");
+    const revision = filteredTasks.filter((t) => t.status === "revision");
+    const completed = filteredTasks.filter((t) => t.status === "completed");
+    const myTasks = filteredTasks.filter((t) => (t.assignee_id === ctx.member?.id || (isReq && t.created_by === ctx.member?.id)) && t.status !== "completed");
+    const lateCount = active.filter((t) => relativeDeadline(t.deadline_at || t.deadline).className === "is-overdue").length;
+
+    // Header create button
+    const createBtnHtml = canCreate
+      ? `<button class="btn btn-primary" id="dashboard-create">${isReq ? "＋ ส่งคำของาน / บรีฟงานใหม่" : "＋ สร้างงานใหม่"}</button>`
+      : "";
+
+    // Answer cards
+    const answerCards = `
+      <div class="answer-grid">
+        <div class="answer"><div class="q">${isReq ? "งานที่คุณส่งบรีฟ" : "งานที่คุณรับผิดชอบ"}</div><div class="a">${myTasks.length} งานอยู่ในกระบวนการ</div></div>
+        <div class="answer"><div class="q">งานไหนใกล้ Deadline?</div><div class="a">${dueSoon.length} งานต้องติดตาม</div></div>
+        <div class="answer"><div class="q">งานอยู่ขั้นตอนรีวิว?</div><div class="a">${review.length} งานรอคอมเมนต์</div></div>
+        <div class="answer"><div class="q">งานกำลังแก้ไข?</div><div class="a">${revision.length} งานส่งกลับมาแก้</div></div>
+      </div>
+    `;
+
+    // Overview Stats
+    const statsHtml = `
+      <section class="section" style="margin-top:16px">
+        <div class="stat-grid">
+          <div class="stat is-primary">
+            <div class="stat-label">งานทั้งหมดในช่วงนี้</div>
+            <div class="stat-value">${filteredTasks.length}</div>
+            <div class="stat-hint">ทั้ง Active และ Completed</div>
+          </div>
+          <div class="stat is-info">
+            <div class="stat-label">กำลังทำ (Active)</div>
+            <div class="stat-value">${active.length}</div>
+            <div class="stat-hint">อยู่ในขั้นตอนการออกแบบ</div>
+          </div>
+          <div class="stat is-warn">
+            <div class="stat-label">รอตรวจ (Review)</div>
+            <div class="stat-value">${review.length}</div>
+            <div class="stat-hint">ส่งดราฟต์ให้ตรวจแล้ว</div>
+          </div>
+          <div class="stat is-danger">
+            <div class="stat-label">แก้ไขงาน (Revision)</div>
+            <div class="stat-value">${revision.length}</div>
+            <div class="stat-hint">มีคอมเมนต์สั่งปรับแก้</div>
+          </div>
+          <div class="stat is-ok">
+            <div class="stat-label">ส่งมอบแล้ว (Completed)</div>
+            <div class="stat-value">${completed.length}</div>
+            <div class="stat-hint">อนุมัติและปิดงานแล้ว</div>
+          </div>
+        </div>
+      </section>
+    `;
+
+    // Activity list
+    const activityList = active.slice(0, 5).map((task) => {
+      const member = memberFor(task, members);
+      const dotColor = task.status === "review" ? "var(--status-review)" : task.status === "revision" ? "var(--status-revision)" : "var(--status-drafting)";
+      return `
+        <div class="activity-item">
+          <div class="activity-dot" style="background:${dotColor};"></div>
+          <div class="activity-main">
+            <div class="activity-name">${escapeHtml(member?.name || "ไม่ระบุผู้รับผิดชอบ")} <span class="text-muted" style="font-weight:400">· ${escapeHtml(roleLabel(member?.role))}</span></div>
+            <div class="activity-task"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;font-weight:600;">${escapeHtml(task.title)}</a> · ${escapeHtml(STATUS_LABELS[task.status])}</div>
+          </div>
+          <div class="activity-right">
+            <div class="text-xs text-muted">${Number(task.item_count || 1)} ชิ้น</div>
+            <div class="text-xs text-muted">${formatDate(task.deadline_at || task.deadline)}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // Deadlines list
+    const deadlinesList = [...filteredTasks].filter((t) => t.status !== "completed")
+      .sort((a, b) => String(a.deadline_at || a.deadline).localeCompare(String(b.deadline_at || b.deadline)))
+      .slice(0, 5).map((task) => {
+        const project = projectFor(task, projects);
+        const member = memberFor(task, members);
+        const date = task.deadline_at ? new Date(task.deadline_at) : task.deadline ? new Date(`${task.deadline}T12:00:00`) : null;
+        const urgency = relativeDeadline(task.deadline_at || task.deadline);
+        return `
+          <div class="deadline-item">
+            <div class="deadline-date">
+              <span class="day">${date ? date.getDate() : "—"}</span>
+              <span class="month">${date ? date.toLocaleDateString("th-TH", { month: "short" }) : "—"}</span>
+            </div>
+            <div class="deadline-main">
+              <div class="deadline-title"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;">${escapeHtml(task.title)}</a></div>
+              <div class="deadline-sub">${escapeHtml(project?.name || "—")} · ${escapeHtml(member?.name || "—")}</div>
+            </div>
+            <span class="badge ${urgency.className === "is-overdue" ? "badge-danger" : urgency.className ? "badge-warn" : "badge-neutral"}">${escapeHtml(urgency.label)}</span>
+          </div>
+        `;
+      }).join("");
+
+    // Urgent cards
+    const urgentCards = dueSoon.slice(0, 3).map((task) => taskCard(task, { projects, members, subtasks })).join("");
+    const emptyUrgentHtml = interactiveEmptyState({
+      title: "ไม่มีงานเร่งด่วนในช่วงเวลานี้",
+      subtitle: "งานทั้งหมดอยู่ในกำหนดส่งตามแผน หรือไม่มีงานค้างตามตัวกรองที่เลือก",
+      small: true
+    });
+
+    // Putting everything together into #page-content
+    qs("#page-content").innerHTML = `
+      <div class="page-header">
+        <div>
+          <h2>ภาพรวมคิวงาน & สถิติทีมออกแบบ</h2>
+          <p class="page-desc">วิเคราะห์ Workflow, กำหนดส่ง และเปรียบเทียบภาระงานของทีมในจุดเดียว</p>
+        </div>
+        <div class="row-wrap" style="gap:10px;">
+          <span class="chip">อัปเดตล่าสุด ${new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" }).format(new Date())}</span>
+          ${createBtnHtml}
+        </div>
+      </div>
+
+      <!-- Time & Date Filter Card -->
+      ${renderTimeFilterBarHtml({ ...filterState, matchCount: filteredTasks.length })}
+
+      <!-- Answer Grid & Stats -->
+      ${answerCards}
+      ${statsHtml}
+
+      <!-- Member Comparison & Status Breakdown Chart -->
+      ${renderMemberComparisonHtml({
+        memberStats: analytics.memberStats,
+        teamTotals: analytics.teamTotals,
+        selectedMemberId: filterState.memberId,
+        selectedStatus: filterState.status,
+        projects,
+        filteredTasks
+      })}
+
+      <!-- Current Activity & Upcoming Deadlines -->
+      <div class="dashboard-grid">
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">ความเคลื่อนไหวในทีม (Current Activity)</div>
+              <div class="card-sub">งานที่กำลังเคลื่อนไหวตามช่วงเวลาที่เลือก</div>
+            </div>
+            <a class="btn btn-ghost btn-sm" href="team.html">ดูทีมทั้งหมด →</a>
+          </div>
+          ${activityList || `<div class="state" style="padding:24px;">ไม่มีความเคลื่อนไหวในช่วงเวลานี้</div>`}
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">กำหนดส่งเร็วๆ นี้ (Upcoming Deadlines)</div>
+              <div class="card-sub">งานที่ต้องติดตามส่งมอบ</div>
+            </div>
+            <a class="btn btn-ghost btn-sm" href="calendar.html">เปิดปฏิทิน →</a>
+          </div>
+          ${deadlinesList || `<div class="state" style="padding:24px;">ไม่มีกำหนดส่งในช่วงเวลานี้</div>`}
+        </section>
+      </div>
+
+      <!-- Urgent Tasks Grid -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">งานที่ต้องจับตาเป็นพิเศษ</div>
+            <div class="card-sub">งานใกล้กำหนดส่งและงานที่กำลังรอความเห็น</div>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="board.html">เปิดบอร์ด Kanban →</a>
+        </div>
+        <div class="task-grid" style="grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));">
+          ${urgentCards || emptyUrgentHtml}
+        </div>
+      </div>
+    `;
+
+    // Bind event listeners
+    qs("#dashboard-create")?.addEventListener("click", () => openCreateTask(ctx));
+    bindTimeFilterBar(qs("#page-content"), {
+      state: filterState,
+      onChange: () => draw()
+    });
+    bindMemberComparison(qs("#page-content"), {
+      onSelectMember: (memberId) => {
+        filterState.memberId = memberId;
+        draw();
+      },
+      onSelectStatus: (statusKey) => {
+        filterState.status = filterState.status === statusKey ? "all" : statusKey;
+        draw();
+      }
+    });
+    bindTaskCards(qs("#page-content"));
+  };
+
+  draw();
 }
