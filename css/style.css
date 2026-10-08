@@ -251,36 +251,39 @@ img { max-width: 100%; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  color: rgba(255, 255, 255, 0.82);
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: #8b8f9e;
   font-size: 0.875rem;
   font-weight: 500;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   color: #fff;
   text-decoration: none;
 }
 
 .nav-item.is-active {
-  background: rgba(255, 255, 255, 0.14);
+  background: #1c1d25;
   color: #fff;
   font-weight: 600;
-  box-shadow: inset 3px 0 0 #fff;
+  box-shadow: none;
+  border: 1px solid #282a36;
 }
 
-.nav-item svg { flex: 0 0 auto; opacity: 0.9; }
+.nav-item svg { flex: 0 0 auto; opacity: 0.85; }
 
 .nav-count {
   margin-left: auto;
-  background: rgba(255, 255, 255, 0.16);
+  background: #101115;
+  color: #8b8f9e;
   border-radius: 20px;
-  padding: 1px 7px;
-  font-size: 0.68rem;
+  padding: 2px 8px;
+  font-size: 0.7rem;
   font-weight: 600;
+  border: 1px solid #22232a;
 }
 
 .nav-footer {
@@ -580,39 +583,45 @@ img { max-width: 100%; }
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border-radius: 9px;
+  border-radius: 10px;
   border: 1px solid transparent;
-  padding: 8px 14px;
+  padding: 8px 16px;
   font-size: 0.83rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  background: var(--surface);
-  color: var(--ink-700);
-  border-color: var(--line-strong);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #17181f;
+  color: #eae8f2;
+  border-color: #2b2c37;
   white-space: nowrap;
 }
 
-.btn:hover { background: var(--purple-50); border-color: var(--purple-200); color: var(--kkp-purple); }
+.btn:hover { background: #232532; border-color: #383a4c; color: #fff; }
 
 .btn-primary {
-  background: var(--kkp-purple);
-  border-color: var(--kkp-purple);
+  background: var(--royal-purple);
+  border-color: var(--royal-purple);
   color: #fff;
+  box-shadow: 0 4px 14px rgba(97, 91, 153, 0.35);
 }
 
-.btn-primary:hover { background: var(--kkp-purple-deep); border-color: var(--kkp-purple-deep); color: #fff; }
+.btn-primary:hover {
+  background: #736cb4;
+  border-color: #736cb4;
+  color: #fff;
+  transform: translateY(-1px);
+}
 
-.btn-success { background: var(--ok); border-color: var(--ok); color: #fff; }
-.btn-success:hover { background: #175f3c; border-color: #175f3c; color: #fff; }
+.btn-success { background: var(--ok); border-color: var(--ok); color: #0a0910; }
+.btn-success:hover { background: #1affa3; border-color: #1affa3; }
 
-.btn-danger { background: var(--surface); border-color: var(--danger-line); color: var(--danger); }
-.btn-danger:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn-danger { background: rgba(230,0,126,0.1); border-color: rgba(230,0,126,0.3); color: #ff3399; }
+.btn-danger:hover { background: #e6007e; border-color: #e6007e; color: #fff; }
 
-.btn-ghost { background: transparent; border-color: transparent; color: var(--kkp-purple); }
-.btn-ghost:hover { background: var(--purple-50); }
+.btn-ghost { background: transparent; border-color: transparent; color: #8b8f9e; }
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
 
-.btn-sm { padding: 5px 10px; font-size: 0.76rem; border-radius: 8px; }
+.btn-sm { padding: 5px 12px; font-size: 0.76rem; border-radius: 8px; }
 .btn-xs { padding: 3px 8px; font-size: 0.72rem; border-radius: 7px; }
 .btn-block { width: 100%; }
 .btn[disabled], .btn.is-disabled { opacity: 0.55; cursor: not-allowed; }
@@ -816,56 +825,62 @@ table.data .num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 
 .task-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 13px 14px;
-  box-shadow: var(--shadow-xs);
+  background: #17181c;
+  border: 1px solid #23252c;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
   cursor: pointer;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .task-card:hover {
-  border-color: var(--purple-300);
-  box-shadow: var(--shadow-sm);
+  border-color: #383c48;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-.task-card.is-overdue { border-left: 3px solid var(--danger); }
-.task-card.is-due-soon { border-left: 3px solid var(--warn); }
-.task-card.is-done { border-left: 3px solid var(--ok); }
+.task-card.is-overdue { border-left: 4px solid var(--danger); }
+.task-card.is-due-soon { border-left: 4px solid var(--warn); }
+.task-card.is-done { border-left: 4px solid var(--ok); }
 
 .task-card-title {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--ink-900);
+  color: #ffffff;
   line-height: 1.4;
 }
 
-.task-card-project { font-size: 0.75rem; color: var(--ink-500); }
+.task-card-project {
+  font-size: 0.75rem;
+  color: #8b8f9e;
+  font-weight: 500;
+}
 
 .task-card-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  border-top: 1px dashed var(--line);
-  padding-top: 9px;
+  background: #101115;
+  border-radius: 10px;
+  padding: 8px 10px;
 }
 
 .task-card-meta .k {
-  font-size: 0.66rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-400);
+  letter-spacing: 0.05em;
+  color: #636775;
 }
 
 .task-card-meta .v {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--ink-800);
+  color: #d1d4de;
 }
 
 .task-card-footer {
@@ -873,6 +888,7 @@ table.data .num { text-align: right; font-variant-numeric: tabular-nums; }
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding-top: 4px;
 }
 
 /* --------------------------------------------------------------- Kanban -- */
