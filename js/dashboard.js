@@ -3,29 +3,30 @@ import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isRequester, isViewer, canCreateTask } from "./auth.js";
-import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH } from "./analytics.js";
+import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison } from "./analytics.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Brand palette (exact hex codes from CI)
+   Brand palette (KKP Purple Palette from user request)
 ───────────────────────────────────────────────────────────────────────── */
 const BRAND = {
-  legacyPurple: "#594F74",
-  royalPurple: "#615B99",
-  grandeurGrey: "#ADACB9",
-  grandeurGreyLite: "#E7E7ED",
+  primary: "#544c70",      // --kkp-purple
+  deep: "#3f3a56",         // --kkp-purple-deep
+  soft: "#6e6790",         // --kkp-purple-soft
+  purple300: "#bdb7d1",    // --purple-300
+  purple200: "#d9d5e6",    // --purple-200
+  purple100: "#eceaf3",    // --purple-100
+  purple50: "#f6f5f9",     // --purple-50
   cyan: "#00A3D9",
   magenta: "#E6007E",
   orange: "#F05A28",
   lime: "#8DC63F",
   violet: "#7F00FF",
-  darkSlate: "#3D3550",
   mintNeon: "#00F0B5",
-  darkNavy: "#112347",
 };
 
 const STATUS_CHART_COLORS = {
-  brief:     { bg: "#ADACB9", border: "#8f8ca0" },
-  drafting:  { bg: "#615B99", border: "#4d4880" },
+  brief:     { bg: "#bdb7d1", border: "#8f8ca0" },
+  drafting:  { bg: "#544c70", border: "#3f3a56" },
   review:    { bg: "#F05A28", border: "#c44016" },
   revision:  { bg: "#E6007E", border: "#b3005f" },
   completed: { bg: "#8DC63F", border: "#6a9f2a" },
@@ -71,6 +72,7 @@ export async function render(ctx) {
 
   const draw = () => {
     const filtered = filterTasksByTimeRange(tasks, filterState);
+    const analytics = calculateTeamAnalytics(filtered, members, filterState.memberId);
     const active    = filtered.filter(t => t.status !== "completed");
     const dueSoon   = filtered.filter(t => t.status !== "completed" && relativeDeadline(t.deadline_at || t.deadline).className);
     const review    = filtered.filter(t => t.status === "review");
@@ -297,21 +299,15 @@ export async function render(ctx) {
             `).join("")}
           </div>
         </div>
-      </div>
-
-      <!-- Member Comparison Bar Chart -->
-      <div class="chart-card" style="margin-bottom:18px">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-card-title">เปรียบเทียบภาระงานรายคน</div>
-            <div class="chart-card-sub">จำนวนงาน Active และส่งมอบแล้ว แยกตามสมาชิกทีม</div>
-          </div>
-          <a class="btn btn-ghost btn-sm" href="team.html">ดูทีมทั้งหมด →</a>
-        </div>
-        <div class="chart-wrap" style="height:260px">
-          <canvas id="chart-members" height="260"></canvas>
-        </div>
-      </div>
+      <!-- Member Comparison & Deepdive Section -->
+      ${renderMemberComparisonHtml({
+        memberStats: analytics.memberStats,
+        teamTotals: analytics.teamTotals,
+        selectedMemberId: filterState.memberId,
+        selectedStatus: filterState.status,
+        projects,
+        filteredTasks: filtered
+      })}
 
       <!-- Activity + Deadlines -->
       <div class="dash-two-col">
@@ -384,6 +380,16 @@ export async function render(ctx) {
 
     qs("#dashboard-create")?.addEventListener("click", () => openCreateTask(ctx));
     bindTaskCards(qs("#page-content"));
+    bindMemberComparison(qs("#page-content"), {
+      onSelectMember: (memberId) => {
+        filterState.memberId = memberId;
+        draw();
+      },
+      onSelectStatus: (statusKey) => {
+        filterState.status = filterState.status === statusKey ? "all" : statusKey;
+        draw();
+      }
+    });
 
     /* ─────────── Render Charts ─────────── */
     setTimeout(() => {
@@ -391,15 +397,15 @@ export async function render(ctx) {
       destroyChart("trend");
       const trendCtx = document.getElementById("chart-trend");
       if (trendCtx) {
-        // Create glowing gradient for Active tasks
+        // Create elegant KKP Purple gradient for Active tasks
         const ctx = trendCtx.getContext("2d");
         const activeGradient = ctx.createLinearGradient(0, 0, 0, 220);
-        activeGradient.addColorStop(0, "rgba(127, 0, 255, 0.4)");
-        activeGradient.addColorStop(1, "rgba(127, 0, 255, 0.0)");
+        activeGradient.addColorStop(0, "rgba(84, 76, 112, 0.45)");
+        activeGradient.addColorStop(1, "rgba(84, 76, 112, 0.0)");
 
         const completedGradient = ctx.createLinearGradient(0, 0, 0, 220);
-        completedGradient.addColorStop(0, "rgba(141, 198, 63, 0.2)");
-        completedGradient.addColorStop(1, "rgba(141, 198, 63, 0.0)");
+        completedGradient.addColorStop(0, "rgba(189, 183, 209, 0.3)");
+        completedGradient.addColorStop(1, "rgba(189, 183, 209, 0.0)");
 
         _chartInstances["trend"] = new Chart(trendCtx, {
           type: "line",
@@ -407,27 +413,27 @@ export async function render(ctx) {
             labels: monthLabels,
             datasets: [
               {
-                label: "ส่งมอบแล้ว",
+                label: "ส่งมอบแล้ว (Done)",
                 data: monthCompleted,
-                borderColor: BRAND.lime,
+                borderColor: "#bdb7d1",
                 backgroundColor: completedGradient,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: BRAND.lime,
+                pointBackgroundColor: "#bdb7d1",
                 pointBorderColor: "#151321",
                 pointRadius: 5,
                 pointHoverRadius: 7,
                 borderWidth: 2.5,
               },
               {
-                label: "งาน Active",
+                label: "งาน Active (กำลังทำ)",
                 data: monthActive,
-                borderColor: BRAND.violet, // Use bright violet for the line
+                borderColor: "#6e6790",
                 backgroundColor: activeGradient,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: BRAND.violet,
-                pointBorderColor: "#151321",
+                pointBackgroundColor: "#544c70",
+                pointBorderColor: "#ffffff",
                 pointRadius: 5,
                 pointHoverRadius: 7,
                 borderWidth: 3,
