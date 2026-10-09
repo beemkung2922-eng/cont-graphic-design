@@ -19,8 +19,15 @@ const icons = {
   close: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>`,
 };
 
-export const qs = (selector, root = document) => root.querySelector(selector);
-export const qsa = (selector, root = document) => [...root.querySelectorAll(selector)];
+export const qs = (selector, root = document) => {
+  const node = (root && typeof root.querySelector === "function") ? root : document;
+  return node.querySelector(selector);
+};
+export const qsa = (selector, root = document) => {
+  const node = (root && typeof root.querySelectorAll === "function") ? root : document;
+  return [...node.querySelectorAll(selector)];
+};
+
 
 export function toast(message, type = "info", title = "") {
   const stack = qs("#toast-stack") || document.body.appendChild(Object.assign(document.createElement("div"), { id: "toast-stack", className: "toast-stack" }));
