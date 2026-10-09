@@ -3130,3 +3130,281 @@ body[data-page="dashboard"] .page {
     padding: 16px 12px 40px;
   }
 }
+
+/* ==========================================================================
+   UNIVERSAL TOP-NAV & HIGH-CONTRAST READABILITY SYSTEM
+   - Completely removes left sidebar across ALL pages
+   - Topbar provides universal navigation + profile + create CTA
+   - Fixes calendar contrast and removes washed out white selections
+   - Fixes brief preset contrast in create task modal
+   - Enforces clean, legible IBM Plex Sans Thai typography
+   ========================================================================== */
+
+/* Universal Layout: No Sidebar anywhere */
+.app {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  background: var(--ink) !important;
+}
+
+.sidebar, #sidebar-slot, #sidebar {
+  display: none !important;
+}
+
+.main {
+  width: 100% !important;
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.page {
+  width: 100% !important;
+  max-width: 1420px !important;
+  margin: 0 auto !important;
+  padding: 24px 28px 60px !important;
+  box-sizing: border-box !important;
+}
+
+/* High-Contrast Universal Topbar */
+.pixel-topbar {
+  height: 84px;
+  min-height: 84px;
+  background: #0f1016;
+  border-bottom: 2px solid #282a3a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 16px;
+  font-family: var(--font);
+}
+
+.pixel-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+.pixel-nav-link {
+  font-family: var(--font) !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #a8adbf !important;
+  letter-spacing: 0.01em;
+  padding: 8px 14px !important;
+  border-radius: 6px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  border: 1px solid transparent !important;
+}
+.pixel-nav-link:hover {
+  color: #FFFFFF !important;
+  background: #1c1e2b !important;
+  transform: translateY(-1px);
+}
+.pixel-nav-link.is-active {
+  color: #FFFFFF !important;
+  background: #202232 !important;
+  border: 1px solid var(--yellow) !important;
+  box-shadow: 0 2px 0 var(--yellow-dark) !important;
+}
+
+/* User Capsule in Topbar */
+.topbar-user-capsule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #181924;
+  border: 1px solid #2e3144;
+  padding: 6px 12px;
+  border-radius: 24px;
+}
+.topbar-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.78rem;
+  display: grid;
+  place-items: center;
+}
+.topbar-user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.topbar-user-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+.topbar-user-role {
+  font-size: 0.68rem;
+  color: #9297ad;
+}
+.topbar-logout-btn {
+  background: transparent;
+  border: 0;
+  color: #9297ad;
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  transition: color 0.15s;
+  border-radius: 4px;
+}
+.topbar-logout-btn:hover {
+  color: var(--red);
+}
+
+/* High-Contrast Smart Brief Presets (Fix for Image 4) */
+.brief-presets-wrap {
+  background: #161823 !important;
+  border: 1px solid #2f3246 !important;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+.brief-presets-label {
+  color: #FFFFFF !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+}
+.brief-presets-hint {
+  color: #959ab0 !important;
+}
+.brief-preset-btn {
+  background: #1f212f !important;
+  border: 1px solid #36394e !important;
+  border-radius: 8px !important;
+  color: #FFFFFF !important;
+  transition: all 0.15s ease !important;
+}
+.brief-preset-btn:hover {
+  background: #282b3d !important;
+  border-color: #4f5470 !important;
+  transform: translateY(-1px);
+}
+.brief-preset-btn.is-active {
+  background: #1b263b !important;
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 0 2px rgba(25, 195, 235, 0.3) !important;
+}
+.preset-title {
+  color: #FFFFFF !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+}
+.preset-sub {
+  color: #9ba0b6 !important;
+  font-size: 0.72rem !important;
+}
+.preset-tag {
+  background: #13141d !important;
+  color: #CBD1E5 !important;
+  border: 1px solid #33364a !important;
+}
+.preset-icon {
+  background: #2a2d3e !important;
+  color: #FFFFFF !important;
+}
+.brief-preset-btn.is-active .preset-icon {
+  background: var(--cyan) !important;
+  color: #0A0A0A !important;
+}
+
+/* High-Contrast Calendar Overrides (Fix for Image 3) */
+.cal-grid {
+  gap: 8px;
+}
+.cal-cell {
+  background: #161722 !important;
+  border: 1px solid #2b2e40 !important;
+  border-radius: 8px !important;
+  min-height: 100px;
+  padding: 8px 10px !important;
+  color: #FFFFFF !important;
+  font-family: var(--font) !important;
+  transition: all 0.15s ease;
+}
+.cal-cell:hover {
+  background: #1e202f !important;
+  border-color: #42465e !important;
+}
+.cal-cell.is-outside {
+  background: #111219 !important;
+  opacity: 0.45 !important;
+}
+.cal-cell.is-today {
+  border: 2px solid var(--cyan) !important;
+  background: #181c2b !important;
+  box-shadow: inset 0 0 0 1px var(--cyan) !important;
+}
+.cal-cell.is-selected {
+  background: #222538 !important;
+  border: 2px solid var(--yellow) !important;
+  box-shadow: 0 0 8px rgba(255, 198, 26, 0.2) !important;
+}
+.cal-day {
+  color: #FFFFFF !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  font-family: var(--font) !important;
+}
+.cal-day .count {
+  background: #282b3d !important;
+  color: var(--cyan) !important;
+  border: 1px solid #3b3f56;
+}
+.cal-item {
+  background: #222434 !important;
+  border: 1px solid #36394e !important;
+  border-left: 3px solid var(--cyan) !important;
+  color: #E2E6F5 !important;
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  border-radius: 4px !important;
+}
+.cal-item.is-overdue {
+  background: rgba(232, 32, 42, 0.2) !important;
+  border-left-color: var(--red) !important;
+  color: #ff757c !important;
+}
+.cal-item.is-due-soon {
+  background: rgba(255, 198, 26, 0.18) !important;
+  border-left-color: var(--yellow) !important;
+  color: #ffd642 !important;
+}
+.cal-item.is-done {
+  background: rgba(43, 209, 75, 0.18) !important;
+  border-left-color: var(--green) !important;
+  color: #59e875 !important;
+}
+.conflict {
+  background: #1e1616 !important;
+  border: 1px solid #542224 !important;
+  color: #ffc2c2 !important;
+  border-radius: 8px !important;
+}
+.field input, .field select, .field textarea {
+  background: #13141c !important;
+  border: 1px solid #313548 !important;
+  color: #FFFFFF !important;
+  font-family: var(--font) !important;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--cyan) !important;
+  outline: 2px solid rgba(25, 195, 235, 0.2) !important;
+}
