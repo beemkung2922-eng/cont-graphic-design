@@ -144,21 +144,22 @@ export async function render(ctx) {
       </div>
     `;
 
-    /* ── KPI Cards (Sleek Taskio / Messaging style) ── */
+    /* ── KPI Cards (UrbanRail Live Telemetry style) ── */
+    const onTimeRate = filtered.length ? ((completed.length / filtered.length) * 100).toFixed(1) : "100.0";
     const kpiCards = [
-      { label: "งานในกระบวนการ (Active)", value: active.length, trend: "+8%", isDown: false, icon: "⚡" },
-      { label: "งานทั้งหมดในระบบ", value: filtered.length, trend: "+12%", isDown: false, icon: "📋" },
-      { label: "รอตรวจคอมเมนต์ (Review)", value: review.length, trend: review.length > 0 ? `${review.length}` : "0", isDown: false, icon: "🔍" },
-      { label: "ส่งมอบงานสำเร็จ (Done)", value: completed.length, trend: "+24%", isDown: false, icon: "✅" },
+      { label: "TRAINS RUNNING (ACTIVE)", value: active.length, trend: "NORMAL", isDown: false, icon: "⚡", isAmber: false },
+      { label: "LINES ACTIVE (TOTAL)", value: filtered.length, trend: "+12%", isDown: false, icon: "☷", isAmber: false },
+      { label: "INSPECTION / REVIEWS", value: review.length, trend: "PENDING", isDown: review.length > 3, icon: "⚠", isAmber: review.length > 0 },
+      { label: "ON-TIME PERFORMANCE", value: `${onTimeRate}%`, trend: "98.4%", isDown: false, icon: "✦", isAmber: true },
     ].map(k => `
-      <div class="kpi-card">
+      <div class="kpi-card" style="font-family:var(--font-mono);">
         <div class="kpi-top-row">
-          <div class="kpi-icon">${k.icon}</div>
-          <div class="kpi-trend ${k.isDown ? "is-down" : ""}">${k.trend}</div>
+          <div class="kpi-icon" style="color:${k.isAmber ? "#e59324" : "#10b981"};">${k.icon}</div>
+          <div class="kpi-trend ${k.isDown ? "is-down" : ""}" style="${k.isAmber ? "background:rgba(229,147,36,0.12);color:#e59324;" : ""}">${k.trend}</div>
         </div>
         <div class="kpi-body">
-          <div class="kpi-value">${k.value}</div>
-          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-value" style="font-family:var(--font-flap);font-size:2.2rem;letter-spacing:0.04em;color:${k.isAmber ? "#e59324" : "#ffffff"};">${k.value}</div>
+          <div class="kpi-label" style="font-family:var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;">${k.label}</div>
         </div>
       </div>
     `).join("");
@@ -196,83 +197,165 @@ export async function render(ctx) {
       count: filtered.filter(t => t.status === s).length,
     }));
 
-    /* ── Activity feed ── */
-    const activityHtml = active.slice(0, 6).map(task => {
+    /* ── Split-Flap Helper Functions ── */
+    const renderFlapWord = (text, isAmber = false) => {
+      return text.toUpperCase().split("").map(ch => {
+        if (ch === " ") return `<span class="flap-char is-space"></span>`;
+        return `<span class="flap-char ${isAmber ? "is-amber" : ""}">${escapeHtml(ch)}</span>`;
+      }).join("");
+    };
+
+    const renderFlapMini = (text, colorClass = "") => {
+      return text.toUpperCase().split("").map(ch => {
+        return `<span class="flap-mini ${colorClass}">${escapeHtml(ch)}</span>`;
+      }).join("");
+    };
+
+    /* ── Live Departures Board Rows (Flight/Rail Timetable Style) ── */
+    const departureRows = filtered.slice(0, 8).map(task => {
       const member = memberFor(task, members);
       const project = projectFor(task, projects);
-      const urgency = relativeDeadline(task.deadline_at || task.deadline);
-      const dotColor = STATUS_CHART_COLORS[task.status]?.bg || "#adacb9";
+      const d = getTaskDate(task, "deadline");
+      const timeStr = d ? `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` : "09:00";
+      
+      let statusText = "ON TIME";
+      let statusClass = "on-time";
+      let statusColor = "is-green";
+      
+      if (task.status === "revision") {
+        statusText = "REVISION";
+        statusClass = "cancelled";
+        statusColor = "is-red";
+      } else if (relativeDeadline(task.deadline_at || task.deadline).className === "is-overdue") {
+        statusText = "DELAYED";
+        statusClass = "delayed";
+        statusColor = "is-amber";
+      } else if (task.status === "review") {
+        statusText = "IN REVIEW";
+        statusClass = "delayed";
+        statusColor = "is-amber";
+      } else if (task.status === "completed") {
+        statusText = "DELIVERED";
+        statusClass = "on-time";
+        statusColor = "is-green";
+      }
+
+      const platformCode = String(task.item_count || 1).padStart(2, "0");
+      const trackCode = task.status === "drafting" ? "A" : task.status === "review" ? "B" : "C";
+
       return `
-        <div class="feed-item">
-          <div class="feed-dot" style="background:${dotColor}"></div>
-          <div class="feed-body">
-            <div class="feed-title"><a href="task.html?id=${encodeURIComponent(task.id)}">${escapeHtml(task.title)}</a></div>
-            <div class="feed-meta">
-              ${avatar(member, 20)}
-              <span>${escapeHtml(member?.name || "—")}</span>
-              <span class="feed-dot-sep">·</span>
-              <span>${escapeHtml(project?.name || "—")}</span>
-              <span class="feed-dot-sep">·</span>
-              <span class="badge ${urgency.className === "is-overdue" ? "badge-danger" : urgency.className ? "badge-warn" : "badge-neutral"}" style="font-size:0.68rem">${escapeHtml(STATUS_TH[task.status])}</span>
-            </div>
+        <tr>
+          <td><span class="flap-cell">${renderFlapMini(timeStr, "is-amber")}</span></td>
+          <td><strong style="color:#ffffff;"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title.slice(0, 24))}</a></strong></td>
+          <td><span style="color:#8c90a1;">${escapeHtml(project?.name?.slice(0, 16) || "GENERAL")}</span></td>
+          <td><span class="flap-cell">${renderFlapMini(platformCode)}</span></td>
+          <td>
+            <span class="status-rail-pill ${statusClass}">
+              <span class="flap-cell">${renderFlapMini(statusText, statusColor)}</span>
+            </span>
+          </td>
+          <td><span class="flap-cell">${renderFlapMini(trackCode)}</span></td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="6" style="text-align:center;padding:24px;color:#515463;">NO ACTIVE SCHEDULED TRAINS / TASKS</td></tr>`;
+
+    /* ── Split-flap Hero Banner HTML ── */
+    const flapHeroHtml = `
+      <div class="flap-hero-board">
+        <div class="flap-headline-container">
+          <div class="flap-text-row">
+            ${renderFlapWord("ONE BOARD.")}
           </div>
-          <div class="feed-right">
-            <div class="text-xs text-muted">${formatDate(task.deadline_at || task.deadline)}</div>
+          <div class="flap-text-row">
+            ${renderFlapWord("EVERY JOURNEY.")}
+          </div>
+          <div class="flap-text-row">
+            ${renderFlapWord("STAY INFORMED.", true)}
           </div>
         </div>
-      `;
-    }).join("") || `<div class="state-empty">ไม่มีงาน Active ในช่วงเวลานี้</div>`;
+        <div class="flap-subtext">
+          CONT OPERATIONS CLOUD UNIFIES LIVE DATA, ALERTS, AND WORKFLOW ANALYTICS SO DESIGN TEAMS CAN KEEP PROJECTS MOVING AND CLIENTS INFORMED.
+        </div>
+        <div class="flap-action-bar">
+          ${canCreate ? `<button class="btn-rail-amber" id="flap-create-btn"><span>⚡ REQUEST ACCESS / CREATE TASK</span> <span>›</span></button>` : ""}
+          <a class="btn-rail-dark" href="board.html"><span>SEE LIVE BOARD</span> <span>☷</span></a>
+        </div>
+      </div>
+    `;
 
-    /* ── Upcoming deadlines ── */
-    const deadlinesHtml = [...filtered]
-      .filter(t => t.status !== "completed")
-      .sort((a, b) => String(a.deadline_at || a.deadline).localeCompare(String(b.deadline_at || b.deadline)))
-      .slice(0, 6)
-      .map(task => {
-        const project = projectFor(task, projects);
-        const member = memberFor(task, members);
-        const date = task.deadline_at ? new Date(task.deadline_at) : task.deadline ? new Date(`${task.deadline}T12:00:00`) : null;
-        const urgency = relativeDeadline(task.deadline_at || task.deadline);
-        return `
-          <div class="deadline-row">
-            <div class="deadline-date-block">
-              <span class="dl-day">${date ? date.getDate() : "—"}</span>
-              <span class="dl-month">${date ? date.toLocaleDateString("th-TH", { month: "short" }) : "—"}</span>
+    /* ── Live Departures Timetable Card HTML ── */
+    const departuresBoardHtml = `
+      <div class="departures-board-card">
+        <div class="departures-header">
+          <div class="departures-title">
+            <span>LIVE DISPATCH & WORKFLOW DEPARTURES</span>
+            <div class="led-bar">
+              <span class="led-pip is-on"></span>
+              <span class="led-pip is-on"></span>
+              <span class="led-pip is-on"></span>
+              <span class="led-pip is-amber"></span>
             </div>
-            <div class="deadline-info">
-              <div class="deadline-task-name"><a href="task.html?id=${encodeURIComponent(task.id)}">${escapeHtml(task.title)}</a></div>
-              <div class="deadline-task-sub">${escapeHtml(project?.name || "—")} · ${escapeHtml(member?.name || "—")}</div>
-            </div>
-            <span class="badge ${urgency.className === "is-overdue" ? "badge-danger" : urgency.className ? "badge-warn" : "badge-ok"}">${escapeHtml(urgency.label)}</span>
           </div>
-        `;
-      }).join("") || `<div class="state-empty">ไม่มี deadline ที่ต้องติดตาม</div>`;
+          <a href="board.html" class="btn-rail-dark" style="padding:4px 10px;font-size:0.75rem;">VIEW FULL BOARD ☷</a>
+        </div>
+        <div class="departures-table-wrap">
+          <table class="departures-table">
+            <thead>
+              <tr>
+                <th style="width:90px;">TIME</th>
+                <th>WORKFLOW / TASK DESTINATION</th>
+                <th>PROJECT</th>
+                <th style="width:80px;">ITEMS</th>
+                <th style="width:160px;">STATUS</th>
+                <th style="width:70px;">TRACK</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${departureRows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
 
     /* ─────────── Render HTML ─────────── */
     qs("#page-content").innerHTML = `
       <div class="dash-header">
         <div>
-          <h2 class="dash-title">ภาพรวมคิวงาน & สถิติทีม</h2>
-          <p class="dash-sub">วิเคราะห์ Workflow · กำหนดส่ง · เปรียบเทียบภาระงานของทีม</p>
+          <h2 class="dash-title" style="font-family:var(--font-mono);letter-spacing:0.12em;text-transform:uppercase;color:#f1f2f6;">
+            URBANRAIL · OPERATIONS CONTROL CLOUD
+          </h2>
+          <p class="dash-sub" style="font-family:var(--font-mono);letter-spacing:0.06em;color:#8c90a1;">
+            REAL-TIME WORKFLOW DISPATCH · TIMETABLES · TEAM PERFORMANCE METRICS
+          </p>
         </div>
         <div class="row-wrap" style="gap:8px">
-          <span class="chip">อัปเดต ${new Intl.DateTimeFormat("th-TH",{hour:"2-digit",minute:"2-digit"}).format(new Date())}</span>
+          <span class="chip" style="font-family:var(--font-mono);background:#16181f;border:1px solid #292b36;color:#e59324;">
+            ● LIVE FEED: ${new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())}
+          </span>
           ${createBtnHtml}
         </div>
       </div>
 
+      <!-- Split-Flap Destination Hero Banner -->
+      ${flapHeroHtml}
+
+      <!-- Time & Period Filter Toolbar -->
       ${periodFilterHtml}
 
-      <!-- KPI Cards -->
+      <!-- Live Network KPI Cards -->
       <div class="kpi-grid">${kpiCards}</div>
+
+      <!-- Live Dispatch Timetable (Airport / Train Station Departures) -->
+      ${departuresBoardHtml}
 
       <!-- Charts Row: Line + Donut -->
       <div class="charts-row">
         <div class="chart-card chart-card-wide">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title">แนวโน้มงาน 6 เดือน</div>
-              <div class="chart-card-sub">เปรียบเทียบงาน Active vs ส่งมอบแล้ว รายเดือน</div>
+              <div class="chart-card-title" style="font-family:var(--font-mono);letter-spacing:0.08em;">PERFORMANCE TREND (6 MONTHS)</div>
+              <div class="chart-card-sub">COMPARING ACTIVE VS DELIVERED CREATIVE TRAINS</div>
             </div>
           </div>
           <div class="chart-wrap">
@@ -282,8 +365,8 @@ export async function render(ctx) {
         <div class="chart-card">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title">สัดส่วนสถานะงาน</div>
-              <div class="chart-card-sub">งานในช่วงเวลาที่กรอง</div>
+              <div class="chart-card-title" style="font-family:var(--font-mono);letter-spacing:0.08em;">STATUS BREAKDOWN & SIGNALS</div>
+              <div class="chart-card-sub">CURRENT ROUTE ALLOCATION</div>
             </div>
           </div>
           <div class="chart-wrap chart-wrap-donut">
@@ -293,13 +376,15 @@ export async function render(ctx) {
             ${STATUS_ORDER.map(s => `
               <div class="donut-legend-item">
                 <span class="donut-legend-dot" style="background:${STATUS_CHART_COLORS[s].bg}"></span>
-                <span>${STATUS_TH[s]}</span>
-                <span class="donut-legend-count">${statusCounts.find(x => x.status === s)?.count || 0}</span>
+                <span style="font-family:var(--font-mono);">${STATUS_TH[s]}</span>
+                <span class="donut-legend-count" style="font-family:var(--font-mono);">${statusCounts.find(x => x.status === s)?.count || 0}</span>
               </div>
             `).join("")}
           </div>
         </div>
-      <!-- Member Comparison & Deepdive Section -->
+      </div>
+
+      <!-- Member Workload & Deepdive Section -->
       ${renderMemberComparisonHtml({
         memberStats: analytics.memberStats,
         teamTotals: analytics.teamTotals,
@@ -379,6 +464,7 @@ export async function render(ctx) {
     });
 
     qs("#dashboard-create")?.addEventListener("click", () => openCreateTask(ctx));
+    qs("#flap-create-btn")?.addEventListener("click", () => openCreateTask(ctx));
     bindTaskCards(qs("#page-content"));
     bindMemberComparison(qs("#page-content"), {
       onSelectMember: (memberId) => {
@@ -397,15 +483,15 @@ export async function render(ctx) {
       destroyChart("trend");
       const trendCtx = document.getElementById("chart-trend");
       if (trendCtx) {
-        // Create elegant KKP Purple gradient for Active tasks
+        // Create UrbanRail amber / purple glowing gradient for Active tasks
         const ctx = trendCtx.getContext("2d");
         const activeGradient = ctx.createLinearGradient(0, 0, 0, 220);
-        activeGradient.addColorStop(0, "rgba(84, 76, 112, 0.45)");
-        activeGradient.addColorStop(1, "rgba(84, 76, 112, 0.0)");
+        activeGradient.addColorStop(0, "rgba(229, 147, 36, 0.35)");
+        activeGradient.addColorStop(1, "rgba(229, 147, 36, 0.0)");
 
         const completedGradient = ctx.createLinearGradient(0, 0, 0, 220);
-        completedGradient.addColorStop(0, "rgba(189, 183, 209, 0.3)");
-        completedGradient.addColorStop(1, "rgba(189, 183, 209, 0.0)");
+        completedGradient.addColorStop(0, "rgba(84, 76, 112, 0.35)");
+        completedGradient.addColorStop(1, "rgba(84, 76, 112, 0.0)");
 
         _chartInstances["trend"] = new Chart(trendCtx, {
           type: "line",
@@ -413,26 +499,26 @@ export async function render(ctx) {
             labels: monthLabels,
             datasets: [
               {
-                label: "ส่งมอบแล้ว (Done)",
+                label: "DELIVERED (ON TIME)",
                 data: monthCompleted,
-                borderColor: "#bdb7d1",
+                borderColor: "#544c70",
                 backgroundColor: completedGradient,
                 fill: true,
-                tension: 0.4,
-                pointBackgroundColor: "#bdb7d1",
-                pointBorderColor: "#151321",
+                tension: 0.35,
+                pointBackgroundColor: "#544c70",
+                pointBorderColor: "#15161b",
                 pointRadius: 5,
                 pointHoverRadius: 7,
                 borderWidth: 2.5,
               },
               {
-                label: "งาน Active (กำลังทำ)",
+                label: "RUNNING TRAINS / ACTIVE",
                 data: monthActive,
-                borderColor: "#6e6790",
+                borderColor: "#e59324",
                 backgroundColor: activeGradient,
                 fill: true,
-                tension: 0.4,
-                pointBackgroundColor: "#544c70",
+                tension: 0.35,
+                pointBackgroundColor: "#e59324",
                 pointBorderColor: "#ffffff",
                 pointRadius: 5,
                 pointHoverRadius: 7,
@@ -445,12 +531,12 @@ export async function render(ctx) {
             maintainAspectRatio: false,
             interaction: { mode: "index", intersect: false },
             plugins: {
-              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#a19eac", usePointStyle: true, padding: 16 } },
-              tooltip: { backgroundColor: "#1d1a2c", titleColor: "#fff", bodyColor: "#eae8f2", padding: 12, cornerRadius: 8, borderColor: "#2a263e", borderWidth: 1 },
+              legend: { position: "top", labels: { font: { family: "Share Tech Mono, IBM Plex Sans Thai", size: 11 }, color: "#8c90a1", usePointStyle: true, padding: 16 } },
+              tooltip: { backgroundColor: "#15161b", titleColor: "#e59324", bodyColor: "#d6d8e1", padding: 12, cornerRadius: 4, borderColor: "#282a32", borderWidth: 1 },
             },
             scales: {
-              x: { grid: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 } } },
-              y: { beginAtZero: true, grid: { color: "#211e2f" }, border: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
+              x: { grid: { display: false }, ticks: { color: "#6a6e7f", font: { family: "Share Tech Mono", size: 11 } } },
+              y: { beginAtZero: true, grid: { color: "#1f2129" }, border: { display: false }, ticks: { color: "#6a6e7f", font: { family: "Share Tech Mono", size: 11 }, stepSize: 1 } },
             },
           },
         });
