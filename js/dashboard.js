@@ -1,35 +1,39 @@
 import { taskCard, interactiveEmptyState, formatDate, relativeDeadline, avatar, escapeHtml, roleLabel, memberFor, projectFor } from "./formatters.js";
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
-import { qs, toast } from "./app.js";
+import { qs, toast, openModal } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isRequester, isViewer, canCreateTask } from "./auth.js";
 import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison } from "./analytics.js";
+import { pixelIcons } from "./pixel-icons.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Brand palette (KKP Purple Palette from user request)
+   Brand palette (Neo-Retro Pixel Arcade Tokens)
 ───────────────────────────────────────────────────────────────────────── */
 const BRAND = {
-  primary: "#544c70",      // --kkp-purple
-  deep: "#3f3a56",         // --kkp-purple-deep
-  soft: "#6e6790",         // --kkp-purple-soft
-  purple300: "#bdb7d1",    // --purple-300
-  purple200: "#d9d5e6",    // --purple-200
-  purple100: "#eceaf3",    // --purple-100
-  purple50: "#f6f5f9",     // --purple-50
-  cyan: "#00A3D9",
-  magenta: "#E6007E",
-  orange: "#F05A28",
-  lime: "#8DC63F",
-  violet: "#7F00FF",
-  mintNeon: "#00F0B5",
+  ink: "#0A0A0A",
+  ink2: "#141414",
+  cream: "#F5ECD2",
+  line: "#3A3A3A",
+  red: "#E8202A",
+  redDark: "#9E1018",
+  cyan: "#19C3EB",
+  cyanDark: "#0B7FA0",
+  yellow: "#FFC61A",
+  yellowDark: "#B58300",
+  green: "#2BD14B",
+  greenDark: "#198C30",
+  blue: "#2F6BFF",
+  blueDark: "#1643AF",
+  purple: "#8B4DFF",
+  purpleDark: "#5824B8",
 };
 
 const STATUS_CHART_COLORS = {
-  brief:     { bg: "#bdb7d1", border: "#8f8ca0" },
-  drafting:  { bg: "#544c70", border: "#3f3a56" },
-  review:    { bg: "#F05A28", border: "#c44016" },
-  revision:  { bg: "#E6007E", border: "#b3005f" },
-  completed: { bg: "#8DC63F", border: "#6a9f2a" },
+  brief:     { bg: BRAND.yellow, border: BRAND.yellowDark },
+  drafting:  { bg: BRAND.cyan,   border: BRAND.cyanDark },
+  review:    { bg: BRAND.red,    border: BRAND.redDark },
+  revision:  { bg: BRAND.purple, border: BRAND.purpleDark },
+  completed: { bg: BRAND.green,  border: BRAND.greenDark },
 };
 
 const STATUS_TH = {
@@ -78,17 +82,209 @@ export async function render(ctx) {
     const review    = filtered.filter(t => t.status === "review");
     const revision  = filtered.filter(t => t.status === "revision");
     const completed = filtered.filter(t => t.status === "completed");
-    const myTasks   = filtered.filter(t =>
-      (t.assignee_id === ctx.member?.id || (isReq && t.created_by === ctx.member?.id))
-      && t.status !== "completed"
-    );
     const lateCount = active.filter(t => relativeDeadline(t.deadline_at || t.deadline).className === "is-overdue").length;
+    const onTimeRate = filtered.length ? ((completed.length / filtered.length) * 100).toFixed(1) : "100.0";
 
-    const createBtnHtml = canCreate
-      ? `<button class="btn btn-primary" id="dashboard-create">${isReq ? "＋ ส่งคำของาน" : "＋ สร้างงานใหม่"}</button>`
-      : "";
+    const topTask = active[0] || tasks[0];
+    const topMember = topTask ? memberFor(topTask, members) : null;
 
-    /* ── Build years list for year selector ── */
+    /* ── 1. Hero Section (2 Columns, ~700px, Cream Left, Pixel Art City Right) ── */
+    const pixelHeroHtml = `
+      <section class="pixel-hero crt-scanlines">
+        <!-- Left Column: Cream Background -->
+        <div class="pixel-hero-cream">
+          <div>
+            <h1 class="pixel-hero-headline">
+              <span>DESIGN</span>
+              <span>WORKFLOW.</span>
+              <span>TOGETHER.${pixelIcons.heart}</span>
+            </h1>
+            <p class="pixel-hero-sub">
+              ระบบจัดการกระบวนการทำงานกราฟิกดีไซน์ KKP แบบเรียลไทม์<br />
+              TRACK BRIEFS, DESIGN ITERATIONS & TEAM CAPACITY IN 8-BIT PRECISION
+            </p>
+            <div class="pixel-hero-actions">
+              <button class="btn-pixel btn-pixel-red" id="hero-create-btn">
+                ${pixelIcons.rocket}
+                <span>START BUILDING →</span>
+              </button>
+              <a class="btn-pixel btn-pixel-cyan" href="board.html">
+                ${pixelIcons.arrowRight}
+                <span>EXPLORE KANBAN</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- News Ticker Bar -->
+          <div class="pixel-news-ticker">
+            <span class="pixel-news-tag">NEWS</span>
+            <span class="pixel-news-text" id="news-ticker-text">
+              CONT 2.0 PIXEL WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING
+            </span>
+            <span class="pixel-news-chevron">›</span>
+          </div>
+        </div>
+
+        <!-- Right Column: Full-Bleed Isometric Pixel-Art City -->
+        <div class="pixel-hero-city-wrap">
+          <img
+            class="pixel-hero-city-img pixel-bob-animation"
+            src="assets/hero-city.png"
+            alt="Isometric Pixel City Builder"
+            loading="eager"
+          />
+        </div>
+      </section>
+    `;
+
+    /* ── 2. Feature Strip (4 Cards on Near-Black, Double-line Pixel Frame) ── */
+    const featureStripHtml = `
+      <section class="pixel-feature-strip">
+        <!-- Card 1: Green Cube -->
+        <div class="pixel-feature-card crt-scanlines">
+          <div class="pixel-feature-tile is-green">
+            ${pixelIcons.cubeGreen}
+          </div>
+          <div class="pixel-feature-main">
+            <h3 class="pixel-feature-title is-green">SMART WORKFLOW</h3>
+            <p class="pixel-feature-body">
+              ติดตามสถานะงาน 5 ขั้นตอน (Brief → Draft → Review → Revision → Done) ชัดเจนทุกเฟส
+            </p>
+            <a class="pixel-feature-link is-green" href="#" id="feature-guide-link">
+              <span>LEARN MORE</span>
+              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2: Blue People -->
+        <div class="pixel-feature-card crt-scanlines">
+          <div class="pixel-feature-tile is-blue">
+            ${pixelIcons.people}
+          </div>
+          <div class="pixel-feature-main">
+            <h3 class="pixel-feature-title is-blue">TEAM CAPACITY</h3>
+            <p class="pixel-feature-body">
+              วิเคราะห์ Workload และกำลังงานกราฟิกรายบุคคล พร้อมระบบเทียบผลงานย้อนหลัง
+            </p>
+            <a class="pixel-feature-link is-blue" href="team.html">
+              <span>VIEW TEAM</span>
+              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 3: Yellow Trophy -->
+        <div class="pixel-feature-card crt-scanlines">
+          <div class="pixel-feature-tile is-yellow">
+            ${pixelIcons.trophy}
+          </div>
+          <div class="pixel-feature-main">
+            <h3 class="pixel-feature-title is-yellow">ON-TIME ACCURACY</h3>
+            <p class="pixel-feature-body">
+              ป้องกันงานชนและเร่งด่วนด้วย Smart Deadline & SLA Monitoring แบบเรียลไทม์
+            </p>
+            <a class="pixel-feature-link is-yellow" href="#dash-filter-bar">
+              <span>VIEW METRICS</span>
+              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 4: Purple Code -->
+        <div class="pixel-feature-card crt-scanlines">
+          <div class="pixel-feature-tile is-purple">
+            ${pixelIcons.code}
+          </div>
+          <div class="pixel-feature-main">
+            <h3 class="pixel-feature-title is-purple">SUPABASE CLOUD</h3>
+            <p class="pixel-feature-body">
+              เชื่อมต่อฐานข้อมูลเรียลไทม์ ซิงค์การตรวจงาน คอมเมนต์ และประวัติเวอร์ชันฉับไว
+            </p>
+            <a class="pixel-feature-link is-purple" href="tasks.html">
+              <span>BROWSE TASKS</span>
+              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    `;
+
+    /* ── 3. Stats Bar (Double-line Frame, Featured Card Left, 4 Stat Cells Right) ── */
+    const statsBarHtml = `
+      <section class="pixel-stats-bar crt-scanlines">
+        <!-- Left: FEATURED Card -->
+        <div class="pixel-featured-card">
+          <div class="pixel-featured-thumb">
+            <img src="assets/hero-city.png" alt="Featured Preview" />
+          </div>
+          <div class="pixel-featured-info">
+            <div class="pixel-featured-tag">FEATURED JOB</div>
+            <h4 class="pixel-featured-title">
+              <a href="${topTask ? `task.html?id=${encodeURIComponent(topTask.id)}` : '#'}" style="color:inherit;text-decoration:none;">
+                ${escapeHtml(topTask?.title || "KEY VISUAL CAMPAIGN 2026")}
+              </a>
+            </h4>
+            <div class="pixel-featured-author">
+              by ${escapeHtml(topMember?.name || "CONT CREATIVE LAB")}
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: 4 Stat Cells with Dotted Dividers -->
+        <div class="pixel-stat-cells">
+          <!-- Stat 1: Total Tasks -->
+          <div class="pixel-stat-cell">
+            <div class="pixel-stat-head">
+              <span class="pixel-stat-label">TOTAL JOBS</span>
+              ${pixelIcons.cubeBlue}
+            </div>
+            <div class="pixel-stat-num count-up-num" data-final="${filtered.length}">
+              0
+            </div>
+            <div class="pixel-stat-caption">ALL REGISTERED</div>
+          </div>
+
+          <!-- Stat 2: Active Tasks -->
+          <div class="pixel-stat-cell">
+            <div class="pixel-stat-head">
+              <span class="pixel-stat-label">IN PROGRESS</span>
+              ${pixelIcons.rocket}
+            </div>
+            <div class="pixel-stat-num count-up-num" data-final="${active.length}" style="color:var(--cyan);">
+              0
+            </div>
+            <div class="pixel-stat-caption">ACTIVE QUEUE</div>
+          </div>
+
+          <!-- Stat 3: Completed -->
+          <div class="pixel-stat-cell">
+            <div class="pixel-stat-head">
+              <span class="pixel-stat-label">DELIVERED</span>
+              ${pixelIcons.trophy}
+            </div>
+            <div class="pixel-stat-num count-up-num" data-final="${completed.length}" style="color:var(--green);">
+              0
+            </div>
+            <div class="pixel-stat-caption">SUCCESSFUL JOBS</div>
+          </div>
+
+          <!-- Stat 4: On-time SLA Rate -->
+          <div class="pixel-stat-cell">
+            <div class="pixel-stat-head">
+              <span class="pixel-stat-label">ON-TIME SLA</span>
+              <span class="pixel-pulse-dot"></span>
+            </div>
+            <div class="pixel-stat-num count-up-num" data-final="${onTimeRate}" data-is-percent="true" style="color:var(--yellow);">
+              0%
+            </div>
+            <div class="pixel-stat-caption">TIMELY ACCURACY</div>
+          </div>
+        </div>
+      </section>
+    `;
+
+    /* ── 4. Build years list for year selector ── */
     const allYears = [...new Set(tasks.map(t => {
       const d = getTaskDate(t, "created_at");
       return d ? d.getFullYear() : null;
@@ -144,27 +340,7 @@ export async function render(ctx) {
       </div>
     `;
 
-    /* ── KPI Cards (UrbanRail Live Telemetry style) ── */
-    const onTimeRate = filtered.length ? ((completed.length / filtered.length) * 100).toFixed(1) : "100.0";
-    const kpiCards = [
-      { label: "TRAINS RUNNING (ACTIVE)", value: active.length, trend: "NORMAL", isDown: false, icon: "⚡", isAmber: false },
-      { label: "LINES ACTIVE (TOTAL)", value: filtered.length, trend: "+12%", isDown: false, icon: "☷", isAmber: false },
-      { label: "INSPECTION / REVIEWS", value: review.length, trend: "PENDING", isDown: review.length > 3, icon: "⚠", isAmber: review.length > 0 },
-      { label: "ON-TIME PERFORMANCE", value: `${onTimeRate}%`, trend: "98.4%", isDown: false, icon: "✦", isAmber: true },
-    ].map(k => `
-      <div class="kpi-card" style="font-family:var(--font-mono);">
-        <div class="kpi-top-row">
-          <div class="kpi-icon" style="color:${k.isAmber ? "#e59324" : "#10b981"};">${k.icon}</div>
-          <div class="kpi-trend ${k.isDown ? "is-down" : ""}" style="${k.isAmber ? "background:rgba(229,147,36,0.12);color:#e59324;" : ""}">${k.trend}</div>
-        </div>
-        <div class="kpi-body">
-          <div class="kpi-value" style="font-family:var(--font-flap);font-size:2.2rem;letter-spacing:0.04em;color:${k.isAmber ? "#e59324" : "#ffffff"};">${k.value}</div>
-          <div class="kpi-label" style="font-family:var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;">${k.label}</div>
-        </div>
-      </div>
-    `).join("");
-
-    /* ── Build monthly trend data for line chart ── */
+    /* ── Monthly trend data for line chart ── */
     const now = new Date();
     const monthLabels = [];
     const monthCompleted = [];
@@ -197,180 +373,78 @@ export async function render(ctx) {
       count: filtered.filter(t => t.status === s).length,
     }));
 
-    /* ── Split-Flap Helper Functions ── */
-    const renderFlapWord = (text, isAmber = false) => {
-      return text.toUpperCase().split("").map(ch => {
-        if (ch === " ") return `<span class="flap-char is-space"></span>`;
-        return `<span class="flap-char ${isAmber ? "is-amber" : ""}">${escapeHtml(ch)}</span>`;
-      }).join("");
-    };
-
-    const renderFlapMini = (text, colorClass = "") => {
-      return text.toUpperCase().split("").map(ch => {
-        return `<span class="flap-mini ${colorClass}">${escapeHtml(ch)}</span>`;
-      }).join("");
-    };
-
-    /* ── Live Departures Board Rows (Flight/Rail Timetable Style) ── */
-    const departureRows = filtered.slice(0, 8).map(task => {
-      const member = memberFor(task, members);
-      const project = projectFor(task, projects);
-      const d = getTaskDate(task, "deadline");
-      const timeStr = d ? `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` : "09:00";
-      
-      let statusText = "ON TIME";
-      let statusClass = "on-time";
-      let statusColor = "is-green";
-      
-      if (task.status === "revision") {
-        statusText = "REVISION";
-        statusClass = "cancelled";
-        statusColor = "is-red";
-      } else if (relativeDeadline(task.deadline_at || task.deadline).className === "is-overdue") {
-        statusText = "DELAYED";
-        statusClass = "delayed";
-        statusColor = "is-amber";
-      } else if (task.status === "review") {
-        statusText = "IN REVIEW";
-        statusClass = "delayed";
-        statusColor = "is-amber";
-      } else if (task.status === "completed") {
-        statusText = "DELIVERED";
-        statusClass = "on-time";
-        statusColor = "is-green";
-      }
-
-      const platformCode = String(task.item_count || 1).padStart(2, "0");
-      const trackCode = task.status === "drafting" ? "A" : task.status === "review" ? "B" : "C";
-
+    /* ── Activity + Deadlines list HTML ── */
+    const activityHtml = active.slice(0, 5).map(task => {
+      const m = memberFor(task, members);
       return `
-        <tr>
-          <td><span class="flap-cell">${renderFlapMini(timeStr, "is-amber")}</span></td>
-          <td><strong style="color:#ffffff;"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title.slice(0, 24))}</a></strong></td>
-          <td><span style="color:#8c90a1;">${escapeHtml(project?.name?.slice(0, 16) || "GENERAL")}</span></td>
-          <td><span class="flap-cell">${renderFlapMini(platformCode)}</span></td>
-          <td>
-            <span class="status-rail-pill ${statusClass}">
-              <span class="flap-cell">${renderFlapMini(statusText, statusColor)}</span>
-            </span>
-          </td>
-          <td><span class="flap-cell">${renderFlapMini(trackCode)}</span></td>
-        </tr>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:${STATUS_CHART_COLORS[task.status]?.bg || BRAND.cyan};"></div>
+          <div class="activity-main">
+            <div class="activity-name"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title)}</a></div>
+            <div class="activity-task">${escapeHtml(m?.name || "ยังไม่ระบุ")} · ${STATUS_TH[task.status] || task.status}</div>
+          </div>
+          <div class="activity-right">
+            <span class="pixel-badge" style="color:var(--text-dim);border-color:var(--line);">${formatDate(task.created_at)}</span>
+          </div>
+        </div>
       `;
-    }).join("") || `<tr><td colspan="6" style="text-align:center;padding:24px;color:#515463;">NO ACTIVE SCHEDULED TRAINS / TASKS</td></tr>`;
+    }).join("") || `<div class="state-empty">ไม่มีความเคลื่อนไหวในช่วงเวลานี้</div>`;
 
-    /* ── Split-flap Hero Banner HTML ── */
-    const flapHeroHtml = `
-      <div class="flap-hero-board">
-        <div class="flap-headline-container">
-          <div class="flap-text-row">
-            ${renderFlapWord("ONE BOARD.")}
+    const deadlinesHtml = dueSoon.slice(0, 5).map(task => {
+      const urgency = relativeDeadline(task.deadline_at || task.deadline);
+      const d = getTaskDate(task, "deadline");
+      return `
+        <div class="deadline-item">
+          <div class="deadline-date" style="border-color:var(--line);background:#1a1a1a;">
+            <span class="day" style="font-family:var(--font-pixel);">${d ? d.getDate() : "—"}</span>
+            <span class="month">${d ? MONTH_NAMES_TH[d.getMonth()].slice(0, 3) : "—"}</span>
           </div>
-          <div class="flap-text-row">
-            ${renderFlapWord("EVERY JOURNEY.")}
+          <div class="deadline-main">
+            <div class="deadline-title"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title)}</a></div>
+            <div class="deadline-sub">${escapeHtml(urgency.label)}</div>
           </div>
-          <div class="flap-text-row">
-            ${renderFlapWord("STAY INFORMED.", true)}
-          </div>
+          <span class="badge ${urgency.className}">${urgency.className === "is-overdue" ? "เกินกำหนด" : "ใกล้ส่ง"}</span>
         </div>
-        <div class="flap-subtext">
-          CONT OPERATIONS CLOUD UNIFIES LIVE DATA, ALERTS, AND WORKFLOW ANALYTICS SO DESIGN TEAMS CAN KEEP PROJECTS MOVING AND CLIENTS INFORMED.
-        </div>
-        <div class="flap-action-bar">
-          ${canCreate ? `<button class="btn-rail-amber" id="flap-create-btn"><span>⚡ REQUEST ACCESS / CREATE TASK</span> <span>›</span></button>` : ""}
-          <a class="btn-rail-dark" href="board.html"><span>SEE LIVE BOARD</span> <span>☷</span></a>
-        </div>
-      </div>
-    `;
+      `;
+    }).join("") || `<div class="state-empty">ไม่มีงานเร่งด่วนที่ต้องส่งมอบเร็วๆ นี้</div>`;
 
-    /* ── Live Departures Timetable Card HTML ── */
-    const departuresBoardHtml = `
-      <div class="departures-board-card">
-        <div class="departures-header">
-          <div class="departures-title">
-            <span>LIVE DISPATCH & WORKFLOW DEPARTURES</span>
-            <div class="led-bar">
-              <span class="led-pip is-on"></span>
-              <span class="led-pip is-on"></span>
-              <span class="led-pip is-on"></span>
-              <span class="led-pip is-amber"></span>
-            </div>
-          </div>
-          <a href="board.html" class="btn-rail-dark" style="padding:4px 10px;font-size:0.75rem;">VIEW FULL BOARD ☷</a>
-        </div>
-        <div class="departures-table-wrap">
-          <table class="departures-table">
-            <thead>
-              <tr>
-                <th style="width:90px;">TIME</th>
-                <th>WORKFLOW / TASK DESTINATION</th>
-                <th>PROJECT</th>
-                <th style="width:80px;">ITEMS</th>
-                <th style="width:160px;">STATUS</th>
-                <th style="width:70px;">TRACK</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${departureRows}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-
-    /* ─────────── Render HTML ─────────── */
+    /* ─────────── Render Full Dashboard Page HTML ─────────── */
     qs("#page-content").innerHTML = `
-      <div class="dash-header">
-        <div>
-          <h2 class="dash-title" style="font-family:var(--font-mono);letter-spacing:0.12em;text-transform:uppercase;color:#f1f2f6;">
-            URBANRAIL · OPERATIONS CONTROL CLOUD
-          </h2>
-          <p class="dash-sub" style="font-family:var(--font-mono);letter-spacing:0.06em;color:#8c90a1;">
-            REAL-TIME WORKFLOW DISPATCH · TIMETABLES · TEAM PERFORMANCE METRICS
-          </p>
-        </div>
-        <div class="row-wrap" style="gap:8px">
-          <span class="chip" style="font-family:var(--font-mono);background:#16181f;border:1px solid #292b36;color:#e59324;">
-            ● LIVE FEED: ${new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())}
-          </span>
-          ${createBtnHtml}
-        </div>
-      </div>
+      <!-- 1. Pixel Arcade Hero Section -->
+      ${pixelHeroHtml}
 
-      <!-- Split-Flap Destination Hero Banner -->
-      ${flapHeroHtml}
+      <!-- 2. Feature Strip (4 Pixel Cards) -->
+      ${featureStripHtml}
 
-      <!-- Time & Period Filter Toolbar -->
+      <!-- 3. Stats Bar (Count-Up Animation) -->
+      ${statsBarHtml}
+
+      <!-- 4. Time & Period Filter Toolbar -->
       ${periodFilterHtml}
 
-      <!-- Live Network KPI Cards -->
-      <div class="kpi-grid">${kpiCards}</div>
-
-      <!-- Live Dispatch Timetable (Airport / Train Station Departures) -->
-      ${departuresBoardHtml}
-
-      <!-- Charts Row: Line + Donut -->
-      <div class="charts-row">
-        <div class="chart-card chart-card-wide">
+      <!-- 5. Charts Row: Performance Trend Line + Status Donut -->
+      <div class="charts-row" style="margin-bottom:28px;">
+        <div class="chart-card chart-card-wide" style="border:2px solid var(--line);box-shadow:inset 0 0 0 2px var(--ink), 0 var(--px) 0 #000;background:var(--ink-2);">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title" style="font-family:var(--font-mono);letter-spacing:0.08em;">PERFORMANCE TREND (6 MONTHS)</div>
-              <div class="chart-card-sub">COMPARING ACTIVE VS DELIVERED CREATIVE TRAINS</div>
+              <div class="chart-card-title" style="font-family:var(--font-pixel);letter-spacing:0.06em;color:var(--cyan);">PERFORMANCE TREND (6 MONTHS)</div>
+              <div class="chart-card-sub" style="font-family:var(--font-mono);">COMPARING ACTIVE VS COMPLETED JOBS</div>
             </div>
           </div>
           <div class="chart-wrap">
-            <canvas id="chart-trend" height="220"></canvas>
+            <canvas id="chart-trend" height="230"></canvas>
           </div>
         </div>
-        <div class="chart-card">
+
+        <div class="chart-card" style="border:2px solid var(--line);box-shadow:inset 0 0 0 2px var(--ink), 0 var(--px) 0 #000;background:var(--ink-2);">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title" style="font-family:var(--font-mono);letter-spacing:0.08em;">STATUS BREAKDOWN & SIGNALS</div>
-              <div class="chart-card-sub">CURRENT ROUTE ALLOCATION</div>
+              <div class="chart-card-title" style="font-family:var(--font-pixel);letter-spacing:0.06em;color:var(--yellow);">STATUS BREAKDOWN</div>
+              <div class="chart-card-sub" style="font-family:var(--font-mono);">CURRENT PIPELINE ALLOCATION</div>
             </div>
           </div>
           <div class="chart-wrap chart-wrap-donut">
-            <canvas id="chart-donut" height="220"></canvas>
+            <canvas id="chart-donut" height="200"></canvas>
           </div>
           <div class="donut-legend">
             ${STATUS_ORDER.map(s => `
@@ -384,7 +458,7 @@ export async function render(ctx) {
         </div>
       </div>
 
-      <!-- Member Workload & Deepdive Section -->
+      <!-- 6. Member Workload & Deepdive Section -->
       ${renderMemberComparisonHtml({
         memberStats: analytics.memberStats,
         teamTotals: analytics.teamTotals,
@@ -394,38 +468,39 @@ export async function render(ctx) {
         filteredTasks: filtered
       })}
 
-      <!-- Activity + Deadlines -->
-      <div class="dash-two-col">
-        <div class="chart-card">
+      <!-- 7. Activity + Deadlines Row -->
+      <div class="dash-two-col" style="margin-top:24px;">
+        <div class="chart-card" style="border:2px solid var(--line);background:var(--ink-2);box-shadow:0 var(--px) 0 #000;">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title">ความเคลื่อนไหวล่าสุด</div>
+              <div class="chart-card-title" style="font-family:var(--font-pixel);color:#fff;">ความเคลื่อนไหวล่าสุด</div>
               <div class="chart-card-sub">งานที่กำลังดำเนินอยู่ในช่วงเวลานี้</div>
             </div>
-            <a class="btn btn-ghost btn-sm" href="board.html">บอร์ด Kanban →</a>
+            <a class="btn-pixel btn-pixel-dark" href="board.html" style="font-size:0.75rem;padding:6px 12px;">บอร์ด KANBAN →</a>
           </div>
           <div class="feed-list">${activityHtml}</div>
         </div>
-        <div class="chart-card">
+
+        <div class="chart-card" style="border:2px solid var(--line);background:var(--ink-2);box-shadow:0 var(--px) 0 #000;">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title">กำหนดส่งใกล้มา</div>
+              <div class="chart-card-title" style="font-family:var(--font-pixel);color:#fff;">กำหนดส่งใกล้มา</div>
               <div class="chart-card-sub">งานที่ต้องติดตามส่งมอบ</div>
             </div>
-            <a class="btn btn-ghost btn-sm" href="calendar.html">ปฏิทิน →</a>
+            <a class="btn-pixel btn-pixel-dark" href="calendar.html" style="font-size:0.75rem;padding:6px 12px;">ปฏิทิน →</a>
           </div>
           <div class="deadline-list">${deadlinesHtml}</div>
         </div>
       </div>
 
-      <!-- Urgent Tasks -->
-      <div class="chart-card" style="margin-top:0">
+      <!-- 8. Urgent Tasks Grid -->
+      <div class="chart-card" style="margin-top:24px;border:2px solid var(--line);background:var(--ink-2);box-shadow:0 var(--px) 0 #000;">
         <div class="chart-card-header">
           <div>
-            <div class="chart-card-title">งานที่ต้องจับตา</div>
+            <div class="chart-card-title" style="font-family:var(--font-pixel);color:var(--red);">งานที่ต้องจับตา</div>
             <div class="chart-card-sub">งานใกล้กำหนดส่งและรอความเห็น</div>
           </div>
-          <a class="btn btn-ghost btn-sm" href="tasks.html">งานทั้งหมด →</a>
+          <a class="btn-pixel btn-pixel-dark" href="tasks.html" style="font-size:0.75rem;padding:6px 12px;">งานทั้งหมด →</a>
         </div>
         <div class="task-grid" style="grid-template-columns:repeat(auto-fill,minmax(290px,1fr))">
           ${dueSoon.slice(0, 3).map(task => taskCard(task, { projects, members, subtasks })).join("") || interactiveEmptyState({ title: "ไม่มีงานเร่งด่วนในช่วงนี้", subtitle: "งานทั้งหมดอยู่ในกำหนดส่งตามแผน", small: true })}
@@ -433,95 +508,102 @@ export async function render(ctx) {
       </div>
     `;
 
-    /* ─────────── Bind filter events ─────────── */
-    const bar = qs("#dash-filter-bar");
+    /* ─────────── Event Bindings ─────────── */
+    // Hero CTA button
+    qs("#hero-create-btn")?.addEventListener("click", () => window.openCreateTask?.());
 
-    bar.querySelectorAll(".dfb-chip").forEach(btn => {
-      btn.addEventListener("click", () => {
-        filterState.period = btn.dataset.period;
-        filterState.startDate = "";
-        filterState.endDate = "";
+    // Feature card guide link
+    qs("#feature-guide-link")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      qs("#workflow-guide-link")?.click();
+    });
+
+    // Count-up animation on stats bar
+    initCountUp();
+
+    // Rotating news ticker announcement
+    initNewsTicker();
+
+    // Filter bar event handlers
+    const bar = qs("#dash-filter-bar");
+    if (bar) {
+      bar.querySelectorAll(".dfb-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          filterState.period = btn.dataset.period;
+          filterState.startDate = "";
+          filterState.endDate = "";
+          draw();
+        });
+      });
+      qs("#dfb-year")?.addEventListener("change", e => { filterState.year = e.target.value; draw(); });
+      qs("#dfb-month")?.addEventListener("change", e => { filterState.month = e.target.value; draw(); });
+      qs("#dfb-member")?.addEventListener("change", e => { filterState.memberId = e.target.value; draw(); });
+      qs("#dfb-status")?.addEventListener("change", e => { filterState.status = e.target.value; draw(); });
+      qs("#dfb-start")?.addEventListener("change", e => {
+        filterState.startDate = e.target.value;
+        filterState.period = "custom";
         draw();
       });
-    });
-    qs("#dfb-year")?.addEventListener("change", e => { filterState.year = e.target.value; draw(); });
-    qs("#dfb-month")?.addEventListener("change", e => { filterState.month = e.target.value; draw(); });
-    qs("#dfb-member")?.addEventListener("change", e => { filterState.memberId = e.target.value; draw(); });
-    qs("#dfb-status")?.addEventListener("change", e => { filterState.status = e.target.value; draw(); });
-    qs("#dfb-start")?.addEventListener("change", e => {
-      filterState.startDate = e.target.value;
-      if (filterState.startDate || filterState.endDate) filterState.period = "custom";
-      draw();
-    });
-    qs("#dfb-end")?.addEventListener("change", e => {
-      filterState.endDate = e.target.value;
-      if (filterState.startDate || filterState.endDate) filterState.period = "custom";
-      draw();
-    });
-    qs("#dfb-reset")?.addEventListener("click", () => {
-      Object.assign(filterState, { period:"all", year:"all", month:"all", specificDay:"", startDate:"", endDate:"", memberId:"all", status:"all" });
+      qs("#dfb-end")?.addEventListener("change", e => {
+        filterState.endDate = e.target.value;
+        filterState.period = "custom";
+        draw();
+      });
+      qs("#dfb-reset")?.addEventListener("click", () => {
+        filterState.period = "all";
+        filterState.year = "all";
+        filterState.month = "all";
+        filterState.specificDay = "";
+        filterState.startDate = "";
+        filterState.endDate = "";
+        filterState.memberId = "all";
+        filterState.status = "all";
+        draw();
+      });
+    }
+
+    // Bind Member Comparison drilldowns and actions
+    bindMemberComparison(ctx, (newMemberId) => {
+      filterState.memberId = newMemberId;
       draw();
     });
 
-    qs("#dashboard-create")?.addEventListener("click", () => openCreateTask(ctx));
-    qs("#flap-create-btn")?.addEventListener("click", () => openCreateTask(ctx));
-    bindTaskCards(qs("#page-content"));
-    bindMemberComparison(qs("#page-content"), {
-      onSelectMember: (memberId) => {
-        filterState.memberId = memberId;
-        draw();
-      },
-      onSelectStatus: (statusKey) => {
-        filterState.status = filterState.status === statusKey ? "all" : statusKey;
-        draw();
-      }
-    });
+    // Bind Task Cards
+    bindTaskCards(ctx);
 
-    /* ─────────── Render Charts ─────────── */
-    setTimeout(() => {
-      // 1) Line chart: 6-month trend
+    /* ─────────── Chart.js Rendering ─────────── */
+    window.setTimeout(() => {
+      // 1) Line chart: trend
       destroyChart("trend");
       const trendCtx = document.getElementById("chart-trend");
       if (trendCtx) {
-        // Create UrbanRail amber / purple glowing gradient for Active tasks
-        const ctx = trendCtx.getContext("2d");
-        const activeGradient = ctx.createLinearGradient(0, 0, 0, 220);
-        activeGradient.addColorStop(0, "rgba(229, 147, 36, 0.35)");
-        activeGradient.addColorStop(1, "rgba(229, 147, 36, 0.0)");
-
-        const completedGradient = ctx.createLinearGradient(0, 0, 0, 220);
-        completedGradient.addColorStop(0, "rgba(84, 76, 112, 0.35)");
-        completedGradient.addColorStop(1, "rgba(84, 76, 112, 0.0)");
-
         _chartInstances["trend"] = new Chart(trendCtx, {
           type: "line",
           data: {
             labels: monthLabels,
             datasets: [
               {
-                label: "DELIVERED (ON TIME)",
+                label: "COMPLETED",
                 data: monthCompleted,
-                borderColor: "#544c70",
-                backgroundColor: completedGradient,
+                borderColor: BRAND.green,
+                backgroundColor: "rgba(43, 209, 75, 0.12)",
                 fill: true,
-                tension: 0.35,
-                pointBackgroundColor: "#544c70",
-                pointBorderColor: "#15161b",
+                stepped: true,
+                pointBackgroundColor: BRAND.green,
+                pointBorderColor: BRAND.ink,
                 pointRadius: 5,
-                pointHoverRadius: 7,
-                borderWidth: 2.5,
+                borderWidth: 3,
               },
               {
-                label: "RUNNING TRAINS / ACTIVE",
+                label: "ACTIVE JOBS",
                 data: monthActive,
-                borderColor: "#e59324",
-                backgroundColor: activeGradient,
+                borderColor: BRAND.cyan,
+                backgroundColor: "rgba(25, 195, 235, 0.12)",
                 fill: true,
-                tension: 0.35,
-                pointBackgroundColor: "#e59324",
-                pointBorderColor: "#ffffff",
+                stepped: true,
+                pointBackgroundColor: BRAND.cyan,
+                pointBorderColor: BRAND.ink,
                 pointRadius: 5,
-                pointHoverRadius: 7,
                 borderWidth: 3,
               },
             ],
@@ -531,12 +613,37 @@ export async function render(ctx) {
             maintainAspectRatio: false,
             interaction: { mode: "index", intersect: false },
             plugins: {
-              legend: { position: "top", labels: { font: { family: "Share Tech Mono, IBM Plex Sans Thai", size: 11 }, color: "#8c90a1", usePointStyle: true, padding: 16 } },
-              tooltip: { backgroundColor: "#15161b", titleColor: "#e59324", bodyColor: "#d6d8e1", padding: 12, cornerRadius: 4, borderColor: "#282a32", borderWidth: 1 },
+              legend: {
+                position: "top",
+                labels: {
+                  font: { family: "Space Mono", size: 11 },
+                  color: "#a8a8a8",
+                  usePointStyle: true,
+                  padding: 16
+                }
+              },
+              tooltip: {
+                backgroundColor: "#141414",
+                titleColor: BRAND.yellow,
+                bodyColor: "#f2f2f2",
+                padding: 10,
+                cornerRadius: 0,
+                borderColor: "#3a3a3a",
+                borderWidth: 1,
+                titleFont: { family: "Space Mono" },
+                bodyFont: { family: "Space Mono" },
+              },
             },
             scales: {
-              x: { grid: { display: false }, ticks: { color: "#6a6e7f", font: { family: "Share Tech Mono", size: 11 } } },
-              y: { beginAtZero: true, grid: { color: "#1f2129" }, border: { display: false }, ticks: { color: "#6a6e7f", font: { family: "Share Tech Mono", size: 11 }, stepSize: 1 } },
+              x: {
+                grid: { color: "#222" },
+                ticks: { color: "#777", font: { family: "Space Mono", size: 10 } }
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: "#222" },
+                ticks: { color: "#777", font: { family: "Space Mono", size: 10 }, stepSize: 1 }
+              },
             },
           },
         });
@@ -553,65 +660,99 @@ export async function render(ctx) {
             datasets: [{
               data: STATUS_ORDER.map(s => statusCounts.find(x => x.status === s)?.count || 0),
               backgroundColor: STATUS_ORDER.map(s => STATUS_CHART_COLORS[s].bg),
-              borderColor: "#151321", // Match card surface background
+              borderColor: BRAND.ink2,
               borderWidth: 3,
-              hoverOffset: 8,
+              hoverOffset: 6,
             }],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: "68%", // slightly thinner donut looks more modern
+            cutout: "64%",
             plugins: {
               legend: { display: false },
-              tooltip: { backgroundColor: "#1d1a2c", titleColor: "#fff", bodyColor: "#eae8f2", padding: 12, cornerRadius: 8, borderColor: "#2a263e", borderWidth: 1 },
+              tooltip: {
+                backgroundColor: "#141414",
+                titleColor: "#fff",
+                bodyColor: "#f2f2f2",
+                padding: 10,
+                cornerRadius: 0,
+                borderColor: "#3a3a3a",
+                borderWidth: 1,
+              },
             },
           },
         });
-      }
-
-      // 3) Bar chart: member workload
-      destroyChart("members");
-      const membersCtx = document.getElementById("chart-members");
-      if (membersCtx && memberWorkload.length > 0) {
-        _chartInstances["members"] = new Chart(membersCtx, {
-          type: "bar",
-          data: {
-            labels: memberWorkload.map(m => m.name),
-            datasets: [
-              {
-                label: "Active",
-                data: memberWorkload.map(m => m.active),
-                backgroundColor: BRAND.violet,
-                borderRadius: 4,
-              },
-              {
-                label: "ส่งมอบแล้ว",
-                data: memberWorkload.map(m => m.completed),
-                backgroundColor: BRAND.lime,
-                borderRadius: 4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
-            plugins: {
-              legend: { position: "top", labels: { font: { family: "IBM Plex Sans Thai", size: 12 }, color: "#a19eac", usePointStyle: true, padding: 16 } },
-              tooltip: { backgroundColor: "#1d1a2c", titleColor: "#fff", bodyColor: "#eae8f2", padding: 12, cornerRadius: 8, borderColor: "#2a263e", borderWidth: 1 },
-            },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 } } },
-              y: { beginAtZero: true, grid: { color: "#211e2f" }, border: { display: false }, ticks: { color: "#7e7b89", font: { family: "IBM Plex Sans Thai", size: 11 }, stepSize: 1 } },
-            },
-          },
-        });
-      } else if (membersCtx) {
-        membersCtx.parentElement.innerHTML = `<div class="state-empty">ยังไม่มีข้อมูลสมาชิกทีมในช่วงเวลานี้</div>`;
       }
     }, 0);
   };
 
   draw();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Count-Up Animation (IntersectionObserver, 1.2s easeOut)
+───────────────────────────────────────────────────────────────────────── */
+function initCountUp() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll(".count-up-num").forEach(el => {
+      const isPercent = el.dataset.isPercent === "true";
+      el.textContent = isPercent ? `${el.dataset.final}%` : el.dataset.final;
+    });
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        observer.unobserve(el);
+        const finalVal = parseFloat(el.dataset.final || "0");
+        const isPercent = el.dataset.isPercent === "true";
+        const duration = 1200;
+        const startTime = performance.now();
+
+        function step(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          // easeOutQuad: 1 - (1 - progress) * (1 - progress)
+          const ease = 1 - (1 - progress) * (1 - progress);
+          const current = finalVal * ease;
+          el.textContent = isPercent ? `${current.toFixed(1)}%` : Math.round(current).toLocaleString();
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = isPercent ? `${finalVal.toFixed(1)}%` : Math.round(finalVal).toLocaleString();
+          }
+        }
+        requestAnimationFrame(step);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll(".count-up-num").forEach(el => observer.observe(el));
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Rotating News Ticker
+───────────────────────────────────────────────────────────────────────── */
+function initNewsTicker() {
+  const el = qs("#news-ticker-text");
+  if (!el) return;
+
+  const announcements = [
+    "CONT 2.0 PIXEL WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING",
+    "NEW: SMART WORKLOAD DRILLDOWN ACTIVE — ANALYZE DESIGN CAPACITY & REVISION CYCLES",
+    "REMINDER: SLA REVIEW CYCLE ACTIVE — PLEASE APPROVE OR REQUEST REVISIONS WITHIN 24 HOURS",
+    "KKP BRAND GUIDELINES UPDATED — NEW SOCIAL MEDIA BANNER PRESETS AVAILABLE IN TEMPLATES"
+  ];
+
+  let idx = 0;
+  window.setInterval(() => {
+    idx = (idx + 1) % announcements.length;
+    el.style.opacity = "0";
+    setTimeout(() => {
+      el.textContent = announcements[idx];
+      el.style.opacity = "1";
+    }, 250);
+  }, 6000);
 }
