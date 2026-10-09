@@ -41,34 +41,35 @@
   --status-revision: #E6007E;         /* แก้ไขงาน: Brand Magenta */
   --status-completed: #8DC63F;        /* ส่งมอบสำเร็จ: Brand Lime Green */
 
-  /* --- Neutral & Surface (Dark Theme) --- */
-  --ink-900: #ffffff;
-  --ink-800: #eae8f2;
-  --ink-700: #c3c0ce;
-  --ink-600: #a19eac;
-  --ink-500: #7e7b89;
-  --ink-400: #615e6a;
-  --ink-300: #423f4a;
-  --ink-200: #2c2933;
-  --line: #211e2f;                    /* Darker borders */
-  --line-strong: #2a263e;             /* Slightly lighter borders */
-  --bg: #0b0a12;                      /* Main App Background (Dark Navy/Purple) */
-  --surface: #151321;                 /* Cards (Slightly lighter than bg) */
-  --surface-alt: #1d1a2c;             /* Hover surfaces / inputs */
+  /* --- Neutral & Surface (UrbanRail Industrial Theme) --- */
+  --ink-900: #f1f2f6;
+  --ink-800: #d6d8e1;
+  --ink-700: #b1b5c4;
+  --ink-600: #8c90a1;
+  --ink-500: #6a6e7f;
+  --ink-400: #515463;
+  --ink-300: #383a45;
+  --ink-200: #26272f;
+  --line: #22242c;                    /* Control board borders */
+  --line-strong: #323541;             /* Metallic borders */
+  --bg: #0f1013;                      /* Deep Charcoal Control Board Background */
+  --surface: #15161b;                 /* Module Panel */
+  --surface-alt: #1a1b22;             /* Secondary Panel / Slits */
 
-  /* --- Semantic Accents --- */
-  --ok: #00F0B5;                      /* Mint Neon for success */
-  --ok-bg: rgba(0, 240, 181, 0.1);
-  --ok-line: rgba(0, 240, 181, 0.2);
-  --warn: #F05A28;                    /* Orange */
-  --warn-bg: rgba(240, 90, 40, 0.1);
-  --warn-line: rgba(240, 90, 40, 0.2);
-  --danger: #E6007E;                  /* Magenta */
-  --danger-bg: rgba(230, 0, 126, 0.1);
-  --danger-line: rgba(230, 0, 126, 0.2);
+  /* --- Semantic Accents & Status --- */
+  --ok: #10b981;                      /* Green Operational */
+  --ok-bg: rgba(16, 185, 129, 0.12);
+  --ok-line: rgba(16, 185, 129, 0.25);
+  --warn: #e59324;                    /* Amber Alert / Train Yellow */
+  --warn-bg: rgba(229, 147, 36, 0.12);
+  --warn-line: rgba(229, 147, 36, 0.25);
+  --danger: #ef4444;                  /* Red Cancelled */
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --danger-line: rgba(239, 68, 68, 0.25);
   --info: #00A3D9;                    /* Cyan */
-  --info-bg: rgba(0, 163, 217, 0.1);
-  --info-line: rgba(0, 163, 217, 0.2);
+  --info-bg: rgba(0, 163, 217, 0.12);
+  --info-line: rgba(0, 163, 217, 0.25);
+
 
   /* --- Layout --- */
   --sidebar-w: 260px;
@@ -186,7 +187,7 @@ img { max-width: 100%; }
 }
 
 .sidebar {
-  background: #08070d;
+  background: #101115;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -194,44 +195,50 @@ img { max-width: 100%; }
   top: 0;
   height: 100vh;
   overflow-y: auto;
-  border-right: 1px solid var(--line);
+  border-right: 1px solid #20222a;
 }
 
 .brand {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--line);
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid #1c1d25;
 }
 
 .brand-mark {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .brand-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: var(--royal-purple);
-  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: #1a1b22;
+  border: 1px solid #2d303d;
+  color: #e59324;
   display: grid;
   place-items: center;
+  font-family: var(--font-flap);
   font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: -0.02em;
+  font-size: 1.3rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 10px rgba(229, 147, 36, 0.2);
 }
 
 .brand-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-family: var(--font-flap);
+  font-size: 1.45rem;
+  letter-spacing: 0.12em;
+  color: #f1f2f6;
+  line-height: 1;
 }
 
 .brand-sub {
-  margin-top: 6px;
-  font-size: 0.72rem;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.65);
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #e59324;
 }
 
 .nav {
@@ -243,37 +250,42 @@ img { max-width: 100%; }
 }
 
 .nav-label {
-  padding: 12px 12px 6px;
-  font-size: 0.68rem;
+  padding: 14px 12px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.16em;
+  color: #555866;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  color: #8b8f9e;
-  font-size: 0.875rem;
+  padding: 9px 12px;
+  border-radius: 4px;
+  color: #8c90a1;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   font-weight: 500;
   transition: all 0.15s ease;
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   color: #fff;
   text-decoration: none;
 }
 
 .nav-item.is-active {
-  background: #1c1d25;
-  color: #fff;
-  font-weight: 600;
-  box-shadow: none;
-  border: 1px solid #282a36;
+  background: #171820;
+  color: #e59324;
+  font-weight: 700;
+  border-left: 3px solid #e59324;
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 1px 0 0 rgba(229, 147, 36, 0.2);
 }
 
 .nav-item svg { flex: 0 0 auto; opacity: 0.85; }
@@ -326,25 +338,31 @@ img { max-width: 100%; }
 
 .topbar {
   height: var(--topbar-h);
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  background: #111216;
+  border-bottom: 1px solid #20222a;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 20px;
+  padding: 0 24px;
   position: sticky;
   top: 0;
   z-index: 40;
 }
 
 .topbar h1 {
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #f1f2f6;
 }
 
 .topbar-sub {
-  font-size: 0.75rem;
-  color: var(--ink-400);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: #6a6e7f;
 }
 
 .search-inline {
