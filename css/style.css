@@ -27,54 +27,63 @@
   --text-dim: #A8A8A8;
   --px: 4px;
 
-  /* Typography */
+  /* Typography: Highly readable IBM Plex Sans Thai for UI, Pixelify only for arcade hero */
   --font-pixel: "Pixelify Sans", "Press Start 2P", monospace;
-  --font-mono: "Space Mono", "VT323", monospace;
-  --font-thai: "IBM Plex Sans Thai", "Sarabun", sans-serif;
-  --font: "Space Mono", "IBM Plex Sans Thai", monospace;
+  --font-mono: "Space Mono", monospace;
+  --font-thai: "IBM Plex Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font: "IBM Plex Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-  /* Mapped Framework Colors */
-  --bg: var(--ink);
-  --surface: var(--ink-2);
-  --surface-alt: #1a1a1a;
-  --ink-900: var(--text-on-dark);
-  --ink-800: #e2e2e2;
-  --ink-700: #cccccc;
-  --ink-600: var(--text-dim);
-  --ink-500: #888888;
-  --ink-400: #666666;
-  --ink-300: #444444;
-  --ink-200: #2a2a2a;
+  /* High-Contrast Readability Surfaces & Text */
+  --bg: #0d0e12;
+  --surface: #161720;
+  --surface-alt: #1e202c;
+  --line: #2d3040;
+  --line-strong: #3d4156;
+  --ink-900: #FFFFFF;
+  --ink-800: #F0F2F8;
+  --ink-700: #D8DBE7;
+  --ink-600: #B0B5C8;
+  --ink-500: #888EAA;
+  --ink-400: #686D85;
+  --ink-300: #424658;
+  --ink-200: #262937;
 
   --ok: var(--green);
   --warn: var(--yellow);
   --danger: var(--red);
   --info: var(--cyan);
 
-  --sidebar-w: 260px;
+  --sidebar-w: 0px;
   --topbar-h: 84px;
-  --radius-sm: 0px;
-  --radius: 0px;
-  --radius-lg: 0px;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
 
-  /* Block Shadow System (No blur shadows) */
+  /* Block Shadow System */
   --shadow-block-red: 0 var(--px) 0 var(--red-dark);
   --shadow-block-cyan: 0 var(--px) 0 var(--cyan-dark);
   --shadow-block-yellow: 0 var(--px) 0 var(--yellow-dark);
   --shadow-block-dark: 0 var(--px) 0 #000000;
 }
 
-/* Hard pixel rendering */
-img, svg.pixel-art {
+/* Hard pixel rendering strictly for pixel artwork */
+img.pixel-art, svg.pixel-art {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 
-h1, h2, h3, .pixel-font {
+.pixel-font {
   font-family: var(--font-pixel);
   -webkit-font-smoothing: none;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font);
+  color: #FFFFFF;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 /* ---------------------------------------------------------------- Reset -- */
@@ -173,21 +182,30 @@ img { max-width: 100%; }
 /* --------------------------------------------------------------- Layout -- */
 .app {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-}
-
-.sidebar {
-  background: #101115;
-  color: #fff;
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  border-right: 1px solid #20222a;
+  width: 100%;
 }
+
+.sidebar, #sidebar-slot, #sidebar {
+  display: none !important;
+}
+
+.main {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page {
+  max-width: 1420px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 28px 60px;
+  box-sizing: border-box;
+}
+
 
 .brand {
   padding: 22px 20px 18px;
