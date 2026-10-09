@@ -580,7 +580,8 @@ export async function render(ctx) {
     });
 
     // Bind Task Cards
-    bindTaskCards(ctx);
+    bindTaskCards(qs("#page-content"));
+
 
     /* ─────────── Chart.js Rendering ─────────── */
     window.setTimeout(() => {
