@@ -127,11 +127,11 @@ function sidebarHtml(page, member) {
 }
 
 function topbarHtml(page, member) {
+  const memberInitials = (member?.name || "U").trim().slice(0, 2).toUpperCase();
+
   return `
     <header class="topbar pixel-topbar">
-      <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="เปิดเมนู">${pixelIcons.menu}</button>
-
-      <!-- Left: Logo = Red rounded-square badge with white pixel skull + wordmark CONT -->
+      <!-- Left: Logo = Red badge with white pixel skull + wordmark CONT -->
       <a class="pixel-brand" href="dashboard.html" title="CONT Graphic Design Workflow">
         <div class="pixel-logo-badge">
           ${pixelIcons.skull}
@@ -139,43 +139,40 @@ function topbarHtml(page, member) {
         <span class="pixel-brand-name">CONT</span>
       </a>
 
-      <!-- Center-left: Nav links with colored pixel icon + uppercase label -->
+      <!-- Center: Universal Top Nav Links (Replaces Left Sidebar) -->
       <nav class="pixel-nav-links">
-        <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="งานของฉัน">
+        <a class="pixel-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html" title="ภาพรวมระบบ">
           ${pixelIcons.cubeBlue}
-          <span>TASKS</span>
+          <span>ภาพรวม</span>
+        </a>
+        <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="งานของฉัน">
+          ${pixelIcons.cubeGreen}
+          <span>งานของฉัน</span>
           <span class="nav-count-badge" id="nav-task-count-top">0</span>
         </a>
         <a class="pixel-nav-link ${page === "board" ? "is-active" : ""}" href="board.html" title="บอร์ด Kanban">
           ${pixelIcons.cubeGreen}
-          <span>BOARD</span>
+          <span>บอร์ดงาน</span>
         </a>
         <a class="pixel-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html" title="ปฏิทินงาน">
           ${pixelIcons.smiley}
-          <span>CALENDAR</span>
+          <span>ปฏิทิน</span>
         </a>
         <a class="pixel-nav-link ${page === "team" ? "is-active" : ""}" href="team.html" title="ทีม & กำลังงาน">
           ${pixelIcons.code}
-          <span>TEAM</span>
+          <span>ทีม & กำลังงาน</span>
         </a>
         <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="คู่มือเวิร์กโฟลว์">
           ${pixelIcons.book}
-          <span>GUIDE</span>
+          <span>คู่มือ CONT</span>
         </a>
       </nav>
 
-      <!-- Right: Green dot + 1287 ONLINE counter, divider, search, notifications, red CTA button -->
+      <!-- Right: Search, Notifications, User Capsule, and Create CTA -->
       <div class="pixel-topbar-right">
-        <div class="pixel-live-status">
-          <span class="pixel-pulse-dot"></span>
-          <span id="pixel-live-online-counter">1,287 ONLINE</span>
-        </div>
-
-        <div class="pixel-v-divider"></div>
-
-        <div class="search-inline" style="background:#141414;border:1px solid var(--line);border-radius:0;">
+        <div class="search-inline" style="background:#171822;border:1px solid var(--line);border-radius:6px;padding:6px 12px;">
           ${pixelIcons.search}
-          <input id="global-search" type="search" placeholder="SEARCH..." style="background:transparent;border:0;color:#fff;font-family:var(--font-mono);font-size:0.75rem;" />
+          <input id="global-search" type="search" placeholder="ค้นหางาน..." style="background:transparent;border:0;color:#FFFFFF;font-family:var(--font);font-size:0.82rem;margin-left:6px;" />
         </div>
 
         <!-- In-app Notification Bell -->
@@ -187,9 +184,22 @@ function topbarHtml(page, member) {
           <div class="notif-dropdown hidden" id="notif-dropdown"></div>
         </div>
 
-        <button class="btn-pixel btn-pixel-red" id="quick-create">
-          ${pixelIcons.rocket}
-          <span>JOIN FREE →</span>
+        <!-- User Capsule Profile & Logout -->
+        <div class="topbar-user-capsule">
+          <div class="topbar-avatar">${escapeHtml(memberInitials)}</div>
+          <div class="topbar-user-meta">
+            <span class="topbar-user-name">${escapeHtml(member?.name || "Member")}</span>
+            <span class="topbar-user-role">${escapeHtml(member?.role || "Staff")}</span>
+          </div>
+          <button class="topbar-logout-btn" id="topbar-logout-btn" title="ออกจากระบบ" aria-label="ออกจากระบบ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          </button>
+        </div>
+
+        <!-- Chunky Create Task Button -->
+        <button class="btn-pixel btn-pixel-red" id="quick-create" title="สร้างงานใหม่">
+          ${pixelIcons.plus}
+          <span>＋ สร้างงานใหม่</span>
         </button>
       </div>
     </header>
@@ -395,16 +405,14 @@ export async function initShell() {
   const access = await ensureAccess();
   if (!access.member) return null;
 
-  document.querySelector("#sidebar-slot")?.replaceWith(
-    document.createRange().createContextualFragment(sidebarHtml(page, access.member))
-  );
+  document.querySelector("#sidebar-slot")?.remove();
   document.querySelector("#topbar-slot")?.replaceWith(
     document.createRange().createContextualFragment(topbarHtml(page, access.member))
   );
 
   mountUser(access.member);
 
-  qsa("#logout-link").forEach((link) =>
+  qsa("#logout-link, #topbar-logout-btn").forEach((link) =>
     link.addEventListener("click", (event) => {
       event.preventDefault();
       auth.signOut();
@@ -496,10 +504,11 @@ export { icons, canManage, STATUS_LABELS };
 
 // Interactive Mascot Motion Handler: Nong CONT Wake & Nap
 window.wakeNongCont = function(container) {
-  if (!container) return;
+  if (!container || typeof container.querySelector !== "function") return;
   const bubble = container.querySelector(".bubble-text");
   const wrapper = container.querySelector(".empty-img-wrapper");
   const zzz = container.querySelector(".zzz-container");
+
   
   if (wrapper) {
     wrapper.classList.remove("is-woken");
