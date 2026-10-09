@@ -138,6 +138,15 @@ function topbarHtml(page, member) {
 
   return `
     <header class="topbar pixel-topbar">
+      <!-- Mobile / Tablet Hamburger Toggle Button -->
+      <button class="pixel-menu-toggle" id="menu-toggle" aria-label="Open Navigation Menu" title="Open Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
       <!-- Left: Logo = Red badge with white pixel skull + wordmark CONT -->
       <a class="pixel-brand" href="dashboard.html" title="CONT Graphic Design Workflow">
         <div class="pixel-logo-badge">
@@ -146,7 +155,7 @@ function topbarHtml(page, member) {
         <span class="pixel-brand-name">CONT</span>
       </a>
 
-      <!-- Center: Universal Top Nav Links (English) -->
+      <!-- Center: Universal Top Nav Links (Desktop) -->
       <nav class="pixel-nav-links">
         <a class="pixel-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html" title="Dashboard Overview">
           ${pixelIcons.cubeBlue}
@@ -177,9 +186,9 @@ function topbarHtml(page, member) {
 
       <!-- Right: Search, Notifications, User Capsule, and Create CTA -->
       <div class="pixel-topbar-right">
-        <div class="search-inline" style="background:#171822;border:1px solid var(--line);border-radius:6px;padding:6px 12px;">
+        <div class="search-inline">
           ${pixelIcons.search}
-          <input id="global-search" type="search" placeholder="Search tasks, projects..." style="background:transparent;border:0;color:#FFFFFF;font-family:var(--font);font-size:0.82rem;margin-left:6px;" />
+          <input id="global-search" type="search" placeholder="Search tasks, projects..." />
         </div>
 
         <!-- In-app Notification Bell -->
@@ -203,13 +212,82 @@ function topbarHtml(page, member) {
           </button>
         </div>
 
-        <!-- Create Task Button (English, Single Plus) -->
-        <button class="btn-pixel btn-pixel-red" id="quick-create" title="Create New Task" style="white-space:nowrap;">
+        <!-- Create Task Button -->
+        <button class="btn-pixel btn-pixel-red" id="quick-create" title="Create New Task">
           ${pixelIcons.plus}
           <span>NEW TASK</span>
         </button>
       </div>
     </header>
+
+    <!-- Mobile Navigation Drawer for Mobile & Tablet/iPad -->
+    <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop"></div>
+    <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile Navigation Drawer">
+      <div class="mobile-drawer-header">
+        <div class="pixel-brand">
+          <div class="pixel-logo-badge">
+            ${pixelIcons.skull}
+          </div>
+          <span class="pixel-brand-name">CONT</span>
+        </div>
+        <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Close Navigation" title="Close Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mobile-drawer-user">
+        <div class="topbar-avatar" style="width:38px;height:38px;font-size:0.95rem;">${escapeHtml(memberInitials)}</div>
+        <div class="mobile-drawer-user-info">
+          <div class="mobile-drawer-user-name">${escapeHtml(member?.name || "Member")}</div>
+          <div class="mobile-drawer-user-role">${escapeHtml(member?.role || "Staff")}</div>
+        </div>
+      </div>
+
+      <div class="mobile-drawer-actions">
+        <button class="btn-pixel btn-pixel-red" id="drawer-quick-create" style="width:100%;justify-content:center;">
+          ${pixelIcons.plus}
+          <span>NEW TASK</span>
+        </button>
+      </div>
+
+      <nav class="mobile-drawer-nav">
+        <a class="mobile-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html">
+          ${pixelIcons.cubeBlue}
+          <span>DASHBOARD</span>
+        </a>
+        <a class="mobile-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html">
+          ${pixelIcons.cubeGreen}
+          <span>TASKS</span>
+          <span class="nav-count-badge" id="nav-task-count-drawer">0</span>
+        </a>
+        <a class="mobile-nav-link ${page === "board" ? "is-active" : ""}" href="board.html">
+          ${pixelIcons.cubeGreen}
+          <span>BOARD</span>
+        </a>
+        <a class="mobile-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html">
+          ${pixelIcons.smiley}
+          <span>CALENDAR</span>
+        </a>
+        <a class="mobile-nav-link ${page === "team" ? "is-active" : ""}" href="team.html">
+          ${pixelIcons.code}
+          <span>TEAM</span>
+        </a>
+        <a class="mobile-nav-link" href="#" id="drawer-workflow-guide-link">
+          ${pixelIcons.book}
+          <span>WORKFLOW GUIDE</span>
+        </a>
+      </nav>
+
+      <div class="mobile-drawer-footer">
+        <button class="mobile-logout-btn" id="drawer-logout-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
   `;
 }
 
@@ -419,28 +497,39 @@ export async function initShell() {
 
   mountUser(access.member);
 
-  qsa("#logout-link, #topbar-logout-btn").forEach((link) =>
+  qsa("#logout-link, #topbar-logout-btn, #drawer-logout-btn").forEach((link) =>
     link.addEventListener("click", (event) => {
       event.preventDefault();
       auth.signOut();
     })
   );
 
-  qs("#menu-toggle")?.addEventListener("click", () => {
-    qs("#sidebar")?.classList.toggle("is-open");
-    if (qs(".sidebar-backdrop")) qs(".sidebar-backdrop").remove();
-    else {
-      const backdrop = document.createElement("div");
-      backdrop.className = "sidebar-backdrop";
-      backdrop.addEventListener("click", () => {
-        qs("#sidebar")?.classList.remove("is-open");
-        backdrop.remove();
-      });
-      document.body.appendChild(backdrop);
-    }
+  // Mobile Drawer Navigation handlers
+  const drawer = qs("#mobile-drawer");
+  const backdrop = qs("#mobile-drawer-backdrop");
+  const openDrawer = () => {
+    drawer?.classList.add("is-open");
+    backdrop?.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+  };
+  const closeDrawer = () => {
+    drawer?.classList.remove("is-open");
+    backdrop?.classList.remove("is-open");
+    document.body.style.overflow = "";
+  };
+
+  qs("#menu-toggle")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openDrawer();
   });
+  qs("#mobile-drawer-close")?.addEventListener("click", closeDrawer);
+  backdrop?.addEventListener("click", closeDrawer);
 
   qs("#quick-create")?.addEventListener("click", () => window.openCreateTask?.());
+  qs("#drawer-quick-create")?.addEventListener("click", () => {
+    closeDrawer();
+    window.openCreateTask?.();
+  });
 
   qs("#global-search")?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && event.target.value.trim()) {
@@ -467,16 +556,20 @@ export async function initShell() {
         </div>
       `
     });
-
   };
 
   qs("#workflow-guide-link")?.addEventListener("click", openWorkflowGuide);
   qs("#top-workflow-guide-link")?.addEventListener("click", openWorkflowGuide);
+  qs("#drawer-workflow-guide-link")?.addEventListener("click", (e) => {
+    closeDrawer();
+    openWorkflowGuide(e);
+  });
 
   const bundle = await api.loadBundle();
   const active = bundle.tasks.filter((task) => task.status !== "completed").length;
   qs("#nav-task-count") && (qs("#nav-task-count").textContent = active);
   qs("#nav-task-count-top") && (qs("#nav-task-count-top").textContent = active);
+  qs("#nav-task-count-drawer") && (qs("#nav-task-count-drawer").textContent = active);
 
   // Live Online Counter simulator
   const onlineEl = qs("#pixel-live-online-counter");
