@@ -499,8 +499,11 @@ export function renderMemberComparisonHtml({
  * Initializes and binds event listeners for the Time Filter widget
  */
 export function bindTimeFilterBar(container, { state, onChange }) {
-  const root = container.querySelector("#time-filter-widget");
+  const root = (container && typeof container.querySelector === "function")
+    ? container.querySelector("#time-filter-widget")
+    : document.querySelector("#time-filter-widget");
   if (!root) return;
+
 
   const pills = root.querySelectorAll(".time-pill");
   const yearSelect = root.querySelector("#tf-year");
@@ -602,12 +605,14 @@ export function bindTimeFilterBar(container, { state, onChange }) {
   });
 }
 
-/**
- * Initializes and binds event listeners for the Member Comparison section
- */
-export function bindMemberComparison(container, { onSelectMember, onSelectStatus }) {
-  const root = container.querySelector("#member-comparison-section");
+export function bindMemberComparison(container, options = {}) {
+  const root = (container && typeof container.querySelector === "function")
+    ? container.querySelector("#member-comparison-section")
+    : document.querySelector("#member-comparison-section");
   if (!root) return;
+
+  const onSelectMember = typeof options === "function" ? options : (options.onSelectMember || (() => {}));
+  const onSelectStatus = typeof options === "object" && typeof options.onSelectStatus === "function" ? options.onSelectStatus : (() => {});
 
   // Member select pills
   root.querySelectorAll("[data-select-member]").forEach((btn) => {
@@ -629,9 +634,7 @@ export function bindMemberComparison(container, { onSelectMember, onSelectStatus
   root.querySelectorAll("[data-legend-status]").forEach((el) => {
     el.addEventListener("click", () => {
       const statusKey = el.dataset.legendStatus;
-      if (typeof onSelectStatus === "function") {
-        onSelectStatus(statusKey);
-      }
+      onSelectStatus(statusKey);
     });
   });
 }
