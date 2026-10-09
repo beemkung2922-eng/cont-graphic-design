@@ -2,6 +2,7 @@ import { NAV_ITEMS, STATUS_LABELS } from "./constants.js";
 import { ensureAccess, mountUser, canManage, errorMessage } from "./auth.js";
 import { api, auth } from "./supabase.js";
 import { escapeHtml, avatar, relativeDeadline, formatDateTime } from "./formatters.js";
+import { pixelIcons } from "./pixel-icons.js";
 
 const icons = {
   grid: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>`,
@@ -125,43 +126,76 @@ function sidebarHtml(page, member) {
   `;
 }
 
-function topbarHtml(page) {
-  const titles = {
-    dashboard: ["ภาพรวม", "สถานะงานและทีมแบบเรียลไทม์"],
-    tasks: ["งานของฉัน", "จัดการงานที่รับผิดชอบและงานของทีม"],
-    board: ["บอร์ดงาน", "เห็น workflow ทั้งทีมในมุมมองเดียว"],
-    calendar: ["ปฏิทิน", "ติดตามกำหนดส่งและงานที่ชนกัน"],
-    team: ["ทีม & กำลังงาน", "ภาพรวมการทำงานของทีม วันนี้ใครทำอะไร กำลังทำอะไรอยู่"],
-    task: ["Task Detail", "รายละเอียด งานย่อย คอมเมนต์ และประวัติ"]
-  };
-  const [title, sub] = titles[page] || ["CONT", ""];
-
+function topbarHtml(page, member) {
   return `
-    <header class="topbar">
-      <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="เปิดเมนู">${icons.menu}</button>
-      <div>
-        <h1>${title}</h1>
-        <div class="topbar-sub">${sub}</div>
-      </div>
-      <div class="spacer"></div>
-      <div class="search-inline">
-        ${icons.search}
-        <input id="global-search" type="search" placeholder="ค้นหางาน…" />
-      </div>
+    <header class="topbar pixel-topbar">
+      <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="เปิดเมนู">${pixelIcons.menu}</button>
 
-      <!-- In-app Notification Bell -->
-      <div class="notif-container">
-        <button class="icon-btn" id="notifications-btn" title="การแจ้งเตือน" aria-label="การแจ้งเตือน">
-          ${icons.bell}
+      <!-- Left: Logo = Red rounded-square badge with white pixel skull + wordmark CONT -->
+      <a class="pixel-brand" href="dashboard.html" title="CONT Graphic Design Workflow">
+        <div class="pixel-logo-badge">
+          ${pixelIcons.skull}
+        </div>
+        <span class="pixel-brand-name">CONT</span>
+      </a>
+
+      <!-- Center-left: Nav links with colored pixel icon + uppercase label -->
+      <nav class="pixel-nav-links">
+        <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="งานของฉัน">
+          ${pixelIcons.cubeBlue}
+          <span>TASKS</span>
+          <span class="nav-count-badge" id="nav-task-count-top">0</span>
+        </a>
+        <a class="pixel-nav-link ${page === "board" ? "is-active" : ""}" href="board.html" title="บอร์ด Kanban">
+          ${pixelIcons.cubeGreen}
+          <span>BOARD</span>
+        </a>
+        <a class="pixel-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html" title="ปฏิทินงาน">
+          ${pixelIcons.smiley}
+          <span>CALENDAR</span>
+        </a>
+        <a class="pixel-nav-link ${page === "team" ? "is-active" : ""}" href="team.html" title="ทีม & กำลังงาน">
+          ${pixelIcons.code}
+          <span>TEAM</span>
+        </a>
+        <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="คู่มือเวิร์กโฟลว์">
+          ${pixelIcons.book}
+          <span>GUIDE</span>
+        </a>
+      </nav>
+
+      <!-- Right: Green dot + 1287 ONLINE counter, divider, search, notifications, red CTA button -->
+      <div class="pixel-topbar-right">
+        <div class="pixel-live-status">
+          <span class="pixel-pulse-dot"></span>
+          <span id="pixel-live-online-counter">1,287 ONLINE</span>
+        </div>
+
+        <div class="pixel-v-divider"></div>
+
+        <div class="search-inline" style="background:#141414;border:1px solid var(--line);border-radius:0;">
+          ${pixelIcons.search}
+          <input id="global-search" type="search" placeholder="SEARCH..." style="background:transparent;border:0;color:#fff;font-family:var(--font-mono);font-size:0.75rem;" />
+        </div>
+
+        <!-- In-app Notification Bell -->
+        <div class="notif-container">
+          <button class="icon-btn" id="notifications-btn" title="การแจ้งเตือน" aria-label="การแจ้งเตือน">
+            ${pixelIcons.bell}
+          </button>
+          <span class="notif-badge hidden" id="notif-badge">0</span>
+          <div class="notif-dropdown hidden" id="notif-dropdown"></div>
+        </div>
+
+        <button class="btn-pixel btn-pixel-red" id="quick-create">
+          ${pixelIcons.rocket}
+          <span>JOIN FREE →</span>
         </button>
-        <span class="notif-badge hidden" id="notif-badge">0</span>
-        <div class="notif-dropdown hidden" id="notif-dropdown"></div>
       </div>
-
-      <button class="btn btn-primary btn-sm" id="quick-create">${icons.plus}<span>สร้างงาน</span></button>
     </header>
   `;
 }
+
 
 // --- Notification Center Engine ---
 function buildNotifications(bundle, currentMember) {
@@ -365,7 +399,7 @@ export async function initShell() {
     document.createRange().createContextualFragment(sidebarHtml(page, access.member))
   );
   document.querySelector("#topbar-slot")?.replaceWith(
-    document.createRange().createContextualFragment(topbarHtml(page))
+    document.createRange().createContextualFragment(topbarHtml(page, access.member))
   );
 
   mountUser(access.member);
@@ -399,8 +433,8 @@ export async function initShell() {
     }
   });
 
-  qs("#workflow-guide-link")?.addEventListener("click", (event) => {
-    event.preventDefault();
+  const openWorkflowGuide = (event) => {
+    event?.preventDefault();
     openModal({
       title: "CONT Design Workflow Guide",
       body: `
@@ -416,14 +450,31 @@ export async function initShell() {
         </div>
       `
     });
-  });
+  };
+
+  qs("#workflow-guide-link")?.addEventListener("click", openWorkflowGuide);
+  qs("#top-workflow-guide-link")?.addEventListener("click", openWorkflowGuide);
 
   const bundle = await api.loadBundle();
   const active = bundle.tasks.filter((task) => task.status !== "completed").length;
   qs("#nav-task-count") && (qs("#nav-task-count").textContent = active);
+  qs("#nav-task-count-top") && (qs("#nav-task-count-top").textContent = active);
+
+  // Live Online Counter simulator
+  const onlineEl = qs("#pixel-live-online-counter");
+  if (onlineEl) {
+    const baseCount = 1280;
+    const updateOnline = () => {
+      const count = baseCount + Math.floor(Math.random() * 15);
+      onlineEl.textContent = `${count.toLocaleString()} ONLINE`;
+    };
+    updateOnline();
+    window.setInterval(updateOnline, 8000);
+  }
 
   // Mount In-app Notification Center
   mountNotificationCenter(bundle, access.member);
+
 
   return { ...access, ...bundle };
 }
