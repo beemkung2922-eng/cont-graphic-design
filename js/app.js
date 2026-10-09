@@ -139,32 +139,32 @@ function topbarHtml(page, member) {
         <span class="pixel-brand-name">CONT</span>
       </a>
 
-      <!-- Center: Universal Top Nav Links (Replaces Left Sidebar) -->
+      <!-- Center: Universal Top Nav Links (English) -->
       <nav class="pixel-nav-links">
-        <a class="pixel-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html" title="ภาพรวมระบบ">
+        <a class="pixel-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html" title="Dashboard Overview">
           ${pixelIcons.cubeBlue}
-          <span>ภาพรวม</span>
+          <span>DASHBOARD</span>
         </a>
-        <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="งานของฉัน">
+        <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="My Tasks">
           ${pixelIcons.cubeGreen}
-          <span>งานของฉัน</span>
+          <span>TASKS</span>
           <span class="nav-count-badge" id="nav-task-count-top">0</span>
         </a>
-        <a class="pixel-nav-link ${page === "board" ? "is-active" : ""}" href="board.html" title="บอร์ด Kanban">
+        <a class="pixel-nav-link ${page === "board" ? "is-active" : ""}" href="board.html" title="Kanban Board">
           ${pixelIcons.cubeGreen}
-          <span>บอร์ดงาน</span>
+          <span>BOARD</span>
         </a>
-        <a class="pixel-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html" title="ปฏิทินงาน">
+        <a class="pixel-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html" title="Calendar Schedule">
           ${pixelIcons.smiley}
-          <span>ปฏิทิน</span>
+          <span>CALENDAR</span>
         </a>
-        <a class="pixel-nav-link ${page === "team" ? "is-active" : ""}" href="team.html" title="ทีม & กำลังงาน">
+        <a class="pixel-nav-link ${page === "team" ? "is-active" : ""}" href="team.html" title="Team & Workload">
           ${pixelIcons.code}
-          <span>ทีม & กำลังงาน</span>
+          <span>TEAM</span>
         </a>
-        <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="คู่มือเวิร์กโฟลว์">
+        <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="Workflow Guide">
           ${pixelIcons.book}
-          <span>คู่มือ CONT</span>
+          <span>GUIDE</span>
         </a>
       </nav>
 
@@ -172,12 +172,12 @@ function topbarHtml(page, member) {
       <div class="pixel-topbar-right">
         <div class="search-inline" style="background:#171822;border:1px solid var(--line);border-radius:6px;padding:6px 12px;">
           ${pixelIcons.search}
-          <input id="global-search" type="search" placeholder="ค้นหางาน..." style="background:transparent;border:0;color:#FFFFFF;font-family:var(--font);font-size:0.82rem;margin-left:6px;" />
+          <input id="global-search" type="search" placeholder="Search tasks, projects..." style="background:transparent;border:0;color:#FFFFFF;font-family:var(--font);font-size:0.82rem;margin-left:6px;" />
         </div>
 
         <!-- In-app Notification Bell -->
         <div class="notif-container">
-          <button class="icon-btn" id="notifications-btn" title="การแจ้งเตือน" aria-label="การแจ้งเตือน">
+          <button class="icon-btn" id="notifications-btn" title="Notifications" aria-label="Notifications">
             ${pixelIcons.bell}
           </button>
           <span class="notif-badge hidden" id="notif-badge">0</span>
@@ -191,15 +191,15 @@ function topbarHtml(page, member) {
             <span class="topbar-user-name">${escapeHtml(member?.name || "Member")}</span>
             <span class="topbar-user-role">${escapeHtml(member?.role || "Staff")}</span>
           </div>
-          <button class="topbar-logout-btn" id="topbar-logout-btn" title="ออกจากระบบ" aria-label="ออกจากระบบ">
+          <button class="topbar-logout-btn" id="topbar-logout-btn" title="Sign Out" aria-label="Sign Out">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
           </button>
         </div>
 
-        <!-- Chunky Create Task Button -->
-        <button class="btn-pixel btn-pixel-red" id="quick-create" title="สร้างงานใหม่">
+        <!-- Create Task Button (English, Single Plus) -->
+        <button class="btn-pixel btn-pixel-red" id="quick-create" title="Create New Task" style="white-space:nowrap;">
           ${pixelIcons.plus}
-          <span>＋ สร้างงานใหม่</span>
+          <span>NEW TASK</span>
         </button>
       </div>
     </header>
@@ -444,20 +444,23 @@ export async function initShell() {
   const openWorkflowGuide = (event) => {
     event?.preventDefault();
     openModal({
-      title: "CONT Design Workflow Guide",
+      title: "CONT Creative Operations Guide",
       body: `
         <div class="stack" style="gap:14px">
-          <img class="workflow-modal-img" src="assets/illustrations/cont-workflow.jpg" alt="CONT Workflow Guide" />
-          <div style="font-size:0.86rem;color:var(--ink-700);line-height:1.6">
-            <strong style="color:var(--ink-900)">กระบวนการทำงานของระบบ CONT (Graphic Design Team):</strong><br/>
-            • <strong>บรีฟเข้า (Brief):</strong> รับบรีฟ ความต้องการ ขนาด และช่องทางจัดส่งจาก Requester<br/>
-            • <strong>ดัดเส้น (Drafting):</strong> ดีไซเนอร์เริ่มออกแบบ ดัดเส้น Bézier และเตรียมดราฟต์ชิ้นงาน<br/>
-            • <strong>ตรวจงาน (Review):</strong> ตรวจเช็คคุณภาพ ความถูกต้อง และคอมเมนต์ขอแก้ไข (Revision) หากจำเป็น<br/>
-            • <strong>ไฟนอล (Completed):</strong> ชิ้นงานผ่านเกณฑ์ ปิดจ๊อบสำเร็จ พร้อมส่งมอบไฟล์เพื่อนำไปใช้งาน
+          <div style="background:#12131b;border:2px solid #2d3042;overflow:hidden;box-shadow:0 4px 0 #000;">
+            <img class="workflow-modal-img" src="assets/hero-city.png" alt="CONT Workflow Guide" style="width:100%;display:block;image-rendering:pixelated;border-radius:0;border:0;background:transparent;" />
+          </div>
+          <div style="font-size:0.86rem;color:#D8DBE7;line-height:1.6">
+            <strong style="color:#FFFFFF;font-size:0.95rem;">Creative Workflow Execution Framework:</strong><br/>
+            • <strong>Brief:</strong> Intake specifications, sizing, brand assets, and SLA targets from Requester.<br/>
+            • <strong>Drafting:</strong> Designer crafts vector layouts, Bézier curves, and visual concepts.<br/>
+            • <strong>Review:</strong> Stakeholders and leads review proofs, annotate feedback, or request Revisions.<br/>
+            • <strong>Completed:</strong> Final artwork approved, assets packaged, and delivered on schedule.
           </div>
         </div>
       `
     });
+
   };
 
   qs("#workflow-guide-link")?.addEventListener("click", openWorkflowGuide);
