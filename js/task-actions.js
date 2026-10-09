@@ -5,7 +5,8 @@ import { canManage, canCreateTask, isRequester, isViewer } from "./auth.js";
 import { renderImageUploaderHtml, bindImageUploader } from "./image-uploader.js";
 
 export function bindTaskCards(root = document) {
-  qsa("[data-task-id]", root).forEach((card) => {
+  const node = (root && typeof root.querySelectorAll === "function") ? root : document;
+  qsa("[data-task-id]", node).forEach((card) => {
     const open = () => { window.location.href = `task.html?id=${encodeURIComponent(card.dataset.taskId)}`; };
     card.addEventListener("click", open);
     card.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } });
