@@ -563,10 +563,17 @@ export async function render(ctx) {
     }
 
     // Bind Member Comparison drilldowns and actions
-    bindMemberComparison(ctx, (newMemberId) => {
-      filterState.memberId = newMemberId;
-      draw();
+    bindMemberComparison(qs("#page-content"), {
+      onSelectMember: (newMemberId) => {
+        filterState.memberId = newMemberId;
+        draw();
+      },
+      onSelectStatus: (newStatus) => {
+        filterState.status = newStatus;
+        draw();
+      }
     });
+
 
     // Bind Task Cards
     bindTaskCards(ctx);
