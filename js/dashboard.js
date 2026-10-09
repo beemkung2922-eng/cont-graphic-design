@@ -36,13 +36,18 @@ const STATUS_CHART_COLORS = {
   completed: { bg: BRAND.green,  border: BRAND.greenDark },
 };
 
-const STATUS_TH = {
-  brief: "รอรับบรีฟ",
-  drafting: "กำลังดราฟต์",
-  review: "รอคอมเมนต์",
-  revision: "แก้ไขงาน",
-  completed: "ส่งมอบสำเร็จ",
+const STATUS_EN = {
+  brief: "Brief Intake",
+  drafting: "Drafting",
+  review: "In Review",
+  revision: "Revision",
+  completed: "Delivered",
 };
+
+const MONTH_NAMES_EN = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 
 /* ─── Destroy existing Chart.js instances before redraw ─── */
 const _chartInstances = {};
@@ -100,13 +105,13 @@ export async function render(ctx) {
               <span>TOGETHER.${pixelIcons.heart}</span>
             </h1>
             <p class="pixel-hero-sub">
-              ระบบจัดการกระบวนการทำงานกราฟิกดีไซน์ KKP แบบเรียลไทม์<br />
+              REAL-TIME GRAPHIC DESIGN WORKFLOW ENGINE FOR KKP<br />
               TRACK BRIEFS, DESIGN ITERATIONS & TEAM CAPACITY IN 8-BIT PRECISION
             </p>
             <div class="pixel-hero-actions">
               <button class="btn-pixel btn-pixel-red" id="hero-create-btn">
                 ${pixelIcons.rocket}
-                <span>START BUILDING →</span>
+                <span>CREATE TASK →</span>
               </button>
               <a class="btn-pixel btn-pixel-cyan" href="board.html">
                 ${pixelIcons.arrowRight}
@@ -119,7 +124,7 @@ export async function render(ctx) {
           <div class="pixel-news-ticker">
             <span class="pixel-news-tag">NEWS</span>
             <span class="pixel-news-text" id="news-ticker-text">
-              CONT 2.0 PIXEL WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING
+              CONT 2.0 WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING
             </span>
             <span class="pixel-news-chevron">›</span>
           </div>
@@ -148,7 +153,7 @@ export async function render(ctx) {
           <div class="pixel-feature-main">
             <h3 class="pixel-feature-title is-green">SMART WORKFLOW</h3>
             <p class="pixel-feature-body">
-              ติดตามสถานะงาน 5 ขั้นตอน (Brief → Draft → Review → Revision → Done) ชัดเจนทุกเฟส
+              Track 5-stage pipeline (Brief → Draft → Review → Revision → Done) with SLA precision.
             </p>
             <a class="pixel-feature-link is-green" href="#" id="feature-guide-link">
               <span>LEARN MORE</span>
@@ -165,7 +170,7 @@ export async function render(ctx) {
           <div class="pixel-feature-main">
             <h3 class="pixel-feature-title is-blue">TEAM CAPACITY</h3>
             <p class="pixel-feature-body">
-              วิเคราะห์ Workload และกำลังงานกราฟิกรายบุคคล พร้อมระบบเทียบผลงานย้อนหลัง
+              Analyze designer workload, assignments, and historical output across all squads.
             </p>
             <a class="pixel-feature-link is-blue" href="team.html">
               <span>VIEW TEAM</span>
@@ -182,7 +187,7 @@ export async function render(ctx) {
           <div class="pixel-feature-main">
             <h3 class="pixel-feature-title is-yellow">ON-TIME ACCURACY</h3>
             <p class="pixel-feature-body">
-              ป้องกันงานชนและเร่งด่วนด้วย Smart Deadline & SLA Monitoring แบบเรียลไทม์
+              Prevent bottlenecks with real-time deadline monitoring and collision alerts.
             </p>
             <a class="pixel-feature-link is-yellow" href="#dash-filter-bar">
               <span>VIEW METRICS</span>
@@ -199,7 +204,7 @@ export async function render(ctx) {
           <div class="pixel-feature-main">
             <h3 class="pixel-feature-title is-purple">SUPABASE CLOUD</h3>
             <p class="pixel-feature-body">
-              เชื่อมต่อฐานข้อมูลเรียลไทม์ ซิงค์การตรวจงาน คอมเมนต์ และประวัติเวอร์ชันฉับไว
+              Real-time cloud database syncing version histories, artwork proofs, and comments.
             </p>
             <a class="pixel-feature-link is-purple" href="tasks.html">
               <span>BROWSE TASKS</span>
@@ -290,53 +295,53 @@ export async function render(ctx) {
       return d ? d.getFullYear() : null;
     }).filter(Boolean))].sort((a, b) => b - a);
 
-    /* ── Period filter bar HTML ── */
+    /* ── Period filter bar HTML (English) ── */
     const periodFilterHtml = `
       <div class="dash-filter-bar" id="dash-filter-bar">
         <div class="dfb-group">
-          <label class="dfb-label">ช่วงเวลา</label>
+          <label class="dfb-label">Timeframe</label>
           <div class="dfb-chips">
             ${["all","today","7days","month","year"].map(p => `
               <button class="dfb-chip${filterState.period===p?" is-active":""}" data-period="${p}">
-                ${{ all:"ทั้งหมด", today:"วันนี้", "7days":"7 วัน", month:"เดือนนี้", year:"ปีนี้" }[p]}
+                ${{ all:"All Time", today:"Today", "7days":"7 Days", month:"This Month", year:"This Year" }[p]}
               </button>`).join("")}
           </div>
         </div>
         <div class="dfb-group">
-          <label class="dfb-label">ปี</label>
+          <label class="dfb-label">Year</label>
           <select class="dfb-select" id="dfb-year">
-            <option value="all"${filterState.year==="all"?" selected":""}>ทุกปี</option>
-            ${allYears.map(y => `<option value="${y}"${filterState.year==y?" selected":""}>${y + 543}</option>`).join("")}
+            <option value="all"${filterState.year==="all"?" selected":""}>All Years</option>
+            ${allYears.map(y => `<option value="${y}"${filterState.year==y?" selected":""}>${y}</option>`).join("")}
           </select>
         </div>
         <div class="dfb-group">
-          <label class="dfb-label">เดือน</label>
+          <label class="dfb-label">Month</label>
           <select class="dfb-select" id="dfb-month">
-            <option value="all"${filterState.month==="all"?" selected":""}>ทุกเดือน</option>
-            ${MONTH_NAMES_TH.map((m, i) => `<option value="${i+1}"${filterState.month==i+1?" selected":""}>${m}</option>`).join("")}
+            <option value="all"${filterState.month==="all"?" selected":""}>All Months</option>
+            ${MONTH_NAMES_EN.map((m, i) => `<option value="${i+1}"${filterState.month==i+1?" selected":""}>${m}</option>`).join("")}
           </select>
         </div>
         <div class="dfb-group">
-          <label class="dfb-label">สมาชิก</label>
+          <label class="dfb-label">Member</label>
           <select class="dfb-select" id="dfb-member">
-            <option value="all"${filterState.memberId==="all"?" selected":""}>ทุกคน</option>
+            <option value="all"${filterState.memberId==="all"?" selected":""}>All Members</option>
             ${members.map(m => `<option value="${m.id}"${filterState.memberId===m.id?" selected":""}>${escapeHtml(m.name)}</option>`).join("")}
           </select>
         </div>
         <div class="dfb-group">
-          <label class="dfb-label">สถานะ</label>
+          <label class="dfb-label">Status</label>
           <select class="dfb-select" id="dfb-status">
-            <option value="all"${filterState.status==="all"?" selected":""}>ทุกสถานะ</option>
-            ${STATUS_ORDER.map(s => `<option value="${s}"${filterState.status===s?" selected":""}>${STATUS_TH[s]}</option>`).join("")}
+            <option value="all"${filterState.status==="all"?" selected":""}>All Statuses</option>
+            ${STATUS_ORDER.map(s => `<option value="${s}"${filterState.status===s?" selected":""}>${STATUS_EN[s]}</option>`).join("")}
           </select>
         </div>
         <div class="dfb-group dfb-range">
-          <label class="dfb-label">ช่วงวันที่</label>
-          <input type="date" class="dfb-input" id="dfb-start" value="${filterState.startDate}" placeholder="วันเริ่ม">
+          <label class="dfb-label">Date Range</label>
+          <input type="date" class="dfb-input" id="dfb-start" value="${filterState.startDate}" placeholder="Start Date">
           <span class="dfb-sep">–</span>
-          <input type="date" class="dfb-input" id="dfb-end" value="${filterState.endDate}" placeholder="วันสิ้นสุด">
+          <input type="date" class="dfb-input" id="dfb-end" value="${filterState.endDate}" placeholder="End Date">
         </div>
-        <button class="dfb-reset" id="dfb-reset">× ล้างตัวกรอง</button>
+        <button class="dfb-reset" id="dfb-reset">× Reset</button>
       </div>
     `;
 
@@ -347,7 +352,7 @@ export async function render(ctx) {
     const monthActive = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      monthLabels.push(MONTH_NAMES_TH[d.getMonth()].slice(0, 3) + " " + (d.getFullYear() + 543).toString().slice(2));
+      monthLabels.push(MONTH_NAMES_EN[d.getMonth()].slice(0, 3) + " " + d.getFullYear().toString().slice(2));
       const mComp = tasks.filter(t => {
         const td = getTaskDate(t, "created_at");
         return td && td.getFullYear() === d.getFullYear() && td.getMonth() === d.getMonth() && t.status === "completed";
@@ -373,7 +378,7 @@ export async function render(ctx) {
       count: filtered.filter(t => t.status === s).length,
     }));
 
-    /* ── Activity + Deadlines list HTML ── */
+    /* ── Activity + Deadlines list HTML (English) ── */
     const activityHtml = active.slice(0, 5).map(task => {
       const m = memberFor(task, members);
       return `
@@ -381,14 +386,14 @@ export async function render(ctx) {
           <div class="activity-dot" style="background:${STATUS_CHART_COLORS[task.status]?.bg || BRAND.cyan};"></div>
           <div class="activity-main">
             <div class="activity-name"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title)}</a></div>
-            <div class="activity-task">${escapeHtml(m?.name || "ยังไม่ระบุ")} · ${STATUS_TH[task.status] || task.status}</div>
+            <div class="activity-task">${escapeHtml(m?.name || "Unassigned")} · ${STATUS_EN[task.status] || task.status}</div>
           </div>
           <div class="activity-right">
             <span class="pixel-badge" style="color:var(--text-dim);border-color:var(--line);">${formatDate(task.created_at)}</span>
           </div>
         </div>
       `;
-    }).join("") || `<div class="state-empty">ไม่มีความเคลื่อนไหวในช่วงเวลานี้</div>`;
+    }).join("") || `<div class="state-empty" style="color:#8c91a8;">No recent activity in this period</div>`;
 
     const deadlinesHtml = dueSoon.slice(0, 5).map(task => {
       const urgency = relativeDeadline(task.deadline_at || task.deadline);
@@ -396,17 +401,17 @@ export async function render(ctx) {
       return `
         <div class="deadline-item">
           <div class="deadline-date" style="border-color:var(--line);background:#1a1a1a;">
-            <span class="day" style="font-family:var(--font-pixel);">${d ? d.getDate() : "—"}</span>
-            <span class="month">${d ? MONTH_NAMES_TH[d.getMonth()].slice(0, 3) : "—"}</span>
+            <span class="day" style="font-family:var(--font);font-weight:700;">${d ? d.getDate() : "—"}</span>
+            <span class="month">${d ? MONTH_NAMES_EN[d.getMonth()].slice(0, 3) : "—"}</span>
           </div>
           <div class="deadline-main">
             <div class="deadline-title"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title)}</a></div>
             <div class="deadline-sub">${escapeHtml(urgency.label)}</div>
           </div>
-          <span class="badge ${urgency.className}">${urgency.className === "is-overdue" ? "เกินกำหนด" : "ใกล้ส่ง"}</span>
+          <span class="badge ${urgency.className}">${urgency.className === "is-overdue" ? "Overdue" : "Due Soon"}</span>
         </div>
       `;
-    }).join("") || `<div class="state-empty">ไม่มีงานเร่งด่วนที่ต้องส่งมอบเร็วๆ นี้</div>`;
+    }).join("") || `<div class="state-empty" style="color:#8c91a8;">No upcoming deadlines in this period</div>`;
 
     /* ─────────── Render Full Dashboard Page HTML ─────────── */
     qs("#page-content").innerHTML = `
@@ -428,7 +433,7 @@ export async function render(ctx) {
           <div class="chart-card-header">
             <div>
               <div class="chart-card-title" style="font-family:var(--font-pixel);letter-spacing:0.06em;color:var(--cyan);">PERFORMANCE TREND (6 MONTHS)</div>
-              <div class="chart-card-sub" style="font-family:var(--font-mono);">COMPARING ACTIVE VS COMPLETED JOBS</div>
+              <div class="chart-card-sub" style="font-family:var(--font-mono);">COMPARING ACTIVE VS DELIVERED CREATIVE SPRINTS</div>
             </div>
           </div>
           <div class="chart-wrap">
@@ -450,7 +455,7 @@ export async function render(ctx) {
             ${STATUS_ORDER.map(s => `
               <div class="donut-legend-item">
                 <span class="donut-legend-dot" style="background:${STATUS_CHART_COLORS[s].bg}"></span>
-                <span style="font-family:var(--font-mono);">${STATUS_TH[s]}</span>
+                <span style="font-family:var(--font);">${STATUS_EN[s]}</span>
                 <span class="donut-legend-count" style="font-family:var(--font-mono);">${statusCounts.find(x => x.status === s)?.count || 0}</span>
               </div>
             `).join("")}
@@ -473,10 +478,10 @@ export async function render(ctx) {
         <div class="chart-card" style="border:2px solid var(--line);background:var(--ink-2);box-shadow:0 var(--px) 0 #000;">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title" style="font-family:var(--font-pixel);color:#fff;">ความเคลื่อนไหวล่าสุด</div>
-              <div class="chart-card-sub">งานที่กำลังดำเนินอยู่ในช่วงเวลานี้</div>
+              <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:#fff;">Recent Activity</div>
+              <div class="chart-card-sub">Tasks currently moving in the pipeline</div>
             </div>
-            <a class="btn-pixel btn-pixel-dark" href="board.html" style="font-size:0.75rem;padding:6px 12px;">บอร์ด KANBAN →</a>
+            <a class="btn-pixel btn-pixel-dark" href="board.html" style="font-size:0.75rem;padding:6px 12px;">KANBAN BOARD →</a>
           </div>
           <div class="feed-list">${activityHtml}</div>
         </div>
@@ -484,10 +489,10 @@ export async function render(ctx) {
         <div class="chart-card" style="border:2px solid var(--line);background:var(--ink-2);box-shadow:0 var(--px) 0 #000;">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title" style="font-family:var(--font-pixel);color:#fff;">กำหนดส่งใกล้มา</div>
-              <div class="chart-card-sub">งานที่ต้องติดตามส่งมอบ</div>
+              <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:#fff;">Upcoming Deadlines</div>
+              <div class="chart-card-sub">Deliveries requiring SLA focus</div>
             </div>
-            <a class="btn-pixel btn-pixel-dark" href="calendar.html" style="font-size:0.75rem;padding:6px 12px;">ปฏิทิน →</a>
+            <a class="btn-pixel btn-pixel-dark" href="calendar.html" style="font-size:0.75rem;padding:6px 12px;">CALENDAR →</a>
           </div>
           <div class="deadline-list">${deadlinesHtml}</div>
         </div>
@@ -497,13 +502,13 @@ export async function render(ctx) {
       <div class="chart-card" style="margin-top:24px;border:2px solid var(--line);background:var(--ink-2);box-shadow:0 var(--px) 0 #000;">
         <div class="chart-card-header">
           <div>
-            <div class="chart-card-title" style="font-family:var(--font-pixel);color:var(--red);">งานที่ต้องจับตา</div>
-            <div class="chart-card-sub">งานใกล้กำหนดส่งและรอความเห็น</div>
+            <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:var(--red);">Urgent Focus</div>
+            <div class="chart-card-sub">Tasks nearing SLA target or awaiting review</div>
           </div>
-          <a class="btn-pixel btn-pixel-dark" href="tasks.html" style="font-size:0.75rem;padding:6px 12px;">งานทั้งหมด →</a>
+          <a class="btn-pixel btn-pixel-dark" href="tasks.html" style="font-size:0.75rem;padding:6px 12px;">ALL TASKS →</a>
         </div>
         <div class="task-grid" style="grid-template-columns:repeat(auto-fill,minmax(290px,1fr))">
-          ${dueSoon.slice(0, 3).map(task => taskCard(task, { projects, members, subtasks })).join("") || interactiveEmptyState({ title: "ไม่มีงานเร่งด่วนในช่วงนี้", subtitle: "งานทั้งหมดอยู่ในกำหนดส่งตามแผน", small: true })}
+          ${dueSoon.slice(0, 3).map(task => taskCard(task, { projects, members, subtasks })).join("") || interactiveEmptyState({ title: "No urgent tasks", subtitle: "All creative sprints are progressing on schedule", small: true })}
         </div>
       </div>
     `;
@@ -574,7 +579,6 @@ export async function render(ctx) {
       }
     });
 
-
     // Bind Task Cards
     bindTaskCards(ctx);
 
@@ -590,7 +594,7 @@ export async function render(ctx) {
             labels: monthLabels,
             datasets: [
               {
-                label: "COMPLETED",
+                label: "DELIVERED",
                 data: monthCompleted,
                 borderColor: BRAND.green,
                 backgroundColor: "rgba(43, 209, 75, 0.12)",
@@ -663,7 +667,7 @@ export async function render(ctx) {
         _chartInstances["donut"] = new Chart(donutCtx, {
           type: "doughnut",
           data: {
-            labels: STATUS_ORDER.map(s => STATUS_TH[s]),
+            labels: STATUS_ORDER.map(s => STATUS_EN[s]),
             datasets: [{
               data: STATUS_ORDER.map(s => statusCounts.find(x => x.status === s)?.count || 0),
               backgroundColor: STATUS_ORDER.map(s => STATUS_CHART_COLORS[s].bg),
@@ -721,7 +725,6 @@ function initCountUp() {
 
         function step(now) {
           const progress = Math.min((now - startTime) / duration, 1);
-          // easeOutQuad: 1 - (1 - progress) * (1 - progress)
           const ease = 1 - (1 - progress) * (1 - progress);
           const current = finalVal * ease;
           el.textContent = isPercent ? `${current.toFixed(1)}%` : Math.round(current).toLocaleString();
@@ -740,17 +743,17 @@ function initCountUp() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Rotating News Ticker
+   Rotating News Ticker (English)
 ───────────────────────────────────────────────────────────────────────── */
 function initNewsTicker() {
   const el = qs("#news-ticker-text");
   if (!el) return;
 
   const announcements = [
-    "CONT 2.0 PIXEL WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING",
-    "NEW: SMART WORKLOAD DRILLDOWN ACTIVE — ANALYZE DESIGN CAPACITY & REVISION CYCLES",
-    "REMINDER: SLA REVIEW CYCLE ACTIVE — PLEASE APPROVE OR REQUEST REVISIONS WITHIN 24 HOURS",
-    "KKP BRAND GUIDELINES UPDATED — NEW SOCIAL MEDIA BANNER PRESETS AVAILABLE IN TEMPLATES"
+    "CONT 2.0 WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING",
+    "SMART WORKLOAD DRILLDOWN ACTIVE — ANALYZE DESIGN CAPACITY & REVISION CYCLES",
+    "SLA TARGET REMINDER: PLEASE APPROVE OR REQUEST REVISIONS WITHIN 24 HOURS",
+    "KKP BRAND GUIDELINES UPDATED — NEW SOCIAL MEDIA BANNER PRESETS AVAILABLE"
   ];
 
   let idx = 0;
