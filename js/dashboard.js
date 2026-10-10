@@ -3,7 +3,7 @@ import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast, openModal } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isRequester, isViewer, canCreateTask } from "./auth.js";
-import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison } from "./analytics.js";
+import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -78,6 +78,8 @@ export async function render(ctx) {
     memberId: "all",
     status: "all",
   };
+
+  let heatmapWeekOffset = 0;
 
   const draw = () => {
     const filtered = filterTasksByTimeRange(tasks, filterState);
@@ -463,14 +465,17 @@ export async function render(ctx) {
         </div>
       </div>
 
-      <!-- 6. Member Workload & Deepdive Section -->
+      <!-- 6. Member Workload & Deepdive Section (6 Charts + Heatmap + Summary) -->
       ${renderMemberComparisonHtml({
         memberStats: analytics.memberStats,
         teamTotals: analytics.teamTotals,
         selectedMemberId: filterState.memberId,
         selectedStatus: filterState.status,
         projects,
-        filteredTasks: filtered
+        filteredTasks: filtered,
+        allTasks: tasks,
+        members,
+        weekOffset: heatmapWeekOffset,
       })}
 
       <!-- 7. Activity + Deadlines Row -->
@@ -575,6 +580,10 @@ export async function render(ctx) {
       },
       onSelectStatus: (newStatus) => {
         filterState.status = newStatus;
+        draw();
+      },
+      onToggleWeek: (newOffset) => {
+        heatmapWeekOffset = newOffset;
         draw();
       }
     });
@@ -696,6 +705,15 @@ export async function render(ctx) {
           },
         });
       }
+
+      // 3) Advanced 6-Charts & Bubble Suite
+      initAdvancedCharts({
+        container: qs("#page-content"),
+        tasks: filtered,
+        allTasks: tasks,
+        members,
+        selectedMemberId: filterState.memberId,
+      });
     }, 0);
   };
 
