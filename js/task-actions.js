@@ -82,8 +82,9 @@ const BRIEF_PRESETS = [
   }
 ];
 
-export function openCreateTask(ctx) {
-  if (!canCreateTask(ctx.member)) {
+export function openCreateTask(ctx = {}) {
+  const currentMember = ctx?.member || window.CONT_MEMBER || (ctx?.members && ctx.members[0]);
+  if (!canCreateTask(currentMember)) {
     toast("ไม่มีสิทธิ์สร้างงาน (Read-only / Viewer)", "warn");
     return;
   }
@@ -93,6 +94,25 @@ export function openCreateTask(ctx) {
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(18, 0, 0, 0);
   const defaultDeadline = tomorrow.toISOString().slice(0, 16);
+
+  const projects = (ctx?.projects && ctx.projects.length) ? ctx.projects : [
+    { id: "41e8989d-185a-4ae0-9579-b8572001f1dc", name: "CONT — Graphic Design" },
+    { id: "7ab9334d-97ed-4532-a85e-615a32bc8edd", name: "KKP Auto และแคมเปญรถ" },
+    { id: "b2e7f9db-e520-4e72-a4a1-80078f27ef03", name: "รถเรียกเงิน (RRN)" },
+    { id: "a43dfd54-16e9-4f43-b148-17dc9ea09082", name: "KKP Loan Sure" },
+    { id: "154b0b5b-7123-4f9c-84df-6b099be1f995", name: "สินเชื่อบ้านอื่น ๆ" }
+  ];
+
+  const designMembers = (ctx?.members && ctx.members.length)
+    ? ctx.members.filter((m) => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role))
+    : [
+        { id: "1fd3ea77-8461-4de1-917a-90a9869428c1", name: "BEEM", role: "supervisor" },
+        { id: "a31026f2-adc9-47d7-9ba0-f809be9344f1", name: "Peerapisit Rojatiegpanya", role: "designer" },
+        { id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303", name: "Pisit Sintavanuwat", role: "designer" },
+        { id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52", name: "Pongsathorn Pang", role: "designer" },
+        { id: "c16a2845-c95e-47c5-b616-4b37299574a4", name: "Yutiporn Thongkom", role: "designer" },
+        { id: "739187f5-e142-4aa4-95ad-e06f881163cc", name: "Naraporn Leungvititgoon", role: "designer" }
+      ];
 
   const presetsHtml = `
     <div class="brief-presets-wrap">
@@ -141,7 +161,7 @@ export function openCreateTask(ctx) {
           <label for="task-project">Project / แคมเปญ *</label>
           <select id="task-project" name="project_id" required>
             <option value="">เลือก Project / แคมเปญ</option>
-            ${ctx.projects.map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join("")}
+            ${projects.map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join("")}
           </select>
         </div>
 
@@ -170,7 +190,7 @@ export function openCreateTask(ctx) {
           <label for="task-assignee">ผู้รับผิดชอบ (Designer) *</label>
           <select id="task-assignee" name="assignee_id" required>
             <option value="">เลือกดีไซเนอร์ในทีม</option>
-            ${ctx.members.filter((m) => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role)).map((m) => `
+            ${designMembers.map((m) => `
               <option value="${escapeHtml(m.id)}">${escapeHtml(m.name)} · ${escapeHtml(roleLabel(m.role))}</option>
             `).join("")}
           </select>
@@ -298,17 +318,23 @@ export function openCreateTask(ctx) {
     const form = qs("#create-task-form", modal);
     if (!form.reportValidity()) return;
 
+    const submitBtn = qs("#submit-create-task", modal);
+    const originalHtml = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>⏳ กำลังบันทึกงาน...</span>`;
+
     const data = Object.fromEntries(new FormData(form));
     const previewUrl = uploader ? uploader.getValue() : (data.preview_url || "");
     const errorNode = qs("#create-task-error", modal);
     errorNode.textContent = "";
 
     try {
+      const creatorId = currentMember?.id || designMembers[0]?.id || "1fd3ea77-8461-4de1-917a-90a9869428c1";
       const created = await api.createTask({
         ...data,
         preview_url: previewUrl ? previewUrl.trim() : null,
-        item_count: Number(data.item_count || 1),
-        created_by: ctx.member.id,
+        item_count: Math.min(10000, Math.max(1, Number(data.item_count || 1))),
+        created_by: creatorId,
       });
 
       closeModal();
@@ -317,7 +343,10 @@ export function openCreateTask(ctx) {
         window.location.href = `task.html?id=${encodeURIComponent(created.id)}`;
       }, 350);
     } catch (error) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHtml;
       errorNode.textContent = error.message || "ไม่สามารถสร้างงานได้";
+      toast(error.message || "ไม่สามารถสร้างงานได้", "error");
     }
   });
 }
