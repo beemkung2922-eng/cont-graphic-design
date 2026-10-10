@@ -1,6 +1,14 @@
 import { qs } from "./app.js";
 import { escapeHtml, projectFor, memberFor, formatDate, taskTypeLabel, relativeDeadline } from "./formatters.js";
-import { filterTasksByTimeRange, renderTimeFilterBarHtml, bindTimeFilterBar } from "./analytics.js";
+import {
+  filterTasksByTimeRange,
+  renderTimeFilterBarHtml,
+  bindTimeFilterBar,
+  calculateTeamAnalytics,
+  renderMemberComparisonHtml,
+  bindMemberComparison,
+  initAdvancedCharts,
+} from "./analytics.js";
 
 export async function render(ctx) {
   const filterState = {
@@ -11,29 +19,32 @@ export async function render(ctx) {
     startDate: "",
     endDate: "",
     dateField: "created_at",
+    memberId: "all",
+    status: "all",
   };
+
+  let heatmapWeekOffset = 0;
 
   const draw = () => {
     const allTasks = ctx.tasks || [];
+    const members = ctx.members || [];
+    const projects = ctx.projects || [];
     const tasks = filterTasksByTimeRange(allTasks, filterState);
+    const analytics = calculateTeamAnalytics(tasks, members, filterState.memberId);
     const completed = tasks.filter((task) => task.status === "completed");
     const active = tasks.filter((task) => task.status !== "completed");
     const totalRevision = tasks.reduce((sum, task) => sum + Number(task.revision_count || 0), 0);
     const late = active.filter((task) => relativeDeadline(task.deadline_at || task.deadline).className === "is-overdue");
     const itemTotal = tasks.reduce((sum, task) => sum + Number(task.item_count || 1), 0);
-    const typeMap = new Map();
-    tasks.forEach((task) => typeMap.set(taskTypeLabel(task.task_type), (typeMap.get(taskTypeLabel(task.task_type)) || 0) + 1));
-    const topTypes = [...typeMap.entries()].sort((a, b) => b[1] - a[1]);
-    const longest = [...active].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).slice(0, 5);
 
     qs("#page-content").innerHTML = `
       <div class="page-header">
         <div>
-          <h2>Performance Report</h2>
-          <p class="page-desc">สรุปจำนวนงาน จำนวนชิ้นงาน ประเภทงาน และงานที่เลทตามช่วงเวลา</p>
+          <h2>Performance & Workload Reports</h2>
+          <p class="page-desc">วิเคราะห์ภาระงานรายคน, สัดส่วนประเภทงาน, Throughput การส่งมอบ, Heatmap รายวัน และเปรียบเทียบ Est vs Actual Hours</p>
         </div>
         <div class="row-wrap">
-          <span class="chip">ข้อมูล ${tasks.length} งาน</span>
+          <span class="chip">ข้อมูล ${tasks.length} งาน (${itemTotal} ชิ้น)</span>
           <button class="btn" id="print-report">พิมพ์ / Export PDF</button>
         </div>
       </div>
@@ -51,7 +62,7 @@ export async function render(ctx) {
         </div>
         <div class="card report-card">
           <div class="text-xs text-muted">งานเลท (Overdue)</div>
-          <div class="report-number">${late.length}</div>
+          <div class="report-number" style="color:${late.length ? "var(--red)" : "inherit"};">${late.length}</div>
         </div>
         <div class="card report-card">
           <div class="text-xs text-muted">Average Revision</div>
@@ -59,90 +70,51 @@ export async function render(ctx) {
         </div>
       </div>
 
-      <div class="dashboard-grid">
-        <section class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">ประเภทงาน (Task Types)</div>
-              <div class="card-sub">จำนวนงานแยกตามประเภทตามช่วงเวลาที่เลือก</div>
-            </div>
-          </div>
-          <div class="bar-chart">
-            ${topTypes.map(([name, count], index) => `
-              <div class="bar-row">
-                <span>${escapeHtml(name)}</span>
-                <div class="bar-track">
-                  <div class="bar-fill ${index === 0 ? "" : index === 1 ? "is-info" : "is-warn"}" style="width:${Math.max(8, Math.round((count / Math.max(topTypes[0]?.[1] || 1, 1)) * 100))}%"></div>
-                </div>
-                <span class="bar-value">${count} งาน</span>
-              </div>
-            `).join("") || `<div class="state">ยังไม่มีข้อมูลประเภทงาน</div>`}
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">สัญญาณที่ควรติดตาม</div>
-              <div class="card-sub">ข้อมูลเพื่อวางแผนการทำงาน</div>
-            </div>
-          </div>
-          <div class="quick-stat">
-            <span class="label">งานรอคอมเมนต์ (Review)</span>
-            <span class="value">${tasks.filter((task) => task.status === "review").length}</span>
-          </div>
-          <div class="quick-stat">
-            <span class="label">งานกำลังแก้ไข (Revision)</span>
-            <span class="value">${tasks.filter((task) => task.status === "revision").length}</span>
-          </div>
-          <div class="quick-stat">
-            <span class="label">งานเลท (Overdue)</span>
-            <span class="value">${late.length}</span>
-          </div>
-        </section>
-      </div>
-
-      <section class="card" style="margin-top:16px">
-        <div class="card-header">
-          <div>
-            <div class="card-title">งานที่ยังไม่เสร็จ (Active Tasks)</div>
-            <div class="card-sub">แสดงประเภท จำนวนชิ้น และเวลาที่เหลือ/เลท</div>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead>
-              <tr>
-                <th>งาน</th>
-                <th>ประเภท</th>
-                <th>Project</th>
-                <th>ผู้รับผิดชอบ</th>
-                <th>จำนวนชิ้น</th>
-                <th>เวลา</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${longest.map((task) => `
-                <tr>
-                  <td><a href="task.html?id=${encodeURIComponent(task.id)}"><strong>${escapeHtml(task.title)}</strong></a></td>
-                  <td>${escapeHtml(taskTypeLabel(task.task_type))}</td>
-                  <td>${escapeHtml(projectFor(task, ctx.projects)?.name || "—")}</td>
-                  <td>${escapeHtml(memberFor(task, ctx.members)?.name || "—")}</td>
-                  <td>${Number(task.item_count || 1)}</td>
-                  <td>${escapeHtml(relativeDeadline(task.deadline_at || task.deadline).label)}</td>
-                </tr>
-              `).join("") || `<tr><td colspan="6">ยังไม่มีข้อมูล</td></tr>`}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <!-- Advanced Workload & 6 Charts Suite -->
+      ${renderMemberComparisonHtml({
+        memberStats: analytics.memberStats,
+        teamTotals: analytics.teamTotals,
+        selectedMemberId: filterState.memberId,
+        selectedStatus: filterState.status,
+        projects,
+        filteredTasks: tasks,
+        allTasks,
+        members,
+        weekOffset: heatmapWeekOffset,
+      })}
     `;
 
     bindTimeFilterBar(qs("#page-content"), {
       state: filterState,
-      onChange: () => draw()
+      onChange: () => draw(),
     });
+
+    bindMemberComparison(qs("#page-content"), {
+      onSelectMember: (newMemberId) => {
+        filterState.memberId = newMemberId;
+        draw();
+      },
+      onSelectStatus: (newStatus) => {
+        filterState.status = newStatus;
+        draw();
+      },
+      onToggleWeek: (newOffset) => {
+        heatmapWeekOffset = newOffset;
+        draw();
+      },
+    });
+
     qs("#print-report")?.addEventListener("click", () => window.print());
+
+    window.setTimeout(() => {
+      initAdvancedCharts({
+        container: qs("#page-content"),
+        tasks,
+        allTasks,
+        members,
+        selectedMemberId: filterState.memberId,
+      });
+    }, 0);
   };
 
   draw();
