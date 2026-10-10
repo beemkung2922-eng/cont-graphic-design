@@ -3841,3 +3841,409 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
 }
 
+/* ==========================================================================
+   ADVANCED ANALYTICS & WORKLOAD SUITE (6 CHARTS + HEATMAP + MEMBER DEEP-DIVE)
+   ========================================================================== */
+
+.analytics-suite-wrap {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.analytics-header-banner {
+  background: #141520;
+  border: 2px solid var(--line);
+  box-shadow: 0 4px 0 #000;
+  border-radius: 10px;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.analytics-title-group h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.analytics-title-group p {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #9ea4ba;
+}
+
+.analytics-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .analytics-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.analytics-chart-card {
+  background: #13141d;
+  border: 2px solid #282a3a;
+  box-shadow: 0 4px 0 #000;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.analytics-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #232536;
+  padding-bottom: 12px;
+}
+
+.analytics-chart-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analytics-chart-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.analytics-chart-tag.tag-comparison {
+  background: rgba(25, 195, 235, 0.15);
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+}
+
+.analytics-chart-tag.tag-trend {
+  background: rgba(43, 209, 75, 0.15);
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+
+.analytics-chart-tag.tag-matrix {
+  background: rgba(255, 198, 26, 0.15);
+  color: var(--yellow);
+  border: 1px solid var(--yellow);
+}
+
+.analytics-chart-tag.tag-scatter {
+  background: rgba(139, 77, 255, 0.15);
+  color: var(--purple);
+  border: 1px solid var(--purple);
+}
+
+.analytics-chart-sub {
+  font-size: 0.78rem;
+  color: #9297ab;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.analytics-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 290px;
+}
+
+/* Category Legend Chips */
+.cat-legend-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #171824;
+  border-radius: 6px;
+  border: 1px solid #272a3c;
+  font-size: 0.76rem;
+}
+
+.cat-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d1d5e5;
+  font-weight: 500;
+}
+
+.cat-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* --- Heat Map Matrix (Designer × Day) --- */
+.heatmap-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 10px;
+}
+
+.heatmap-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+  min-width: 620px;
+}
+
+.heatmap-th {
+  background: #181a26;
+  border: 1px solid #2a2c3f;
+  color: #aeb4c8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 10px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.heatmap-th.is-today {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 6px rgba(25, 195, 235, 0.3);
+}
+
+.heatmap-member-cell {
+  background: #161823;
+  border: 1px solid #26293a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.heatmap-member-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.heatmap-member-cap {
+  font-size: 0.7rem;
+  color: #8c91a6;
+}
+
+.heatmap-day-cell {
+  background: #151620;
+  border: 1px solid #242636;
+  border-radius: 6px;
+  height: 52px;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #888d9f;
+}
+
+.heatmap-day-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Heatmap Density Color Levels */
+.heatmap-day-cell.level-0 {
+  background: #13141c;
+  color: #494d63;
+}
+.heatmap-day-cell.level-1 {
+  background: rgba(25, 195, 235, 0.16);
+  border-color: rgba(25, 195, 235, 0.45);
+  color: #79e3fa;
+}
+.heatmap-day-cell.level-2 {
+  background: rgba(43, 209, 75, 0.22);
+  border-color: rgba(43, 209, 75, 0.55);
+  color: #6ef187;
+}
+.heatmap-day-cell.level-3 {
+  background: rgba(255, 198, 26, 0.28);
+  border-color: rgba(255, 198, 26, 0.65);
+  color: #ffd64f;
+}
+.heatmap-day-cell.level-4 {
+  background: rgba(232, 32, 42, 0.45);
+  border-color: var(--red);
+  color: #ff9da2;
+  box-shadow: 0 0 10px rgba(232, 32, 42, 0.35);
+  animation: pulse-border 2s infinite ease-in-out;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: var(--red); }
+  50% { border-color: #ff757c; }
+}
+
+.heatmap-badge-text {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.1;
+}
+
+.heatmap-sub-text {
+  display: block;
+  font-size: 0.64rem;
+  opacity: 0.8;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* --- Member Drill-down & Detailed Task Summary --- */
+.member-deepdive-panel {
+  background: #141521;
+  border: 2px solid var(--line);
+  box-shadow: 0 4px 0 #000;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.member-deepdive-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #282a3c;
+  padding-bottom: 16px;
+}
+
+.member-deepdive-user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.member-deepdive-stats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .member-deepdive-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 600px) {
+  .member-deepdive-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+.m-stat-box {
+  background: #191b29;
+  border: 1px solid #2d3148;
+  border-radius: 6px;
+  padding: 12px 14px;
+  text-align: center;
+}
+
+.m-stat-val {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.1;
+}
+
+.m-stat-lbl {
+  font-size: 0.72rem;
+  color: #9aa0b6;
+  margin-top: 4px;
+}
+
+/* Deep-dive Detailed Table */
+.deepdive-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #11121b;
+  border: 1px solid #26283b;
+  border-radius: 8px;
+}
+
+.deepdive-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  color: #FFFFFF;
+}
+
+.deepdive-table th {
+  background: #181a28;
+  color: #9ca2bb;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid #2b2e44;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.deepdive-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #1f2132;
+  vertical-align: middle;
+}
+
+.deepdive-table tr:hover td {
+  background: #171926;
+}
+
+.deepdive-task-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deepdive-task-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: #25283a;
+  border: 1px solid #363a54;
+  flex-shrink: 0;
+}
+
+.cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+
