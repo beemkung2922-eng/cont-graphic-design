@@ -3,6 +3,7 @@ import { ensureAccess, mountUser, canManage, errorMessage } from "./auth.js";
 import { api, auth } from "./supabase.js";
 import { escapeHtml, avatar, relativeDeadline, formatDateTime } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
+import { openCreateTask } from "./task-actions.js";
 
 const icons = {
   grid: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>`,
@@ -587,7 +588,9 @@ export async function initShell() {
   mountNotificationCenter(bundle, access.member);
 
 
-  return { ...access, ...bundle };
+  const shellContext = { ...access, ...bundle };
+  window.openCreateTask = () => openCreateTask(shellContext);
+  return shellContext;
 }
 
 export async function boot(pageModule) {
