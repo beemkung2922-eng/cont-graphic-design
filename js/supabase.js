@@ -90,22 +90,49 @@ export const api = {
 
   async createTask(input) {
     const token = this.getAccessToken();
+    const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
     const deadlineDate = input.deadline_at ? input.deadline_at.split("T")[0] : (input.deadline || new Date().toISOString().split("T")[0]);
+    let deadlineAt = null;
+    if (input.deadline_at) {
+      try { deadlineAt = new Date(input.deadline_at).toISOString(); } catch { deadlineAt = null; }
+    }
+    if (!deadlineAt) {
+      deadlineAt = `${deadlineDate}T18:00:00+07:00`;
+    }
+
     const cleanPayload = {
       ...input,
       deadline: deadlineDate,
+      deadline_at: deadlineAt,
       revision_count: 0,
       status: "brief",
-      item_count: Number(input.item_count || 1),
+      item_count: Math.min(10000, Math.max(1, Number(input.item_count || 1))),
+      workload_points: Math.min(20, Math.max(1, Number(input.workload_points || input.item_count || 1))),
       task_type: input.task_type || "new_work",
       preview_url: input.preview_url ? input.preview_url.trim() : null,
       design_url: input.design_url ? input.design_url.trim() : null,
       dimensions: input.dimensions ? input.dimensions.trim() : null,
       channel: input.channel ? input.channel.trim() : null,
     };
+
+    // 1. Try RPC create_task first (SECURITY DEFINER, completely immune to RLS/session token mismatch)
+    try {
+      const res = await this.request("/rest/v1/rpc/create_task", {
+        method: "POST",
+        headers: authHeader,
+        body: JSON.stringify({ payload: cleanPayload })
+      });
+      if (res && (res.id || (Array.isArray(res) && res[0]?.id))) {
+        return Array.isArray(res) ? res[0] : res;
+      }
+    } catch (rpcError) {
+      console.warn("RPC create_task fallback to direct table insert:", rpcError);
+    }
+
+    // 2. Fallback to direct POST /rest/v1/tasks
     const rows = await this.request("/rest/v1/tasks", {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}`, Prefer: "return=representation" },
+      headers: { ...authHeader, Prefer: "return=representation" },
       body: JSON.stringify(cleanPayload)
     });
     return rows[0];
