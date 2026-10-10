@@ -302,10 +302,13 @@ export function calculateWorkloadComparison(tasks, members) {
     const capacity = Number(m.capacity_points || 10);
     const percent = capacity > 0 ? Math.round((activePoints / capacity) * 100) : 0;
     const isOverloaded = percent > 100;
+    const raw = (m.name || "").trim();
+    const shortName = raw.split(/\s+/)[0] || raw;
 
     return {
       member: m,
       name: m.name,
+      shortName,
       activeTasks: activeTasks.length,
       activePoints,
       capacity,
@@ -317,7 +320,8 @@ export function calculateWorkloadComparison(tasks, members) {
   }).sort((a, b) => b.percent - a.percent);
 
   return {
-    labels: results.map((r) => r.name),
+    labels: results.map((r) => r.shortName),
+    fullNames: results.map((r) => r.name),
     percentages: results.map((r) => r.percent),
     colors: results.map((r) => r.color),
     borders: results.map((r) => r.borderColor),
@@ -332,7 +336,12 @@ export function calculateStackedCategoryData(tasks, members) {
   const designMembers = members.filter((m) =>
     ["designer", "supervisor", "admin"].includes(m.role)
   );
-  const labels = designMembers.map((m) => m.name);
+  // Shorten names on mobile/stacked axis (e.g. "BEEM", "Naraporn", "Peerapisit")
+  const labels = designMembers.map((m) => {
+    const raw = (m.name || "").trim();
+    const parts = raw.split(/\s+/);
+    return parts[0] || raw;
+  });
   const social = [];
   const keyVisual = [];
   const print = [];
@@ -363,6 +372,7 @@ export function calculateStackedCategoryData(tasks, members) {
     print,
     adsResize,
     totals,
+    designMembers,
   };
 }
 
@@ -381,10 +391,10 @@ export function calculateCategoryTotals(tasks) {
   });
 
   const list = [
-    { label: TASK_CATEGORIES.social.shortLabel, key: "social", count: s, color: TASK_CATEGORIES.social.color },
-    { label: TASK_CATEGORIES.key_visual.shortLabel, key: "key_visual", count: kv, color: TASK_CATEGORIES.key_visual.color },
-    { label: TASK_CATEGORIES.print.shortLabel, key: "print", count: pr, color: TASK_CATEGORIES.print.color },
-    { label: TASK_CATEGORIES.ads_resize.shortLabel, key: "ads_resize", count: ar, color: TASK_CATEGORIES.ads_resize.color },
+    { label: "Social", fullLabel: TASK_CATEGORIES.social.shortLabel, key: "social", count: s, color: TASK_CATEGORIES.social.color },
+    { label: "Key Visual", fullLabel: TASK_CATEGORIES.key_visual.shortLabel, key: "key_visual", count: kv, color: TASK_CATEGORIES.key_visual.color },
+    { label: "Print", fullLabel: TASK_CATEGORIES.print.shortLabel, key: "print", count: pr, color: TASK_CATEGORIES.print.color },
+    { label: "Ads/Resize", fullLabel: TASK_CATEGORIES.ads_resize.shortLabel, key: "ads_resize", count: ar, color: TASK_CATEGORIES.ads_resize.color },
   ].sort((a, b) => b.count - a.count);
 
   return {
@@ -815,6 +825,71 @@ export function renderMemberComparisonHtml({
               </tbody>
             </table>
           </div>
+
+          <!-- Responsive Mobile Card List for Smartphones & Tablets (<= 768px) -->
+          <div class="deepdive-mobile-cards">
+            ${enrichedTasks.length === 0 ? `
+              <div class="m-task-card-empty">ไม่มีรายการงานในช่วงเวลานี้</div>
+            ` : enrichedTasks.map((t) => {
+              const proj = projectFor(t, projects);
+              const isLate = t.status !== "completed" && getTaskDate(t, "deadline") < new Date();
+              const cat = t.category;
+
+              return `
+                <div class="m-task-card">
+                  <div class="m-task-card-top">
+                    <div class="m-task-card-thumb">
+                      ${t.preview_url ? `
+                        <img src="${escapeHtml(t.preview_url)}" alt="preview" />
+                      ` : `
+                        <div class="m-task-card-placeholder">ART</div>
+                      `}
+                    </div>
+                    <div class="m-task-card-main">
+                      <a href="task.html?id=${encodeURIComponent(t.id)}" class="m-task-card-title">
+                        ${escapeHtml(t.title)}
+                      </a>
+                      <div class="m-task-card-sub">
+                        <span class="m-task-card-proj">${escapeHtml(proj?.name || "ทั่วไป")}</span>
+                        ${t.dimensions ? `<span class="m-task-card-dim">· ${escapeHtml(t.dimensions)}</span>` : ""}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="m-task-card-badges">
+                    <span class="cat-badge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.border};">
+                      ${cat.icon} ${escapeHtml(cat.shortLabel)}
+                    </span>
+                    ${statusBadge(t.status)}
+                    <span class="m-task-deadline-pill" style="color:${isLate ? "var(--red)" : "#c5cadc"};font-weight:${isLate ? "700" : "500"};">
+                      📅 ${formatDate(t.deadline_at || t.deadline)} ${isLate ? "⚠️" : ""}
+                    </span>
+                  </div>
+
+                  <div class="m-task-card-metrics">
+                    <div class="m-metric-chip">
+                      <span class="m-metric-label">จำนวน:</span>
+                      <span class="m-metric-val">${Number(t.item_count || 1)} ชิ้น</span>
+                    </div>
+                    <div class="m-metric-chip">
+                      <span class="m-metric-label">Est:</span>
+                      <span class="m-metric-val">${t.estHours}h</span>
+                    </div>
+                    <div class="m-metric-chip">
+                      <span class="m-metric-label">จริง:</span>
+                      <span class="m-metric-val" style="color:${t.actualHours > t.estHours ? "var(--red)" : "var(--green)"};">${t.actualHours}h</span>
+                    </div>
+                  </div>
+
+                  <div class="m-task-card-action">
+                    <a class="btn-pixel btn-pixel-cyan" href="task.html?id=${encodeURIComponent(t.id)}" style="display:flex;width:100%;text-align:center;box-sizing:border-box;padding:9px 12px;font-size:0.82rem;text-decoration:none;justify-content:center;">
+                      ดูรายละเอียดงาน →
+                    </a>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
         </div>
       </section>
     `;
@@ -1031,6 +1106,7 @@ export function initAdvancedCharts({
             borderWidth: 1,
             padding: 10,
             callbacks: {
+              title: (items) => workload.fullNames?.[items[0].dataIndex] || items[0].label,
               label: (ctx) => {
                 const item = workload.membersData[ctx.dataIndex];
                 return `${item.percent}% (${item.activeTasks} งาน, ${item.activePoints}/${item.capacity} แต้ม) ${item.isOverloaded ? "🚨 OVERLOADED!" : "✓ กำลังงานปกติ"}`;
@@ -1086,13 +1162,22 @@ export function initAdvancedCharts({
             borderColor: "#32354c",
             borderWidth: 1,
             padding: 10,
+            callbacks: {
+              title: (items) => stacked.designMembers?.[items[0].dataIndex]?.name || items[0].label,
+            },
           },
         },
         scales: {
           x: {
             stacked: true,
             grid: { display: false },
-            ticks: { color: "#FFFFFF", font: { family: "IBM Plex Sans Thai", size: 11 } },
+            ticks: {
+              color: "#FFFFFF",
+              font: { family: "IBM Plex Sans Thai", size: 10, weight: "600" },
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: false,
+            },
           },
           y: {
             stacked: true,
@@ -1134,6 +1219,7 @@ export function initAdvancedCharts({
             borderWidth: 1,
             padding: 10,
             callbacks: {
+              title: (items) => catData.list[items[0].dataIndex]?.fullLabel || items[0].label,
               label: (ctx) => `${ctx.parsed.y} ชิ้นงาน (${Math.round((ctx.parsed.y / Math.max(1, catData.counts.reduce((a, b) => a + b, 0))) * 100)}%)`,
             },
           },
@@ -1141,7 +1227,13 @@ export function initAdvancedCharts({
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "#FFFFFF", font: { family: "IBM Plex Sans Thai", size: 11, weight: "600" } },
+            ticks: {
+              color: "#FFFFFF",
+              font: { family: "IBM Plex Sans Thai", size: 11, weight: "600" },
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: false,
+            },
           },
           y: {
             beginAtZero: true,
