@@ -82,7 +82,7 @@ const BRIEF_PRESETS = [
   }
 ];
 
-export function openCreateTask(ctx = {}) {
+export function openCreateTask(ctx = {}, defaults = {}) {
   const currentMember = ctx?.member || window.CONT_MEMBER || (ctx?.members && ctx.members[0]);
   if (!canCreateTask(currentMember)) {
     toast("ไม่มีสิทธิ์สร้างงาน (Read-only / Viewer)", "warn");
@@ -191,7 +191,7 @@ export function openCreateTask(ctx = {}) {
           <select id="task-assignee" name="assignee_id" required>
             <option value="">เลือกดีไซเนอร์ในทีม</option>
             ${designMembers.map((m) => `
-              <option value="${escapeHtml(m.id)}">${escapeHtml(m.name)} · ${escapeHtml(roleLabel(m.role))}</option>
+              <option value="${escapeHtml(m.id)}" ${defaults?.assignee_id === m.id ? "selected" : ""}>${escapeHtml(m.name)} · ${escapeHtml(roleLabel(m.role))}</option>
             `).join("")}
           </select>
         </div>
