@@ -3,285 +3,254 @@ import { escapeHtml } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
 
 /**
- * Curated Pinterest Visual Design Trends & Aesthetics
- * Matches the layout from the reference UI:
- * 1. Top-Left Hero Swatch Card (Light)
- * 2. Top-Right 1 Pill Category Switcher (Dark with orange active pill)
- * 3. Top-Right 2 Minimal Concept Card (Dark)
- * 4. Bottom-Left "A signal appears" Mockup Card (Light)
- * 5. Bottom-Right 3D Cover Carousel Gallery (Dark, 7 upright 3D covers)
+ * Curated Pinterest & Graphic Design Trends Database
  */
-export const PINTEREST_COVERS = [
+export const TREND_DATABASE = [
   {
-    id: "cover-the-fall-off",
-    title: "THE FALL OFF",
-    subtitle: "Streetwear Lookbook & High Editorial",
-    category: "fashion",
-    categoryLabel: "Fashion & Editorial",
-    author: "@visual_archive",
-    saves: "48.2k",
-    badge: "🔥 TRENDING",
-    coverColor: "#EAB308",
-    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80",
-    description: "การผสานสตรีทแวร์ดิบเท่เข้ากับเลย์เอาต์นิตยสารแฟชั่นชั้นสูง โทนสีเข้มหม่นตัดกับฟอนต์ Display สีเหลืองสดดึงดูดสายตา",
-    swatches: [
-      { hex: "#0E1015", name: "Heavy Asphalt" },
-      { hex: "#EAB308", name: "Amber Voltage" },
-      { hex: "#3F3F46", name: "Worn Concrete" },
-      { hex: "#FAFAFA", name: "Ghost White" }
-    ],
-    tags: ["#Streetwear", "#EditorialPoster", "#Lookbook", "#UrbanAesthetic"],
-    aiPrompt: "Editorial magazine cover 'THE FALL OFF', bold yellow condensed typography, moody dramatic fashion portrait in textured dark jacket, cinematic film grain, 35mm photography"
-  },
-  {
-    id: "cover-monochrome",
-    title: "MONOCHROME ESSENCE",
-    subtitle: "Swiss Architecture & Sketch Print",
-    category: "art",
-    categoryLabel: "Visual Art & Print",
-    author: "@minimal_studios",
-    saves: "36.8k",
-    badge: "✦ MINIMAL",
-    coverColor: "#71717A",
-    image: "https://images.unsplash.com/photo-1515260268569-9271009adfdb?auto=format&fit=crop&w=600&q=80",
-    description: "เสน่ห์ของขาว-ดำสไตล์สวิส เส้นสายการสเก็ตช์ภาพคน และการจัดวางช่องไฟแบบมินิมอลที่ไม่เคยตกยุค",
-    swatches: [
-      { hex: "#000000", name: "True Black" },
-      { hex: "#52525B", name: "Architectural Zinc" },
-      { hex: "#A1A1AA", name: "Silver Ash" },
-      { hex: "#FFFFFF", name: "Pure Canvas" }
-    ],
-    tags: ["#Monochrome", "#SwissGrid", "#SketchArt", "#MinimalArchitecture"],
-    aiPrompt: "Minimalist black and white art poster, charcoal portrait sketch, clean Swiss typography, raw textured paper grain, high-end gallery edition"
-  },
-  {
-    id: "cover-red-star",
-    title: "RED STAR GLOW",
-    subtitle: "90s Cyber Y2K & Acid Poster Art",
+    id: "trend-y2k-chrome",
+    title: "Y2K Acid Chrome & Cyber 90s",
     category: "graphics",
-    categoryLabel: "Acid Graphics",
-    author: "@cyber_acid",
-    saves: "54.1k",
-    badge: "⚡ VIRAL",
-    coverColor: "#EF4444",
-    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80",
-    description: "พื้นหลังสีแดงสดสะกดสายตา ผสานสัญลักษณ์ดวงดาว Y2K สปาร์คเคิล และฟอนต์เรโทรย้อนยุค 90s ที่กำลังครองใจคนรุ่นใหม่",
+    categoryLabel: "Acid & Y2K Graphics",
+    source: "Pinterest Viral",
+    saves: "68.4k",
+    badge: "🔥 TOP VIRAL",
+    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+    insight: "เทรนด์การกลับมาของวัฒนธรรมต้นยุค 2000s ผสมผสานโลหะโครเมียมสะท้อนแสง (Liquid Chrome), ประกายดาว 4 แฉก (Sparkle Star), สีสะท้อนแสง และตัวอักษรดิสเพลย์ทรงบิดเบี้ยว",
+    principles: ["สะท้อนแสงแบบ 3D Metallic", "สีนีออนม่วง-ชมพู-เขียวตัดดำ", "ประกายดาว Cyber Star", "กลิ่นอาย Rave Culture"],
+    bestFor: "โปสเตอร์อีเวนต์ดนตรี, ปกซิงเกิล, สตรีทแวร์, คอนเทนต์วัยรุ่น Gen-Z",
     swatches: [
-      { hex: "#DC2626", name: "Crimson Spark" },
-      { hex: "#18181B", name: "Nightcore" },
-      { hex: "#FFFFFF", name: "Starlight" },
-      { hex: "#F87171", name: "Blush Neon" }
+      { hex: "#FF007F", name: "Cyber Fuchsia" },
+      { hex: "#00F0FF", name: "Electric Cyan" },
+      { hex: "#18181B", name: "Chrome Core" },
+      { hex: "#E4E4E7", name: "Reflective Silver" }
     ],
-    tags: ["#AcidPoster", "#RedAesthetic", "#Y2KStars", "#CyberRetro"],
-    aiPrompt: "Intense red cyber acid poster, bold white typographic layout, glowing starlight sparkles, 90s techno club flyer aesthetic, screenprint texture"
+    tags: ["#Y2K", "#AcidGraphics", "#LiquidChrome", "#RavePoster"],
+    aiPrompt: "Y2K cyber aesthetic graphic poster, shiny liquid chrome 3D typography, metallic reflective star shapes, vibrant neon fuchsia and electric cyan gradients, acid techno club aesthetic, high detail, retrofuturistic, 8k render"
   },
   {
-    id: "cover-jesus-boy",
-    title: "JESUS BOY",
-    subtitle: "Retro Pop Culture & Vintage Screenprint",
-    category: "art",
-    categoryLabel: "Pop Art & Vintage",
-    author: "@vintage_revival",
-    saves: "41.9k",
-    badge: "🔥 POPULAR",
-    coverColor: "#F59E0B",
-    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
-    description: "งานคอลลาจและภาพพิมพ์สไตล์ป๊อปคัลเจอร์ยุคเซเว่นตี้ส์ ใช้คู่สีตัดกันรุนแรงอย่างเหลืองและแดงเพื่อสร้างความน่าจดจำ",
-    swatches: [
-      { hex: "#F59E0B", name: "Solar Amber" },
-      { hex: "#B91C1C", name: "Oxblood" },
-      { hex: "#FEF3C7", name: "Parchment Cream" },
-      { hex: "#1C1917", name: "Charred Wood" }
-    ],
-    tags: ["#VintagePop", "#Screenprint", "#CollageArt", "#RetroTypography"],
-    aiPrompt: "Vintage 1970s pop art poster 'JESUS BOY', bold distressed yellow typography, dramatic portrait artwork, warm nostalgic halftone textures"
-  },
-  {
-    id: "cover-anba",
-    title: "ANBA EDITORIAL",
-    subtitle: "French Chic & High Fashion Lookbook",
-    category: "fashion",
-    categoryLabel: "Fashion & Editorial",
-    author: "@paris_archive",
-    saves: "62.4k",
-    badge: "✦ ICONIC",
-    coverColor: "#E11D48",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-    description: "ภาพถ่ายแฟชั่นปกหมวกเบเร่ต์สีแดงสด โดดเด่นด้วยโทนสีผิวธรรมชาติและการจัดวางตัวอักษร ANBA ขนาดใหญ่พาดบนหน้าปก",
-    swatches: [
-      { hex: "#E11D48", name: "Parisian Rose" },
-      { hex: "#27272A", name: "Bespoke Charcoal" },
-      { hex: "#F4F4F5", name: "Studio Softbox" },
-      { hex: "#71717A", name: "Neutral Tint" }
-    ],
-    tags: ["#HighFashion", "#EditorialCover", "#RedBeret", "#FrenchChic"],
-    aiPrompt: "Vogue magazine cover 'ANBA', striking fashion portrait wearing bold red beret, elegant typography, warm cinema lighting, 8k editorial look"
-  },
-  {
-    id: "cover-hop-club",
-    title: "HOP CLUB",
-    subtitle: "Neo-Psychedelic & Acid Club Culture",
+    id: "trend-neo-brutalism",
+    title: "Neo-Brutalism & High Contrast",
     category: "graphics",
-    categoryLabel: "Acid Graphics",
-    author: "@rave_visuals",
-    saves: "39.1k",
-    badge: "⚡ FRESH",
-    coverColor: "#10B981",
-    image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80",
-    description: "คลื่นความนิยมของงานโปสเตอร์ปาร์ตี้และเทศกาลดนตรียุคใหม่ ใช้สีนีออนเขียวม่วงสะท้อนแสงและการจัดวางข้อความแบบไหลเวียน",
+    categoryLabel: "Neo-Brutalism",
+    source: "Pinterest & Behance",
+    saves: "54.2k",
+    badge: "⚡ TRENDING",
+    image: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80",
+    insight: "ทลายกฎเกณฑ์ความเนี้ยบแบบดั้งเดิมด้วยเส้นขอบสีดำหนาเตอะ (Heavy Black Stroke), เงาตกกระทบแบบมุมฉากไม่มีเบลอ (Hard Drop Shadow), และการใช้สีสดคอนทราสต์จัดจ้าน",
+    principles: ["เส้นขอบ 3px - 5px คมชัด", "เงาสีดำทึบ 100%", "สีพาสเทลสดตัดกับแม่สี", "ความดิบและจริงใจในการสื่อสาร"],
+    bestFor: "Web UI, การ์ดโปรโมชันโซเชียลมีเดีย, โปสเตอร์อินดี้, งานดีไซน์แบรนด์รุ่นใหม่",
     swatches: [
-      { hex: "#10B981", name: "Acid Emerald" },
-      { hex: "#8B5CF6", name: "Psychedelic Violet" },
-      { hex: "#FBBF24", name: "Electric Citron" },
-      { hex: "#09090B", name: "Club Void" }
+      { hex: "#FFE600", name: "Brutal Yellow" },
+      { hex: "#FF5E5E", name: "Bold Coral" },
+      { hex: "#000000", name: "Deep Ink" },
+      { hex: "#FFFFFF", name: "Paper Base" }
     ],
-    tags: ["#ClubPoster", "#NeoPsychedelic", "#NeonPalette", "#AcidType"],
-    aiPrompt: "Neo-psychedelic music poster 'HOP CLUB', vivid emerald green and purple fluid gradients, distorted experimental typography, rave flyer art"
+    tags: ["#NeoBrutalism", "#HighContrast", "#AntiDesign", "#BoldStrokes"],
+    aiPrompt: "Neo-brutalist graphic design poster, heavy thick black outlines, flat vivid pop colors, brutal yellow and coral geometric cards, bold modern typography, asymmetrical playful layout, clean vector art"
   },
   {
-    id: "cover-cyber-blue",
-    title: "CYBER BLUE HORIZON",
-    subtitle: "Digital Surrealism & 3D Character Art",
+    id: "trend-liquid-glass",
+    title: "Liquid Glass & Spatial 3D",
     category: "3d",
-    categoryLabel: "3D & Digital Surrealism",
-    author: "@spatial_future",
-    saves: "58.7k",
-    badge: "🔥 TOP PICK",
-    coverColor: "#2563EB",
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
-    description: "โลกดิจิทัลสามมิติในโทนสีโคบอลต์บลู เสื้อฮู้ดเรืองแสงและวัตถุโครเมียมสะท้อนแสง สไตล์ที่ครองฟีด Pinterest สาย Sci-Fi",
+    categoryLabel: "3D & Spatial Design",
+    source: "Pinterest Aesthetics",
+    saves: "81.9k",
+    badge: "✦ PIN OF THE WEEK",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+    insight: "ความล้ำยุคของวัสดุแก้วของเหลวใส (Refractive Glass) การหักเหของแสงสีรุ้ง (Chromatic Aberration) และความโปร่งแสงแบบฟิวเจอร์ริสติกที่กำลังครองใจวงการเทคโนโลยีและแฟชั่น",
+    principles: ["การหักเหแสง Caustics", "ความโปร่งใสแบบ Frosted Glass", "ความโค้งมนของของเหลวหยดน้ำ", "แสงสะท้อนระดับสตูดิโอ"],
+    bestFor: "Visual Key ของแบรนด์ไฮเอนด์, หน้าปกพอร์ตโฟลิโอ, แคมเปญแอปพลิเคชันยุคใหม่",
     swatches: [
-      { hex: "#2563EB", name: "Cobalt Future" },
-      { hex: "#38BDF8", name: "Hologram Sky" },
-      { hex: "#030712", name: "Deep Space" },
-      { hex: "#E0E7FF", name: "Cyber Chrome" }
+      { hex: "#3B82F6", name: "Spatial Cobalt" },
+      { hex: "#A855F7", name: "Iris Glow" },
+      { hex: "#06B6D4", name: "Aqua Prism" },
+      { hex: "#0F172A", name: "Abyss Dark" }
     ],
-    tags: ["#DigitalSurrealism", "#CobaltBlue", "#3DCharacter", "#ChromeArt"],
-    aiPrompt: "Futuristic digital character in cobalt blue hoodie, chrome metallic reflective surfaces, dark ambient neon glow, sleek 3D render art"
+    tags: ["#LiquidGlass", "#Glassmorphism", "#ChromaticAberration", "#3DSurreal"],
+    aiPrompt: "Fluid liquid glass sculpture, organic transparent glass drops, iridescent rainbow refraction caustic lighting, sleek spatial 3D render, dark ambient studio background, octane render, 8k resolution, ultra detailed"
+  },
+  {
+    id: "trend-swiss-editorial",
+    title: "Swiss Grid & Typographic Minimal",
+    category: "editorial",
+    categoryLabel: "Editorial & Swiss",
+    source: "Pinterest Curated",
+    saves: "43.7k",
+    badge: "🏛️ TIMELESS",
+    image: "https://images.unsplash.com/photo-1515260268569-9271009adfdb?auto=format&fit=crop&w=800&q=80",
+    insight: "รากฐานการออกแบบระดับสากลที่กลับมาได้รับความนิยมสูงสุดในหมู่ดีไซเนอร์รุ่นใหม่ ใช้ระบบกริดที่เคร่งครัด ตัวอักษร Sans-Serif ที่มีระเบียบ และการเว้นพื้นที่ว่าง (Negative Space) อย่างทรงพลัง",
+    principles: ["ตารางกริดเป็นโครงสร้างหลัก", "ฟอนต์ Helvetica / Grotesk ที่ไร้การปรุงแต่ง", "อัตราส่วนพื้นที่ว่างมากกว่า 60%", "เน้นความชัดเจนของสาร (Content-First)"],
+    bestFor: "นิตยสารสถาปัตยกรรม, เอกสารแนะนำแบรนด์, งานแสดงศิลปะ, เว็บไซต์คูลๆ",
+    swatches: [
+      { hex: "#111111", name: "Swiss Black" },
+      { hex: "#F3F3F3", name: "Canvas Warmth" },
+      { hex: "#E11D48", name: "Accent Carmine" },
+      { hex: "#71717A", name: "Slate Grid" }
+    ],
+    tags: ["#SwissDesign", "#GridSystem", "#EditorialLayout", "#Minimalist"],
+    aiPrompt: "Swiss style minimalist editorial poster, clean architectural grid layout, bold Helvetica typography, striking black and white photography, subtle red accent square, pristine negative space, premium museum print"
+  },
+  {
+    id: "trend-retro-risograph",
+    title: "Risograph Grain & Halftone Print",
+    category: "graphics",
+    categoryLabel: "Retro Print & Grain",
+    source: "Pinterest Indie Art",
+    saves: "52.3k",
+    badge: "✨ INDIE HIT",
+    image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80",
+    insight: "สุนทรียศาสตร์ของความไม่สมบูรณ์แบบ (Wabi-Sabi) ในงานพิมพ์กระดาษยุคแอนะล็อก ลวดลายเม็ดสกรีน (Halftone Dots), การซ้อนทับของแม่พิมพ์สีเหลื่อม (Misregistration), และเนื้อกระดาษหยาบอบอุ่น",
+    principles: ["เม็ดสกรีน Halftone ที่มองเห็นชัด", "การพิมพ์ทับกันของเลเยอร์สี 2-3 สี", "พื้นผิวเกรนกระดาษมีเท็กซ์เจอร์", "โทนสีสไตล์หมึกพิมพ์ญี่ปุ่น"],
+    bestFor: "โปสเตอร์คาเฟ่, บรรจุภัณฑ์สินค้าคราฟต์, ปกหนังสืออิสระ, การ์ดอวยพร",
+    swatches: [
+      { hex: "#10B981", name: "Riso Emerald" },
+      { hex: "#F43F5E", name: "Soy Ink Coral" },
+      { hex: "#F59E0B", name: "Warm Sun" },
+      { hex: "#FEF3C7", name: "Vintage Parchment" }
+    ],
+    tags: ["#Risograph", "#HalftoneDots", "#VintagePrint", "#AnalogAesthetic"],
+    aiPrompt: "Authentic risograph print artwork, tactile halftone dot texture, two-tone soy ink overlay in emerald green and warm coral, subtle misalignment misregistration effect, aged textured paper grain, indie art illustration"
+  },
+  {
+    id: "trend-french-chic",
+    title: "High Fashion & Editorial Lookbook",
+    category: "editorial",
+    categoryLabel: "Fashion & Lookbook",
+    source: "Pinterest Lookbooks",
+    saves: "61.5k",
+    badge: "👗 ELEGANT",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+    insight: "การผสมผสานภาพถ่ายบุคคลแฟชั่นชั้นสูง (Editorial Portrait) เข้ากับตัวอักษร Serif ขนาดใหญ่พาดเต็มหน้า ความงามสง่าแบบปารีเซียงและแสงสตูดิโอแบบ Softbox",
+    principles: ["ภาพโคลสอัพใบหน้าและเครื่องแต่งกายโดดเด่น", "ฟอนต์ Serif ไฮเอนด์ทรงเพรียว", "ความสมดุลระหว่างความหรูหราและความดิบ", "สีเน้นเฉดเดียว เช่น แดงเบอร์กันดี หรือน้ำเงินโคบอลต์"],
+    bestFor: "แคมเปญบิวตี้, นิตยสารแฟชั่น, แบรนด์เสื้อผ้า, โปสเตอร์ภาพยนตร์",
+    swatches: [
+      { hex: "#BE123C", name: "Parisian Crimson" },
+      { hex: "#27272A", name: "Dark Wool" },
+      { hex: "#FAFAFA", name: "Studio Soft" },
+      { hex: "#A1A1AA", name: "Silk Gray" }
+    ],
+    tags: ["#HighFashion", "#LookbookCover", "#EditorialChic", "#SerifTypography"],
+    aiPrompt: "Vogue style high fashion magazine cover, cinematic model portrait wearing luxury red beret, soft studio lighting, elegant oversized editorial serif title, film grain, luxury aesthetic, 35mm photograph"
+  },
+  {
+    id: "trend-bauhaus-geometry",
+    title: "Bauhaus & Constructivist Forms",
+    category: "art",
+    categoryLabel: "Bauhaus & Modernism",
+    source: "Pinterest Art Gallery",
+    saves: "39.8k",
+    badge: "📐 CLASSIC",
+    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80",
+    insight: "รูปทรงเรขาคณิตบริสุทธิ์ (วงกลม สามเหลี่ยม สี่เหลี่ยม) ภายใต้แนวคิด Form Follows Function ใช้แม่สีพื้นฐานจัดวางในมุมมองพลวัต (Dynamic Angle)",
+    principles: ["ใช้แม่สี: แดง น้ำเงิน เหลือง", "รูปทรงเรขาคณิตตัดแปะ", "มุมเอียงสร้างพลังและความเคลื่อนไหว", "ตัวพิมพ์ไม่มีเชิงสไตล์เยอรมัน"],
+    bestFor: "นิทรรศการศิลปะ, โปสเตอร์สถาปัตยกรรม, ปกพอดแคสต์สารคดี, สื่อการเรียนรู้",
+    swatches: [
+      { hex: "#E11D48", name: "Bauhaus Red" },
+      { hex: "#2563EB", name: "Modern Blue" },
+      { hex: "#FACC15", name: "Primary Yellow" },
+      { hex: "#18181B", name: "Charcoal Black" }
+    ],
+    tags: ["#Bauhaus", "#Constructivism", "#GeometricArt", "#PrimaryColors"],
+    aiPrompt: "Bauhaus art movement exhibition poster, bold geometric composition with circles and triangles, primary red, blue, and yellow colors on aged warm cream paper, diagonal dynamic layout, classic modernism graphic"
+  },
+  {
+    id: "trend-cyberpunk-glitch",
+    title: "Cyberpunk Glitch & Distorted Type",
+    category: "graphics",
+    categoryLabel: "Cyberpunk & Glitch",
+    source: "Pinterest Trending",
+    saves: "73.1k",
+    badge: "🔮 SCI-FI",
+    image: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=800&q=80",
+    insight: "ภาพสะท้อนของโลกอนาคตที่เทคโนโลยีชนกับความวุ่นวาย แสงนีออนสะท้อนบนถนนเปียกฝน สัญญาณภาพล้มเหลว (Glitch Artifacts) และตัวอักษรที่ถูกแยกคลื่นสัญญาณ RGB",
+    principles: ["การแตกตัวของสี RGB Shift", "แสงนีออนฟ้าเทอร์ควอยซ์และชมพูไซเบอร์", "องค์ประกอบแบบ HUD Interface", "พื้นหลังมืดสลัวสไตล์ Dystopian"],
+    bestFor: "เกม, ปกเพลง Synthwave/EDM, งานอีเวนต์เทคโนโลยี, สตรีมเมอร์",
+    swatches: [
+      { hex: "#06B6D4", name: "Neon Cyan" },
+      { hex: "#EC4899", name: "Laser Magenta" },
+      { hex: "#09090B", name: "Night Dystopia" },
+      { hex: "#8B5CF6", name: "Electric Violet" }
+    ],
+    tags: ["#Cyberpunk", "#GlitchArt", "#RGBShift", "#DistortedType"],
+    aiPrompt: "Cyberpunk futuristic poster, heavy RGB chromatic aberration glitch effect, neon cyan and hot magenta glows against dark rainy alley, distorted futuristic typography, sci-fi interface elements, 8k render"
   }
 ];
 
-let activeCover = PINTEREST_COVERS[0];
-let currentCategoryPill = "trending";
+// Active State
+let currentTab = "discovery"; // "discovery" | "studio"
+let selectedTrend = TREND_DATABASE[0];
+let activeFilter = "all";
+let searchQuery = "";
+
+// Studio Image State
+let studioState = {
+  prompt: selectedTrend.aiPrompt,
+  aspectRatio: "1:1", // "1:1", "4:5", "16:9", "9:16"
+  stylePreset: "graphic-poster",
+  isGenerating: false,
+  currentImageUrl: selectedTrend.image,
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+  hueRotate: 0,
+  blur: 0,
+  overlayText: "",
+  overlayPosition: "bottom", // "top", "center", "bottom"
+  history: []
+};
 
 /**
- * Copy HEX code to clipboard with toast notification
+ * Copy text to clipboard with feedback
  */
-function copyHex(hex, name) {
-  navigator.clipboard.writeText(hex).then(() => {
-    toast(`คัดลอกรหัสสี ${hex} (${name || ""}) สำเร็จ`, "success", "Color Copied");
+function copyText(text, label = "คัดลอกสำเร็จ") {
+  navigator.clipboard.writeText(text).then(() => {
+    toast(`คัดลอก ${label} เรียบร้อยแล้ว`, "success");
   }).catch(() => {
     const input = document.createElement("input");
-    input.value = hex;
+    input.value = text;
     document.body.appendChild(input);
     input.select();
     document.execCommand("copy");
     document.body.removeChild(input);
-    toast(`คัดลอกรหัสสี ${hex} สำเร็จ`, "success", "Color Copied");
+    toast(`คัดลอก ${label} เรียบร้อยแล้ว`, "success");
   });
 }
 
 /**
- * Open Pin Inspection Modal
+ * Build Pollinations AI Image URL
  */
-function openPinModal(cover) {
-  openModal({
-    size: "lg",
-    title: `
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:1.4rem;">📌</span>
-        <div>
-          <div style="font-weight:700;font-size:1.15rem;color:#ffffff;">${escapeHtml(cover.title)}</div>
-          <div style="font-size:0.8rem;color:#8f95ae;">${escapeHtml(cover.subtitle)} · ${escapeHtml(cover.author)}</div>
-        </div>
-      </div>
-    `,
-    body: `
-      <div style="display:flex;flex-direction:column;gap:18px;">
-        <!-- Artwork Hero -->
-        <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;border:1px solid #27272a;max-height:420px;display:flex;justify-content:center;">
-          <img src="${escapeHtml(cover.image)}" alt="${escapeHtml(cover.title)}" style="max-height:420px;width:auto;object-fit:contain;display:block;" />
-          <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;color:#fff;">
-            📌 ${cover.saves} Saves on Pinterest
-          </div>
-        </div>
+function buildAiImageUrl(prompt, aspect, style) {
+  let width = 1024;
+  let height = 1024;
 
-        <!-- Description & Tags -->
-        <div style="background:#111218;border:1px solid #232530;border-radius:10px;padding:16px;">
-          <div style="font-weight:700;font-size:0.92rem;color:#ffffff;margin-bottom:6px;">✨ รายละเอียดและสุนทรียศาสตร์ของชิ้นงาน:</div>
-          <p style="font-size:0.86rem;color:#c5cadc;line-height:1.6;margin:0 0 14px;">${escapeHtml(cover.description)}</p>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            ${cover.tags.map((t) => `<span style="font-size:0.72rem;background:#1e202d;color:#94a3b8;padding:3px 8px;border-radius:4px;border:1px solid #2c3042;">${escapeHtml(t)}</span>`).join("")}
-          </div>
-        </div>
+  if (aspect === "4:5") {
+    width = 896;
+    height = 1120;
+  } else if (aspect === "16:9") {
+    width = 1152;
+    height = 648;
+  } else if (aspect === "9:16") {
+    width = 648;
+    height = 1152;
+  }
 
-        <!-- Color Palette Swatches -->
-        <div style="background:#111218;border:1px solid #232530;border-radius:10px;padding:16px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <span style="font-weight:700;font-size:0.88rem;color:#ffffff;">🎨 จานสีเด่น (Color Palette) — คลิกเพื่อคัดลอก:</span>
-            <span style="font-size:0.72rem;color:#8f95ae;">Click to copy HEX</span>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
-            ${cover.swatches.map((s) => `
-              <div class="modal-swatch-box" data-modal-hex="${s.hex}" data-modal-name="${s.name}" style="background:#181a24;border:1px solid #2b2e40;border-radius:8px;padding:10px;cursor:pointer;transition:transform 0.15s, border-color 0.15s;" title="คลิกเพื่อคัดลอก ${s.hex}">
-                <div style="width:100%;height:32px;border-radius:4px;background:${s.hex};border:1px solid rgba(255,255,255,0.1);margin-bottom:8px;"></div>
-                <div style="font-weight:700;font-size:0.82rem;color:#ffffff;font-family:'Space Mono',monospace;">${s.hex}</div>
-                <div style="font-size:0.72rem;color:#8f95ae;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(s.name)}</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
+  // Enrich prompt with chosen style
+  let styleSuffix = "";
+  if (style === "3d-render") {
+    styleSuffix = ", 3D octane render, cinema 4d, ray tracing, spatial lighting, 8k render";
+  } else if (style === "graphic-poster") {
+    styleSuffix = ", graphic design poster, print ready, vector aesthetics, balanced typography, award-winning visual";
+  } else if (style === "photorealistic") {
+    styleSuffix = ", editorial photography, 35mm film shot, photorealistic, cinematic atmospheric light, 8k";
+  } else if (style === "cyberpunk") {
+    styleSuffix = ", cyberpunk aesthetic, neon glow, holographic reflections, futuristic high tech, ultra detailed";
+  } else if (style === "swiss-minimal") {
+    styleSuffix = ", swiss graphic design, minimalist grid, helvetica typography, negative space, black and white with vivid accent";
+  }
 
-        <!-- AI Prompt -->
-        <div style="background:#0c0d12;border:1px dashed #2c3042;border-radius:8px;padding:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-size:0.78rem;font-weight:700;color:#9ca2bb;">💡 AI Prompt Inspiration สำหรับจำลองสไตล์นี้:</span>
-            <button type="button" class="btn btn-ghost btn-xs" id="btn-copy-pin-prompt" style="font-size:0.72rem;padding:2px 8px;">คัดลอก Prompt 📋</button>
-          </div>
-          <pre style="margin:0;font-family:'Space Mono',monospace;font-size:0.76rem;color:#a6acc3;white-space:pre-wrap;background:#14151f;padding:10px;border-radius:4px;border:1px solid #232636;">${escapeHtml(cover.aiPrompt)}</pre>
-        </div>
-      </div>
-    `,
-    footer: `
-      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;flex-wrap:wrap;">
-        <span style="font-size:0.78rem;color:#8f95ae;">บันทึกจาก Pinterest Visual Curator</span>
-        <div style="display:flex;gap:10px;">
-          <button type="button" class="btn btn-ghost" data-close-modal>ปิด</button>
-          <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-use-pin-create" style="padding:7px 16px;">
-            ${pixelIcons.plus}
-            <span>นำเทรนด์นี้ไปสร้าง Task</span>
-          </button>
-        </div>
-      </div>
-    `
-  });
-
-  // Bind swatch clicks inside modal
-  qsa(".modal-swatch-box").forEach((box) => {
-    box.addEventListener("click", () => {
-      copyHex(box.dataset.modalHex, box.dataset.modalName);
-    });
-  });
-
-  // Bind copy prompt
-  qs("#btn-copy-pin-prompt")?.addEventListener("click", () => {
-    navigator.clipboard.writeText(cover.aiPrompt).then(() => {
-      toast("คัดลอก AI Prompt เรียบร้อยแล้ว", "success");
-    });
-  });
-
-  // Bind create task
-  qs("#btn-use-pin-create")?.addEventListener("click", () => {
-    closeModal();
-    if (typeof window.openCreateTask === "function") {
-      window.openCreateTask({
-        title: `งานดีไซน์สไตล์ ${cover.title}`,
-        description: `บรีฟชิ้นงานอ้างอิงแรงบันดาลใจจาก Pinterest Trend: ${cover.title} (${cover.subtitle})\n\nแท็กสไตล์: ${cover.tags.join(" ")}\nจานสีเด่น: ${cover.swatches.map((s) => `${s.name} (${s.hex})`).join(", ")}\n\nรายละเอียดงาน: \n`,
-        preview_url: cover.image,
-        channel: "Social Media / Key Visual"
-      });
-    }
-  });
+  const fullPrompt = `${prompt.trim()}${styleSuffix}`;
+  const seed = Math.floor(Math.random() * 999999);
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
 }
 
 /**
@@ -291,245 +260,809 @@ export async function render(context = {}) {
   const mount = qs("#page-content");
   if (!mount) return;
 
-  // Build the Bento Frame matching the uploaded image exactly
   mount.innerHTML = `
-    <div class="pinterest-curator-root">
-      <!-- Title & Subtitle Bar -->
-      <div class="pinterest-header-row">
-        <div>
-          <div class="pinterest-top-badge">
-            <span class="p-dot-pulse"></span>
-            <span>PINTEREST VISUAL DESIGN CURATOR</span>
-            <span class="p-badge-sub">LIVE MOODBOARD FEED</span>
+    <div class="trend-curator-app">
+      <!-- App Top Navigation & Mode Switcher -->
+      <div class="trend-top-bar">
+        <div class="trend-brand-group">
+          <div class="trend-pill-badge">
+            <span class="pulse-indicator"></span>
+            <span>DESIGN TREND CURATOR AI</span>
+            <span class="badge-tag">PINTEREST & STUDIO</span>
           </div>
-          <h1 class="pinterest-header-title">
-            เทรนด์งานออกแบบ & สุนทรียศาสตร์ร่วมสมัยจาก Pinterest
+          <h1 class="trend-main-heading">
+            วิเคราะห์เทรนด์งานดีไซน์ & AI สร้างภาพพร้อมปรับแต่งทันที
           </h1>
-          <p class="pinterest-header-desc">
-            รวบรวมเทรนด์ภาพถ่าย แฟชั่น โปสเตอร์ สิ่งพิมพ์ งานศิลปะ และงานดีไซน์หลากมิติที่กำลังไวรัลบน Pinterest เพื่อจุดประกายไอเดียใหม่ ๆ ให้กับทีม
+          <p class="trend-sub-heading">
+            ดึงภาพและเจาะลึก Insight จาก Pinterest และแหล่งดีไซน์ระดับโลก แล้วนำไอเดียมาให้ AI ช่วยสังเคราะห์ภาพใหม่และปรับแต่งได้ในที่เดียว
           </p>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-sync-pinterest" title="Refresh Pinterest Pins">
-            <span>🔄 ซิงค์พินล่าสุด</span>
+
+        <!-- Mode Switcher Tabs -->
+        <div class="trend-mode-tabs">
+          <button type="button" class="mode-tab-btn ${currentTab === "discovery" ? "is-active" : ""}" id="tab-btn-discovery">
+            <span>📌 ค้นหา & วิเคราะห์เทรนด์ (Trends Feed)</span>
+          </button>
+          <button type="button" class="mode-tab-btn ${currentTab === "studio" ? "is-active" : ""}" id="tab-btn-studio">
+            <span>✨ AI Studio & เครื่องมือปรับแต่งภาพ</span>
           </button>
         </div>
       </div>
 
-      <!-- Bento Canvas Container (Matching the reference screenshot!) -->
-      <div class="bento-black-canvas" id="bento-canvas">
+      <!-- Main Workspace Views -->
+      <div class="trend-workspace" id="trend-workspace">
+        <!-- Rendered dynamically based on currentTab -->
+      </div>
+    </div>
+  `;
+
+  // Bind tab buttons
+  qs("#tab-btn-discovery")?.addEventListener("click", () => {
+    currentTab = "discovery";
+    updateActiveTabs();
+    renderDiscoveryView();
+  });
+
+  qs("#tab-btn-studio")?.addEventListener("click", () => {
+    currentTab = "studio";
+    updateActiveTabs();
+    renderStudioView();
+  });
+
+  function updateActiveTabs() {
+    qs("#tab-btn-discovery")?.classList.toggle("is-active", currentTab === "discovery");
+    qs("#tab-btn-studio")?.classList.toggle("is-active", currentTab === "studio");
+  }
+
+  // Initial View
+  if (currentTab === "discovery") {
+    renderDiscoveryView();
+  } else {
+    renderStudioView();
+  }
+}
+
+/**
+ * VIEW 1: TREND DISCOVERY & INSIGHT BREAKDOWN
+ */
+function renderDiscoveryView() {
+  const container = qs("#trend-workspace");
+  if (!container) return;
+
+  // Filter trends based on category & search
+  const filteredTrends = TREND_DATABASE.filter((item) => {
+    const matchCat = activeFilter === "all" || item.category === activeFilter;
+    const matchSearch = searchQuery === "" || 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      item.insight.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  container.innerHTML = `
+    <div class="discovery-layout">
+      <!-- Search & Category Filtering Bar -->
+      <div class="discovery-filter-card">
+        <div class="discovery-search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="trend-search-input" 
+            class="trend-input-search" 
+            placeholder="ค้นหาเทรนด์ เช่น Y2K, Brutalism, Liquid Glass, Minimalist, Cyberpunk..." 
+            value="${escapeHtml(searchQuery)}"
+          />
+          ${searchQuery ? `<button type="button" class="btn-clear-search" id="btn-clear-search">✕</button>` : ""}
+        </div>
+
+        <div class="discovery-category-pills" id="category-pills">
+          <button type="button" class="filter-pill ${activeFilter === "all" ? "is-selected" : ""}" data-filter="all">
+            🌟 เทรนด์ทั้งหมด (${TREND_DATABASE.length})
+          </button>
+          <button type="button" class="filter-pill ${activeFilter === "graphics" ? "is-selected" : ""}" data-filter="graphics">
+            ⚡ Acid & Neo-Brutalism
+          </button>
+          <button type="button" class="filter-pill ${activeFilter === "3d" ? "is-selected" : ""}" data-filter="3d">
+            🔮 3D & Spatial Glass
+          </button>
+          <button type="button" class="filter-pill ${activeFilter === "editorial" ? "is-selected" : ""}" data-filter="editorial">
+            📰 Swiss & Fashion Lookbook
+          </button>
+          <button type="button" class="filter-pill ${activeFilter === "art" ? "is-selected" : ""}" data-filter="art">
+            🎨 Bauhaus & Modern Art
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Dual Panel: Left Selected Trend Deep Dive, Right Grid of Pinterest Cards -->
+      <div class="discovery-main-grid">
         
-        <!-- TOP ROW -->
-        <div class="bento-top-row">
-          
-          <!-- TOP-LEFT: HERO WHITE SWATCH CARD (~65% width) -->
-          <div class="bento-card bento-hero-white-card" id="bento-hero-card">
-            <div class="hero-white-inner">
-              <!-- Swatches Grid (2 rows x 4 items) -->
-              <div class="hero-swatches-grid" id="hero-swatches-grid">
-                <!-- Populated dynamically based on activeCover -->
+        <!-- Left: Selected Trend AI Insight Breakdown -->
+        <div class="trend-inspector-panel">
+          <div class="inspector-card">
+            <div class="inspector-header">
+              <div class="inspector-meta-badge">
+                <span>📌 AI INSIGHT ANALYSIS</span>
+                <span class="inspector-saves">${selectedTrend.saves} Saves</span>
               </div>
+              <h2 class="inspector-title">${escapeHtml(selectedTrend.title)}</h2>
+              <div class="inspector-source-label">หมวดหมู่: ${escapeHtml(selectedTrend.categoryLabel)} · แหล่งที่มา: ${escapeHtml(selectedTrend.source)}</div>
+            </div>
 
-              <!-- Cart / Pin Metric Bar -->
-              <div class="hero-metric-bar">
-                <div class="hero-metric-left">
-                  <span class="hero-cart-icon">🛍️</span>
-                </div>
-                <div class="hero-metric-right">
-                  <span class="hero-metric-price" id="hero-metric-saves">$1,863.00</span>
-                </div>
+            <div class="inspector-image-wrap">
+              <img src="${escapeHtml(selectedTrend.image)}" alt="${escapeHtml(selectedTrend.title)}" />
+              <div class="inspector-img-badge">${escapeHtml(selectedTrend.badge)}</div>
+            </div>
+
+            <!-- Insight Content -->
+            <div class="inspector-section">
+              <div class="inspector-section-label">💡 แก่นและ Insight ของเทรนด์นี้:</div>
+              <p class="inspector-insight-text">${escapeHtml(selectedTrend.insight)}</p>
+            </div>
+
+            <!-- Design Principles -->
+            <div class="inspector-section">
+              <div class="inspector-section-label">📐 องค์ประกอบ & กฎการจัดวาง:</div>
+              <ul class="inspector-principles-list">
+                ${selectedTrend.principles.map(p => `<li>✦ ${escapeHtml(p)}</li>`).join("")}
+              </ul>
+            </div>
+
+            <!-- Color Palette -->
+            <div class="inspector-section">
+              <div class="inspector-section-label">🎨 จานสีเด่น (คลิกเพื่อคัดลอก HEX):</div>
+              <div class="inspector-swatches-grid">
+                ${selectedTrend.swatches.map(s => `
+                  <div class="inspector-swatch-box" data-hex="${s.hex}" title="คลิกเพื่อคัดลอก ${s.hex}">
+                    <div class="swatch-color-bar" style="background:${s.hex};"></div>
+                    <div class="swatch-info">
+                      <span class="swatch-hex">${s.hex}</span>
+                      <span class="swatch-name">${escapeHtml(s.name)}</span>
+                    </div>
+                  </div>
+                `).join("")}
               </div>
+            </div>
+
+            <!-- AI Prompt Blueprint -->
+            <div class="inspector-section">
+              <div class="inspector-section-label" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>🤖 AI Prompt Blueprint สำหรับสร้างงานสไตล์นี้:</span>
+                <button type="button" class="btn btn-ghost btn-xs" id="btn-copy-blueprint-prompt">คัดลอก 📋</button>
+              </div>
+              <pre class="inspector-prompt-code">${escapeHtml(selectedTrend.aiPrompt)}</pre>
+            </div>
+
+            <!-- Inspector Action Buttons -->
+            <div class="inspector-actions">
+              <button type="button" class="btn-studio-launch" id="btn-open-in-studio">
+                <span>✨ ให้ AI สร้างภาพตามเทรนด์นี้ทันที</span>
+              </button>
+              <button type="button" class="btn btn-ghost" id="btn-create-task-from-trend">
+                <span>+ บรีฟงานสร้าง Task ใน CONT</span>
+              </button>
             </div>
           </div>
-
-          <!-- TOP-RIGHT STACK (~35% width) -->
-          <div class="bento-top-right-stack">
-            
-            <!-- TOP-RIGHT 1: PILL FILTER CARD -->
-            <div class="bento-card bento-dark-pill-card">
-              <div class="pill-buttons-row" id="pill-buttons-row">
-                <button type="button" class="capsule-icon-pill" data-pill-cat="all" title="All Aesthetics">✦</button>
-                <button type="button" class="capsule-icon-pill" data-pill-cat="fashion" title="Fashion & Editorial">👗</button>
-                <button type="button" class="capsule-icon-pill" data-pill-cat="graphics" title="Acid Graphics">⚡</button>
-                <button type="button" class="capsule-text-pill is-active-orange" data-pill-cat="trending">Trending</button>
-                <button type="button" class="capsule-icon-pill" data-pill-cat="3d" title="3D & Digital">🔮</button>
-              </div>
-            </div>
-
-            <!-- TOP-RIGHT 2: MINIMAL CONCEPT CARD -->
-            <div class="bento-card bento-dark-concept-card">
-              <div class="concept-center-text">
-                <span class="concept-wordmark">✦ concept</span>
-                <span class="concept-sub-caption">PINTEREST AESTHETIC DIRECTORY</span>
-              </div>
-            </div>
-
-          </div>
-
         </div>
 
-        <!-- BOTTOM ROW -->
-        <div class="bento-bottom-row">
-
-          <!-- BOTTOM-LEFT: A SIGNAL APPEARS (WHITE CARD, ~30% width) -->
-          <div class="bento-card bento-signal-white-card" id="bento-signal-card">
-            <div class="signal-card-content">
-              <div class="signal-thumb-wrap">
-                <img id="signal-thumb-img" src="${activeCover.image}" alt="Signal preview" />
-              </div>
-              <div class="signal-text-wrap">
-                <h3 class="signal-title">A signal appears.</h3>
-                <p class="signal-desc" id="signal-desc-text">
-                  Visual narrative tracking aesthetic shifts across photography, poster art & lifestyle.
-                </p>
-              </div>
-            </div>
+        <!-- Right: Pinterest Trend Cards Grid -->
+        <div class="trends-cards-column">
+          <div class="cards-column-header">
+            <span class="column-title">กระดานเทรนด์ที่คัดสรรมาให้คุณ (${filteredTrends.length} สไตล์)</span>
+            <span class="column-hint">คลิกการ์ดเพื่อดูการวิเคราะห์ Insight</span>
           </div>
 
-          <!-- BOTTOM-RIGHT: 3D COVER CAROUSEL SHOWCASE (~70% width) -->
-          <div class="bento-card bento-covers-carousel-card">
-            <div class="covers-track" id="covers-track">
-              <!-- Populated dynamically with 7 upright 3D covers -->
-            </div>
-          </div>
+          <div class="trends-masonry-grid">
+            ${filteredTrends.map(item => `
+              <div class="trend-pin-card ${item.id === selectedTrend.id ? "is-active-pin" : ""}" data-trend-id="${item.id}">
+                <div class="pin-card-media">
+                  <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" />
+                  <div class="pin-card-overlay">
+                    <span class="pin-badge">${escapeHtml(item.badge)}</span>
+                    <span class="pin-saves">📌 ${item.saves}</span>
+                  </div>
+                </div>
 
+                <div class="pin-card-body">
+                  <div class="pin-card-cat">${escapeHtml(item.categoryLabel)}</div>
+                  <h3 class="pin-card-title">${escapeHtml(item.title)}</h3>
+                  <p class="pin-card-desc">${escapeHtml(item.insight)}</p>
+
+                  <div class="pin-palette-mini">
+                    ${item.swatches.map(s => `<span class="mini-swatch" style="background:${s.hex};" title="${s.hex} (${s.name})"></span>`).join("")}
+                  </div>
+
+                  <div class="pin-card-footer">
+                    <button type="button" class="btn-pin-action btn-inspect-pin" data-inspect-id="${item.id}">
+                      วิเคราะห์ Insight
+                    </button>
+                    <button type="button" class="btn-pin-action btn-generate-pin" data-gen-id="${item.id}">
+                      ✨ AI สร้างภาพ
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
         </div>
 
       </div>
+    </div>
+  `;
 
-      <!-- Quick Action Bar -->
-      <div class="pinterest-quick-meta-bar">
-        <div style="font-size:0.8rem;color:#8f95ae;">
-          💡 <strong>เคล็ดลับ:</strong> คลิกที่ปกหนังสือ/โปสเตอร์ด้านล่างเพื่อสลับดูจานสี หรือคลิกเพื่อดูรายละเอียดบรีฟและนำไปสร้างงานใน CONT
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button type="button" class="btn btn-ghost btn-sm" id="btn-open-active-detail">
-            🔍 ดูรายละเอียดชิ้นงานที่เลือก (<span id="active-title-label">${activeCover.title}</span>)
+  // Bind Search Input
+  const searchInput = qs("#trend-search-input");
+  searchInput?.addEventListener("input", (e) => {
+    searchQuery = e.target.value;
+    renderDiscoveryView();
+    // Keep focus
+    const input = qs("#trend-search-input");
+    if (input) {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  });
+
+  qs("#btn-clear-search")?.addEventListener("click", () => {
+    searchQuery = "";
+    renderDiscoveryView();
+  });
+
+  // Bind Category Filter Pills
+  qsa(".filter-pill").forEach((pill) => {
+    pill.addEventListener("click", () => {
+      activeFilter = pill.dataset.filter;
+      renderDiscoveryView();
+    });
+  });
+
+  // Bind Swatch Copy
+  qsa(".inspector-swatch-box").forEach((box) => {
+    box.addEventListener("click", () => {
+      copyText(box.dataset.hex, `รหัสสี ${box.dataset.hex}`);
+    });
+  });
+
+  // Bind Copy Blueprint
+  qs("#btn-copy-blueprint-prompt")?.addEventListener("click", () => {
+    copyText(selectedTrend.aiPrompt, "AI Prompt");
+  });
+
+  // Bind Open in Studio
+  qs("#btn-open-in-studio")?.addEventListener("click", () => {
+    loadTrendIntoStudio(selectedTrend);
+  });
+
+  // Bind Create Task from Trend
+  qs("#btn-create-task-from-trend")?.addEventListener("click", () => {
+    if (typeof window.openCreateTask === "function") {
+      window.openCreateTask({
+        title: `งานดีไซน์สไตล์ ${selectedTrend.title}`,
+        description: `บรีฟชิ้นงานอ้างอิงเทรนด์: ${selectedTrend.title}\nInsight: ${selectedTrend.insight}\n\nองค์ประกอบหลัก:\n${selectedTrend.principles.map(p => `- ${p}`).join("\n")}\n\nจานสีเด่น: ${selectedTrend.swatches.map(s => `${s.name} (${s.hex})`).join(", ")}\n\nAI Prompt Blueprint:\n${selectedTrend.aiPrompt}\n`,
+        preview_url: selectedTrend.image,
+        channel: "Social Media / Key Visual"
+      });
+    } else {
+      toast("กรุณาเปิดเมนูสร้าง Task ในระบบ CONT", "info");
+    }
+  });
+
+  // Bind Pin Cards Click
+  qsa(".trend-pin-card").forEach((card) => {
+    card.addEventListener("click", (e) => {
+      // Don't trigger if clicked on specific inner buttons
+      if (e.target.closest(".btn-generate-pin")) return;
+      const id = card.dataset.trendId;
+      const found = TREND_DATABASE.find(t => t.id === id);
+      if (found) {
+        selectedTrend = found;
+        renderDiscoveryView();
+      }
+    });
+  });
+
+  // Bind Quick Generate Button on Pin Cards
+  qsa(".btn-generate-pin").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.genId;
+      const found = TREND_DATABASE.find(t => t.id === id);
+      if (found) {
+        loadTrendIntoStudio(found);
+      }
+    });
+  });
+}
+
+/**
+ * Load a Trend into Studio and switch tab
+ */
+function loadTrendIntoStudio(trend) {
+  selectedTrend = trend;
+  studioState.prompt = trend.aiPrompt;
+  studioState.currentImageUrl = trend.image;
+  studioState.overlayText = trend.title.toUpperCase();
+  currentTab = "studio";
+  render();
+  toast(`โหลดข้อมูลสไตล์ "${trend.title}" เข้าสู่ AI Studio เรียบร้อยแล้ว`, "success");
+}
+
+/**
+ * VIEW 2: AI STUDIO & IMAGE CUSTOMIZER
+ */
+function renderStudioView() {
+  const container = qs("#trend-workspace");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="studio-layout">
+      <!-- Left Panel: AI Generator Controls & Prompts -->
+      <div class="studio-controls-panel">
+        <div class="studio-box">
+          <div class="studio-box-header">
+            <span class="studio-badge">✨ AI IMAGE GENERATOR</span>
+            <span class="studio-status">${studioState.isGenerating ? "⏳ กำลังสร้างภาพ..." : "พร้อมสร้างภาพ"}</span>
+          </div>
+
+          <h3 class="studio-box-title">เครื่องมือ AI สังเคราะห์ภาพกราฟิก</h3>
+          <p class="studio-box-desc">ปรับแต่งข้อความ Prompt สไตล์ และอัตราส่วนภาพ จากนั้นกดสั่งให้ AI เจนภาพได้ทันที</p>
+
+          <!-- Prompt Textarea -->
+          <div class="form-group" style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <label class="studio-field-label">AI Prompt คำสั่งสร้างภาพ:</label>
+              <button type="button" class="btn btn-ghost btn-xs" id="btn-enhance-prompt" title="AI ช่วยเติมคีย์เวิร์ดเสริมคุณภาพ">
+                ⚡ เพิ่มความอลังการ (Enhance)
+              </button>
+            </div>
+            <textarea id="studio-prompt-input" class="studio-textarea" rows="4" placeholder="พิมพ์อธิบายภาพกราฟิกที่ต้องการสร้าง...">${escapeHtml(studioState.prompt)}</textarea>
+          </div>
+
+          <!-- Style Preset Selector -->
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="studio-field-label">สไตล์ภาพ (Visual Style):</label>
+            <div class="studio-style-grid" id="studio-styles-grid">
+              <button type="button" class="style-choice-btn ${studioState.stylePreset === "graphic-poster" ? "is-selected" : ""}" data-style="graphic-poster">
+                🎨 Graphic Poster
+              </button>
+              <button type="button" class="style-choice-btn ${studioState.stylePreset === "3d-render" ? "is-selected" : ""}" data-style="3d-render">
+                🔮 3D Octane Render
+              </button>
+              <button type="button" class="style-choice-btn ${studioState.stylePreset === "photorealistic" ? "is-selected" : ""}" data-style="photorealistic">
+                📸 Fashion Editorial
+              </button>
+              <button type="button" class="style-choice-btn ${studioState.stylePreset === "cyberpunk" ? "is-selected" : ""}" data-style="cyberpunk">
+                ⚡ Cyberpunk & Neon
+              </button>
+              <button type="button" class="style-choice-btn ${studioState.stylePreset === "swiss-minimal" ? "is-selected" : ""}" data-style="swiss-minimal">
+                📐 Swiss Minimalist
+              </button>
+            </div>
+          </div>
+
+          <!-- Aspect Ratio Selector -->
+          <div class="form-group" style="margin-bottom:18px;">
+            <label class="studio-field-label">อัตราส่วนภาพ (Aspect Ratio):</label>
+            <div class="aspect-ratio-row" id="aspect-ratio-row">
+              <button type="button" class="aspect-choice-btn ${studioState.aspectRatio === "1:1" ? "is-selected" : ""}" data-aspect="1:1">
+                <span class="aspect-icon square"></span>
+                <span>1:1 (Square)</span>
+              </button>
+              <button type="button" class="aspect-choice-btn ${studioState.aspectRatio === "4:5" ? "is-selected" : ""}" data-aspect="4:5">
+                <span class="aspect-icon portrait"></span>
+                <span>4:5 (Social/Pin)</span>
+              </button>
+              <button type="button" class="aspect-choice-btn ${studioState.aspectRatio === "16:9" ? "is-selected" : ""}" data-aspect="16:9">
+                <span class="aspect-icon landscape"></span>
+                <span>16:9 (Cover)</span>
+              </button>
+              <button type="button" class="aspect-choice-btn ${studioState.aspectRatio === "9:16" ? "is-selected" : ""}" data-aspect="9:16">
+                <span class="aspect-icon story"></span>
+                <span>9:16 (Story/Reel)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Primary Generate Button -->
+          <button type="button" class="btn-studio-generate-main ${studioState.isGenerating ? "is-loading" : ""}" id="btn-generate-ai-image" ${studioState.isGenerating ? "disabled" : ""}>
+            <span>${studioState.isGenerating ? "⏳ กำลังสังเคราะห์ภาพด้วย AI..." : "🚀 สั่งให้ AI สร้างภาพทันที (Generate Image)"}</span>
           </button>
+        </div>
+
+        <!-- Trend Reference Fast Swapper -->
+        <div class="studio-box" style="margin-top:16px;">
+          <div class="studio-box-header">
+            <span class="studio-badge">📌 โหลดไอเดียจากเทรนด์อื่น</span>
+          </div>
+          <div class="quick-trend-chips">
+            ${TREND_DATABASE.map(t => `
+              <button type="button" class="quick-chip-btn ${t.id === selectedTrend.id ? "is-active" : ""}" data-load-trend="${t.id}">
+                ${escapeHtml(t.title)}
+              </button>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Live Canvas Preview & Customizer Tools -->
+      <div class="studio-canvas-panel">
+        <div class="canvas-card">
+          <!-- Canvas Top Bar -->
+          <div class="canvas-top-bar">
+            <div class="canvas-title-group">
+              <span class="canvas-title">ภาพชิ้นงานที่สร้างและปรับแต่ง</span>
+              <span class="canvas-ratio-pill">${studioState.aspectRatio}</span>
+            </div>
+            <div class="canvas-actions-right">
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-reset-filters" title="รีเซ็ตฟิลเตอร์">
+                🔄 รีเซ็ตค่าสี
+              </button>
+              <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-download-image" style="padding:6px 14px;">
+                <span>💾 ดาวน์โหลดภาพ (.PNG)</span>
+              </button>
+              <button type="button" class="btn-pixel btn-pixel-orange" id="btn-task-from-canvas" style="padding:6px 14px;">
+                <span>+ ส่งงานเข้า CONT</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas Preview Viewport -->
+          <div class="canvas-viewport aspect-${studioState.aspectRatio.replace(":", "-")}" id="canvas-viewport">
+            ${studioState.isGenerating ? `
+              <div class="canvas-loader-overlay">
+                <div class="loader-spinner"></div>
+                <div class="loader-text">AI กำลังเรนเดอร์ภาพกราฟิกความละเอียดสูง...</div>
+                <div class="loader-sub">อิงตาม Prompt และทฤษฎีการออกแบบของเทรนด์</div>
+              </div>
+            ` : ""}
+
+            <div class="canvas-img-container" id="canvas-img-container">
+              <img 
+                id="canvas-active-img" 
+                src="${escapeHtml(studioState.currentImageUrl)}" 
+                alt="AI Generated Artwork" 
+                style="filter: brightness(${studioState.brightness}%) contrast(${studioState.contrast}%) saturate(${studioState.saturation}%) hue-rotate(${studioState.hueRotate}deg) blur(${studioState.blur}px);"
+              />
+
+              <!-- Overlay Headline Text if any -->
+              <div 
+                id="canvas-overlay-display" 
+                class="canvas-overlay-text pos-${studioState.overlayPosition}" 
+                style="${studioState.overlayText ? "display:block;" : "display:none;"}"
+              >
+                ${escapeHtml(studioState.overlayText)}
+              </div>
+            </div>
+          </div>
+
+          <!-- Image Customizer Tools (Filters & Typography) -->
+          <div class="studio-editor-tools">
+            <div class="tools-header">
+              <span class="tools-title">🎛️ เครื่องมือปรับแต่งภาพ (Live Image Customizer)</span>
+              <div class="preset-filters-row">
+                <button type="button" class="preset-btn" data-preset="normal">Original</button>
+                <button type="button" class="preset-btn" data-preset="cyber">Cyber Neon</button>
+                <button type="button" class="preset-btn" data-preset="noir">Noir B&W</button>
+                <button type="button" class="preset-btn" data-preset="warm">Warm Vintage</button>
+                <button type="button" class="preset-btn" data-preset="acid">Acid Pop</button>
+              </div>
+            </div>
+
+            <div class="sliders-grid">
+              <!-- Brightness -->
+              <div class="slider-control">
+                <div class="slider-label-row">
+                  <span>ความสว่าง (Brightness)</span>
+                  <span id="val-brightness">${studioState.brightness}%</span>
+                </div>
+                <input type="range" id="slider-brightness" min="40" max="180" value="${studioState.brightness}" class="tool-range-slider" />
+              </div>
+
+              <!-- Contrast -->
+              <div class="slider-control">
+                <div class="slider-label-row">
+                  <span>ความคมชัด (Contrast)</span>
+                  <span id="val-contrast">${studioState.contrast}%</span>
+                </div>
+                <input type="range" id="slider-contrast" min="50" max="200" value="${studioState.contrast}" class="tool-range-slider" />
+              </div>
+
+              <!-- Saturation -->
+              <div class="slider-control">
+                <div class="slider-label-row">
+                  <span>ความอิ่มตัวสี (Saturation)</span>
+                  <span id="val-saturation">${studioState.saturation}%</span>
+                </div>
+                <input type="range" id="slider-saturation" min="0" max="220" value="${studioState.saturation}" class="tool-range-slider" />
+              </div>
+
+              <!-- Hue Rotate -->
+              <div class="slider-control">
+                <div class="slider-label-row">
+                  <span>เฉดสี (Hue Shift)</span>
+                  <span id="val-hue">${studioState.hueRotate}°</span>
+                </div>
+                <input type="range" id="slider-hue" min="0" max="360" value="${studioState.hueRotate}" class="tool-range-slider" />
+              </div>
+            </div>
+
+            <!-- Typography Overlay Row -->
+            <div class="overlay-text-row">
+              <div style="flex:1;">
+                <label class="studio-field-label">พิมพ์ข้อความ Headline ลงบนภาพ:</label>
+                <input 
+                  type="text" 
+                  id="input-overlay-text" 
+                  class="studio-text-input" 
+                  placeholder="เช่น NEW COLLECTION 2026, ART EXHIBITION, FUTURE BEATS..." 
+                  value="${escapeHtml(studioState.overlayText)}"
+                />
+              </div>
+              <div style="width:160px;">
+                <label class="studio-field-label">ตำแหน่งข้อความ:</label>
+                <select id="select-overlay-pos" class="studio-select">
+                  <option value="bottom" ${studioState.overlayPosition === "bottom" ? "selected" : ""}>ล่างสุด (Bottom)</option>
+                  <option value="center" ${studioState.overlayPosition === "center" ? "selected" : ""}>ตรงกลาง (Center)</option>
+                  <option value="top" ${studioState.overlayPosition === "top" ? "selected" : ""}>บนสุด (Top)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </div>
     </div>
   `;
 
-  // Update Hero Swatches Grid
-  const updateHeroSwatches = (cover) => {
-    const grid = mount.querySelector("#hero-swatches-grid");
-    const metric = mount.querySelector("#hero-metric-saves");
-    const signalImg = mount.querySelector("#signal-thumb-img");
-    const signalDesc = mount.querySelector("#signal-desc-text");
-    const activeLabel = mount.querySelector("#active-title-label");
+  // Bind Prompt Textarea changes
+  const promptInput = qs("#studio-prompt-input");
+  promptInput?.addEventListener("input", (e) => {
+    studioState.prompt = e.target.value;
+  });
 
-    if (signalImg) signalImg.src = cover.image;
-    if (signalDesc) signalDesc.textContent = `${cover.title} — ${cover.description}`;
-    if (activeLabel) activeLabel.textContent = cover.title;
-    if (metric) metric.textContent = `$1,863.00`; // Preserving the iconic metric aesthetic from reference screenshot
+  // Bind Enhance Prompt
+  qs("#btn-enhance-prompt")?.addEventListener("click", () => {
+    const current = studioState.prompt.trim();
+    const additions = ", masterpiece quality, volumetric lighting, award winning graphic design composition, hyper detailed 8k";
+    if (!current.includes("masterpiece")) {
+      studioState.prompt = current + additions;
+      if (promptInput) promptInput.value = studioState.prompt;
+      toast("เติมคีย์เวิร์ดยกระดับคุณภาพเรียบร้อยแล้ว", "success");
+    }
+  });
 
-    if (grid) {
-      // 8 swatches / chips arranged nicely (2 rows x 4)
-      const chips = [
-        { hex: cover.swatches[0]?.hex || "#EAB308", label: "01" },
-        { hex: cover.swatches[1]?.hex || "#0E1015", label: "02" },
-        { hex: cover.swatches[2]?.hex || "#3F3F46", label: "03" },
-        { hex: cover.swatches[3]?.hex || "#FAFAFA", label: "04" },
-        { hex: cover.coverColor || "#EF4444", label: "05" },
-        { hex: "#22D3EE", label: "06" },
-        { hex: "#C084FC", label: "07" },
-        { hex: "#F472B6", label: "08" },
-      ];
+  // Bind Style Choices
+  qsa(".style-choice-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      studioState.stylePreset = btn.dataset.style;
+      qsa(".style-choice-btn").forEach(b => b.classList.remove("is-selected"));
+      btn.classList.add("is-selected");
+    });
+  });
 
-      grid.innerHTML = chips.map((c) => `
-        <div class="swatch-tile" data-tile-hex="${c.hex}" style="background:${c.hex};" title="คลิกเพื่อคัดลอก ${c.hex}">
-          <span class="swatch-tile-badge">✓</span>
-        </div>
-      `).join("");
+  // Bind Aspect Choices
+  qsa(".aspect-choice-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      studioState.aspectRatio = btn.dataset.aspect;
+      renderStudioView();
+    });
+  });
 
-      grid.querySelectorAll("[data-tile-hex]").forEach((tile) => {
-        tile.addEventListener("click", (e) => {
-          e.stopPropagation();
-          copyHex(tile.dataset.tileHex, "Palette Chip");
-        });
-      });
+  // Bind Generate Button
+  qs("#btn-generate-ai-image")?.addEventListener("click", async () => {
+    if (!studioState.prompt.trim()) {
+      toast("กรุณาใส่ข้อความ Prompt ก่อนสั่งให้ AI สร้างภาพ", "warning");
+      return;
+    }
+
+    studioState.isGenerating = true;
+    renderStudioView();
+
+    const targetUrl = buildAiImageUrl(studioState.prompt, studioState.aspectRatio, studioState.stylePreset);
+
+    // Preload image to avoid blank flashing
+    const imgLoader = new Image();
+    imgLoader.src = targetUrl;
+    imgLoader.onload = () => {
+      studioState.currentImageUrl = targetUrl;
+      studioState.isGenerating = false;
+      studioState.history.unshift(targetUrl);
+      renderStudioView();
+      toast("AI สังเคราะห์ภาพกราฟิกตามเทรนด์สำเร็จ!", "success", "AI Generated");
+    };
+
+    imgLoader.onerror = () => {
+      // Fallback
+      studioState.currentImageUrl = targetUrl;
+      studioState.isGenerating = false;
+      renderStudioView();
+      toast("สร้างภาพเรียบร้อยแล้ว", "success");
+    };
+  });
+
+  // Bind Quick Trend Swappers
+  qsa("[data-load-trend]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.loadTrend;
+      const t = TREND_DATABASE.find(x => x.id === id);
+      if (t) {
+        loadTrendIntoStudio(t);
+      }
+    });
+  });
+
+  // Live Slider Events
+  const applyFilterStyles = () => {
+    const img = qs("#canvas-active-img");
+    if (img) {
+      img.style.filter = `brightness(${studioState.brightness}%) contrast(${studioState.contrast}%) saturate(${studioState.saturation}%) hue-rotate(${studioState.hueRotate}deg) blur(${studioState.blur}px)`;
     }
   };
 
-  // Render 3D Covers Track
-  const renderCovers = (covers) => {
-    const track = mount.querySelector("#covers-track");
-    if (!track) return;
+  const bSlider = qs("#slider-brightness");
+  bSlider?.addEventListener("input", (e) => {
+    studioState.brightness = e.target.value;
+    qs("#val-brightness").textContent = `${studioState.brightness}%`;
+    applyFilterStyles();
+  });
 
-    track.innerHTML = covers.map((c) => `
-      <div class="cover-3d-item ${c.id === activeCover.id ? "is-selected-cover" : ""}" data-cover-id="${c.id}" title="${escapeHtml(c.title)} — ${escapeHtml(c.subtitle)}">
-        <div class="cover-3d-spine"></div>
-        <div class="cover-3d-face">
-          <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.title)}" loading="lazy" />
-          <div class="cover-3d-overlay">
-            <span class="cover-mini-title">${escapeHtml(c.title)}</span>
-          </div>
-        </div>
-      </div>
-    `).join("");
+  const cSlider = qs("#slider-contrast");
+  cSlider?.addEventListener("input", (e) => {
+    studioState.contrast = e.target.value;
+    qs("#val-contrast").textContent = `${studioState.contrast}%`;
+    applyFilterStyles();
+  });
 
-    track.querySelectorAll("[data-cover-id]").forEach((el) => {
-      el.addEventListener("click", () => {
-        const found = PINTEREST_COVERS.find((x) => x.id === el.dataset.coverId);
-        if (found) {
-          activeCover = found;
-          track.querySelectorAll(".cover-3d-item").forEach((b) => b.classList.toggle("is-selected-cover", b.dataset.coverId === activeCover.id));
-          updateHeroSwatches(activeCover);
-          openPinModal(activeCover);
-        }
-      });
-    });
-  };
+  const sSlider = qs("#slider-saturation");
+  sSlider?.addEventListener("input", (e) => {
+    studioState.saturation = e.target.value;
+    qs("#val-saturation").textContent = `${studioState.saturation}%`;
+    applyFilterStyles();
+  });
 
-  // Initial State Render
-  updateHeroSwatches(activeCover);
-  renderCovers(PINTEREST_COVERS);
+  const hSlider = qs("#slider-hue");
+  hSlider?.addEventListener("input", (e) => {
+    studioState.hueRotate = e.target.value;
+    qs("#val-hue").textContent = `${studioState.hueRotate}°`;
+    applyFilterStyles();
+  });
 
-  // Bind Category Pills
-  const pillButtons = mount.querySelectorAll("[data-pill-cat]");
-  pillButtons.forEach((btn) => {
+  // Preset Filters
+  qsa(".preset-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      pillButtons.forEach((b) => {
-        b.classList.remove("is-active-orange");
-        b.classList.remove("is-active-cyan");
-      });
-
-      btn.classList.add("is-active-orange");
-      currentCategoryPill = btn.dataset.pillCat;
-
-      let filtered = PINTEREST_COVERS;
-      if (currentCategoryPill !== "all" && currentCategoryPill !== "trending") {
-        filtered = PINTEREST_COVERS.filter((c) => c.category === currentCategoryPill);
+      const p = btn.dataset.preset;
+      if (p === "normal") {
+        studioState.brightness = 100;
+        studioState.contrast = 100;
+        studioState.saturation = 100;
+        studioState.hueRotate = 0;
+      } else if (p === "cyber") {
+        studioState.brightness = 110;
+        studioState.contrast = 140;
+        studioState.saturation = 160;
+        studioState.hueRotate = 40;
+      } else if (p === "noir") {
+        studioState.brightness = 95;
+        studioState.contrast = 150;
+        studioState.saturation = 0;
+        studioState.hueRotate = 0;
+      } else if (p === "warm") {
+        studioState.brightness = 105;
+        studioState.contrast = 115;
+        studioState.saturation = 120;
+        studioState.hueRotate = 330;
+      } else if (p === "acid") {
+        studioState.brightness = 115;
+        studioState.contrast = 160;
+        studioState.saturation = 180;
+        studioState.hueRotate = 120;
       }
-      if (filtered.length === 0) filtered = PINTEREST_COVERS;
-
-      activeCover = filtered[0];
-      updateHeroSwatches(activeCover);
-      renderCovers(filtered);
-      toast(`แสดงพินหมวดหมู่: ${currentCategoryPill.toUpperCase()}`, "info");
+      renderStudioView();
+      toast(`ใช้ฟิลเตอร์: ${btn.textContent}`, "info");
     });
   });
 
-  // Bind Active Detail Button
-  mount.querySelector("#btn-open-active-detail")?.addEventListener("click", () => {
-    openPinModal(activeCover);
+  // Reset Filters
+  qs("#btn-reset-filters")?.addEventListener("click", () => {
+    studioState.brightness = 100;
+    studioState.contrast = 100;
+    studioState.saturation = 100;
+    studioState.hueRotate = 0;
+    renderStudioView();
+    toast("รีเซ็ตค่าสีเรียบร้อยแล้ว", "info");
   });
 
-  // Bind Hero Card click
-  mount.querySelector("#bento-hero-card")?.addEventListener("click", () => {
-    openPinModal(activeCover);
+  // Overlay Headline Input
+  const overlayInput = qs("#input-overlay-text");
+  overlayInput?.addEventListener("input", (e) => {
+    studioState.overlayText = e.target.value;
+    const display = qs("#canvas-overlay-display");
+    if (display) {
+      display.textContent = studioState.overlayText;
+      display.style.display = studioState.overlayText ? "block" : "none";
+    }
   });
 
-  // Bind Signal Card click
-  mount.querySelector("#bento-signal-card")?.addEventListener("click", () => {
-    openPinModal(activeCover);
+  // Overlay Position Select
+  const overlaySelect = qs("#select-overlay-pos");
+  overlaySelect?.addEventListener("change", (e) => {
+    studioState.overlayPosition = e.target.value;
+    const display = qs("#canvas-overlay-display");
+    if (display) {
+      display.className = `canvas-overlay-text pos-${studioState.overlayPosition}`;
+    }
   });
 
-  // Bind Sync Button
-  mount.querySelector("#btn-sync-pinterest")?.addEventListener("click", () => {
-    toast("ซิงค์ฟีดพิน Pinterest และจานสีล่าสุดเรียบร้อยแล้ว!", "success", "Pinterest Live Sync");
-    updateHeroSwatches(activeCover);
-    renderCovers(PINTEREST_COVERS);
+  // Download Image button (Renders to Canvas to apply CSS filters & overlay text permanently!)
+  qs("#btn-download-image")?.addEventListener("click", () => {
+    const img = qs("#canvas-active-img");
+    if (!img) return;
+
+    toast("กำลังประมวลผลไฟล์ภาพความละเอียดสูง...", "info");
+
+    const offscreen = document.createElement("canvas");
+    const ctx = offscreen.getContext("2d");
+    const dlImg = new Image();
+    dlImg.crossOrigin = "anonymous";
+    dlImg.src = studioState.currentImageUrl;
+
+    dlImg.onload = () => {
+      offscreen.width = dlImg.naturalWidth || 1024;
+      offscreen.height = dlImg.naturalHeight || 1024;
+
+      // Apply Filter via canvas context
+      ctx.filter = `brightness(${studioState.brightness}%) contrast(${studioState.contrast}%) saturate(${studioState.saturation}%) hue-rotate(${studioState.hueRotate}deg)`;
+      ctx.drawImage(dlImg, 0, 0, offscreen.width, offscreen.height);
+
+      // Render Overlay Text if present
+      if (studioState.overlayText) {
+        ctx.filter = "none";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        const barHeight = offscreen.height * 0.12;
+        let yPos = offscreen.height - barHeight;
+        if (studioState.overlayPosition === "top") yPos = 0;
+        if (studioState.overlayPosition === "center") yPos = (offscreen.height - barHeight) / 2;
+
+        ctx.fillRect(0, yPos, offscreen.width, barHeight);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = `bold ${Math.round(offscreen.width * 0.045)}px 'Space Mono', sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(studioState.overlayText, offscreen.width / 2, yPos + barHeight / 2);
+      }
+
+      // Trigger download
+      try {
+        const link = document.createElement("a");
+        link.download = `CONT-AI-${selectedTrend.id}-${Date.now()}.png`;
+        link.href = offscreen.toDataURL("image/png");
+        link.click();
+        toast("ดาวน์โหลดภาพสำเร็จเรียบร้อย!", "success");
+      } catch (err) {
+        // Direct open fallback if canvas tainted
+        window.open(studioState.currentImageUrl, "_blank");
+        toast("เปิดภาพต้นฉบับในแท็บใหม่แล้ว", "success");
+      }
+    };
+
+    dlImg.onerror = () => {
+      window.open(studioState.currentImageUrl, "_blank");
+      toast("เปิดภาพในแท็บใหม่สำหรับการบันทึก", "info");
+    };
+  });
+
+  // Task from Canvas button
+  qs("#btn-task-from-canvas")?.addEventListener("click", () => {
+    if (typeof window.openCreateTask === "function") {
+      window.openCreateTask({
+        title: `งานดีไซน์: ${studioState.overlayText || selectedTrend.title}`,
+        description: `ชิ้นงานที่สร้างและปรับแต่งด้วย AI Studio ตามเทรนด์ ${selectedTrend.title}\n\nAI Prompt ที่ใช้:\n${studioState.prompt}\n\nสไตล์: ${studioState.stylePreset} (${studioState.aspectRatio})\nการตั้งค่าฟิลเตอร์: Brightness ${studioState.brightness}%, Contrast ${studioState.contrast}%, Saturation ${studioState.saturation}%\n`,
+        preview_url: studioState.currentImageUrl,
+        channel: "Social Media / Key Visual"
+      });
+    } else {
+      toast("เปิดเมนูสร้างงานในระบบ CONT", "info");
+    }
   });
 }
