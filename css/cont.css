@@ -6778,6 +6778,262 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   .heatmap-cell.lvl-4 { background: #f59e0b !important; }
 }
 
+/* ==========================================================================
+   TEAM & PERMISSIONS BENTO LAYOUT (MATCHING REFERENCE LAYOUT)
+   ========================================================================== */
+.team-bento-dual {
+  display: grid;
+  grid-template-columns: 1.15fr 1.35fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.team-bento-panel {
+  background: #131522;
+  border: 1px solid #262a3e;
+  border-radius: 14px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+}
+
+.team-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.team-panel-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 3px;
+}
+
+.team-panel-sub {
+  font-size: 0.8rem;
+  color: #8b92ad;
+  margin: 0;
+}
+
+/* --- Left: People List --- */
+.people-rows-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.people-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #181b2a;
+  border: 1px solid #262b40;
+  border-radius: 10px;
+  gap: 12px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.people-row:hover {
+  border-color: #3b4262;
+  background: #1c2032;
+}
+
+.people-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.people-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #ffffff;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+}
+
+.people-details {
+  min-width: 0;
+  flex: 1;
+}
+
+.people-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.people-email {
+  font-size: 0.74rem;
+  color: #7b839f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.people-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.people-role-badge {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #22263a;
+  color: #c7ceea;
+  border: 1px solid #333852;
+}
+
+.people-role-badge.is-head {
+  background: rgba(255, 198, 26, 0.14);
+  color: #ffc61a;
+  border-color: rgba(255, 198, 26, 0.35);
+}
+
+.people-status-text {
+  font-size: 0.72rem;
+  color: #8b92ad;
+  white-space: nowrap;
+}
+
+.people-status-text.text-green { color: #22c55e; }
+.people-status-text.text-red { color: #ff5252; }
+
+/* --- Right: Permissions Matrix Table --- */
+.perm-matrix-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.perm-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.perm-matrix-table th {
+  padding: 10px 8px;
+  font-size: 0.74rem;
+  color: #8b92ad;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 1px solid #262a3e;
+  white-space: nowrap;
+}
+
+.perm-matrix-table th:first-child {
+  text-align: left;
+  padding-left: 4px;
+}
+
+.perm-matrix-table td {
+  padding: 11px 8px;
+  border-bottom: 1px solid #1f2336;
+  text-align: center;
+  color: #d2d7ec;
+}
+
+.perm-matrix-table td:first-child {
+  text-align: left;
+  padding-left: 4px;
+  font-weight: 500;
+  color: #e4e7f5;
+}
+
+.perm-matrix-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.perm-toggle-on {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffc61a;
+  color: #0d0e14;
+  font-weight: 700;
+  font-size: 0.75rem;
+  box-shadow: 0 0 6px rgba(255, 198, 26, 0.4);
+}
+
+.perm-toggle-off {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #22263a;
+  color: #555d78;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.perm-roles-guide {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #202438;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.perm-role-card {
+  background: #181b2a;
+  border: 1px solid #24283c;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.perm-role-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.perm-role-desc {
+  font-size: 0.73rem;
+  color: #8b92ad;
+  line-height: 1.4;
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .team-bento-dual {
+    grid-template-columns: 1fr;
+  }
+  .perm-roles-guide {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 
 
 
