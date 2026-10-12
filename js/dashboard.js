@@ -107,8 +107,8 @@ export async function render(ctx) {
               <span>TOGETHER.${pixelIcons.heart}</span>
             </h1>
             <p class="pixel-hero-sub">
-              REAL-TIME GRAPHIC DESIGN WORKFLOW ENGINE FOR KKP<br />
-              TRACK BRIEFS, DESIGN ITERATIONS & TEAM CAPACITY IN 8-BIT PRECISION
+              ระบบจัดการกระบวนการทำงานออกแบบกราฟิก KKP แบบเรียลไทม์<br />
+              ติดตามบรีฟงาน การแก้ไข และขีดความสามารถของทีมอย่างแม่นยำ
             </p>
             <div class="pixel-hero-actions">
               <button class="btn-pixel btn-pixel-red" id="hero-create-btn">
@@ -126,7 +126,7 @@ export async function render(ctx) {
           <div class="pixel-news-ticker">
             <span class="pixel-news-tag">NEWS</span>
             <span class="pixel-news-text" id="news-ticker-text">
-              CONT 2.0 WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING
+              ระบบ CONT 2.0 พร้อมใช้งาน — จัดการคิวงาน ตรวจสอบบรีฟ และติดตามรอบแก้แบบเรียลไทม์
             </span>
             <span class="pixel-news-chevron">›</span>
           </div>
@@ -144,80 +144,7 @@ export async function render(ctx) {
       </section>
     `;
 
-    /* ── 2. Feature Strip (4 Cards on Near-Black, Double-line Pixel Frame) ── */
-    const featureStripHtml = `
-      <section class="pixel-feature-strip">
-        <!-- Card 1: Green Cube -->
-        <div class="pixel-feature-card crt-scanlines">
-          <div class="pixel-feature-tile is-green">
-            ${pixelIcons.cubeGreen}
-          </div>
-          <div class="pixel-feature-main">
-            <h3 class="pixel-feature-title is-green">SMART WORKFLOW</h3>
-            <p class="pixel-feature-body">
-              Track 5-stage pipeline (Brief → Draft → Review → Revision → Done) with SLA precision.
-            </p>
-            <a class="pixel-feature-link is-green" href="#" id="feature-guide-link">
-              <span>LEARN MORE</span>
-              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Card 2: Blue People -->
-        <div class="pixel-feature-card crt-scanlines">
-          <div class="pixel-feature-tile is-blue">
-            ${pixelIcons.people}
-          </div>
-          <div class="pixel-feature-main">
-            <h3 class="pixel-feature-title is-blue">TEAM CAPACITY</h3>
-            <p class="pixel-feature-body">
-              Analyze designer workload, assignments, and historical output across all squads.
-            </p>
-            <a class="pixel-feature-link is-blue" href="team.html">
-              <span>VIEW TEAM</span>
-              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Card 3: Yellow Trophy -->
-        <div class="pixel-feature-card crt-scanlines">
-          <div class="pixel-feature-tile is-yellow">
-            ${pixelIcons.trophy}
-          </div>
-          <div class="pixel-feature-main">
-            <h3 class="pixel-feature-title is-yellow">ON-TIME ACCURACY</h3>
-            <p class="pixel-feature-body">
-              Prevent bottlenecks with real-time deadline monitoring and collision alerts.
-            </p>
-            <a class="pixel-feature-link is-yellow" href="#dash-filter-bar">
-              <span>VIEW METRICS</span>
-              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Card 4: Purple Code -->
-        <div class="pixel-feature-card crt-scanlines">
-          <div class="pixel-feature-tile is-purple">
-            ${pixelIcons.code}
-          </div>
-          <div class="pixel-feature-main">
-            <h3 class="pixel-feature-title is-purple">SUPABASE CLOUD</h3>
-            <p class="pixel-feature-body">
-              Real-time cloud database syncing version histories, artwork proofs, and comments.
-            </p>
-            <a class="pixel-feature-link is-purple" href="tasks.html">
-              <span>BROWSE TASKS</span>
-              <span class="feature-arrow-icon">${pixelIcons.arrowRight}</span>
-            </a>
-          </div>
-        </div>
-      </section>
-    `;
-
-    /* ── 3. Stats Bar (Double-line Frame, Featured Card Left, 4 Stat Cells Right) ── */
+    /* ── 2. Stats Bar (Double-line Frame, Featured Card Left, 4 Stat Cells Right) ── */
     const statsBarHtml = `
       <section class="pixel-stats-bar crt-scanlines">
         <!-- Left: FEATURED Card -->
@@ -420,10 +347,7 @@ export async function render(ctx) {
       <!-- 1. Pixel Arcade Hero Section -->
       ${pixelHeroHtml}
 
-      <!-- 2. Feature Strip (4 Pixel Cards) -->
-      ${featureStripHtml}
-
-      <!-- 3. Stats Bar (Count-Up Animation) -->
+      <!-- 2. Stats Bar (Count-Up Animation) -->
       ${statsBarHtml}
 
       <!-- 4. Time & Period Filter Toolbar -->
@@ -521,12 +445,6 @@ export async function render(ctx) {
     /* ─────────── Event Bindings ─────────── */
     // Hero CTA button
     qs("#hero-create-btn")?.addEventListener("click", () => window.openCreateTask?.());
-
-    // Feature card guide link
-    qs("#feature-guide-link")?.addEventListener("click", (e) => {
-      e.preventDefault();
-      qs("#workflow-guide-link")?.click();
-    });
 
     // Count-up animation on stats bar
     initCountUp();
@@ -762,17 +680,17 @@ function initCountUp() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Rotating News Ticker (English)
+   Rotating News Ticker (Thai)
 ───────────────────────────────────────────────────────────────────────── */
 function initNewsTicker() {
   const el = qs("#news-ticker-text");
   if (!el) return;
 
   const announcements = [
-    "CONT 2.0 WORKFLOW ENGINE IS ONLINE — REAL-TIME SPRINT DISPATCH & REVISION TRACKING",
-    "SMART WORKLOAD DRILLDOWN ACTIVE — ANALYZE DESIGN CAPACITY & REVISION CYCLES",
-    "SLA TARGET REMINDER: PLEASE APPROVE OR REQUEST REVISIONS WITHIN 24 HOURS",
-    "KKP BRAND GUIDELINES UPDATED — NEW SOCIAL MEDIA BANNER PRESETS AVAILABLE"
+    "ระบบ CONT 2.0 พร้อมใช้งาน — จัดการคิวงาน ตรวจสอบบรีฟ และติดตามรอบแก้แบบเรียลไทม์",
+    "ระบบวิเคราะห์ภาระงานรายคนเปิดใช้งาน — ดูขีดความสามารถ สัดส่วนงาน และ SLA งานออกแบบ",
+    "แจ้งเตือน SLA: กรุณาอนุมัติแบบหรือส่งข้อเสนอแนะแก้ไขงานภายใน 24 ชั่วโมง",
+    "อัปเดต CI แบรนด์ KKP — มีเทมเพลตบรีฟงานด่วนสำหรับแบนเนอร์โซเชียลมีเดียแล้ว"
   ];
 
   let idx = 0;
