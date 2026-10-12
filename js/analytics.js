@@ -737,6 +737,38 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
           </div>
         </div>
 
+        <!-- Date Range Filter within Project Explorer -->
+        <div class="proj-date-filter-section">
+          <div class="proj-date-filter-row">
+            <div class="proj-date-filter-title">
+              <span>📅</span>
+              <span>ช่วงวันที่ของงาน (Date Range):</span>
+            </div>
+            <div class="proj-date-preset-buttons" id="proj-date-preset-buttons">
+              <button type="button" class="btn-proj-date-pill is-active" data-proj-date-preset="all">ทั้งหมด</button>
+              <button type="button" class="btn-proj-date-pill" data-proj-date-preset="today">วันนี้</button>
+              <button type="button" class="btn-proj-date-pill" data-proj-date-preset="7days">7 วันล่าสุด</button>
+              <button type="button" class="btn-proj-date-pill" data-proj-date-preset="month">เดือนนี้</button>
+            </div>
+            <div class="proj-date-inputs-wrap">
+              <div class="proj-date-field-group">
+                <label for="proj-date-start">จาก:</label>
+                <input type="date" id="proj-date-start" class="proj-date-input" />
+              </div>
+              <div class="proj-date-field-group">
+                <label for="proj-date-end">ถึง:</label>
+                <input type="date" id="proj-date-end" class="proj-date-input" />
+              </div>
+              <button type="button" id="btn-proj-date-today-range" class="btn-proj-quick-action" title="ตั้งค่าช่วงวันเป็น วันนี้ถึงวันนี้">
+                ⚡ วันนี้ถึงวันนี้
+              </button>
+              <button type="button" id="btn-proj-date-clear" class="btn-proj-quick-action btn-proj-clear-action" title="ล้างตัวกรองวันที่">
+                ✕ ล้าง
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="proj-tasks-meta-bar">
           <div id="proj-tasks-count-label" style="font-size:0.88rem;font-weight:700;color:#ffffff;">
             รายการงานใน: ทุกโปรเจกต์ (${allCount} งาน)
@@ -766,6 +798,33 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
   const breakdown = calculateProjectBreakdown(tasks, projects, members);
   let currentProjectId = "all";
   let currentMemberId = "all";
+  let projDatePreset = "all";
+  let projStartDate = "";
+  let projEndDate = "";
+
+  const filterTaskByProjDate = (t) => {
+    if (projDatePreset === "all" && !projStartDate && !projEndDate) return true;
+    const taskDate = getTaskDate(t, "deadline") || getTaskDate(t, "created_at");
+    if (!taskDate || isNaN(taskDate.getTime())) return true;
+    const dStr = taskDate.toISOString().slice(0, 10);
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+
+    if (projDatePreset === "today") {
+      return dStr === todayStr;
+    }
+    if (projDatePreset === "7days") {
+      const d7 = new Date(now);
+      d7.setDate(now.getDate() - 7);
+      return taskDate >= d7 && taskDate <= now;
+    }
+    if (projDatePreset === "month") {
+      return taskDate.getFullYear() === now.getFullYear() && (taskDate.getMonth() + 1) === (now.getMonth() + 1);
+    }
+    if (projStartDate && dStr < projStartDate) return false;
+    if (projEndDate && dStr > projEndDate) return false;
+    return true;
+  };
 
   const renderActiveBox = (projId) => {
     const box = root.querySelector("#project-active-box");
@@ -863,24 +922,27 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
     const chipsWrap = root.querySelector("#proj-filter-member-chips");
     if (!chipsWrap) return;
 
-    let availableMembers = [];
-    if (projId === "all") {
-      const mMap = new Map();
-      tasks.forEach((t) => {
-        const m = memberFor(t, members);
-        const mId = m ? m.id : (t.assignee_id || "unassigned");
-        if (!mMap.has(mId)) {
-          mMap.set(mId, { member: m || { id: mId, name: "ยังไม่ระบุ" }, count: 0 });
-        }
-        mMap.get(mId).count++;
+    let projectTasks = tasks;
+    if (projId !== "all") {
+      projectTasks = tasks.filter((t) => {
+        const proj = projectFor(t, projects);
+        const pId = proj ? proj.id : (t.project_id || "unassigned");
+        return pId === projId;
       });
-      availableMembers = Array.from(mMap.values()).sort((a, b) => b.count - a.count);
-    } else {
-      const p = breakdown.projects.find((x) => x.id === projId);
-      availableMembers = p ? p.members : [];
     }
+    projectTasks = projectTasks.filter(filterTaskByProjDate);
 
-    const totalInScope = projId === "all" ? tasks.length : (breakdown.projects.find((x) => x.id === projId)?.count || 0);
+    const mMap = new Map();
+    projectTasks.forEach((t) => {
+      const m = memberFor(t, members);
+      const mId = m ? m.id : (t.assignee_id || "unassigned");
+      if (!mMap.has(mId)) {
+        mMap.set(mId, { member: m || { id: mId, name: "ยังไม่ระบุ" }, count: 0 });
+      }
+      mMap.get(mId).count++;
+    });
+    const availableMembers = Array.from(mMap.values()).sort((a, b) => b.count - a.count);
+    const totalInScope = projectTasks.length;
 
     chipsWrap.innerHTML = `
       <button type="button" class="proj-member-pill ${currentMemberId === "all" ? "is-active" : ""}" data-proj-member="all">
@@ -909,7 +971,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
     const countLabel = root.querySelector("#proj-tasks-count-label");
     if (!listWrap) return;
 
-    let scopedTasks = tasks;
+    let scopedTasks = tasks.filter(filterTaskByProjDate);
     if (currentProjectId !== "all") {
       scopedTasks = tasks.filter((t) => {
         const proj = projectFor(t, projects);
@@ -926,7 +988,18 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
 
     if (countLabel) {
       const projName = currentProjectId === "all" ? "ทุกโปรเจกต์" : (breakdown.projects.find((x) => x.id === currentProjectId)?.name || "โปรเจกต์");
-      countLabel.textContent = `รายการงานใน: ${projName} (${enriched.length} งาน)`;
+      let dateDesc = "";
+      if (projDatePreset === "today") dateDesc = " • วันนี้";
+      else if (projDatePreset === "7days") dateDesc = " • 7 วันล่าสุด";
+      else if (projDatePreset === "month") dateDesc = " • เดือนนี้";
+      else if (projStartDate && projEndDate) {
+        dateDesc = projStartDate === projEndDate ? ` • วันที่ ${projStartDate}` : ` • ${projStartDate} ถึง ${projEndDate}`;
+      } else if (projStartDate) {
+        dateDesc = ` • ตั้งแต่ ${projStartDate}`;
+      } else if (projEndDate) {
+        dateDesc = ` • ถึง ${projEndDate}`;
+      }
+      countLabel.textContent = `รายการงานใน: ${projName}${dateDesc} (${enriched.length} งาน)`;
     }
 
     if (enriched.length === 0) {
@@ -1109,6 +1182,67 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
       const tabBtn = tabsWrap?.querySelector(`[data-proj-tab="${pId}"]`);
       if (tabBtn) tabBtn.click();
     });
+  });
+
+  // Project Date Filter Controls
+  const datePresetWrap = root.querySelector("#proj-date-preset-buttons");
+  const startDateInput = root.querySelector("#proj-date-start");
+  const endDateInput = root.querySelector("#proj-date-end");
+  const btnTodayRange = root.querySelector("#btn-proj-date-today-range");
+  const btnClearDate = root.querySelector("#btn-proj-date-clear");
+
+  if (datePresetWrap) {
+    datePresetWrap.querySelectorAll("[data-proj-date-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        projDatePreset = btn.dataset.projDatePreset;
+        projStartDate = "";
+        projEndDate = "";
+        if (startDateInput) startDateInput.value = "";
+        if (endDateInput) endDateInput.value = "";
+        datePresetWrap.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.toggle("is-active", b === btn));
+        renderMemberChips(currentProjectId);
+        renderTaskList();
+      });
+    });
+  }
+
+  startDateInput?.addEventListener("change", () => {
+    projStartDate = startDateInput.value;
+    projDatePreset = "custom";
+    datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.remove("is-active"));
+    renderMemberChips(currentProjectId);
+    renderTaskList();
+  });
+
+  endDateInput?.addEventListener("change", () => {
+    projEndDate = endDateInput.value;
+    projDatePreset = "custom";
+    datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.remove("is-active"));
+    renderMemberChips(currentProjectId);
+    renderTaskList();
+  });
+
+  btnTodayRange?.addEventListener("click", () => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    projDatePreset = "custom";
+    projStartDate = todayStr;
+    projEndDate = todayStr;
+    if (startDateInput) startDateInput.value = todayStr;
+    if (endDateInput) endDateInput.value = todayStr;
+    datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.remove("is-active"));
+    renderMemberChips(currentProjectId);
+    renderTaskList();
+  });
+
+  btnClearDate?.addEventListener("click", () => {
+    projDatePreset = "all";
+    projStartDate = "";
+    projEndDate = "";
+    if (startDateInput) startDateInput.value = "";
+    if (endDateInput) endDateInput.value = "";
+    datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.toggle("is-active", b.dataset.projDatePreset === "all"));
+    renderMemberChips(currentProjectId);
+    renderTaskList();
   });
 
   renderActiveBox(currentProjectId);
@@ -1494,83 +1628,101 @@ export function renderMemberComparisonHtml({
         </div>
       </div>
 
-      <!-- 2. The 4 Core Comparison & Trend Charts (Grid 2x2) -->
-      <div class="analytics-grid-2">
-        <!-- Chart 1: ใครแบกงานหนักกว่าใคร (ภาระงานรายคน) -->
-        <div class="analytics-chart-card">
-          <div class="analytics-chart-header">
+      <!-- 2. Consolidated Tabbed Card: 4 Core Comparison & Trend Charts -->
+      <div class="analytics-tabbed-card" id="analytics-deepdive-tabbed-card">
+        <div class="analytics-tabbed-header">
+          <div class="analytics-tabbed-title-wrap">
+            <span class="analytics-tabbed-icon">📊</span>
             <div>
-              <div class="analytics-chart-title">
-                <span>ใครแบกงานหนักกว่าใคร (ภาระงานรายคน)</span>
-                <span class="analytics-chart-tag tag-comparison">Comparison</span>
-              </div>
-              <div class="analytics-chart-sub">
-                Bar Chart แนวนอน เรียงมากไปน้อย · ไฮไลต์สีแดงเฉพาะคนที่ภาระงานเกิน 100% Capacity
-              </div>
+              <div class="analytics-tabbed-title">เครื่องมือวิเคราะห์เชิงลึก (Deep-Dive Analytics)</div>
+              <div class="analytics-tabbed-sub">กดเลือกแท็บเพื่อสลับดูกราฟที่ต้องการ (รวม 4 การ์ดในกล่องเดียว ไม่ต้องเลื่อนหายาว)</div>
             </div>
           </div>
-          <div class="analytics-canvas-wrap">
-            <canvas id="chart-workload-bar"></canvas>
+          <div class="analytics-chart-tabs" id="analytics-chart-tabs">
+            <button type="button" class="btn-chart-tab is-active" data-chart-tab="workload">
+              <span>⚖️</span> <span>ภาระงานรายคน (% Capacity)</span>
+            </button>
+            <button type="button" class="btn-chart-tab" data-chart-tab="stacked">
+              <span>🎨</span> <span>ประเภทงานรายคน (4 หมวด)</span>
+            </button>
+            <button type="button" class="btn-chart-tab" data-chart-tab="catTotals">
+              <span>📊</span> <span>สัดส่วน 4 ประเภทหลัก</span>
+            </button>
+            <button type="button" class="btn-chart-tab" data-chart-tab="throughput">
+              <span>📈</span> <span>การส่งมอบรายสัปดาห์ (Throughput)</span>
+            </button>
           </div>
         </div>
 
-        <!-- Chart 2: แต่ละคนมีงานประเภทไหนกี่ชิ้น -->
-        <div class="analytics-chart-card">
-          <div class="analytics-chart-header">
-            <div>
-              <div class="analytics-chart-title">
-                <span>แต่ละคนมีงานประเภทไหนกี่ชิ้น</span>
-                <span class="analytics-chart-tag tag-comparison">Comparison</span>
+        <div class="analytics-tab-panes">
+          <!-- Pane 1: ใครแบกงานหนักกว่าใคร -->
+          <div class="analytics-tab-pane" id="pane-chart-workload" style="display:block;">
+            <div class="pane-meta-bar">
+              <div>
+                <strong style="color:#ffffff;font-size:0.95rem;">ใครแบกงานหนักกว่าใคร (ภาระงานรายคน)</strong>
+                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
+                  Bar Chart แนวนอน เรียงมากไปน้อย · ไฮไลต์สีแดงเฉพาะคนที่ภาระงานเกิน 100% Capacity
+                </span>
               </div>
-              <div class="analytics-chart-sub">
-                Stacked Bar Chart หนึ่งแท่งต่อหนึ่งคน แบ่งสีตามประเภทงาน เห็นทั้งยอดรวมและสัดส่วน
-              </div>
+              <span class="analytics-chart-tag tag-comparison">Comparison</span>
+            </div>
+            <div class="analytics-canvas-wrap" style="height:320px;">
+              <canvas id="chart-workload-bar"></canvas>
             </div>
           </div>
-          <div class="cat-legend-bar">
-            <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.social.color}"></span> Social Media</span>
-            <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.key_visual.color}"></span> Key Visual</span>
-            <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.print.color}"></span> Print & POSM</span>
-            <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.ads_resize.color}"></span> Ads & Resizes</span>
-          </div>
-          <div class="analytics-canvas-wrap" style="height:250px;">
-            <canvas id="chart-stacked-categories"></canvas>
-          </div>
-        </div>
 
-        <!-- Chart 3: งานทั้งหมดแยกตามประเภท -->
-        <div class="analytics-chart-card">
-          <div class="analytics-chart-header">
-            <div>
-              <div class="analytics-chart-title">
-                <span>งานทั้งหมดแยกตามประเภท (4 ประเภทหลัก)</span>
-                <span class="analytics-chart-tag tag-comparison">Comparison</span>
+          <!-- Pane 2: แต่ละคนมีงานประเภทไหนกี่ชิ้น -->
+          <div class="analytics-tab-pane" id="pane-chart-stacked" style="display:none;">
+            <div class="pane-meta-bar">
+              <div>
+                <strong style="color:#ffffff;font-size:0.95rem;">แต่ละคนมีงานประเภทไหนกี่ชิ้น</strong>
+                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
+                  Stacked Bar Chart หนึ่งแท่งต่อหนึ่งคน แบ่งสีตามประเภทงาน เห็นทั้งยอดรวมและสัดส่วน
+                </span>
               </div>
-              <div class="analytics-chart-sub">
-                Bar Chart เรียงตามจำนวนชิ้นงานจากมากไปน้อย
-              </div>
+              <span class="analytics-chart-tag tag-comparison">Comparison</span>
+            </div>
+            <div class="cat-legend-bar" style="margin-bottom:12px;">
+              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.social.color}"></span> Social Media</span>
+              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.key_visual.color}"></span> Key Visual</span>
+              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.print.color}"></span> Print & POSM</span>
+              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.ads_resize.color}"></span> Ads & Resizes</span>
+            </div>
+            <div class="analytics-canvas-wrap" style="height:300px;">
+              <canvas id="chart-stacked-categories"></canvas>
             </div>
           </div>
-          <div class="analytics-canvas-wrap">
-            <canvas id="chart-category-totals"></canvas>
-          </div>
-        </div>
 
-        <!-- Chart 4: ปริมาณงานที่ส่งมอบต่อสัปดาห์ (Throughput) -->
-        <div class="analytics-chart-card">
-          <div class="analytics-chart-header">
-            <div>
-              <div class="analytics-chart-title">
-                <span>ปริมาณงานที่ส่งมอบต่อสัปดาห์ (Throughput)</span>
-                <span class="analytics-chart-tag tag-trend">Trend</span>
+          <!-- Pane 3: งานทั้งหมดแยกตามประเภท -->
+          <div class="analytics-tab-pane" id="pane-chart-catTotals" style="display:none;">
+            <div class="pane-meta-bar">
+              <div>
+                <strong style="color:#ffffff;font-size:0.95rem;">งานทั้งหมดแยกตามประเภท (4 ประเภทหลัก)</strong>
+                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
+                  Bar Chart เรียงตามจำนวนชิ้นงานจากมากไปน้อย
+                </span>
               </div>
-              <div class="analytics-chart-sub">
-                Line Chart แสดง Throughput การส่งมอบงานเสร็จต่อสัปดาห์ · สไตล์หลัก: <strong>${escapeHtml(throughputData.primaryStyleLabel)}</strong>
-              </div>
+              <span class="analytics-chart-tag tag-comparison">Comparison</span>
+            </div>
+            <div class="analytics-canvas-wrap" style="height:300px;">
+              <canvas id="chart-category-totals"></canvas>
             </div>
           </div>
-          <div class="analytics-canvas-wrap">
-            <canvas id="chart-throughput-line"></canvas>
+
+          <!-- Pane 4: ปริมาณงานที่ส่งมอบต่อสัปดาห์ (Throughput) -->
+          <div class="analytics-tab-pane" id="pane-chart-throughput" style="display:none;">
+            <div class="pane-meta-bar">
+              <div>
+                <strong style="color:#ffffff;font-size:0.95rem;">ปริมาณงานที่ส่งมอบต่อสัปดาห์ (Throughput)</strong>
+                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
+                  Line Chart แสดง Throughput การส่งมอบงานเสร็จต่อสัปดาห์ · สไตล์หลัก: <strong>${escapeHtml(throughputData.primaryStyleLabel)}</strong>
+                </span>
+              </div>
+              <span class="analytics-chart-tag tag-trend">Trend</span>
+            </div>
+            <div class="analytics-canvas-wrap" style="height:300px;">
+              <canvas id="chart-throughput-line"></canvas>
+            </div>
           </div>
         </div>
       </div>
@@ -1627,7 +1779,6 @@ export function initAdvancedCharts({
     const workload = calculateWorkloadComparison(effectiveTasks, members);
     _advancedChartInstances["workloadBar"] = new Chart(barCanvas, {
       type: "bar",
-      indexAxis: "y",
       data: {
         labels: workload.labels,
         datasets: [{
@@ -1640,6 +1791,7 @@ export function initAdvancedCharts({
         }],
       },
       options: {
+        indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -1662,11 +1814,12 @@ export function initAdvancedCharts({
         },
         scales: {
           x: {
-            suggestedMax: 120,
+            beginAtZero: true,
+            suggestedMax: 100,
             grid: { color: "#232536" },
             ticks: {
               color: "#888d9f",
-              font: { family: "IBM Plex Sans Thai", size: 11 },
+              font: { family: "Space Mono", size: 10 },
               callback: (val) => `${val}%`,
             },
           },
@@ -1674,7 +1827,7 @@ export function initAdvancedCharts({
             grid: { display: false },
             ticks: {
               color: "#FFFFFF",
-              font: { family: "IBM Plex Sans Thai", size: 12, weight: "600" },
+              font: { family: "IBM Plex Sans Thai", size: 11, weight: "600" },
             },
           },
         },
@@ -1969,6 +2122,30 @@ export function bindMemberComparison(container, options = {}) {
   // Heatmap week toggle
   root.querySelector("#btn-heatmap-this-week")?.addEventListener("click", () => onToggleWeek(0));
   root.querySelector("#btn-heatmap-next-week")?.addEventListener("click", () => onToggleWeek(1));
+
+  // Deep-Dive Consolidated Chart Tabs Switcher
+  const chartTabsWrap = root.querySelector("#analytics-chart-tabs");
+  if (chartTabsWrap) {
+    chartTabsWrap.querySelectorAll("[data-chart-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tabKey = btn.dataset.chartTab;
+        chartTabsWrap.querySelectorAll(".btn-chart-tab").forEach((b) => b.classList.toggle("is-active", b === btn));
+        root.querySelectorAll(".analytics-tab-pane").forEach((pane) => {
+          pane.style.display = pane.id === `pane-chart-${tabKey}` ? "block" : "none";
+        });
+        const instanceMap = {
+          workload: "workloadBar",
+          stacked: "stackedCat",
+          catTotals: "catTotals",
+          throughput: "throughputLine",
+        };
+        const chartId = instanceMap[tabKey];
+        if (chartId && _advancedChartInstances[chartId]) {
+          _advancedChartInstances[chartId].resize();
+        }
+      });
+    });
+  }
 
   // Project Explorer & Drilldown binding
   bindProjectExplorer(root, _analyticsContext);
