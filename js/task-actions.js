@@ -297,6 +297,24 @@ export function openCreateTask(ctx = {}, defaults = {}) {
     });
   });
 
+  // Apply Defaults if provided (e.g. from Trends AI Curator)
+  if (defaults && typeof defaults === "object" && Object.keys(defaults).length > 0) {
+    const titleInput = qs("#task-title", modal);
+    const briefInput = qs("#task-brief", modal);
+    const channelInput = qs("#task-channel", modal);
+    const dimensionsInput = qs("#task-dimensions", modal);
+    const projectSelect = qs("#task-project", modal);
+    const typeSelect = qs("#task-type", modal);
+
+    if (defaults.title && titleInput) titleInput.value = defaults.title;
+    if (defaults.description && briefInput) briefInput.value = defaults.description;
+    if (defaults.channel && channelInput) channelInput.value = defaults.channel;
+    if (defaults.dimensions && dimensionsInput) dimensionsInput.value = defaults.dimensions;
+    if (defaults.project_id && projectSelect) projectSelect.value = defaults.project_id;
+    if (defaults.task_type && typeSelect) typeSelect.value = defaults.task_type;
+    if (defaults.preview_url && uploader) uploader.setValue(defaults.preview_url);
+  }
+
   // Handle Form Submission
   qs("#submit-create-task", modal).addEventListener("click", async () => {
     const form = qs("#create-task-form", modal);
