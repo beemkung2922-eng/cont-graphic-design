@@ -5486,3 +5486,217 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* ==========================================================================
+   Consolidated Deep-Dive Tabbed Card
+   ========================================================================== */
+.analytics-tabbed-card {
+  background: #10111a;
+  border: 1px solid #232536;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.analytics-tabbed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #1f2130;
+  margin-bottom: 18px;
+}
+
+.analytics-tabbed-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.analytics-tabbed-icon {
+  font-size: 1.4rem;
+}
+
+.analytics-tabbed-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.analytics-tabbed-sub {
+  font-size: 0.76rem;
+  color: #8a90a4;
+  margin-top: 2px;
+}
+
+.analytics-chart-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-chart-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #161824;
+  border: 1px solid #282a3c;
+  border-radius: 6px;
+  color: #c5cadc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-chart-tab:hover {
+  background: #1f2233;
+  color: #ffffff;
+  border-color: #3b3f57;
+}
+
+.btn-chart-tab.is-active {
+  background: rgba(25, 195, 235, 0.15);
+  border-color: var(--cyan);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(25, 195, 235, 0.25);
+}
+
+.pane-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* ==========================================================================
+   Project Explorer Date Range Filter
+   ========================================================================== */
+.proj-date-filter-section {
+  background: #12141f;
+  border: 1px solid #202336;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.proj-date-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.proj-date-filter-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #c5cadc;
+}
+
+.proj-date-preset-buttons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.btn-proj-date-pill {
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: #1a1c2a;
+  border: 1px solid #2a2e42;
+  border-radius: 4px;
+  color: #9da3ba;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-proj-date-pill:hover {
+  background: #23273b;
+  color: #ffffff;
+  border-color: #3c425d;
+}
+
+.btn-proj-date-pill.is-active {
+  background: rgba(25, 195, 235, 0.2);
+  border-color: var(--cyan);
+  color: #ffffff;
+}
+
+.proj-date-inputs-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.proj-date-field-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #8a90a4;
+}
+
+.proj-date-input {
+  background: #0b0c13;
+  border: 1px solid #282a3c;
+  border-radius: 4px;
+  color: #ffffff;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  outline: none;
+  color-scheme: dark;
+}
+
+.proj-date-input:focus {
+  border-color: var(--cyan);
+}
+
+.btn-proj-quick-action {
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: rgba(255, 198, 26, 0.15);
+  border: 1px solid rgba(255, 198, 26, 0.4);
+  border-radius: 4px;
+  color: #ffc61a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-proj-quick-action:hover {
+  background: rgba(255, 198, 26, 0.3);
+  color: #ffffff;
+}
+
+.btn-proj-clear-action {
+  background: #1a1c2a;
+  border-color: #2a2e42;
+  color: #8a90a4;
+}
+
+.btn-proj-clear-action:hover {
+  background: #2a2e42;
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .proj-date-inputs-wrap {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
