@@ -199,6 +199,43 @@ export async function render(ctx) {
     // Extra tasks due today besides current
     const extraTodayTasks = todayTasks.filter((t) => !currentTask || t.id !== currentTask.id);
 
+    // If member has no active tasks, render streamlined, actionable card
+    if (activeTasks.length === 0) {
+      return `
+        <section class="member-card is-available">
+          <div class="member-head">
+            ${avatar(member, "avatar-lg")}
+            <div style="flex:1; min-width:0">
+              <div class="member-name">${escapeHtml(member.name)}</div>
+              <div class="member-role">${escapeHtml(roleLabel(member.role))}</div>
+            </div>
+            <span class="member-status-pill is-idle" style="background:rgba(43,209,75,0.12);color:var(--green,#2bd14b);border:1px solid var(--green,#2bd14b);">
+              <span class="${todayStatus.dotClass}"></span>
+              ว่าง / พร้อมรับงาน
+            </span>
+          </div>
+
+          <div class="spotlight-box is-idle" style="padding:12px 14px;border-left:4px solid var(--green,#2bd14b);background:rgba(43,209,75,0.04);">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:0.86rem;font-weight:600;color:var(--text-on-dark,#ffffff);">
+                🟢 พร้อมรับมอบหมายงานใหม่
+              </span>
+              <span class="badge badge-ok">0 งานค้าง</span>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-dim,#a8a8a8);margin-top:6px;">
+              ประวัติส่งมอบสำเร็จสะสม: <strong style="color:var(--text-on-dark,#ffffff);">${completedTasks.length} งาน</strong>
+            </div>
+          </div>
+
+          <div style="margin-top:2px;">
+            <button class="btn btn-primary btn-sm btn-assign-member" data-member-id="${escapeHtml(member.id)}" style="width:100%;justify-content:center;font-size:0.82rem;padding:8px 12px;">
+              ＋ มอบหมายงานให้ ${escapeHtml(member.name.split(" ")[0])}
+            </button>
+          </div>
+        </section>
+      `;
+    }
+
     return `
       <section class="member-card">
         <div class="member-head">
@@ -524,9 +561,14 @@ export async function render(ctx) {
           </div>
         </section>
       `;
-    }
-
     resultsContainer.innerHTML = designersHtml + requestersHtml;
+
+    // Bind Quick Assign Buttons on available member cards
+    resultsContainer.querySelectorAll(".btn-assign-member").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        openCreateTask(ctx, { assignee_id: btn.dataset.memberId });
+      });
+    });
   };
 
   // Main Page Layout
