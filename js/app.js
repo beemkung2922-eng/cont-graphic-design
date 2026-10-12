@@ -19,6 +19,7 @@ const icons = {
   bell: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>`,
   logout: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-5"/></svg>`,
   close: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>`,
+  sparkles: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/></svg>`,
 };
 
 export const qs = (selector, root = document) => {
@@ -180,6 +181,10 @@ function topbarHtml(page, member) {
           ${pixelIcons.code}
           <span>TEAM</span>
         </a>
+        <a class="pixel-nav-link ${page === "trends" ? "is-active" : ""}" href="trends.html" title="Design Trend Curator AI">
+          ${pixelIcons.sparkle}
+          <span>TRENDS AI</span>
+        </a>
         <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="Workflow Guide">
           ${pixelIcons.book}
           <span>GUIDE</span>
@@ -276,6 +281,10 @@ function topbarHtml(page, member) {
         <a class="mobile-nav-link ${page === "team" ? "is-active" : ""}" href="team.html">
           ${pixelIcons.code}
           <span>TEAM</span>
+        </a>
+        <a class="mobile-nav-link ${page === "trends" ? "is-active" : ""}" href="trends.html">
+          ${pixelIcons.sparkle}
+          <span>TRENDS AI</span>
         </a>
         <a class="mobile-nav-link" href="#" id="drawer-workflow-guide-link">
           ${pixelIcons.book}
@@ -573,7 +582,7 @@ export async function initShell() {
   mountNotificationCenter(bundle, access.member);
 
   const shellContext = { ...access, ...bundle };
-  window.openCreateTask = () => openCreateTask(shellContext);
+  window.openCreateTask = (defaults = {}) => openCreateTask(shellContext, defaults);
   window.startProductTour = () => startProductTour(true);
 
   // Auto trigger product tour for first-time visitors (if not already completed or skipped)
@@ -609,7 +618,8 @@ const pageModules = {
   task: "task",
   calendar: "calendar",
   team: "team",
-  reports: "reports"
+  reports: "reports",
+  trends: "trends"
 };
 
 if (currentPage && pageModules[currentPage]) {
