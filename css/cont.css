@@ -5254,8 +5254,28 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #2e3247 transparent;
+}
+
+.project-tabs-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.project-tabs-scroll::-webkit-scrollbar-track {
+  background: rgba(14, 15, 23, 0.6);
+  border-radius: 3px;
+}
+
+.project-tabs-scroll::-webkit-scrollbar-thumb {
+  background: #2e3247;
+  border-radius: 3px;
+}
+
+.project-tabs-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan);
 }
 
 .btn-proj-tab {
