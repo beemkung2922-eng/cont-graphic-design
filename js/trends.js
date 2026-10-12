@@ -3,452 +3,251 @@ import { escapeHtml } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
 
 /**
- * Curated Top Design Trends from Behance, Dribbble, Awwwards, and Muzli Magazine
+ * Curated Pinterest Visual Design Trends & Aesthetics
+ * Matches the layout from the reference UI:
+ * 1. Top-Left Hero Swatch Card (Light)
+ * 2. Top-Right 1 Pill Category Switcher (Dark with orange active pill)
+ * 3. Top-Right 2 Minimal Concept Card (Dark)
+ * 4. Bottom-Left "A signal appears" Mockup Card (Light)
+ * 5. Bottom-Right 3D Cover Carousel Gallery (Dark, 7 upright 3D covers)
  */
-export const TRENDS_DATA = [
+export const PINTEREST_COVERS = [
   {
-    id: "trend-kinetic-type",
-    rank: 1,
-    title: "Kinetic Typography & Editorial Maximalism",
-    titleTh: "อักษรศิลป์เคลื่อนไหว ขนาดโอเวอร์ไซส์ และเลย์เอาต์นิตยสารร่วมสมัย",
-    category: "Typography",
-    categoryLabel: "Typography & Graphic Design",
-    sources: [
-      { name: "Muzli Magazine", badge: "Weekly Trend Digest #512", url: "https://medium.muz.li", color: "#F59E0B" },
-      { name: "Behance", badge: "Best of Typography & Editorial", url: "https://www.behance.net", color: "#0057FF" }
+    id: "cover-the-fall-off",
+    title: "THE FALL OFF",
+    subtitle: "Streetwear Lookbook & High Editorial",
+    category: "fashion",
+    categoryLabel: "Fashion & Editorial",
+    author: "@visual_archive",
+    saves: "48.2k",
+    badge: "🔥 TRENDING",
+    coverColor: "#EAB308",
+    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80",
+    description: "การผสานสตรีทแวร์ดิบเท่เข้ากับเลย์เอาต์นิตยสารแฟชั่นชั้นสูง โทนสีเข้มหม่นตัดกับฟอนต์ Display สีเหลืองสดดึงดูดสายตา",
+    swatches: [
+      { hex: "#0E1015", name: "Heavy Asphalt" },
+      { hex: "#EAB308", name: "Amber Voltage" },
+      { hex: "#3F3F46", name: "Worn Concrete" },
+      { hex: "#FAFAFA", name: "Ghost White" }
     ],
-    updatedPeriod: "สัปดาห์นี้ (ตุลาคม 2026)",
-    popularityScore: 98,
-    keywords: ["#KineticType", "#EditorialMaximalism", "#VariableFont", "#HighContrast", "#OversizedDisplay"],
-    colorPalette: [
-      { hex: "#0B0C10", name: "Obsidian Void" },
-      { hex: "#F5F5F0", name: "Editorial Newsprint" },
-      { hex: "#E11D48", name: "Acid Rose" },
-      { hex: "#D97706", name: "Amber Ochre" },
-      { hex: "#475569", name: "Slate Grain" }
-    ],
-    summary: "ตัวอักษรไม่ได้เป็นเพียงเครื่องมืออ่านข้อความอีกต่อไป แต่ได้กลายเป็น 'กราฟิกชิ้นเอก' ของหน้าจอและสื่อสิ่งพิมพ์ ยุคนี้คือการผสานความสง่างามของฟอนต์ Serif ย้อนยุคเข้ากับการเคลื่อนไหว Kinetic Motion ที่ตอบสนองต่อการ Scroll หน้าเว็บ",
-    visualTraits: [
-      "Text-as-Artwork: ใช้ฟอนต์ Display ขนาดใหญ่พิเศษ (Oversized Headline) ดึงดูดสายตาทันทีตั้งแต่แรกเห็น",
-      "Dynamic Kinetic Transitions: ตัวอักษรยืด หด หรือขยับตามการเลื่อนเมาส์ (Scroll-driven motion)",
-      "High Contrast & Editorial Spacing: การจัดวางที่เลียนแบบนิตยสารแฟชั่นชั้นนำ สลับช่องไฟแบบอสมมาตร (Asymmetrical Layout)",
-      "Imperfect Character Shapes: การดัดแปลงตัวอักษรเฉพาะจุด (Custom Ligatures) ให้มีเอกลักษณ์เฉพาะตัว"
-    ],
-    applications: [
-      "Key Visual แคมเปญโฆษณาและโปสเตอร์ประชาสัมพันธ์หลัก",
-      "Social Media Carousels & Title Cards สำหรับแคมเปญโปรโมต",
-      "Hero Banner ของหน้า Landing Page",
-      "ปกสิ่งพิมพ์ โบรชัวร์ และรายงานประจำปี"
-    ],
-    previewImage: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=80",
-    aiPrompt: "Cinematic editorial graphic design, bold oversized kinetic typography 'CONT CREATIVE', high contrast black and ivory paper texture, acid rose and amber ochre accents, asymmetric Swiss grid layout, 8k resolution, professional behance showcase style"
+    tags: ["#Streetwear", "#EditorialPoster", "#Lookbook", "#UrbanAesthetic"],
+    aiPrompt: "Editorial magazine cover 'THE FALL OFF', bold yellow condensed typography, moody dramatic fashion portrait in textured dark jacket, cinematic film grain, 35mm photography"
   },
   {
-    id: "trend-bento-grid",
-    rank: 2,
-    title: "Bento Grid Architecture & Spatial Depth",
-    titleTh: "เลย์เอาต์โมดูลาร์แบบเบนโตะ ผสานมิติเลเยอร์ลอยตัว (Floating Depth)",
-    category: "UI/UX",
-    categoryLabel: "UI/UX & Web Design",
-    sources: [
-      { name: "Awwwards", badge: "Site of the Day (SOTD)", url: "https://www.awwwards.com", color: "#10B981" },
-      { name: "Dribbble", badge: "Trending Modular Systems", url: "https://dribbble.com", color: "#EA4C89" }
+    id: "cover-monochrome",
+    title: "MONOCHROME ESSENCE",
+    subtitle: "Swiss Architecture & Sketch Print",
+    category: "art",
+    categoryLabel: "Visual Art & Print",
+    author: "@minimal_studios",
+    saves: "36.8k",
+    badge: "✦ MINIMAL",
+    coverColor: "#71717A",
+    image: "https://images.unsplash.com/photo-1515260268569-9271009adfdb?auto=format&fit=crop&w=600&q=80",
+    description: "เสน่ห์ของขาว-ดำสไตล์สวิส เส้นสายการสเก็ตช์ภาพคน และการจัดวางช่องไฟแบบมินิมอลที่ไม่เคยตกยุค",
+    swatches: [
+      { hex: "#000000", name: "True Black" },
+      { hex: "#52525B", name: "Architectural Zinc" },
+      { hex: "#A1A1AA", name: "Silver Ash" },
+      { hex: "#FFFFFF", name: "Pure Canvas" }
     ],
-    updatedPeriod: "สัปดาห์นี้ (ตุลาคม 2026)",
-    popularityScore: 95,
-    keywords: ["#BentoGrid", "#ModularUI", "#SpatialDepth", "#GlassCards", "#MicroInteractions"],
-    colorPalette: [
-      { hex: "#0F1018", name: "Deep Charcoal" },
-      { hex: "#181A26", name: "Bento Card Base" },
-      { hex: "#19C3EB", name: "Electric Cyan Glow" },
-      { hex: "#8B5CF6", name: "Spatial Violet" },
-      { hex: "#64748B", name: "Titanium Border" }
-    ],
-    summary: "อิทธิพลจากการจัดกล่องข้าวเบนโตะญี่ปุ่นที่พัฒนามาเป็นมาตรฐานการออกแบบเว็บและแดชบอร์ดยุคใหม่ ช่วยจัดระเบียบข้อมูลสถิติ ฟีเจอร์ และกราฟิกที่ซับซ้อนให้กลายเป็นกล่องการ์ดโมดูลาร์ที่ย่อยง่าย สวยงาม และดึงดูดสายตา",
-    visualTraits: [
-      "Modular Compartments: กริดสี่เหลี่ยมหลายขนาดที่เรียงตัวกันอย่างมีจังหวะ (Multi-sized Asymmetric Cards)",
-      "Floating Objects (UFOs): วัตถุ 3D หรือภาพกราฟิกลอยตัวทะลุขอบกล่อง สร้างมิติความลึก (Z-Index Layering)",
-      "Luminous Borders: ขอบการ์ดบางเฉียบพร้อมประกายแสงสะท้อน (Subtle Gradient Border Glow)",
-      "Tactile Hover States: การ์ดขยับตามการลากเมาส์เบา ๆ (Interactive Tilt Feedback)"
-    ],
-    applications: [
-      "หน้า Landing Page นำเสนอผลิตภัณฑ์และบริการสินเชื่อ",
-      "แดชบอร์ดสรุปสถิติผลงานและ KPI ของทีม",
-      "ตารางเปรียบเทียบฟีเจอร์และสิทธิประโยชน์ทางการเงิน",
-      "Infographic สรุปข้อมูลสำคัญบน Social Media"
-    ],
-    previewImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
-    aiPrompt: "Modern dark UI dashboard landing page, bento grid layout with glowing borders, translucent frosted glass cards, holographic cyan and purple lighting, 3D floating icons, clean sans-serif typography, awwwards site of the day award winner aesthetic"
+    tags: ["#Monochrome", "#SwissGrid", "#SketchArt", "#MinimalArchitecture"],
+    aiPrompt: "Minimalist black and white art poster, charcoal portrait sketch, clean Swiss typography, raw textured paper grain, high-end gallery edition"
   },
   {
-    id: "trend-agentic-mx",
-    rank: 3,
-    title: "AI Machine Experience (MX) & Agentic Dark Canvas",
-    titleTh: "อินเทอร์เฟซผู้ช่วย AI ยุคใหม่ แคนวาสสีเข้มและชิปพารามิเตอร์อัจฉริยะ",
-    category: "UI/UX",
-    categoryLabel: "AI Interface & Product Design",
-    sources: [
-      { name: "Dribbble", badge: "Popular / AI Design Systems", url: "https://dribbble.com", color: "#EA4C89" },
-      { name: "Muzli Magazine", badge: "AI Tools & UX Digest", url: "https://medium.muz.li", color: "#F59E0B" }
+    id: "cover-red-star",
+    title: "RED STAR GLOW",
+    subtitle: "90s Cyber Y2K & Acid Poster Art",
+    category: "graphics",
+    categoryLabel: "Acid Graphics",
+    author: "@cyber_acid",
+    saves: "54.1k",
+    badge: "⚡ VIRAL",
+    coverColor: "#EF4444",
+    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80",
+    description: "พื้นหลังสีแดงสดสะกดสายตา ผสานสัญลักษณ์ดวงดาว Y2K สปาร์คเคิล และฟอนต์เรโทรย้อนยุค 90s ที่กำลังครองใจคนรุ่นใหม่",
+    swatches: [
+      { hex: "#DC2626", name: "Crimson Spark" },
+      { hex: "#18181B", name: "Nightcore" },
+      { hex: "#FFFFFF", name: "Starlight" },
+      { hex: "#F87171", name: "Blush Neon" }
     ],
-    updatedPeriod: "เดือนนี้ (ตุลาคม 2026)",
-    popularityScore: 92,
-    keywords: ["#AgenticUI", "#MachineExperience", "#DarkSpatial", "#DynamicChips", "#AmbientGlow"],
-    colorPalette: [
-      { hex: "#090A0F", name: "Zero Gravity Black" },
-      { hex: "#141724", name: "Dark Slate Surface" },
-      { hex: "#10B981", name: "Agent Active Mint" },
-      { hex: "#6366F1", name: "Neural Indigo" },
-      { hex: "#38BDF8", name: "Prompt Azure" }
-    ],
-    summary: "การก้าวกระโดดของงานออกแบบ UI/UX สำหรับเครื่องมือ AI ไม่ใช่แค่กล่องแชทธรรมดา แต่เป็น 'Living Canvas' ที่มีเครื่องมือผู้ช่วยฝังตัวอยู่รอบพื้นที่ทำงาน พร้อมชิป Interactive ปรับแต่งพารามิเตอร์ได้อย่างลื่นไหลและเข้าใจง่าย",
-    visualTraits: [
-      "Living Agent Status: แสดงสถานะการทำงานของ AI อย่างชัดเจน (Idle / Thinking / Ready) ด้วยไฟแอมเบียนต์",
-      "Contextual Inline Toolbars: เมนูคำสั่งลอยตัวที่ปรากฏขึ้นเมื่อคลิกเลือกชิ้นงานบนหน้าจอ",
-      "Fluid Chip Parameters: ปุ่มแท็กแบบแคปซูลสำหรับสลับโหมด ป้อน Prompt และตั้งค่ารวดเร็ว",
-      "Deep Spatial Void: ธีมมืดสนิทที่ช่วยให้สีไฮไลต์ของ AI โดดเด่น สบายตาเวลาทำงานต่อเนื่องหลายชั่วโมง"
-    ],
-    applications: [
-      "ระบบบริหารจัดการงานดีไซน์อัตโนมัติภายในทีม",
-      "เว็บแอปพลิเคชันที่ขับเคลื่อนด้วยระบบ AI",
-      "เครื่องมือสร้างสรรค์คอนเทนต์และจัดการแคมเปญการตลาด",
-      "อินเทอร์เฟซตัวช่วยคัดกรองข้อมูลอัจฉริยะ"
-    ],
-    previewImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
-    aiPrompt: "Sleek dark mode AI agent interface canvas, fluid neon mesh gradients, luminous emerald and indigo status pills, floating modular tool palette, generative creative assistant, dribbble trending shot style"
+    tags: ["#AcidPoster", "#RedAesthetic", "#Y2KStars", "#CyberRetro"],
+    aiPrompt: "Intense red cyber acid poster, bold white typographic layout, glowing starlight sparkles, 90s techno club flyer aesthetic, screenprint texture"
   },
   {
-    id: "trend-acid-risograph",
-    rank: 4,
-    title: "Acid Graphics & Risograph Tactile Nostalgia",
-    titleTh: "กราฟิกเกรนเก๋า งานพิมพ์รีโซกราฟ และป้ายสัญลักษณ์เรโทร 90s",
-    category: "Graphic Design",
-    categoryLabel: "Graphic Design & Branding",
-    sources: [
-      { name: "Behance", badge: "Best of Behance / Branding", url: "https://www.behance.net", color: "#0057FF" },
-      { name: "Muzli Magazine", badge: "Weekly Graphic Inspiration", url: "https://medium.muz.li", color: "#F59E0B" }
+    id: "cover-jesus-boy",
+    title: "JESUS BOY",
+    subtitle: "Retro Pop Culture & Vintage Screenprint",
+    category: "art",
+    categoryLabel: "Pop Art & Vintage",
+    author: "@vintage_revival",
+    saves: "41.9k",
+    badge: "🔥 POPULAR",
+    coverColor: "#F59E0B",
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
+    description: "งานคอลลาจและภาพพิมพ์สไตล์ป๊อปคัลเจอร์ยุคเซเว่นตี้ส์ ใช้คู่สีตัดกันรุนแรงอย่างเหลืองและแดงเพื่อสร้างความน่าจดจำ",
+    swatches: [
+      { hex: "#F59E0B", name: "Solar Amber" },
+      { hex: "#B91C1C", name: "Oxblood" },
+      { hex: "#FEF3C7", name: "Parchment Cream" },
+      { hex: "#1C1917", name: "Charred Wood" }
     ],
-    updatedPeriod: "เดือนนี้ (ตุลาคม 2026)",
-    popularityScore: 90,
-    keywords: ["#AcidGraphic", "#RisographGrain", "#RetroSerif", "#HalftoneDots", "#AnalogNostalgia"],
-    colorPalette: [
-      { hex: "#E06D53", name: "Risograph Terracotta" },
-      { hex: "#C8F902", name: "Electric Acid Lime" },
-      { hex: "#171829", name: "Deep Ink Blue" },
-      { hex: "#F3EDE2", name: "Vintage Newsprint" },
-      { hex: "#FFAA00", name: "Analog Amber" }
-    ],
-    summary: "กระแสต่อต้านความเนี้ยบเกินไปของภาพดิจิทัล (Anti-Slick Digital) ครีเอเตอร์หันกลับมาหลงใหลในเสน่ห์ของงานพิมพ์ยุคแอนะล็อกที่มีความไม่สมบูรณ์แบบ เช่น เม็ดสกรีน Halftone, ลายเกรน Risograph, และรูปทรงดาว Y2K ที่ให้ความรู้สึกอบอุ่น มีจิตวิญญาณ",
-    visualTraits: [
-      "Raw Print Textures: พื้นผิวสัมผัสกระดาษจริง มีเกรนฟิล์มและจุดเม็ดสกรีน Halftone สไตล์งานพิมพ์โบราณ",
-      "Misaligned Layers: เทคนิคการพิมพ์ซ้อนทับแบบเหลื่อมสี (Off-register print aesthetic)",
-      "Neo-Vintage Crests & Badges: การใช้ตราสัญลักษณ์ ป้ายแสตมป์ และเส้นกรอบเรขาคณิตยุค 70s-90s",
-      "Vibrant Contrast Duotones: สีคู่ตรงข้ามที่มีพลัง เช่น สีส้มอิฐคู่กับสีเขียวมะนาวสะท้อนแสง"
-    ],
-    applications: [
-      "แคมเปญเจาะกลุ่มคนรุ่นใหม่ / กลุ่มลูกค้าไลฟ์สไตล์",
-      "อาร์ตเวิร์ก Social Media และโปสเตอร์อีเวนต์",
-      "บรรจุภัณฑ์ ของพรีเมียม และเสื้อยืดแคมเปญทีม",
-      "ภาพประกอบบทความและการเล่าเรื่องสไตล์สารคดี"
-    ],
-    previewImage: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80",
-    aiPrompt: "Vintage risograph art poster, tactile grainy paper texture, vibrant terracotta and electric lime ink, halftone dot patterns, retro display serif typography, nostalgic 90s acid graphic design badge, behance featured showcase"
+    tags: ["#VintagePop", "#Screenprint", "#CollageArt", "#RetroTypography"],
+    aiPrompt: "Vintage 1970s pop art poster 'JESUS BOY', bold distressed yellow typography, dramatic portrait artwork, warm nostalgic halftone textures"
   },
   {
-    id: "trend-webgl-clay",
-    rank: 5,
-    title: "Lightweight In-Browser 3D & Claymorphism",
-    titleTh: "วัตถุสามมิติสไตล์ดินน้ำมันนุ่มนวล และโมเดลอินเทอร์แอ็กทีฟบนเว็บเบราว์เซอร์",
-    category: "3D & Motion",
-    categoryLabel: "3D Design & Web Interactive",
-    sources: [
-      { name: "Awwwards", badge: "Developer Award & SOTD", url: "https://www.awwwards.com", color: "#10B981" },
-      { name: "Dribbble", badge: "Popular 3D & Spline Art", url: "https://dribbble.com", color: "#EA4C89" }
+    id: "cover-anba",
+    title: "ANBA EDITORIAL",
+    subtitle: "French Chic & High Fashion Lookbook",
+    category: "fashion",
+    categoryLabel: "Fashion & Editorial",
+    author: "@paris_archive",
+    saves: "62.4k",
+    badge: "✦ ICONIC",
+    coverColor: "#E11D48",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    description: "ภาพถ่ายแฟชั่นปกหมวกเบเร่ต์สีแดงสด โดดเด่นด้วยโทนสีผิวธรรมชาติและการจัดวางตัวอักษร ANBA ขนาดใหญ่พาดบนหน้าปก",
+    swatches: [
+      { hex: "#E11D48", name: "Parisian Rose" },
+      { hex: "#27272A", name: "Bespoke Charcoal" },
+      { hex: "#F4F4F5", name: "Studio Softbox" },
+      { hex: "#71717A", name: "Neutral Tint" }
     ],
-    updatedPeriod: "สัปดาห์นี้ (ตุลาคม 2026)",
-    popularityScore: 88,
-    keywords: ["#Claymorphism", "#Spline3D", "#WebGLInteractive", "#SoftMatte", "#Spatial3D"],
-    colorPalette: [
-      { hex: "#C4B5FD", name: "Soft Clay Lilac" },
-      { hex: "#FCA5A5", name: "Pastel Clay Coral" },
-      { hex: "#38BDF8", name: "Floating Sky Azure" },
-      { hex: "#0F172A", name: "Midnight Space" },
-      { hex: "#FFFFFF", name: "Specular White" }
+    tags: ["#HighFashion", "#EditorialCover", "#RedBeret", "#FrenchChic"],
+    aiPrompt: "Vogue magazine cover 'ANBA', striking fashion portrait wearing bold red beret, elegant typography, warm cinema lighting, 8k editorial look"
+  },
+  {
+    id: "cover-hop-club",
+    title: "HOP CLUB",
+    subtitle: "Neo-Psychedelic & Acid Club Culture",
+    category: "graphics",
+    categoryLabel: "Acid Graphics",
+    author: "@rave_visuals",
+    saves: "39.1k",
+    badge: "⚡ FRESH",
+    coverColor: "#10B981",
+    image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80",
+    description: "คลื่นความนิยมของงานโปสเตอร์ปาร์ตี้และเทศกาลดนตรียุคใหม่ ใช้สีนีออนเขียวม่วงสะท้อนแสงและการจัดวางข้อความแบบไหลเวียน",
+    swatches: [
+      { hex: "#10B981", name: "Acid Emerald" },
+      { hex: "#8B5CF6", name: "Psychedelic Violet" },
+      { hex: "#FBBF24", name: "Electric Citron" },
+      { hex: "#09090B", name: "Club Void" }
     ],
-    summary: "การพัฒนาของเทคโนโลยี WebGL และเครื่องมืออย่าง Spline ทำให้งาน 3 มิติบนเว็บเบราว์เซอร์มีขนาดไฟล์เล็กลง โหลดเร็ว และหมุนโต้ตอบกับผู้ใช้ได้ทันที งานสไตล์ Claymorphism ที่มีผิวสัมผัสดินน้ำมันเนื้อแมตต์ให้ความรู้สึกที่เป็นมิตรและทันสมัย",
-    visualTraits: [
-      "Soft Matte Materials: พื้นผิวไม่สะท้อนแสงจัด ให้ความรู้สึกนุ่มเหมือนดินน้ำมันหรือยางซิลิโคนคุณภาพสูง",
-      "Playful Geometry: รูปทรงเรขาคณิตมุมมนโค้งมน ไร้ขอบคม ดูเป็นมิตรและอบอุ่น",
-      "Interactive 3D Motion: หมุนหรือลอยตามการขยับเมาส์ (Mouse-reactive physics)",
-      "Delicate Pastel Lighting: แสงเงาฟุ้งละมุน ไม่แข็งกร้าว สร้างบรรยากาศเชิงบวกและผ่อนคลาย"
+    tags: ["#ClubPoster", "#NeoPsychedelic", "#NeonPalette", "#AcidType"],
+    aiPrompt: "Neo-psychedelic music poster 'HOP CLUB', vivid emerald green and purple fluid gradients, distorted experimental typography, rave flyer art"
+  },
+  {
+    id: "cover-cyber-blue",
+    title: "CYBER BLUE HORIZON",
+    subtitle: "Digital Surrealism & 3D Character Art",
+    category: "3d",
+    categoryLabel: "3D & Digital Surrealism",
+    author: "@spatial_future",
+    saves: "58.7k",
+    badge: "🔥 TOP PICK",
+    coverColor: "#2563EB",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
+    description: "โลกดิจิทัลสามมิติในโทนสีโคบอลต์บลู เสื้อฮู้ดเรืองแสงและวัตถุโครเมียมสะท้อนแสง สไตล์ที่ครองฟีด Pinterest สาย Sci-Fi",
+    swatches: [
+      { hex: "#2563EB", name: "Cobalt Future" },
+      { hex: "#38BDF8", name: "Hologram Sky" },
+      { hex: "#030712", name: "Deep Space" },
+      { hex: "#E0E7FF", name: "Cyber Chrome" }
     ],
-    applications: [
-      "ไอคอนหมวดหมู่บริการทางการเงินและแพ็กเกจสินเชื่อ",
-      "มาสคอตและภาพประกอบนำเสนอสิทธิประโยชน์",
-      "Hero Section บนหน้าแรกของเว็บไซต์",
-      "ภาพเคลื่อนไหวประกอบแคมเปญดิจิทัล"
-    ],
-    previewImage: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=1200&q=80",
-    aiPrompt: "Cute playful claymorphism 3D abstract objects floating in mid air, soft matte pastel lilac and coral materials, gentle ambient shadows, clean composition, rendered in blender and spline 3d, dribbble popular 3d shot"
+    tags: ["#DigitalSurrealism", "#CobaltBlue", "#3DCharacter", "#ChromeArt"],
+    aiPrompt: "Futuristic digital character in cobalt blue hoodie, chrome metallic reflective surfaces, dark ambient neon glow, sleek 3D render art"
   }
 ];
 
-let currentFilterCategory = "all";
-let currentFilterSource = "all";
-let currentSearchQuery = "";
-let lastScanTime = "สัปดาห์นี้ (ตุลาคม 2026)";
+let activeCover = PINTEREST_COVERS[0];
+let currentCategoryPill = "trending";
 
 /**
- * Copies a HEX code to clipboard and provides toast notification
+ * Copy HEX code to clipboard with toast notification
  */
-function copyHexToClipboard(hex, colorName) {
+function copyHex(hex, name) {
   navigator.clipboard.writeText(hex).then(() => {
-    toast(`คัดลอกรหัสสี ${hex} (${colorName}) เรียบร้อยแล้ว`, "success", "Color Copied");
+    toast(`คัดลอกรหัสสี ${hex} (${name || ""}) สำเร็จ`, "success", "Color Copied");
   }).catch(() => {
-    // Fallback
     const input = document.createElement("input");
     input.value = hex;
     document.body.appendChild(input);
     input.select();
     document.execCommand("copy");
     document.body.removeChild(input);
-    toast(`คัดลอกรหัสสี ${hex} เรียบร้อยแล้ว`, "success", "Color Copied");
+    toast(`คัดลอกรหัสสี ${hex} สำเร็จ`, "success", "Color Copied");
   });
 }
 
 /**
- * Triggers the AI Curator Scan Simulation Modal
+ * Open Pin Inspection Modal
  */
-function triggerAiCuratorScan(onComplete) {
-  const modal = openModal({
-    title: `
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:1.4rem;">🤖</span>
-        <div>
-          <div style="font-weight:700;font-size:1.05rem;color:#ffffff;">Design Trend Curator AI — Live Data Fetch</div>
-          <div style="font-size:0.75rem;color:#8f95ae;">กำลังวิเคราะห์และสังเคราะห์ข้อมูลจาก 4 แหล่งที่มาล่าสุด...</div>
-        </div>
-      </div>
-    `,
-    body: `
-      <div class="ai-scan-modal-body" style="padding:10px 0;">
-        <div class="ai-scan-progress-wrap" style="background:#151622;border:1px solid #282a3c;border-radius:8px;padding:14px;margin-bottom:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span id="ai-scan-status-text" style="font-size:0.84rem;font-weight:600;color:var(--cyan);">กำลังเชื่อมต่อแหล่งข้อมูล...</span>
-            <span id="ai-scan-percent" style="font-size:0.84rem;font-weight:700;color:#ffffff;">15%</span>
-          </div>
-          <div style="width:100%;height:8px;background:#232638;border-radius:4px;overflow:hidden;">
-            <div id="ai-scan-bar" style="width:15%;height:100%;background:linear-gradient(90deg, #19C3EB, #8B4DFF);transition:width 0.4s ease;"></div>
-          </div>
-        </div>
-
-        <div class="ai-scan-sources-list" style="display:flex;flex-direction:column;gap:10px;">
-          <div class="ai-source-item" id="src-behance" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#141521;border:1px solid #26283b;border-radius:6px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="width:10px;height:10px;border-radius:50%;background:#0057FF;display:inline-block;"></span>
-              <div>
-                <div style="font-weight:600;font-size:0.84rem;color:#ffffff;">Behance (Popular / Best of Behance)</div>
-                <div style="font-size:0.74rem;color:#8f95ae;">สแกนผลงาน Branding, Graphic Design, และ Typography ล่าสุด</div>
-              </div>
-            </div>
-            <span class="ai-source-badge" style="font-size:0.75rem;color:#8f95ae;">⏳ กำลังสแกน...</span>
-          </div>
-
-          <div class="ai-source-item" id="src-dribbble" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#141521;border:1px solid #26283b;border-radius:6px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="width:10px;height:10px;border-radius:50%;background:#EA4C89;display:inline-block;"></span>
-              <div>
-                <div style="font-weight:600;font-size:0.84rem;color:#ffffff;">Dribbble (Popular / Trending)</div>
-                <div style="font-size:0.74rem;color:#8f95ae;">วิเคราะห์ช็อตยอดนิยม, แดชบอร์ด AI และโมดูลาร์ Bento Grids</div>
-              </div>
-            </div>
-            <span class="ai-source-badge" style="font-size:0.75rem;color:#8f95ae;">รอคิว...</span>
-          </div>
-
-          <div class="ai-source-item" id="src-awwwards" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#141521;border:1px solid #26283b;border-radius:6px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="width:10px;height:10px;border-radius:50%;background:#10B981;display:inline-block;"></span>
-              <div>
-                <div style="font-weight:600;font-size:0.84rem;color:#ffffff;">Awwwards (Site of the Day / Trends)</div>
-                <div style="font-size:0.74rem;color:#8f95ae;">สกัดเทรนด์สถาปัตยกรรมเว็บ, WebGL 3D และ Micro-Interactions</div>
-              </div>
-            </div>
-            <span class="ai-source-badge" style="font-size:0.75rem;color:#8f95ae;">รอคิว...</span>
-          </div>
-
-          <div class="ai-source-item" id="src-muzli" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#141521;border:1px solid #26283b;border-radius:6px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="width:10px;height:10px;border-radius:50%;background:#F59E0B;display:inline-block;"></span>
-              <div>
-                <div style="font-weight:600;font-size:0.84rem;color:#ffffff;">Muzli Magazine (Weekly Trend Digest)</div>
-                <div style="font-size:0.74rem;color:#8f95ae;">ประมวลผลบทความสรุปเทรนด์รายสัปดาห์ & Best Portfolios</div>
-              </div>
-            </div>
-            <span class="ai-source-badge" style="font-size:0.75rem;color:#8f95ae;">รอคิว...</span>
-          </div>
-        </div>
-
-        <div style="margin-top:16px;text-align:center;font-size:0.78rem;color:#8f95ae;">
-          🔍 AI กำลังสกัดคีย์เวิร์ด, จับคู่รหัสสี HEX, และคัดเลือกลิงก์ภาพตัวอย่างคุณภาพสูง...
-        </div>
-      </div>
-    `,
-    footer: `
-      <div style="display:flex;justify-content:flex-end;width:100%;">
-        <button type="button" class="btn btn-ghost" data-close-modal>ยกเลิก</button>
-      </div>
-    `
-  });
-
-  const bar = modal.querySelector("#ai-scan-bar");
-  const pct = modal.querySelector("#ai-scan-percent");
-  const statusTxt = modal.querySelector("#ai-scan-status-text");
-
-  const step1 = setTimeout(() => {
-    if (bar) bar.style.width = "40%";
-    if (pct) pct.textContent = "40%";
-    if (statusTxt) statusTxt.textContent = "ดึงข้อมูล Best of Behance สำเร็จ... กำลังสแกน Dribbble Trending...";
-    const el = modal.querySelector("#src-behance .ai-source-badge");
-    if (el) { el.textContent = "✓ วิเคราะห์สำเร็จ"; el.style.color = "var(--green)"; }
-    const el2 = modal.querySelector("#src-dribbble .ai-source-badge");
-    if (el2) { el2.textContent = "⏳ กำลังสแกน..."; el2.style.color = "var(--cyan)"; }
-  }, 700);
-
-  const step2 = setTimeout(() => {
-    if (bar) bar.style.width = "65%";
-    if (pct) pct.textContent = "65%";
-    if (statusTxt) statusTxt.textContent = "สแกน Dribbble สำเร็จ... กำลังตรวจสอบ Awwwards Site of the Day...";
-    const el = modal.querySelector("#src-dribbble .ai-source-badge");
-    if (el) { el.textContent = "✓ วิเคราะห์สำเร็จ"; el.style.color = "var(--green)"; }
-    const el2 = modal.querySelector("#src-awwwards .ai-source-badge");
-    if (el2) { el2.textContent = "⏳ กำลังสแกน..."; el2.style.color = "var(--cyan)"; }
-  }, 1400);
-
-  const step3 = setTimeout(() => {
-    if (bar) bar.style.width = "88%";
-    if (pct) pct.textContent = "88%";
-    if (statusTxt) statusTxt.textContent = "ประมวลผล Awwwards สำเร็จ... กำลังรวบรวม Muzli Magazine Digest...";
-    const el = modal.querySelector("#src-awwwards .ai-source-badge");
-    if (el) { el.textContent = "✓ วิเคราะห์สำเร็จ"; el.style.color = "var(--green)"; }
-    const el2 = modal.querySelector("#src-muzli .ai-source-badge");
-    if (el2) { el2.textContent = "⏳ กำลังสแกน..."; el2.style.color = "var(--cyan)"; }
-  }, 2100);
-
-  const step4 = setTimeout(() => {
-    if (bar) bar.style.width = "100%";
-    if (pct) pct.textContent = "100%";
-    if (statusTxt) statusTxt.textContent = "✨ สกัดคีย์เวิร์ด, สวอตช์สี HEX, และจัดอันดับ 5 เทรนด์ล่าสุดเรียบร้อยแล้ว!";
-    const el = modal.querySelector("#src-muzli .ai-source-badge");
-    if (el) { el.textContent = "✓ วิเคราะห์สำเร็จ"; el.style.color = "var(--green)"; }
-
-    setTimeout(() => {
-      closeModal();
-      lastScanTime = "เมื่อสักครู่ (Real-Time Live)";
-      toast("AI Curator ซิงค์ข้อมูลเทรนด์ล่าสุด 4 แหล่งเรียบร้อยแล้ว!", "success", "AI Curator Sync Complete");
-      if (typeof onComplete === "function") onComplete();
-    }, 600);
-  }, 2800);
-}
-
-/**
- * Open Trend Deep Dive Modal
- */
-function openTrendDeepDive(trend) {
+function openPinModal(cover) {
   openModal({
     size: "lg",
     title: `
       <div style="display:flex;align-items:center;gap:12px;">
-        <span class="badge badge-info" style="font-weight:700;font-size:0.85rem;">🔥 TREND #${trend.rank}</span>
+        <span style="font-size:1.4rem;">📌</span>
         <div>
-          <div style="font-weight:700;font-size:1.15rem;color:#ffffff;">${escapeHtml(trend.title)}</div>
-          <div style="font-size:0.8rem;color:#8f95ae;">${escapeHtml(trend.titleTh)}</div>
+          <div style="font-weight:700;font-size:1.15rem;color:#ffffff;">${escapeHtml(cover.title)}</div>
+          <div style="font-size:0.8rem;color:#8f95ae;">${escapeHtml(cover.subtitle)} · ${escapeHtml(cover.author)}</div>
         </div>
       </div>
     `,
     body: `
-      <div class="trend-modal-content" style="display:flex;flex-direction:column;gap:20px;">
-        <!-- Large Preview Image -->
-        <div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid #282a3c;background:#151622;max-height:360px;">
-          <img src="${escapeHtml(trend.previewImage)}" alt="${escapeHtml(trend.title)}" style="width:100%;height:360px;object-fit:cover;display:block;" />
-          <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 18px;background:linear-gradient(180deg, transparent 0%, rgba(10,11,16,0.92) 100%);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              ${trend.sources.map((s) => `
-                <a href="${s.url}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;padding:3px 9px;border-radius:4px;background:${s.color}26;color:${s.color};border:1px solid ${s.color}66;text-decoration:none;font-weight:600;">
-                  ↗ ${escapeHtml(s.name)}: ${escapeHtml(s.badge)}
-                </a>
-              `).join("")}
-            </div>
-            <span style="font-size:0.75rem;color:#c5cadc;font-weight:500;">ดัชนีความนิยม: <strong>${trend.popularityScore}%</strong></span>
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <!-- Artwork Hero -->
+        <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;border:1px solid #27272a;max-height:420px;display:flex;justify-content:center;">
+          <img src="${escapeHtml(cover.image)}" alt="${escapeHtml(cover.title)}" style="max-height:420px;width:auto;object-fit:contain;display:block;" />
+          <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;color:#fff;">
+            📌 ${cover.saves} Saves on Pinterest
           </div>
         </div>
 
-        <!-- Color Palette with Copy Buttons -->
-        <div style="background:#141521;border:1px solid #26283b;border-radius:8px;padding:16px;">
+        <!-- Description & Tags -->
+        <div style="background:#111218;border:1px solid #232530;border-radius:10px;padding:16px;">
+          <div style="font-weight:700;font-size:0.92rem;color:#ffffff;margin-bottom:6px;">✨ รายละเอียดและสุนทรียศาสตร์ของชิ้นงาน:</div>
+          <p style="font-size:0.86rem;color:#c5cadc;line-height:1.6;margin:0 0 14px;">${escapeHtml(cover.description)}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${cover.tags.map((t) => `<span style="font-size:0.72rem;background:#1e202d;color:#94a3b8;padding:3px 8px;border-radius:4px;border:1px solid #2c3042;">${escapeHtml(t)}</span>`).join("")}
+          </div>
+        </div>
+
+        <!-- Color Palette Swatches -->
+        <div style="background:#111218;border:1px solid #232530;border-radius:10px;padding:16px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <div style="font-weight:700;font-size:0.9rem;color:#ffffff;display:flex;align-items:center;gap:7px;">
-              <span>🎨</span>
-              <span>โทนสีแนะนำประจำเทรนด์ (Curated Color Palette):</span>
-            </div>
-            <span style="font-size:0.74rem;color:#8f95ae;">คลิกที่สีเพื่อคัดลอกรหัส HEX</span>
+            <span style="font-weight:700;font-size:0.88rem;color:#ffffff;">🎨 จานสีเด่น (Color Palette) — คลิกเพื่อคัดลอก:</span>
+            <span style="font-size:0.72rem;color:#8f95ae;">Click to copy HEX</span>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
-            ${trend.colorPalette.map((col) => `
-              <div class="color-swatch-box" data-copy-hex="${col.hex}" data-color-name="${col.name}" style="background:#191b2a;border:1px solid #2c3048;border-radius:6px;padding:10px;cursor:pointer;transition:transform 0.15s, border-color 0.15s;" title="คลิกเพื่อคัดลอก ${col.hex}">
-                <div style="width:100%;height:32px;border-radius:4px;background:${col.hex};border:1px solid rgba(255,255,255,0.1);margin-bottom:8px;"></div>
-                <div style="font-weight:700;font-size:0.8rem;color:#ffffff;">${col.hex}</div>
-                <div style="font-size:0.7rem;color:#8f95ae;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(col.name)}</div>
+            ${cover.swatches.map((s) => `
+              <div class="modal-swatch-box" data-modal-hex="${s.hex}" data-modal-name="${s.name}" style="background:#181a24;border:1px solid #2b2e40;border-radius:8px;padding:10px;cursor:pointer;transition:transform 0.15s, border-color 0.15s;" title="คลิกเพื่อคัดลอก ${s.hex}">
+                <div style="width:100%;height:32px;border-radius:4px;background:${s.hex};border:1px solid rgba(255,255,255,0.1);margin-bottom:8px;"></div>
+                <div style="font-weight:700;font-size:0.82rem;color:#ffffff;font-family:'Space Mono',monospace;">${s.hex}</div>
+                <div style="font-size:0.72rem;color:#8f95ae;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(s.name)}</div>
               </div>
             `).join("")}
           </div>
         </div>
 
-        <!-- Keywords & Visual Traits -->
-        <div style="background:#141521;border:1px solid #26283b;border-radius:8px;padding:16px;">
-          <div style="font-weight:700;font-size:0.9rem;color:#ffffff;margin-bottom:10px;">
-            ✨ ลักษณะเด่นและเอกลักษณ์ทางสายตา (Visual Traits):
-          </div>
-          <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;color:#c5cadc;font-size:0.85rem;line-height:1.5;">
-            ${trend.visualTraits.map((trait) => `<li>${escapeHtml(trait)}</li>`).join("")}
-          </ul>
-        </div>
-
-        <!-- Applications for KKP / CONT -->
-        <div style="background:#141521;border:1px solid #26283b;border-radius:8px;padding:16px;">
-          <div style="font-weight:700;font-size:0.9rem;color:var(--cyan);margin-bottom:10px;">
-            🎯 แนวทางการนำไปประยุกต์ใช้ในงานจริง (Practical Application for CONT):
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:8px;">
-            ${trend.applications.map((app) => `
-              <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#e1e4ef;background:#181a28;padding:8px 12px;border-radius:6px;border:1px solid #282c42;">
-                <span style="color:var(--green);">✓</span>
-                <span>${escapeHtml(app)}</span>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-
-        <!-- AI Prompt Inspiration -->
-        <div style="background:#10111a;border:1px dashed #30354e;border-radius:8px;padding:14px;">
+        <!-- AI Prompt -->
+        <div style="background:#0c0d12;border:1px dashed #2c3042;border-radius:8px;padding:14px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-weight:700;font-size:0.82rem;color:#9ca2bb;">💡 AI Prompt Inspiration สำหรับเจเนอเรตภาพหรือตั้งต้นบรีฟ:</span>
-            <button type="button" class="btn btn-ghost btn-xs" id="btn-copy-prompt" style="font-size:0.72rem;padding:2px 8px;">คัดลอก Prompt 📋</button>
+            <span style="font-size:0.78rem;font-weight:700;color:#9ca2bb;">💡 AI Prompt Inspiration สำหรับจำลองสไตล์นี้:</span>
+            <button type="button" class="btn btn-ghost btn-xs" id="btn-copy-pin-prompt" style="font-size:0.72rem;padding:2px 8px;">คัดลอก Prompt 📋</button>
           </div>
-          <pre style="margin:0;font-family:'Space Mono',monospace;font-size:0.76rem;color:#a6acc3;white-space:pre-wrap;background:#151622;padding:10px;border-radius:4px;border:1px solid #25283a;">${escapeHtml(trend.aiPrompt)}</pre>
+          <pre style="margin:0;font-family:'Space Mono',monospace;font-size:0.76rem;color:#a6acc3;white-space:pre-wrap;background:#14151f;padding:10px;border-radius:4px;border:1px solid #232636;">${escapeHtml(cover.aiPrompt)}</pre>
         </div>
       </div>
     `,
     footer: `
       <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;flex-wrap:wrap;">
-        <div style="display:flex;gap:8px;">
-          ${trend.sources.map((s) => `
-            <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm" style="font-size:0.78rem;">
-              เปิดดู ${escapeHtml(s.name)} ↗
-            </a>
-          `).join("")}
-        </div>
+        <span style="font-size:0.78rem;color:#8f95ae;">บันทึกจาก Pinterest Visual Curator</span>
         <div style="display:flex;gap:10px;">
           <button type="button" class="btn btn-ghost" data-close-modal>ปิด</button>
-          <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-use-trend-create" style="padding:7px 16px;">
+          <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-use-pin-create" style="padding:7px 16px;">
             ${pixelIcons.plus}
             <span>นำเทรนด์นี้ไปสร้าง Task</span>
           </button>
@@ -457,310 +256,280 @@ function openTrendDeepDive(trend) {
     `
   });
 
-  // Bind Swatch Copies in Modal
-  qsa(".color-swatch-box").forEach((box) => {
+  // Bind swatch clicks inside modal
+  qsa(".modal-swatch-box").forEach((box) => {
     box.addEventListener("click", () => {
-      copyHexToClipboard(box.dataset.copyHex, box.dataset.colorName);
+      copyHex(box.dataset.modalHex, box.dataset.modalName);
     });
   });
 
-  // Bind Copy Prompt
-  qs("#btn-copy-prompt")?.addEventListener("click", () => {
-    navigator.clipboard.writeText(trend.aiPrompt).then(() => {
+  // Bind copy prompt
+  qs("#btn-copy-pin-prompt")?.addEventListener("click", () => {
+    navigator.clipboard.writeText(cover.aiPrompt).then(() => {
       toast("คัดลอก AI Prompt เรียบร้อยแล้ว", "success");
     });
   });
 
-  // Bind Create Task from this Trend
-  qs("#btn-use-trend-create")?.addEventListener("click", () => {
+  // Bind create task
+  qs("#btn-use-pin-create")?.addEventListener("click", () => {
     closeModal();
     if (typeof window.openCreateTask === "function") {
       window.openCreateTask({
-        title: `แคมเปญใหม่ — สไตล์ ${trend.title}`,
-        description: `บรีฟอาร์ตเวิร์กตามเทรนด์ ${trend.title} (${trend.titleTh})\n\nแหล่งอ้างอิง: ${trend.sources.map((s) => s.name).join(", ")}\nคีย์เวิร์ด: ${trend.keywords.join(" ")}\nโทนสีแนะนำ: ${trend.colorPalette.map((c) => `${c.name} (${c.hex})`).join(", ")}\n\nวัตถุประสงค์และรายละเอียดงาน: \n`,
-        preview_url: trend.previewImage,
-        channel: trend.category === "UI/UX" ? "Web / App" : "Social Media"
+        title: `งานดีไซน์สไตล์ ${cover.title}`,
+        description: `บรีฟชิ้นงานอ้างอิงแรงบันดาลใจจาก Pinterest Trend: ${cover.title} (${cover.subtitle})\n\nแท็กสไตล์: ${cover.tags.join(" ")}\nจานสีเด่น: ${cover.swatches.map((s) => `${s.name} (${s.hex})`).join(", ")}\n\nรายละเอียดงาน: \n`,
+        preview_url: cover.image,
+        channel: "Social Media / Key Visual"
       });
     }
   });
 }
 
 /**
- * Filter Trends Data based on Category, Source, and Search
- */
-function getFilteredTrends() {
-  return TRENDS_DATA.filter((t) => {
-    if (currentFilterCategory !== "all" && t.category !== currentFilterCategory) {
-      return false;
-    }
-    if (currentFilterSource !== "all") {
-      const matchSource = t.sources.some((s) => s.name.toLowerCase().includes(currentFilterSource.toLowerCase()));
-      if (!matchSource) return false;
-    }
-    if (currentSearchQuery.trim()) {
-      const q = currentSearchQuery.toLowerCase().trim();
-      const matchTitle = t.title.toLowerCase().includes(q) || t.titleTh.toLowerCase().includes(q);
-      const matchKeywords = t.keywords.some((k) => k.toLowerCase().includes(q));
-      const matchSummary = t.summary.toLowerCase().includes(q);
-      if (!matchTitle && !matchKeywords && !matchSummary) return false;
-    }
-    return true;
-  });
-}
-
-/**
- * Main Render Function for Trends Page
+ * Main Render Function
  */
 export async function render(context = {}) {
   const mount = qs("#page-content");
   if (!mount) return;
 
+  // Build the Bento Frame matching the uploaded image exactly
   mount.innerHTML = `
-    <div class="trends-page-container">
-      <!-- Top Hero Header -->
-      <div class="trends-hero-header">
-        <div class="trends-hero-main">
-          <div class="trends-hero-badge">
-            <span class="live-dot-pulse"></span>
-            <span>DESIGN TREND CURATOR AI</span>
-            <span class="badge-source-count">4 GLOBAL DATA SOURCES</span>
+    <div class="pinterest-curator-root">
+      <!-- Title & Subtitle Bar -->
+      <div class="pinterest-header-row">
+        <div>
+          <div class="pinterest-top-badge">
+            <span class="p-dot-pulse"></span>
+            <span>PINTEREST VISUAL DESIGN CURATOR</span>
+            <span class="p-badge-sub">LIVE MOODBOARD FEED</span>
           </div>
-          <h1 class="trends-hero-title">
-            ผู้ช่วยวิเคราะห์เทรนด์ Graphic Design & UI/UX ล่าสุด
+          <h1 class="pinterest-header-title">
+            เทรนด์งานออกแบบ & สุนทรียศาสตร์ร่วมสมัยจาก Pinterest
           </h1>
-          <p class="trends-hero-subtitle">
-            ประมวลผลและคัดสรรเทรนด์งานออกแบบที่กำลังมาแรงที่สุดจาก <strong>Behance, Dribbble, Awwwards</strong> และ <strong>Muzli Magazine</strong> เพื่อสร้างแรงบันดาลใจ ยกระดับไอเดีย และนำไปใช้งานจริงในเวิร์กโฟลว์ของทีม KKP
+          <p class="pinterest-header-desc">
+            รวบรวมเทรนด์ภาพถ่าย แฟชั่น โปสเตอร์ สิ่งพิมพ์ งานศิลปะ และงานดีไซน์หลากมิติที่กำลังไวรัลบน Pinterest เพื่อจุดประกายไอเดียใหม่ ๆ ให้กับทีม
           </p>
         </div>
-        <div class="trends-hero-actions">
-          <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-trigger-ai-scan" title="Trigger AI Curator Fetch">
-            <span style="font-size:1.1rem;margin-right:4px;">🤖</span>
-            <span>ดึงข้อมูลเทรนด์ล่าสุด (AI SYNC)</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-sync-pinterest" title="Refresh Pinterest Pins">
+            <span>🔄 ซิงค์พินล่าสุด</span>
           </button>
-          <div class="trends-last-updated" id="trends-last-updated-text">
-            <span>🕒 อัปเดตล่าสุด:</span> <strong>${lastScanTime}</strong>
-          </div>
         </div>
       </div>
 
-      <!-- Data Sources Indicator Bar -->
-      <div class="trends-sources-bar">
-        <div class="sources-bar-label">
-          <span>📡 แหล่งข้อมูลอ้างอิงมาตรฐาน (Data Sources):</span>
+      <!-- Bento Canvas Container (Matching the reference screenshot!) -->
+      <div class="bento-black-canvas" id="bento-canvas">
+        
+        <!-- TOP ROW -->
+        <div class="bento-top-row">
+          
+          <!-- TOP-LEFT: HERO WHITE SWATCH CARD (~65% width) -->
+          <div class="bento-card bento-hero-white-card" id="bento-hero-card">
+            <div class="hero-white-inner">
+              <!-- Swatches Grid (2 rows x 4 items) -->
+              <div class="hero-swatches-grid" id="hero-swatches-grid">
+                <!-- Populated dynamically based on activeCover -->
+              </div>
+
+              <!-- Cart / Pin Metric Bar -->
+              <div class="hero-metric-bar">
+                <div class="hero-metric-left">
+                  <span class="hero-cart-icon">🛍️</span>
+                </div>
+                <div class="hero-metric-right">
+                  <span class="hero-metric-price" id="hero-metric-saves">$1,863.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOP-RIGHT STACK (~35% width) -->
+          <div class="bento-top-right-stack">
+            
+            <!-- TOP-RIGHT 1: PILL FILTER CARD -->
+            <div class="bento-card bento-dark-pill-card">
+              <div class="pill-buttons-row" id="pill-buttons-row">
+                <button type="button" class="capsule-icon-pill" data-pill-cat="all" title="All Aesthetics">✦</button>
+                <button type="button" class="capsule-icon-pill" data-pill-cat="fashion" title="Fashion & Editorial">👗</button>
+                <button type="button" class="capsule-icon-pill" data-pill-cat="graphics" title="Acid Graphics">⚡</button>
+                <button type="button" class="capsule-text-pill is-active-orange" data-pill-cat="trending">Trending</button>
+                <button type="button" class="capsule-icon-pill" data-pill-cat="3d" title="3D & Digital">🔮</button>
+              </div>
+            </div>
+
+            <!-- TOP-RIGHT 2: MINIMAL CONCEPT CARD -->
+            <div class="bento-card bento-dark-concept-card">
+              <div class="concept-center-text">
+                <span class="concept-wordmark">✦ concept</span>
+                <span class="concept-sub-caption">PINTEREST AESTHETIC DIRECTORY</span>
+              </div>
+            </div>
+
+          </div>
+
         </div>
-        <div class="sources-pills-row">
-          <a href="https://www.behance.net" target="_blank" rel="noopener noreferrer" class="source-pill source-behance" title="Behance Popular & Curated">
-            <span class="source-dot" style="background:#0057FF;"></span>
-            <span>Behance (Popular / Best of Behance)</span>
-          </a>
-          <a href="https://dribbble.com" target="_blank" rel="noopener noreferrer" class="source-pill source-dribbble" title="Dribbble Trending">
-            <span class="source-dot" style="background:#EA4C89;"></span>
-            <span>Dribbble (Popular / Trending)</span>
-          </a>
-          <a href="https://www.awwwards.com" target="_blank" rel="noopener noreferrer" class="source-pill source-awwwards" title="Awwwards Site of the Day">
-            <span class="source-dot" style="background:#10B981;"></span>
-            <span>Awwwards (Site of the Day / Trends)</span>
-          </a>
-          <a href="https://medium.muz.li" target="_blank" rel="noopener noreferrer" class="source-pill source-muzli" title="Muzli Weekly Magazine">
-            <span class="source-dot" style="background:#F59E0B;"></span>
-            <span>Muzli Magazine (Weekly Trend Digest)</span>
-          </a>
+
+        <!-- BOTTOM ROW -->
+        <div class="bento-bottom-row">
+
+          <!-- BOTTOM-LEFT: A SIGNAL APPEARS (WHITE CARD, ~30% width) -->
+          <div class="bento-card bento-signal-white-card" id="bento-signal-card">
+            <div class="signal-card-content">
+              <div class="signal-thumb-wrap">
+                <img id="signal-thumb-img" src="${activeCover.image}" alt="Signal preview" />
+              </div>
+              <div class="signal-text-wrap">
+                <h3 class="signal-title">A signal appears.</h3>
+                <p class="signal-desc" id="signal-desc-text">
+                  Visual narrative tracking aesthetic shifts across photography, poster art & lifestyle.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM-RIGHT: 3D COVER CAROUSEL SHOWCASE (~70% width) -->
+          <div class="bento-card bento-covers-carousel-card">
+            <div class="covers-track" id="covers-track">
+              <!-- Populated dynamically with 7 upright 3D covers -->
+            </div>
+          </div>
+
         </div>
+
       </div>
 
-      <!-- Filter Controls Toolbar -->
-      <div class="trends-filter-toolbar">
-        <div class="trends-filter-left">
-          <!-- Search Box -->
-          <div class="trends-search-box">
-            <span class="search-icon">${pixelIcons.search}</span>
-            <input type="search" id="trends-search-input" placeholder="ค้นหาเทรนด์, คีย์เวิร์ด, หรือสไตล์ (เช่น Bento, 3D, Acid, Type)..." />
-          </div>
-
-          <!-- Category Pills -->
-          <div class="trends-category-pills" id="trends-cat-pills">
-            <button type="button" class="btn-cat-pill is-active" data-cat="all">ทั้งหมด (${TRENDS_DATA.length})</button>
-            <button type="button" class="btn-cat-pill" data-cat="Graphic Design">Graphic Design</button>
-            <button type="button" class="btn-cat-pill" data-cat="UI/UX">UI/UX & Web</button>
-            <button type="button" class="btn-cat-pill" data-cat="Typography">Typography</button>
-            <button type="button" class="btn-cat-pill" data-cat="3D & Motion">3D & Motion</button>
-          </div>
+      <!-- Quick Action Bar -->
+      <div class="pinterest-quick-meta-bar">
+        <div style="font-size:0.8rem;color:#8f95ae;">
+          💡 <strong>เคล็ดลับ:</strong> คลิกที่ปกหนังสือ/โปสเตอร์ด้านล่างเพื่อสลับดูจานสี หรือคลิกเพื่อดูรายละเอียดบรีฟและนำไปสร้างงานใน CONT
         </div>
-
-        <div class="trends-filter-right">
-          <!-- Source Filter Dropdown -->
-          <div style="display:flex;align-items:center;gap:8px;">
-            <label for="trends-source-select" style="font-size:0.78rem;color:#8f95ae;white-space:nowrap;">กรองตามแหล่งที่มา:</label>
-            <select id="trends-source-select" class="trends-select-clean">
-              <option value="all">ทุกแหล่งที่มา (4 แหล่ง)</option>
-              <option value="behance">Behance</option>
-              <option value="dribbble">Dribbble</option>
-              <option value="awwwards">Awwwards</option>
-              <option value="muzli">Muzli Magazine</option>
-            </select>
-          </div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-open-active-detail">
+            🔍 ดูรายละเอียดชิ้นงานที่เลือก (<span id="active-title-label">${activeCover.title}</span>)
+          </button>
         </div>
-      </div>
-
-      <!-- Trend Cards Grid -->
-      <div id="trends-grid-container" class="trends-cards-grid">
-        <!-- Rendered dynamically by renderTrendsList() -->
       </div>
     </div>
   `;
 
-  // Render Function
-  const renderTrendsList = () => {
-    const grid = mount.querySelector("#trends-grid-container");
-    if (!grid) return;
+  // Update Hero Swatches Grid
+  const updateHeroSwatches = (cover) => {
+    const grid = mount.querySelector("#hero-swatches-grid");
+    const metric = mount.querySelector("#hero-metric-saves");
+    const signalImg = mount.querySelector("#signal-thumb-img");
+    const signalDesc = mount.querySelector("#signal-desc-text");
+    const activeLabel = mount.querySelector("#active-title-label");
 
-    const filtered = getFilteredTrends();
+    if (signalImg) signalImg.src = cover.image;
+    if (signalDesc) signalDesc.textContent = `${cover.title} — ${cover.description}`;
+    if (activeLabel) activeLabel.textContent = cover.title;
+    if (metric) metric.textContent = `$1,863.00`; // Preserving the iconic metric aesthetic from reference screenshot
 
-    if (filtered.length === 0) {
-      grid.innerHTML = `
-        <div style="grid-column:1/-1;text-align:center;padding:48px 16px;background:#141521;border:1px dashed #282a3c;border-radius:10px;color:#8f95ae;">
-          <div style="font-size:2rem;margin-bottom:10px;">🔍</div>
-          <div style="font-size:1.05rem;font-weight:700;color:#ffffff;">ไม่พบเทรนด์ตามเงื่อนไขที่เลือก</div>
-          <div style="font-size:0.82rem;margin-top:6px;">ลองค้นหาด้วยคำอื่น หรือกดเลือกดู "ทั้งหมด"</div>
+    if (grid) {
+      // 8 swatches / chips arranged nicely (2 rows x 4)
+      const chips = [
+        { hex: cover.swatches[0]?.hex || "#EAB308", label: "01" },
+        { hex: cover.swatches[1]?.hex || "#0E1015", label: "02" },
+        { hex: cover.swatches[2]?.hex || "#3F3F46", label: "03" },
+        { hex: cover.swatches[3]?.hex || "#FAFAFA", label: "04" },
+        { hex: cover.coverColor || "#EF4444", label: "05" },
+        { hex: "#22D3EE", label: "06" },
+        { hex: "#C084FC", label: "07" },
+        { hex: "#F472B6", label: "08" },
+      ];
+
+      grid.innerHTML = chips.map((c) => `
+        <div class="swatch-tile" data-tile-hex="${c.hex}" style="background:${c.hex};" title="คลิกเพื่อคัดลอก ${c.hex}">
+          <span class="swatch-tile-badge">✓</span>
         </div>
-      `;
-      return;
+      `).join("");
+
+      grid.querySelectorAll("[data-tile-hex]").forEach((tile) => {
+        tile.addEventListener("click", (e) => {
+          e.stopPropagation();
+          copyHex(tile.dataset.tileHex, "Palette Chip");
+        });
+      });
     }
+  };
 
-    grid.innerHTML = filtered.map((t) => `
-      <div class="trend-card" data-trend-id="${t.id}">
-        <!-- Top Media Showcase -->
-        <div class="trend-card-media">
-          <img src="${escapeHtml(t.previewImage)}" alt="${escapeHtml(t.title)}" loading="lazy" />
-          <div class="trend-card-rank-badge">
-            <span class="rank-fire">🔥</span>
-            <span>#${t.rank} TREND</span>
+  // Render 3D Covers Track
+  const renderCovers = (covers) => {
+    const track = mount.querySelector("#covers-track");
+    if (!track) return;
+
+    track.innerHTML = covers.map((c) => `
+      <div class="cover-3d-item ${c.id === activeCover.id ? "is-selected-cover" : ""}" data-cover-id="${c.id}" title="${escapeHtml(c.title)} — ${escapeHtml(c.subtitle)}">
+        <div class="cover-3d-spine"></div>
+        <div class="cover-3d-face">
+          <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.title)}" loading="lazy" />
+          <div class="cover-3d-overlay">
+            <span class="cover-mini-title">${escapeHtml(c.title)}</span>
           </div>
-          <div class="trend-card-cat-badge">
-            ${escapeHtml(t.categoryLabel)}
-          </div>
-        </div>
-
-        <!-- Main Info -->
-        <div class="trend-card-body">
-          <!-- Sources row -->
-          <div class="trend-card-sources">
-            ${t.sources.map((s) => `
-              <span class="trend-source-chip" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55;">
-                ● ${escapeHtml(s.name)}
-              </span>
-            `).join("")}
-            <span class="trend-score-badge">ความนิยม ${t.popularityScore}%</span>
-          </div>
-
-          <!-- Title -->
-          <h2 class="trend-card-title">${escapeHtml(t.title)}</h2>
-          <div class="trend-card-sub">${escapeHtml(t.titleTh)}</div>
-
-          <!-- Keywords Tags -->
-          <div class="trend-card-tags">
-            ${t.keywords.map((k) => `<span class="trend-kw-tag">${escapeHtml(k)}</span>`).join("")}
-          </div>
-
-          <!-- Summary -->
-          <p class="trend-card-summary">${escapeHtml(t.summary)}</p>
-
-          <!-- Color Palette Swatches -->
-          <div class="trend-card-palette-wrap">
-            <div class="palette-header">
-              <span style="font-weight:700;font-size:0.75rem;color:#9ca2bb;">โทนสีแนะนำ (คลิกเพื่อก็อปปี้):</span>
-            </div>
-            <div class="palette-swatches-row">
-              ${t.colorPalette.map((col) => `
-                <div class="swatch-item" data-swatch-hex="${col.hex}" data-swatch-name="${col.name}" title="${col.name} (${col.hex}) - คลิกเพื่อคัดลอก">
-                  <span class="swatch-circle" style="background:${col.hex};"></span>
-                  <span class="swatch-hex">${col.hex}</span>
-                </div>
-              `).join("")}
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions Footer -->
-        <div class="trend-card-foot">
-          <button type="button" class="btn btn-ghost btn-sm btn-deepdive" data-open-deepdive="${t.id}">
-            🔍 ดูบทวิเคราะห์เชิงลึก
-          </button>
-          <button type="button" class="btn-pixel btn-pixel-cyan btn-sm btn-create-task-trend" data-use-trend="${t.id}">
-            ${pixelIcons.plus}
-            <span>นำไปสร้าง Task</span>
-          </button>
         </div>
       </div>
     `).join("");
 
-    // Bind Swatch Clicks
-    grid.querySelectorAll("[data-swatch-hex]").forEach((item) => {
-      item.addEventListener("click", (e) => {
-        e.stopPropagation();
-        copyHexToClipboard(item.dataset.swatchHex, item.dataset.swatchName);
-      });
-    });
-
-    // Bind Deep Dive Modal
-    grid.querySelectorAll("[data-open-deepdive]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const trend = TRENDS_DATA.find((x) => x.id === btn.dataset.openDeepdive);
-        if (trend) openTrendDeepDive(trend);
-      });
-    });
-
-    // Bind Create Task
-    grid.querySelectorAll("[data-use-trend]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const trend = TRENDS_DATA.find((x) => x.id === btn.dataset.useTrend);
-        if (trend && typeof window.openCreateTask === "function") {
-          window.openCreateTask({
-            title: `แคมเปญใหม่ — สไตล์ ${trend.title}`,
-            description: `บรีฟอาร์ตเวิร์กตามเทรนด์ ${trend.title} (${trend.titleTh})\n\nแหล่งอ้างอิง: ${trend.sources.map((s) => s.name).join(", ")}\nคีย์เวิร์ด: ${trend.keywords.join(" ")}\nโทนสีแนะนำ: ${trend.colorPalette.map((c) => `${c.name} (${c.hex})`).join(", ")}\n\nวัตถุประสงค์และรายละเอียดงาน: \n`,
-            preview_url: trend.previewImage,
-            channel: trend.category === "UI/UX" ? "Web / App" : "Social Media"
-          });
+    track.querySelectorAll("[data-cover-id]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const found = PINTEREST_COVERS.find((x) => x.id === el.dataset.coverId);
+        if (found) {
+          activeCover = found;
+          track.querySelectorAll(".cover-3d-item").forEach((b) => b.classList.toggle("is-selected-cover", b.dataset.coverId === activeCover.id));
+          updateHeroSwatches(activeCover);
+          openPinModal(activeCover);
         }
       });
     });
   };
 
-  // Bind Trigger Button
-  const btnTrigger = mount.querySelector("#btn-trigger-ai-scan");
-  btnTrigger?.addEventListener("click", () => {
-    triggerAiCuratorScan(() => {
-      const timeEl = mount.querySelector("#trends-last-updated-text");
-      if (timeEl) timeEl.innerHTML = `<span>🕒 อัปเดตล่าสุด:</span> <strong>${lastScanTime}</strong>`;
-      renderTrendsList();
-    });
-  });
+  // Initial State Render
+  updateHeroSwatches(activeCover);
+  renderCovers(PINTEREST_COVERS);
 
-  // Bind Search Input
-  const searchInput = mount.querySelector("#trends-search-input");
-  searchInput?.addEventListener("input", (e) => {
-    currentSearchQuery = e.target.value;
-    renderTrendsList();
-  });
-
-  // Bind Category Filter Pills
-  const catPills = mount.querySelectorAll(".btn-cat-pill");
-  catPills.forEach((btn) => {
+  // Bind Category Pills
+  const pillButtons = mount.querySelectorAll("[data-pill-cat]");
+  pillButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      catPills.forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      currentFilterCategory = btn.dataset.cat;
-      renderTrendsList();
+      pillButtons.forEach((b) => {
+        b.classList.remove("is-active-orange");
+        b.classList.remove("is-active-cyan");
+      });
+
+      btn.classList.add("is-active-orange");
+      currentCategoryPill = btn.dataset.pillCat;
+
+      let filtered = PINTEREST_COVERS;
+      if (currentCategoryPill !== "all" && currentCategoryPill !== "trending") {
+        filtered = PINTEREST_COVERS.filter((c) => c.category === currentCategoryPill);
+      }
+      if (filtered.length === 0) filtered = PINTEREST_COVERS;
+
+      activeCover = filtered[0];
+      updateHeroSwatches(activeCover);
+      renderCovers(filtered);
+      toast(`แสดงพินหมวดหมู่: ${currentCategoryPill.toUpperCase()}`, "info");
     });
   });
 
-  // Bind Source Select
-  const sourceSelect = mount.querySelector("#trends-source-select");
-  sourceSelect?.addEventListener("change", (e) => {
-    currentFilterSource = e.target.value;
-    renderTrendsList();
+  // Bind Active Detail Button
+  mount.querySelector("#btn-open-active-detail")?.addEventListener("click", () => {
+    openPinModal(activeCover);
   });
 
-  // Initial List Render
-  renderTrendsList();
+  // Bind Hero Card click
+  mount.querySelector("#bento-hero-card")?.addEventListener("click", () => {
+    openPinModal(activeCover);
+  });
+
+  // Bind Signal Card click
+  mount.querySelector("#bento-signal-card")?.addEventListener("click", () => {
+    openPinModal(activeCover);
+  });
+
+  // Bind Sync Button
+  mount.querySelector("#btn-sync-pinterest")?.addEventListener("click", () => {
+    toast("ซิงค์ฟีดพิน Pinterest และจานสีล่าสุดเรียบร้อยแล้ว!", "success", "Pinterest Live Sync");
+    updateHeroSwatches(activeCover);
+    renderCovers(PINTEREST_COVERS);
+  });
 }
