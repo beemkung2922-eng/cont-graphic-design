@@ -112,6 +112,7 @@ export async function render(ctx) {
         tasks,
         allTasks,
         members,
+        projects,
         selectedMemberId: filterState.memberId,
       });
     }, 0);
