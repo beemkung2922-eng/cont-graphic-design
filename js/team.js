@@ -43,27 +43,7 @@ function formatDeadlineLabel(value) {
   return formatDate(value);
 }
 
-function getInitials(name = "") {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase() || "MB";
-}
 
-function getAvatarColor(name = "") {
-  const colors = [
-    "linear-gradient(135deg, #f59e0b, #d97706)",
-    "linear-gradient(135deg, #10b981, #059669)",
-    "linear-gradient(135deg, #06b6d4, #0891b2)",
-    "linear-gradient(135deg, #3b82f6, #2563eb)",
-    "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-    "linear-gradient(135deg, #ec4899, #db2777)"
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
-  return colors[hash % colors.length];
-}
 
 function analyzeMember(member, tasks, projects) {
   const memberTasks = tasks.filter((task) => task.assignee_id === member.id);
@@ -204,190 +184,7 @@ export async function render(ctx) {
 
   const todayThai = "วันจันทร์ที่ 12 ตุลาคม 2569";
 
-  /* ─── 1. People Rows (High-Contrast Clean Rows) ─── */
-  const renderPeopleRowsHtml = () => {
-    return members.map((m) => {
-      const data = analyzed.find((a) => a.member.id === m.id);
-      const isHead = ["supervisor", "admin"].includes(m.role);
-      const isDes = m.role === "designer";
-      const initials = getInitials(m.name);
-      const bgGradient = getAvatarColor(m.name);
 
-      let statusText = "พร้อมรับงาน";
-      let statusColorClass = "text-green";
-      if (data) {
-        if (data.overdueTasks.length > 0) {
-          statusText = `มีงานเลท (${data.overdueTasks.length})`;
-          statusColorClass = "text-red";
-        } else if (data.draftingTasks.length > 0 || data.revisionTasks.length > 0) {
-          statusText = "กำลังทำชิ้นงาน";
-          statusColorClass = "text-yellow";
-        } else if (data.reviewTasks.length > 0) {
-          statusText = "รอรีวิว";
-          statusColorClass = "";
-        }
-      } else {
-        statusText = "ผู้ขอรับบริการ (Requester)";
-        statusColorClass = "";
-      }
-
-      return `
-        <div class="people-row">
-          <div class="people-profile">
-            <div class="people-avatar-circle" style="background:${bgGradient};">
-              ${escapeHtml(initials)}
-            </div>
-            <div class="people-details">
-              <div class="people-name">${escapeHtml(m.name)}</div>
-              <div class="people-email">${escapeHtml(m.email || `${m.name.toLowerCase().replace(/\\s+/g, '.')}@kkpfg.com`)}</div>
-            </div>
-          </div>
-          <div class="people-meta">
-            <span class="people-role-badge ${isHead ? 'is-head' : ''}">
-              ${isHead ? '👑 ' : isDes ? '🎨 ' : '📝 '}${escapeHtml(roleLabel(m.role))}
-            </span>
-            <span class="people-status-text ${statusColorClass}">
-              ● ${escapeHtml(statusText)}
-            </span>
-            ${canManage(ctx.member) && isDes ? `
-              <button type="button" class="btn btn-sm btn-ghost btn-quick-assign" data-member-id="${escapeHtml(m.id)}" title="มอบหมายงานให้ ${escapeHtml(m.name)}" style="padding:5px 10px;font-size:0.75rem;">
-                + มอบหมายงาน
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      `;
-    }).join("");
-  };
-
-  /* ─── 2. Permissions Matrix State & Definitions (Interactive Toggles) ─── */
-  const DEFAULT_PERMS = {
-    create_task: { head: true, designer: true, requester: true, viewer: false },
-    work_task:   { head: true, designer: true, requester: false, viewer: false },
-    review_task: { head: true, designer: false, requester: false, viewer: false },
-    assign_task: { head: true, designer: false, requester: false, viewer: false },
-    request_rev: { head: true, designer: true, requester: true, viewer: false },
-    view_report: { head: true, designer: true, requester: false, viewer: false },
-    manage_role: { head: true, designer: false, requester: false, viewer: false },
-    download:    { head: true, designer: true, requester: true, viewer: true },
-  };
-
-  const PERM_DEFINITIONS = [
-    {
-      key: "create_task",
-      action: "สร้างและเปิดบรีฟงานใหม่ (Create Tasks)",
-      desc: "เปิดคำขอชิ้นงานใหม่ กรอกขนาด ช่องทาง และสเปกบรีฟ",
-    },
-    {
-      key: "work_task",
-      action: "รับงานและลงมือผลิต (Drafting & Work)",
-      desc: "เปลี่ยนสถานะเป็นกำลังดราฟต์ ทำอาร์ตเวิร์ก และแก้งาน",
-    },
-    {
-      key: "review_task",
-      action: "ตรวจสอบ อนุมัติ และส่งมอบงาน (Review & Deliver)",
-      desc: "ตรวจคุณภาพงาน อนุมัติแบบ และส่งมอบงานสำเร็จ",
-    },
-    {
-      key: "assign_task",
-      action: "มอบหมายงานและเปลี่ยนคนทำ (Assign Team)",
-      desc: "แจกจ่ายงานให้ดีไซเนอร์ในทีมตามคิวงานที่เหมาะสม",
-    },
-    {
-      key: "request_rev",
-      action: "ส่งข้อเสนอแนะและขอแก้ไขงาน (Request Revisions)",
-      desc: "คอมเมนต์จุดแก้ไข และระบุรอบแก้ไขงาน",
-    },
-    {
-      key: "view_report",
-      action: "ดูรายงานสถิติและประสิทธิภาพทีม (View Reports)",
-      desc: "เข้าถึงแดชบอร์ดสรุป Throughput, Heatmap และ SLA",
-    },
-    {
-      key: "manage_role",
-      action: "จัดการสมาชิกและกำหนดบทบาท (Manage Roles)",
-      desc: "เพิ่ม/ลบสมาชิก และตั้งค่าสิทธิ์ผู้ใช้งานในระบบ",
-    },
-    {
-      key: "download",
-      action: "ดาวน์โหลดชิ้นงานและไฟล์แนบ (Download Assets)",
-      desc: "ดาวน์โหลดไฟล์ภาพที่เสร็จแล้ว และ Export ข้อมูลรายงาน",
-    },
-  ];
-
-  const getSavedPermissions = () => {
-    try {
-      const raw = localStorage.getItem("CONT_ROLE_PERMS");
-      if (!raw) return { ...DEFAULT_PERMS };
-      const parsed = JSON.parse(raw);
-      return { ...DEFAULT_PERMS, ...parsed };
-    } catch {
-      return { ...DEFAULT_PERMS };
-    }
-  };
-
-  const savePermissions = (perms) => {
-    try {
-      localStorage.setItem("CONT_ROLE_PERMS", JSON.stringify(perms));
-    } catch (e) {
-      console.error("Save perms error", e);
-    }
-  };
-
-  const renderPermissionsTableHtml = () => {
-    const perms = getSavedPermissions();
-    return PERM_DEFINITIONS.map((p) => {
-      const row = perms[p.key] || DEFAULT_PERMS[p.key];
-      return `
-        <tr>
-          <td>
-            <div style="font-weight:600;color:#f8fafc;font-size:0.84rem;">${escapeHtml(p.action)}</div>
-            <div style="font-size:0.74rem;color:#94a3b8;margin-top:2px;">${escapeHtml(p.desc)}</div>
-          </td>
-          <td>
-            <span class="owner-perm-check" title="หัวหน้าทีมมีสิทธิ์สูงสุดทุกด้าน">✓</span>
-          </td>
-          <td>
-            <label class="role-perm-switch" title="คลิกสลับสิทธิ์ ดีไซเนอร์">
-              <input type="checkbox" class="perm-toggle-input" data-perm-key="${p.key}" data-role="designer" ${row.designer ? "checked" : ""}>
-              <span class="role-perm-slider"></span>
-            </label>
-          </td>
-          <td>
-            <label class="role-perm-switch" title="คลิกสลับสิทธิ์ ผู้ขอรับบริการ">
-              <input type="checkbox" class="perm-toggle-input" data-perm-key="${p.key}" data-role="requester" ${row.requester ? "checked" : ""}>
-              <span class="role-perm-slider"></span>
-            </label>
-          </td>
-          <td>
-            <label class="role-perm-switch" title="คลิกสลับสิทธิ์ ผู้ชมทั่วไป">
-              <input type="checkbox" class="perm-toggle-input" data-perm-key="${p.key}" data-role="viewer" ${row.viewer ? "checked" : ""}>
-              <span class="role-perm-slider"></span>
-            </label>
-          </td>
-        </tr>
-      `;
-    }).join("");
-  };
-
-  const bindPermToggles = () => {
-    qsa(".perm-toggle-input").forEach((toggle) => {
-      toggle.addEventListener("change", (e) => {
-        const key = e.target.dataset.permKey;
-        const role = e.target.dataset.role;
-        const isChecked = e.target.checked;
-        const currentPerms = getSavedPermissions();
-        if (!currentPerms[key]) currentPerms[key] = { ...DEFAULT_PERMS[key] };
-        currentPerms[key][role] = isChecked;
-        savePermissions(currentPerms);
-
-        const roleName = role === "designer" ? "ดีไซเนอร์" : role === "requester" ? "ผู้ขอรับบริการ" : "ผู้ชมทั่วไป";
-        const permItem = PERM_DEFINITIONS.find((p) => p.key === key);
-        const actionName = permItem ? permItem.action.split(" ")[0] : "สิทธิ์";
-        toast(`อัปเดตสิทธิ์ "${actionName}" ของ ${roleName} เป็น ${isChecked ? 'เปิดใช้งาน' : 'ปิดการใช้งาน'} แล้ว`, "success");
-      });
-    });
-  };
 
   /* ─── 3. Member Cards View ─── */
   const renderMemberCard = (data) => {
@@ -669,97 +466,8 @@ export async function render(ctx) {
       </div>
     </div>
 
-    <!-- Dual Bento Panels: People List (Left) + Interactive Permissions Matrix (Right) -->
-    <div class="team-bento-dual">
-      <!-- Left Panel: People List -->
-      <div class="team-bento-panel">
-        <div class="team-panel-head">
-          <div>
-            <h3 class="team-panel-title">รายชื่อสมาชิกในทีม (People List)</h3>
-            <p class="team-panel-sub">${members.length} สมาชิก (${designers.length} ดีไซเนอร์ · ${requesters.length} ผู้ขอรับบริการ)</p>
-          </div>
-          ${canManage(ctx.member) ? `
-            <button type="button" class="btn btn-sm btn-secondary" id="btn-people-manage-members" style="font-size:0.78rem;padding:6px 12px;">
-              ⚙️ จัดการสิทธิ์
-            </button>
-          ` : ""}
-        </div>
-        <div class="people-rows-wrap">
-          ${renderPeopleRowsHtml()}
-        </div>
-      </div>
-
-      <!-- Right Panel: Permissions Matrix (Interactive & Configurable) -->
-      <div class="team-bento-panel">
-        <div class="team-panel-head">
-          <div>
-            <h3 class="team-panel-title">สิทธิ์การใช้งานแต่ละบทบาท (What each role can do)</h3>
-            <p class="team-panel-sub">หัวหน้าทีมมีสิทธิ์สูงสุดทุกด้าน; สวิตช์สามารถคลิกปรับเปลี่ยนสิทธิ์ได้ตามต้องการ</p>
-          </div>
-          <button type="button" class="btn btn-sm btn-ghost" id="btn-reset-perms" style="font-size:0.75rem;color:#94a3b8;padding:5px 8px;" title="คืนค่าสิทธิ์เริ่มต้น">
-            ↺ รีเซ็ตสิทธิ์
-          </button>
-        </div>
-
-        <div class="perm-matrix-wrap">
-          <table class="perm-matrix-table">
-            <thead>
-              <tr>
-                <th style="width:42%;">สิทธิ์การใช้งาน (Permissions)</th>
-                <th>👑 หัวหน้าทีม (Head)</th>
-                <th>🎨 ดีไซเนอร์ (Designer)</th>
-                <th>📝 ผู้ขอรับบริการ (Requester)</th>
-                <th>👁️ ผู้ชมทั่วไป (Viewer)</th>
-              </tr>
-            </thead>
-            <tbody id="perm-matrix-body">
-              ${renderPermissionsTableHtml()}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="perm-roles-guide">
-          <div class="perm-role-card">
-            <div class="perm-role-head">
-              <span>👑 หัวหน้าทีม (Team Head / Supervisor)</span>
-            </div>
-            <p class="perm-role-desc">
-              มีสิทธิ์สูงสุดในการควบคุมคิวงานทั้งหมด ตรวจสอบ อนุมัติ ส่งมอบงาน มอบหมายงาน และจัดการสมาชิกในระบบ
-            </p>
-          </div>
-
-          <div class="perm-role-card">
-            <div class="perm-role-head">
-              <span>🎨 ดีไซเนอร์ (Visual & Design)</span>
-            </div>
-            <p class="perm-role-desc">
-              รับบรีฟงาน ลงมือดราฟต์ แก้ไขงาน ส่งงานตรวจ และดูรายงานประสิทธิภาพของตนเอง
-            </p>
-          </div>
-
-          <div class="perm-role-card">
-            <div class="perm-role-head">
-              <span>📝 ผู้ขอรับบริการ (Requester)</span>
-            </div>
-            <p class="perm-role-desc">
-              เปิดบรีฟงานใหม่ ติดตามสถานะชิ้นงาน และส่งข้อเสนอแนะรอบแก้ไข (Revision)
-            </p>
-          </div>
-
-          <div class="perm-role-card">
-            <div class="perm-role-head">
-              <span>👁️ ผู้ชมทั่วไป (Viewer)</span>
-            </div>
-            <p class="perm-role-desc">
-              ดูภาพรวมสถานะความคืบหน้าของงาน และดาวน์โหลดชิ้นงานที่เสร็จแล้ว (Read-only)
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Section Header for Workload -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin:32px 0 16px;padding-top:20px;border-top:1px solid #23293c;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:28px 0 16px;">
       <div>
         <h3 style="font-size:1.25rem;font-weight:700;color:#ffffff;margin:0 0 4px;">ภาพรวมภาระงานและรายการงานปัจจุบัน (Workload & Tasks)</h3>
         <p style="color:#94a3b8;font-size:0.82rem;margin:0;">ติดตามสถานะงาน กำหนดส่ง และการกระจายงานของสมาชิกแต่ละคน</p>
@@ -810,29 +518,9 @@ export async function render(ctx) {
     <div id="team-workload-results-slot"></div>
   `;
 
-  // Bind permissions interactive toggles
-  bindPermToggles();
-
-  // Reset permissions button listener
-  qs("#btn-reset-perms")?.addEventListener("click", () => {
-    localStorage.removeItem("CONT_ROLE_PERMS");
-    const tbody = qs("#perm-matrix-body");
-    if (tbody) tbody.innerHTML = renderPermissionsTableHtml();
-    bindPermToggles();
-    toast("รีเซ็ตสิทธิ์เริ่มต้นเรียบร้อยแล้ว", "info");
-  });
-
-  // Top header and people panel buttons
+  // Top header buttons
   qs("#team-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
-  qs("#btn-people-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
   qs("#team-create-task")?.addEventListener("click", () => openCreateTask(ctx));
-
-  // Quick assign buttons in people rows
-  qsa(".btn-quick-assign").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      openCreateTask(ctx, { assignee_id: btn.dataset.memberId });
-    });
-  });
 
   // Workload search input
   qs("#team-search-input")?.addEventListener("input", (e) => {
