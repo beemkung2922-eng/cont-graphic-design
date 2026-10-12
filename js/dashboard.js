@@ -630,6 +630,7 @@ export async function render(ctx) {
         tasks: filtered,
         allTasks: tasks,
         members,
+        projects,
         selectedMemberId: filterState.memberId,
       });
     }, 0);
