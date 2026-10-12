@@ -353,38 +353,28 @@ export async function render(ctx) {
       <!-- 4. Time & Period Filter Toolbar -->
       ${periodFilterHtml}
 
-      <!-- 5. Charts Row: Performance Trend Line + Status Donut -->
-      <div class="charts-row" style="margin-bottom:28px;">
-        <div class="chart-card chart-card-wide" style="border:2px solid var(--line);box-shadow:inset 0 0 0 2px var(--ink), 0 var(--px) 0 #000;background:var(--ink-2);">
-          <div class="chart-card-header">
-            <div>
-              <div class="chart-card-title" style="font-family:var(--font-pixel);letter-spacing:0.06em;color:var(--cyan);">PERFORMANCE TREND (6 MONTHS)</div>
-              <div class="chart-card-sub" style="font-family:var(--font-mono);">COMPARING ACTIVE VS DELIVERED CREATIVE SPRINTS</div>
-            </div>
-          </div>
-          <div class="chart-wrap">
-            <canvas id="chart-trend" height="230"></canvas>
-          </div>
-        </div>
-
+      <!-- 5. Status Breakdown Donut Card (PERFORMANCE TREND removed as requested) -->
+      <div class="status-breakdown-panel" style="margin-bottom:28px;">
         <div class="chart-card" style="border:2px solid var(--line);box-shadow:inset 0 0 0 2px var(--ink), 0 var(--px) 0 #000;background:var(--ink-2);">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title" style="font-family:var(--font-pixel);letter-spacing:0.06em;color:var(--yellow);">STATUS BREAKDOWN</div>
+              <div class="chart-card-title" style="letter-spacing:0.04em;color:var(--yellow);font-weight:700;">STATUS BREAKDOWN (สัดส่วนสถานะงานใน Pipeline)</div>
               <div class="chart-card-sub" style="font-family:var(--font-mono);">CURRENT PIPELINE ALLOCATION</div>
             </div>
           </div>
-          <div class="chart-wrap chart-wrap-donut">
-            <canvas id="chart-donut" height="200"></canvas>
-          </div>
-          <div class="donut-legend">
-            ${STATUS_ORDER.map(s => `
-              <div class="donut-legend-item">
-                <span class="donut-legend-dot" style="background:${STATUS_CHART_COLORS[s].bg}"></span>
-                <span style="font-family:var(--font);">${STATUS_EN[s]}</span>
-                <span class="donut-legend-count" style="font-family:var(--font-mono);">${statusCounts.find(x => x.status === s)?.count || 0}</span>
-              </div>
-            `).join("")}
+          <div style="display:flex;align-items:center;justify-content:center;gap:36px;flex-wrap:wrap;padding:12px 16px;">
+            <div class="chart-wrap chart-wrap-donut" style="max-width:240px;height:200px;flex:1 1 200px;">
+              <canvas id="chart-donut" height="200"></canvas>
+            </div>
+            <div class="donut-legend" style="flex:1 1 300px;margin-top:0;">
+              ${STATUS_ORDER.map(s => `
+                <div class="donut-legend-item">
+                  <span class="donut-legend-dot" style="background:${STATUS_CHART_COLORS[s].bg}"></span>
+                  <span style="font-family:var(--font);">${STATUS_EN[s]}</span>
+                  <span class="donut-legend-count" style="font-family:var(--font-mono);font-weight:700;">${statusCounts.find(x => x.status === s)?.count || 0} งาน</span>
+                </div>
+              `).join("")}
+            </div>
           </div>
         </div>
       </div>
