@@ -2996,12 +2996,13 @@ input:focus, select:focus, textarea:focus {
 }
 
 .pixel-stat-num {
-  font-family: var(--font-pixel);
-  font-size: 2.1rem;
-  line-height: 1.1;
+  font-family: var(--font-mono, "Space Mono", monospace) !important;
+  font-weight: 700 !important;
+  font-size: 2.3rem !important;
+  line-height: 1.1 !important;
   color: #FFFFFF;
-  letter-spacing: 0.02em;
-  -webkit-font-smoothing: none;
+  letter-spacing: -0.02em !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
 .pixel-stat-caption {
@@ -5699,4 +5700,200 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   ENHANCED NUMERIC TYPOGRAPHY (CRISP & LEGIBLE NUMBERS)
+   Fix: Numbers 5, 8, 0 becoming distorted / looking like 'S' in pixel font
+   ========================================================================== */
+.pixel-stat-num,
+.pixel-stat-number,
+.count-up-num,
+.report-number,
+.kpi-big-num {
+  font-family: var(--font-mono, "Space Mono", monospace) !important;
+  font-variant-numeric: tabular-nums !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* ==========================================================================
+   STREAMLINED CREATE DESIGN TASK MODAL (CLEAR, FOCUSED & USER-FRIENDLY)
+   ========================================================================== */
+.task-quick-presets-bar {
+  background: #141624;
+  border: 1px solid #2a2e44;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.quick-preset-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--yellow, #ffc61a);
+  white-space: nowrap;
+}
+
+.quick-preset-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.btn-brief-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e2235;
+  border: 1px solid #333852;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #cdd3e8;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-brief-pill:hover {
+  background: #272d45;
+  border-color: #4f5880;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-brief-pill.is-active {
+  background: rgba(25, 195, 235, 0.16);
+  border-color: var(--cyan, #19c3eb);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(25, 195, 235, 0.25);
+}
+
+.btn-brief-pill .pill-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--cyan, #19c3eb);
+}
+
+.btn-brief-pill .pill-dim {
+  font-size: 0.72rem;
+  color: #8b92ad;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 0.8fr;
+  gap: 14px;
+}
+
+.field-label-prominent {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-label-clean {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #dbe0f0;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.required-star {
+  color: #ff5252;
+  font-weight: 700;
+}
+
+.input-task-title {
+  width: 100%;
+  box-sizing: border-box;
+  background: #141624;
+  border: 1px solid #363c58;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 600;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-task-title:focus {
+  border-color: var(--cyan, #19c3eb);
+  box-shadow: 0 0 0 3px rgba(25, 195, 235, 0.2);
+}
+
+.input-task-title::placeholder {
+  color: #5d6480;
+  font-weight: 400;
+}
+
+.input-clean,
+.textarea-clean {
+  width: 100%;
+  box-sizing: border-box;
+  background: #141624;
+  border: 1px solid #32374e;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-family: inherit;
+  padding: 9px 12px;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-clean:focus,
+.textarea-clean:focus {
+  border-color: var(--cyan, #19c3eb);
+  box-shadow: 0 0 0 3px rgba(25, 195, 235, 0.2);
+}
+
+.input-clean::placeholder,
+.textarea-clean::placeholder {
+  color: #5d6480;
+}
+
+.textarea-clean {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .form-grid-2,
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .task-quick-presets-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 
