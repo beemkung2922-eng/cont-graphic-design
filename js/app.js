@@ -4,6 +4,7 @@ import { api, auth } from "./supabase.js";
 import { escapeHtml, avatar, relativeDeadline, formatDateTime } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
 import { openCreateTask } from "./task-actions.js";
+import { startProductTour } from "./onboarding.js";
 
 const icons = {
   grid: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>`,
@@ -539,24 +540,8 @@ export async function initShell() {
   });
 
   const openWorkflowGuide = (event) => {
-    event?.preventDefault();
-    openModal({
-      title: "CONT Creative Operations Guide",
-      body: `
-        <div class="stack" style="gap:14px">
-          <div style="background:#12131b;border:2px solid #2d3042;overflow:hidden;box-shadow:0 4px 0 #000;">
-            <img class="workflow-modal-img" src="assets/hero-city.png" alt="CONT Workflow Guide" style="width:100%;display:block;image-rendering:pixelated;border-radius:0;border:0;background:transparent;" />
-          </div>
-          <div style="font-size:0.86rem;color:#D8DBE7;line-height:1.6">
-            <strong style="color:#FFFFFF;font-size:0.95rem;">Creative Workflow Execution Framework:</strong><br/>
-            • <strong>Brief:</strong> Intake specifications, sizing, brand assets, and SLA targets from Requester.<br/>
-            • <strong>Drafting:</strong> Designer crafts vector layouts, Bézier curves, and visual concepts.<br/>
-            • <strong>Review:</strong> Stakeholders and leads review proofs, annotate feedback, or request Revisions.<br/>
-            • <strong>Completed:</strong> Final artwork approved, assets packaged, and delivered on schedule.
-          </div>
-        </div>
-      `
-    });
+    event?.preventDefault?.();
+    startProductTour(true);
   };
 
   qs("#workflow-guide-link")?.addEventListener("click", openWorkflowGuide);
@@ -587,9 +572,15 @@ export async function initShell() {
   // Mount In-app Notification Center
   mountNotificationCenter(bundle, access.member);
 
-
   const shellContext = { ...access, ...bundle };
   window.openCreateTask = () => openCreateTask(shellContext);
+  window.startProductTour = () => startProductTour(true);
+
+  // Auto trigger product tour for first-time visitors (if not already completed or skipped)
+  window.setTimeout(() => {
+    startProductTour(false);
+  }, 1000);
+
   return shellContext;
 }
 
