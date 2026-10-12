@@ -115,24 +115,16 @@ export function openCreateTask(ctx = {}, defaults = {}) {
       ];
 
   const presetsHtml = `
-    <div class="brief-presets-wrap">
-      <div class="brief-presets-header">
-        <div class="brief-presets-label">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <span>เลือกเทมเพลตบรีฟงานด่วน (Smart Brief Presets)</span>
-        </div>
-        <span class="brief-presets-hint">คลิกเพื่อใส่สเปกและฟอร์แมตอัตโนมัติ</span>
+    <div class="task-quick-presets-bar">
+      <div class="quick-preset-title">
+        <span>⚡ เทมเพลตบรีฟด่วน:</span>
       </div>
-      <div class="brief-preset-grid">
+      <div class="quick-preset-pills">
         ${BRIEF_PRESETS.map((p) => `
-          <button type="button" class="brief-preset-btn" data-preset-id="${p.id}">
-            <div class="preset-icon">${p.icon}</div>
-            <div class="preset-info">
-              <span class="preset-title">${escapeHtml(p.label)}</span>
-              <span class="preset-sub">${escapeHtml(p.sub)}</span>
-              <span class="preset-tag">${escapeHtml(p.tag)}</span>
-            </div>
-            <div class="preset-check-badge">✓</div>
+          <button type="button" class="btn-brief-pill brief-preset-btn" data-preset-id="${p.id}" title="${escapeHtml(p.label)} (${escapeHtml(p.sub)})">
+            <span class="pill-icon">${p.icon}</span>
+            <span class="pill-label">${escapeHtml(p.label)}</span>
+            <span class="pill-dim">${escapeHtml(p.sub)}</span>
           </button>
         `).join("")}
       </div>
@@ -140,36 +132,39 @@ export function openCreateTask(ctx = {}, defaults = {}) {
   `;
 
   const body = `
-    <form id="create-task-form" class="stack" style="gap:16px;">
+    <form id="create-task-form" class="stack" style="gap:14px;">
       ${presetsHtml}
 
-      <!-- Section 1: ข้อมูลงานและแคมเปญ -->
-      <div class="form-section-divider">
-        <span class="form-section-title">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          1. ข้อมูลงานและแคมเปญ (Task & Project Details)
-        </span>
+      <!-- 1. ชื่องาน (Main Title) -->
+      <div class="field field-full">
+        <label for="task-title" class="field-label-prominent">
+          <span>ชื่องาน / อาร์ตเวิร์ก</span>
+          <span class="required-star">*</span>
+        </label>
+        <input id="task-title" name="title" class="input-task-title" required placeholder="เช่น RRN — แบนเนอร์สินเชื่อบ้าน ก.พ. 2026">
       </div>
 
-      <div class="form-grid">
-        <div class="field field-full">
-          <label for="task-title">ชื่องาน *</label>
-          <input id="task-title" name="title" class="input-hero" required placeholder="เช่น RRN — แบนเนอร์สินเชื่อบ้าน ก.พ. 2026">
-        </div>
-
+      <!-- 2. โปรเจกต์ & ประเภทงาน -->
+      <div class="form-grid-2">
         <div class="field">
-          <label for="task-project">Project / แคมเปญ *</label>
-          <select id="task-project" name="project_id" required>
-            <option value="">เลือก Project / แคมเปญ</option>
+          <label for="task-project" class="field-label-clean">
+            <span>Project / แคมเปญ</span>
+            <span class="required-star">*</span>
+          </label>
+          <select id="task-project" name="project_id" class="input-clean" required>
+            <option value="">เลือก Project / แคมเปญ...</option>
             ${projects.map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join("")}
           </select>
         </div>
 
         <div class="field">
-          <label for="task-type">ประเภทงาน *</label>
-          <select id="task-type" name="task_type" required>
+          <label for="task-type" class="field-label-clean">
+            <span>ประเภทงาน</span>
+            <span class="required-star">*</span>
+          </label>
+          <select id="task-type" name="task_type" class="input-clean" required>
             <option value="new_work">เริ่มงานใหม่ (New Creative)</option>
-            <option value="resize">ปรับขยาย Size (Resize / Adaptation)</option>
+            <option value="resize">ปรับขยาย Size (Resize)</option>
             <option value="revision">แก้ไขงานเดิม (Revision)</option>
             <option value="adaptation">ดัดแปลงจากชิ้นเดิม (Derivative)</option>
             <option value="other">อื่น ๆ (Other)</option>
@@ -177,19 +172,15 @@ export function openCreateTask(ctx = {}, defaults = {}) {
         </div>
       </div>
 
-      <!-- Section 2: การมอบหมายและกำหนดเวลา -->
-      <div class="form-section-divider">
-        <span class="form-section-title">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          2. การมอบหมายและกำหนดส่งมอบ (Assignment & SLA Target)
-        </span>
-      </div>
-
-      <div class="form-grid">
+      <!-- 3. ผู้รับผิดชอบ & กำหนดส่งมอบ -->
+      <div class="form-grid-2">
         <div class="field">
-          <label for="task-assignee">ผู้รับผิดชอบ (Designer) *</label>
-          <select id="task-assignee" name="assignee_id" required>
-            <option value="">เลือกดีไซเนอร์ในทีม</option>
+          <label for="task-assignee" class="field-label-clean">
+            <span>ผู้รับผิดชอบ (Designer)</span>
+            <span class="required-star">*</span>
+          </label>
+          <select id="task-assignee" name="assignee_id" class="input-clean" required>
+            <option value="">เลือกดีไซเนอร์ในทีม...</option>
             ${designMembers.map((m) => `
               <option value="${escapeHtml(m.id)}" ${defaults?.assignee_id === m.id ? "selected" : ""}>${escapeHtml(m.name)} · ${escapeHtml(roleLabel(m.role))}</option>
             `).join("")}
@@ -197,56 +188,49 @@ export function openCreateTask(ctx = {}, defaults = {}) {
         </div>
 
         <div class="field">
-          <label for="task-deadline">กำหนดส่งมอบ (Target Deadline) *</label>
-          <input id="task-deadline" type="datetime-local" name="deadline_at" value="${defaultDeadline}" required>
-          <span class="field-hint-pill">⏱️ <strong>ระบบคำนวณเวลานับถอยหลัง</strong> และแจ้งเตือนอัตโนมัติ</span>
+          <label for="task-deadline" class="field-label-clean">
+            <span>กำหนดส่งมอบ (Target Deadline)</span>
+            <span class="required-star">*</span>
+          </label>
+          <input id="task-deadline" type="datetime-local" name="deadline_at" class="input-clean" value="${defaultDeadline}" required>
         </div>
       </div>
 
-      <!-- Section 3: สเปกชิ้นงานและปริมาณงาน -->
-      <div class="form-section-divider">
-        <span class="form-section-title">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-          3. สเปกชิ้นงานและปริมาณงาน (Deliverables Scope & Workload)
-        </span>
-      </div>
-
+      <!-- 4. สเปกชิ้นงาน: ขนาด, ช่องทาง, จำนวน -->
       <div class="form-grid-3">
         <div class="field">
-          <label for="task-dimensions">ขนาด / Dimensions</label>
-          <input id="task-dimensions" name="dimensions" placeholder="เช่น 1080x1080 px (1:1)">
+          <label for="task-dimensions" class="field-label-clean">ขนาด (Dimensions)</label>
+          <input id="task-dimensions" name="dimensions" class="input-clean" placeholder="เช่น 1080x1080 px (1:1)">
         </div>
 
         <div class="field">
-          <label for="task-channel">ช่องทางสื่อ (Channel)</label>
-          <input id="task-channel" name="channel" placeholder="เช่น Facebook, IG Story, GDN, สิ่งพิมพ์">
+          <label for="task-channel" class="field-label-clean">ช่องทางสื่อ (Channel)</label>
+          <input id="task-channel" name="channel" class="input-clean" placeholder="เช่น Facebook, IG Story, GDN">
         </div>
 
         <div class="field">
-          <label for="task-item-count">จำนวนชิ้นงาน *</label>
-          <input id="task-item-count" type="number" name="item_count" min="1" max="10000" value="1" required>
-          <span class="field-hint-pill">⚖️ <strong>นับชิ้นงานจริง</strong> ใช้วัด Workload ทีม</span>
+          <label for="task-item-count" class="field-label-clean">
+            <span>จำนวนชิ้นงาน</span>
+            <span class="required-star">*</span>
+          </label>
+          <input id="task-item-count" type="number" name="item_count" class="input-clean" min="1" max="10000" value="1" required>
         </div>
       </div>
 
-      <!-- Section 4: รายละเอียดบรีฟ -->
-      <div class="form-section-divider">
-        <span class="form-section-title">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          4. รายละเอียดบรีฟและข้อกำหนดงาน (Design Brief & Requirements)
-        </span>
-      </div>
-
+      <!-- 5. รายละเอียดบรีฟ -->
       <div class="field field-full">
-        <label for="task-brief">Design Brief (รายละเอียดโจทย์, วัตถุประสงค์ & สิ่งที่ต้องส่งมอบ)</label>
-        <textarea id="task-brief" name="description" rows="5" placeholder="ระบุวัตถุประสงค์, ข้อความหลัก, Mood & Tone, และลิงก์โฟลเดอร์ไฟล์บรีฟ/Asset อ้างอิง..."></textarea>
+        <label for="task-brief" class="field-label-clean">
+          <span>รายละเอียดบรีฟ / สิ่งที่ต้องส่งมอบ (Brief)</span>
+        </label>
+        <textarea id="task-brief" name="description" class="textarea-clean" rows="4" placeholder="ระบุวัตถุประสงค์, ข้อความหลัก (Copy / Headline), หรือลิงก์ Asset อ้างอิง..."></textarea>
       </div>
 
+      <!-- 6. รูปภาพตัวอย่างงาน / Reference -->
       <div class="field field-full">
         ${renderImageUploaderHtml({
           id: "create-task-artwork-uploader",
           label: "รูปภาพตัวอย่างงาน / Reference Artwork (ถ้ามี)",
-          hint: "สามารถแนบไฟล์ภาพจากในเครื่อง (PNG, JPG, WebP, SVG) หรือใส่ลิงก์รูปภาพเว็บ เพื่อแสดงพรีวิวบนหน้าบอร์ด",
+          hint: "แนบไฟล์ภาพจากในเครื่อง หรือใส่ลิงก์รูปภาพเว็บ เพื่อแสดงพรีวิวบนหน้าบอร์ด",
           initialUrl: "",
           fieldName: "preview_url"
         })}
