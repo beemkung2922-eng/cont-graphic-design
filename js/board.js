@@ -141,31 +141,31 @@ export async function render(ctx) {
           </div>
         </div>
 
-        <div class="board-toolbar-row" style="border-top: 1px dashed var(--line); padding-top: 10px;">
+        <div class="board-toolbar-row" style="border-top: 1px solid var(--line); padding-top: 12px; gap: 10px;">
           <div class="board-filters">
             <!-- Member Filter -->
-            <select class="board-filter-select" id="filter-member">
-              <option value="">สมาชิกทุกคน</option>
+            <select class="board-filter-select" id="filter-member" title="กรองตามสมาชิก">
+              <option value="">👤 สมาชิกทุกคน</option>
               ${ctx.members.map((m) => `<option value="${escapeHtml(m.id)}" ${filterMemberId === m.id ? "selected" : ""}>${escapeHtml(m.name)}</option>`).join("")}
             </select>
 
             <!-- Project Filter -->
-            <select class="board-filter-select" id="filter-project">
-              <option value="">ทุกโปรเจกต์</option>
+            <select class="board-filter-select" id="filter-project" title="กรองตามโปรเจกต์">
+              <option value="">📁 ทุกโปรเจกต์</option>
               ${ctx.projects.map((p) => `<option value="${escapeHtml(p.id)}" ${filterProjectId === p.id ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("")}
             </select>
 
             <!-- Urgency Filter -->
-            <select class="board-filter-select" id="filter-urgency">
-              <option value="all" ${filterUrgency === "all" ? "selected" : ""}>ทุกระดับกำหนดส่ง</option>
-              <option value="overdue" ${filterUrgency === "overdue" ? "selected" : ""}>เลยกำหนด (Overdue)</option>
-              <option value="due_soon" ${filterUrgency === "due_soon" ? "selected" : ""}>ใกล้กำหนดส่ง (< 2 ชม.)</option>
+            <select class="board-filter-select" id="filter-urgency" title="กรองตามกำหนดส่ง">
+              <option value="all" ${filterUrgency === "all" ? "selected" : ""}>⏰ ทุกกำหนดส่ง</option>
+              <option value="overdue" ${filterUrgency === "overdue" ? "selected" : ""}>⚠️ เลยกำหนด (Overdue)</option>
+              <option value="due_soon" ${filterUrgency === "due_soon" ? "selected" : ""}>⚡ ใกล้กำหนดส่ง (< 2 ชม.)</option>
               <option value="normal" ${filterUrgency === "normal" ? "selected" : ""}>ปกติ</option>
             </select>
 
             <!-- Date Period Filter -->
-            <select class="board-filter-select" id="filter-period">
-              <option value="all" ${filterPeriod === "all" ? "selected" : ""}>ทุกช่วงเวลา</option>
+            <select class="board-filter-select" id="filter-period" title="กรองตามช่วงเวลา">
+              <option value="all" ${filterPeriod === "all" ? "selected" : ""}>📅 ทุกช่วงเวลา</option>
               <option value="today" ${filterPeriod === "today" ? "selected" : ""}>วันนี้</option>
               <option value="7days" ${filterPeriod === "7days" ? "selected" : ""}>7 วันล่าสุด</option>
               <option value="month" ${filterPeriod === "month" ? "selected" : ""}>เดือนนี้</option>
@@ -173,8 +173,8 @@ export async function render(ctx) {
             </select>
 
             <!-- Month Filter -->
-            <select class="board-filter-select" id="filter-month">
-              <option value="all" ${filterMonth === "all" ? "selected" : ""}>ทุกเดือน</option>
+            <select class="board-filter-select" id="filter-month" title="กรองตามเดือน">
+              <option value="all" ${filterMonth === "all" ? "selected" : ""}>🗓️ ทุกเดือน</option>
               ${MONTH_NAMES_TH.map((name, idx) => `<option value="${idx + 1}" ${String(filterMonth) === String(idx + 1) ? "selected" : ""}>${name}</option>`).join("")}
             </select>
 
@@ -185,7 +185,7 @@ export async function render(ctx) {
             </label>
           </div>
 
-          <button class="btn btn-sm" id="board-reset-filters">ล้างตัวกรอง</button>
+          <button class="btn btn-sm" id="board-reset-filters">× ล้างตัวกรอง</button>
         </div>
       </div>
 
