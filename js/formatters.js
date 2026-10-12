@@ -52,23 +52,12 @@ export function statusMotionIcon(status, size = 15) {
   return `<span class="badge-dot"></span>`;
 }
 
-export function interactiveEmptyState({ title = "ไม่มีงานค้างตามตัวกรองนี้", subtitle = "พักหัวปากกาได้สักครู่ หรือลองเปลี่ยนตัวกรองด้านบน", small = false } = {}) {
+export function interactiveEmptyState({ title = "ไม่มีงานตามตัวกรองที่เลือก", subtitle = "ลองปรับคำค้นหา หรือเลือกตัวกรองอื่นเพื่อดูงาน", small = false } = {}) {
   return `
-    <div class="empty-state-interactive" onclick="window.wakeNongCont && window.wakeNongCont(this)">
-      <div class="speech-bubble-pop">
-        <span class="bubble-text">งืมม... ไม่มีงานค้างแล้ว ปล่อยให้พักหัวปากกาแป๊บนึงนะ~ 💤</span>
-      </div>
-      <div class="empty-img-wrapper">
-        <div class="zzz-container">
-          <span class="zzz z1">z</span>
-          <span class="zzz z2">Z</span>
-          <span class="zzz z3">Z</span>
-        </div>
-        <img class="${small ? "state-illustration-sm" : "state-illustration"}" src="assets/illustrations/cont-empty-state.jpg" alt="พักหัวปากกา" />
-        <span class="tap-hint">💡 ลองคลิกที่รูปเพื่อปลุกน้อง CONT</span>
-      </div>
-      <div class="state-title" style="font-size:1.05rem;font-weight:700;margin-top:6px">${escapeHtml(title)}</div>
-      <div class="state-text">${escapeHtml(subtitle)}</div>
+    <div class="empty-state-clean" style="text-align:center;padding:${small ? "24px 14px" : "42px 20px"};">
+      <div style="font-size:${small ? "1.4rem" : "1.8rem"};color:#64748b;margin-bottom:8px;line-height:1;">○</div>
+      <div style="font-size:${small ? "0.92rem" : "1.05rem"};font-weight:700;color:#ffffff;margin-bottom:4px;">${escapeHtml(title)}</div>
+      <div style="font-size:${small ? "0.78rem" : "0.84rem"};color:#94a3b8;max-width:440px;margin:0 auto;line-height:1.45;">${escapeHtml(subtitle)}</div>
     </div>
   `;
 }
