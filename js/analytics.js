@@ -801,6 +801,8 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
   let projDatePreset = "all";
   let projStartDate = "";
   let projEndDate = "";
+  let currentPage = 1;
+  let pageSize = 20;
 
   const filterTaskByProjDate = (t) => {
     if (projDatePreset === "all" && !projStartDate && !projEndDate) return true;
@@ -960,6 +962,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
     chipsWrap.querySelectorAll("[data-proj-member]").forEach((btn) => {
       btn.addEventListener("click", () => {
         currentMemberId = btn.dataset.projMember;
+        currentPage = 1;
         chipsWrap.querySelectorAll(".proj-member-pill").forEach((b) => b.classList.toggle("is-active", b.dataset.projMember === currentMemberId));
         renderTaskList();
       });
@@ -985,6 +988,16 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
     }
 
     const enriched = scopedTasks.map((t) => enrichTaskMetrics(t, tasks));
+    const totalCount = enriched.length;
+    const effectivePageSize = pageSize === "all" ? (totalCount || 1) : parseInt(pageSize, 10);
+    const totalPages = pageSize === "all" ? 1 : Math.max(1, Math.ceil(totalCount / effectivePageSize));
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIndex = pageSize === "all" ? 0 : (currentPage - 1) * effectivePageSize;
+    const endIndex = pageSize === "all" ? totalCount : Math.min(startIndex + effectivePageSize, totalCount);
+    const pagedTasks = enriched.slice(startIndex, endIndex);
 
     if (countLabel) {
       const projName = currentProjectId === "all" ? "ทุกโปรเจกต์" : (breakdown.projects.find((x) => x.id === currentProjectId)?.name || "โปรเจกต์");
@@ -999,7 +1012,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
       } else if (projEndDate) {
         dateDesc = ` • ถึง ${projEndDate}`;
       }
-      countLabel.textContent = `รายการงานใน: ${projName}${dateDesc} (${enriched.length} งาน)`;
+      countLabel.textContent = `รายการงานใน: ${projName}${dateDesc} (${totalCount} งาน)`;
     }
 
     if (enriched.length === 0) {
@@ -1030,7 +1043,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
             </tr>
           </thead>
           <tbody>
-            ${enriched.map((t) => {
+            ${pagedTasks.map((t) => {
               const m = memberFor(t, members);
               const proj = projectFor(t, projects);
               const isLate = t.status !== "completed" && getTaskDate(t, "deadline") < new Date();
@@ -1093,7 +1106,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
 
       <!-- Mobile / Tablet Cards -->
       <div class="deepdive-mobile-cards">
-        ${enriched.map((t) => {
+        ${pagedTasks.map((t) => {
           const m = memberFor(t, members);
           const proj = projectFor(t, projects);
           const isLate = t.status !== "completed" && getTaskDate(t, "deadline") < new Date();
@@ -1159,7 +1172,78 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
           `;
         }).join("")}
       </div>
+
+      <!-- Pagination Toolbar -->
+      <div class="proj-pagination-bar">
+        <div class="proj-pagination-info">
+          <span>แสดง <strong>${totalCount === 0 ? 0 : startIndex + 1} - ${endIndex}</strong> จากทั้งหมด <strong>${totalCount}</strong> งาน</span>
+          <div style="display:inline-flex;align-items:center;gap:6px;">
+            <label for="proj-page-size-select" style="font-size:0.75rem;color:#8f95ae;">แสดงต่อหน้า:</label>
+            <select id="proj-page-size-select" class="proj-pg-select">
+              <option value="15" ${pageSize === 15 ? "selected" : ""}>15</option>
+              <option value="20" ${pageSize === 20 ? "selected" : ""}>20</option>
+              <option value="30" ${pageSize === 30 ? "selected" : ""}>30</option>
+              <option value="50" ${pageSize === 50 ? "selected" : ""}>50</option>
+              <option value="100" ${pageSize === 100 ? "selected" : ""}>100</option>
+              <option value="all" ${pageSize === "all" ? "selected" : ""}>ทั้งหมด</option>
+            </select>
+          </div>
+        </div>
+        <div class="proj-pagination-controls">
+          <button type="button" id="proj-pg-first" class="proj-pg-btn" ${currentPage <= 1 ? "disabled" : ""} title="หน้าแรก">⏮ หน้าแรก</button>
+          <button type="button" id="proj-pg-prev" class="proj-pg-btn" ${currentPage <= 1 ? "disabled" : ""} title="ก่อนหน้า">◀ ก่อนหน้า</button>
+          <span style="font-size:0.8rem;font-weight:600;color:#ffffff;padding:0 8px;min-width:70px;text-align:center;">
+            หน้า ${currentPage} / ${totalPages}
+          </span>
+          <button type="button" id="proj-pg-next" class="proj-pg-btn" ${currentPage >= totalPages ? "disabled" : ""} title="ถัดไป">ถัดไป ▶</button>
+          <button type="button" id="proj-pg-last" class="proj-pg-btn" ${currentPage >= totalPages ? "disabled" : ""} title="หน้าสุดท้าย">⏭ ท้ายสุด</button>
+        </div>
+      </div>
     `;
+
+    const selPageSize = listWrap.querySelector("#proj-page-size-select");
+    const btnFirst = listWrap.querySelector("#proj-pg-first");
+    const btnPrev = listWrap.querySelector("#proj-pg-prev");
+    const btnNext = listWrap.querySelector("#proj-pg-next");
+    const btnLast = listWrap.querySelector("#proj-pg-last");
+
+    selPageSize?.addEventListener("change", (e) => {
+      pageSize = e.target.value === "all" ? "all" : parseInt(e.target.value, 10);
+      currentPage = 1;
+      renderTaskList();
+    });
+
+    btnFirst?.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage = 1;
+        renderTaskList();
+        listWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+
+    btnPrev?.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTaskList();
+        listWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+
+    btnNext?.addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTaskList();
+        listWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+
+    btnLast?.addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage = totalPages;
+        renderTaskList();
+        listWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
   };
 
   const tabsWrap = root.querySelector("#project-tabs-bar");
@@ -1168,6 +1252,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
       btn.addEventListener("click", () => {
         currentProjectId = btn.dataset.projTab;
         currentMemberId = "all";
+        currentPage = 1;
         tabsWrap.querySelectorAll(".btn-proj-tab").forEach((b) => b.classList.toggle("is-active", b.dataset.projTab === currentProjectId));
         renderActiveBox(currentProjectId);
         renderMemberChips(currentProjectId);
@@ -1197,6 +1282,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
         projDatePreset = btn.dataset.projDatePreset;
         projStartDate = "";
         projEndDate = "";
+        currentPage = 1;
         if (startDateInput) startDateInput.value = "";
         if (endDateInput) endDateInput.value = "";
         datePresetWrap.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.toggle("is-active", b === btn));
@@ -1209,6 +1295,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
   startDateInput?.addEventListener("change", () => {
     projStartDate = startDateInput.value;
     projDatePreset = "custom";
+    currentPage = 1;
     datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.remove("is-active"));
     renderMemberChips(currentProjectId);
     renderTaskList();
@@ -1217,6 +1304,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
   endDateInput?.addEventListener("change", () => {
     projEndDate = endDateInput.value;
     projDatePreset = "custom";
+    currentPage = 1;
     datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.remove("is-active"));
     renderMemberChips(currentProjectId);
     renderTaskList();
@@ -1227,6 +1315,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
     projDatePreset = "custom";
     projStartDate = todayStr;
     projEndDate = todayStr;
+    currentPage = 1;
     if (startDateInput) startDateInput.value = todayStr;
     if (endDateInput) endDateInput.value = todayStr;
     datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.remove("is-active"));
@@ -1238,6 +1327,7 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
     projDatePreset = "all";
     projStartDate = "";
     projEndDate = "";
+    currentPage = 1;
     if (startDateInput) startDateInput.value = "";
     if (endDateInput) endDateInput.value = "";
     datePresetWrap?.querySelectorAll(".btn-proj-date-pill").forEach((b) => b.classList.toggle("is-active", b.dataset.projDatePreset === "all"));
