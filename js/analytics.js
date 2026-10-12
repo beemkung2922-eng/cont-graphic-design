@@ -682,61 +682,43 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
         <div>
           <div class="analytics-chart-title">
             <span>สัดส่วนงานแยกตามโปรเจกต์ (Project Workload & Explorer)</span>
-            <span class="analytics-chart-tag tag-comparison">Horizontal Bar & Drill-down</span>
+            <span class="analytics-chart-tag tag-comparison">Horizontal Bar</span>
           </div>
           <div class="analytics-chart-sub">
-            กราฟแท่งแนวนอน (Horizontal Bar Chart) แสดงสัดส่วนงานแต่ละโปรเจกต์ · คลิกแท่งหรือเลือกแท็บเพื่อดูงาน · เลือกคนได้ (Filter by Designer) · คลิกดูรายละเอียดของงานแต่ละชิ้นได้ทันที
+            กราฟแท่งแนวนอนแสดงสัดส่วนงานแยกตามโปรเจกต์ · คลิกแท่งกราฟหรือเลือกแท็บเพื่อดูงาน · กรองตามดีไซเนอร์ · คลิกดูรายละเอียดงานได้ทันที
           </div>
-        </div>
-        <div class="row" style="gap:6px;align-items:center;">
-          <button type="button" class="btn btn-sm btn-primary" id="btn-chart-mode-bar" style="font-size:0.75rem;padding:5px 12px;">
-            📊 แท่งแนวนอน (Bar)
-          </button>
-          <button type="button" class="btn btn-sm btn-ghost" id="btn-chart-mode-pie" style="font-size:0.75rem;padding:5px 12px;">
-            🥧 วงกลม (Pie)
-          </button>
         </div>
       </div>
 
+      <!-- แถบเลือกโปรเจกต์ (Project Selection Tabs Bar) เต็มตา เลื่อนแนวนอนง่าย -->
+      <div class="project-tabs-scroll" id="project-tabs-bar" style="margin-bottom:18px;">
+        <button type="button" class="btn-proj-tab is-active" data-proj-tab="all">
+          <span>📁 ทุกโปรเจกต์ (${allCount} งาน)</span>
+        </button>
+        ${breakdown.projects.map((p) => `
+          <button type="button" class="btn-proj-tab" data-proj-tab="${escapeHtml(p.id)}">
+            <span class="proj-tab-dot" style="background:${p.color};"></span>
+            <span class="proj-tab-name">${escapeHtml(p.name)}</span>
+            <span class="proj-tab-count">${p.count} งาน (${p.percentageStr})</span>
+          </button>
+        `).join("")}
+      </div>
+
+      <!-- 2 คอลัมน์สมดุลกัน พอดีขอบ ไม่โบ๋ -->
       <div class="project-breakdown-grid">
-        <!-- Left: Horizontal Bar Chart with Legend -->
+        <!-- ซ้าย: กราฟแท่งแนวนอน (Horizontal Bar Chart) -->
         <div class="project-pie-column">
-          <div class="project-chart-type-label" id="project-chart-type-label" style="font-size:0.78rem;font-weight:700;color:var(--cyan);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
-            <span>📊 กราฟแท่งแนวนอน (Top 10 โปรเจกต์หลัก)</span>
-            <span style="font-size:0.7rem;color:#8a90a4;">คลิกที่แท่งเพื่อเลือกโปรเจกต์</span>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--cyan);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <span>📊 10 โปรเจกต์ที่มีงานมากที่สุด (Top 10 Projects)</span>
+            <span style="font-size:0.72rem;color:#8a90a4;">คลิกที่แท่งเพื่อเลือกดู</span>
           </div>
-          <div class="project-pie-chart-wrap" style="height:320px;">
+          <div class="project-pie-chart-wrap" style="height:330px;">
             <canvas id="chart-project-visual"></canvas>
-          </div>
-          <div class="project-pie-legend" id="project-pie-legend">
-            ${breakdown.projects.map((p) => `
-              <button type="button" class="project-legend-btn" data-pick-project="${escapeHtml(p.id)}">
-                <span class="proj-legend-dot" style="background:${p.color};"></span>
-                <span class="proj-legend-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
-                <span class="proj-legend-badge" style="background:${p.color}26;color:${p.color};border:1px solid ${p.color}66;">
-                  ${p.percentageStr}
-                </span>
-                <span class="proj-legend-count">${p.count} งาน</span>
-              </button>
-            `).join("")}
           </div>
         </div>
 
-        <!-- Right: Project Selection Tabs & Active KPI Box -->
+        <!-- ขวา: Active Project Focus Card สมดุลกับฝั่งซ้าย ไร้ช่องว่างโบ๋ -->
         <div class="project-explorer-column">
-          <div class="project-tabs-scroll" id="project-tabs-bar">
-            <button type="button" class="btn-proj-tab is-active" data-proj-tab="all">
-              <span>📁 ทุกโปรเจกต์ (${allCount} งาน)</span>
-            </button>
-            ${breakdown.projects.map((p) => `
-              <button type="button" class="btn-proj-tab" data-proj-tab="${escapeHtml(p.id)}">
-                <span class="proj-tab-dot" style="background:${p.color};"></span>
-                <span class="proj-tab-name">${escapeHtml(p.name)}</span>
-                <span class="proj-tab-count">${p.count} งาน (${p.percentageStr})</span>
-              </button>
-            `).join("")}
-          </div>
-
           <div class="project-active-box" id="project-active-box">
             <!-- Populated dynamically by bindProjectExplorer -->
           </div>
@@ -819,6 +801,16 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
             <span class="kpi-lbl">ส่งมอบสำเร็จ</span>
           </div>
         </div>
+        <div class="proj-box-summary-list" style="margin-top:16px;padding-top:14px;border-top:1px solid #1f2130;">
+          <div style="font-size:0.75rem;font-weight:700;color:#9ca2bb;margin-bottom:8px;">โปรเจกต์ที่มีสัดส่วนงานมากที่สุด (Top Projects):</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${breakdown.projects.slice(0, 5).map((p) => `
+              <span class="badge" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}55;font-size:0.72rem;padding:3px 8px;">
+                ${escapeHtml(p.name)}: <strong>${p.count} งาน</strong> (${p.percentageStr})
+              </span>
+            `).join("")}
+          </div>
+        </div>
       `;
     } else {
       const p = breakdown.projects.find((x) => x.id === projId) || { name: "โปรเจกต์", count: 0, active: 0, completed: 0, review: 0, revision: 0, color: "#19C3EB", percentageStr: "0%" };
@@ -851,6 +843,16 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
           <div class="proj-kpi-item">
             <span class="kpi-val" style="color:var(--green);">${p.completed}</span>
             <span class="kpi-lbl">ส่งมอบสำเร็จ</span>
+          </div>
+        </div>
+        <div class="proj-box-summary-list" style="margin-top:16px;padding-top:14px;border-top:1px solid #1f2130;">
+          <div style="font-size:0.75rem;font-weight:700;color:#9ca2bb;margin-bottom:8px;">ทีมดีไซเนอร์ที่ดูแลโปรเจกต์นี้:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${(p.members || []).map((m) => `
+              <span class="badge badge-neutral" style="font-size:0.72rem;padding:3px 8px;display:inline-flex;align-items:center;gap:4px;">
+                ${escapeHtml(m.member.name)}: <strong>${m.count} งาน</strong>
+              </span>
+            `).join("") || '<span style="font-size:0.72rem;color:#777;">ไม่ระบุสมาชิก</span>'}
           </div>
         </div>
       `;
@@ -1107,14 +1109,6 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
       const tabBtn = tabsWrap?.querySelector(`[data-proj-tab="${pId}"]`);
       if (tabBtn) tabBtn.click();
     });
-  });
-
-  // Chart type mode toggle: Horizontal Bar vs Pie
-  root.querySelector("#btn-chart-mode-bar")?.addEventListener("click", () => {
-    renderProjectDistributionChart(root, "bar");
-  });
-  root.querySelector("#btn-chart-mode-pie")?.addEventListener("click", () => {
-    renderProjectDistributionChart(root, "pie");
   });
 
   renderActiveBox(currentProjectId);
@@ -1850,17 +1844,14 @@ export function initAdvancedCharts({
     });
   }
 
-  // 5. Project Workload & Distribution Chart (Default: Horizontal Bar Chart)
-  renderProjectDistributionChart(container, _currentProjectChartMode);
+  // 5. Project Workload & Distribution Chart (Horizontal Bar Chart)
+  renderProjectDistributionChart(container);
 }
 
-let _currentProjectChartMode = "bar"; // Default to Horizontal Bar Chart as requested
-
 /**
- * Renders either Horizontal Bar Chart or Pie Chart for Projects
+ * Renders Horizontal Bar Chart for Top 10 Projects
  */
-export function renderProjectDistributionChart(container = document, mode = _currentProjectChartMode) {
-  _currentProjectChartMode = mode;
+export function renderProjectDistributionChart(container = document) {
   destroyAdvancedChart("projectVisual");
 
   const canvas = container.querySelector("#chart-project-visual") || document.querySelector("#chart-project-visual");
@@ -1871,29 +1862,9 @@ export function renderProjectDistributionChart(container = document, mode = _cur
   const pieMembers = _analyticsContext.members || [];
   const breakdown = calculateProjectBreakdown(pieTasks, pieProjects, pieMembers);
 
-  // Update label
-  const labelEl = container.querySelector("#project-chart-type-label") || document.querySelector("#project-chart-type-label");
-  if (labelEl) {
-    if (mode === "bar") {
-      labelEl.innerHTML = `<span>📊 กราฟแท่งแนวนอน (Top 10 โปรเจกต์หลัก)</span><span style="font-size:0.7rem;color:#8a90a4;">คลิกที่แท่งเพื่อเลือกโปรเจกต์</span>`;
-    } else {
-      labelEl.innerHTML = `<span>🥧 กราฟวงกลม (สัดส่วนโปรเจกต์ทั้งหมด)</span><span style="font-size:0.7rem;color:#8a90a4;">คลิกที่ชิ้นเค้กเพื่อเลือกโปรเจกต์</span>`;
-    }
-  }
-
-  // Update toggle button active styles
-  const root = container.querySelector("#project-breakdown-card") || document.querySelector("#project-breakdown-card") || container;
-  if (root) {
-    const btnBar = root.querySelector("#btn-chart-mode-bar");
-    const btnPie = root.querySelector("#btn-chart-mode-pie");
-    if (btnBar) btnBar.className = `btn btn-sm ${mode === "bar" ? "btn-primary" : "btn-ghost"}`;
-    if (btnPie) btnPie.className = `btn btn-sm ${mode === "pie" ? "btn-primary" : "btn-ghost"}`;
-  }
-
-  if (mode === "bar") {
-    // 📊 HORIZONTAL BAR CHART (Top 10 Projects)
-    const topProjects = breakdown.projects.slice(0, 10);
-    _advancedChartInstances["projectVisual"] = new Chart(canvas, {
+  // 📊 HORIZONTAL BAR CHART (Top 10 Projects)
+  const topProjects = breakdown.projects.slice(0, 10);
+  _advancedChartInstances["projectVisual"] = new Chart(canvas, {
       type: "bar",
       data: {
         labels: topProjects.map((p) => (p.name.length > 24 ? p.name.slice(0, 23) + "…" : p.name)),
@@ -1956,54 +1927,6 @@ export function renderProjectDistributionChart(container = document, mode = _cur
         },
       },
     });
-  } else {
-    // 🥧 PIE CHART
-    _advancedChartInstances["projectVisual"] = new Chart(canvas, {
-      type: "pie",
-      data: {
-        labels: breakdown.chartLabels,
-        datasets: [{
-          data: breakdown.chartData,
-          backgroundColor: breakdown.chartColors,
-          borderColor: "#10111a",
-          borderWidth: 2,
-          hoverOffset: 10,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: "#12131d",
-            borderColor: "#30344d",
-            borderWidth: 1,
-            padding: 10,
-            callbacks: {
-              label: (ctx) => {
-                const val = ctx.parsed || 0;
-                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : "0";
-                return ` ${ctx.label}: ${val} งาน (${pct}%)`;
-              },
-            },
-          },
-        },
-        onClick: (evt, elements) => {
-          if (elements && elements.length > 0) {
-            const idx = elements[0].index;
-            const picked = breakdown.projects[idx];
-            if (picked) {
-              const rootEl = container.querySelector("#project-breakdown-card") || document.querySelector("#project-breakdown-card");
-              const tabBtn = rootEl?.querySelector(`[data-proj-tab="${picked.id}"]`);
-              if (tabBtn) tabBtn.click();
-            }
-          }
-        },
-      },
-    });
-  }
 }
 
 /**
