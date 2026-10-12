@@ -7285,6 +7285,76 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
 }
 
+/* ==========================================================================
+   INTERACTIVE PERMISSION TOGGLE SWITCHES (MATCHING REFERENCE IMAGE 1)
+   ========================================================================== */
+.owner-perm-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffc61a;
+  color: #0d0f18;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(255, 198, 26, 0.4);
+}
+
+.role-perm-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  margin: 0 auto;
+}
+
+.role-perm-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.role-perm-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #202638;
+  border: 1px solid #36415e;
+  border-radius: 22px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.role-perm-slider::before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #94a3b8;
+  border-radius: 50%;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.role-perm-switch input:checked + .role-perm-slider {
+  background-color: #ffc61a;
+  border-color: #ffc61a;
+}
+
+.role-perm-switch input:checked + .role-perm-slider::before {
+  transform: translateX(22px);
+  background-color: #0d0f18;
+}
+
+.role-perm-switch:hover .role-perm-slider {
+  border-color: #4f5d82;
+}
+
+
 
 
 
