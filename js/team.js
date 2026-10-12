@@ -198,7 +198,6 @@ export async function render(ctx) {
   const idleMembersAll = analyzed.filter((a) => a.activeTasks.length === 0);
   const totalItemsAll = activeAll.reduce((sum, task) => sum + Number(task.item_count || 1), 0);
 
-  let currentMainTab = "workload"; // "workload" | "permissions" | "people"
   let currentView = "table"; // "table" | "cards"
   let currentFilter = "all"; // "all" | "working" | "today" | "review" | "overdue" | "available"
   let currentSearch = "";
@@ -261,97 +260,133 @@ export async function render(ctx) {
     }).join("");
   };
 
-  /* ─── 2. Permissions Matrix Table (Thai) ─── */
-  const permissionsList = [
+  /* ─── 2. Permissions Matrix State & Definitions (Interactive Toggles) ─── */
+  const DEFAULT_PERMS = {
+    create_task: { head: true, designer: true, requester: true, viewer: false },
+    work_task:   { head: true, designer: true, requester: false, viewer: false },
+    review_task: { head: true, designer: false, requester: false, viewer: false },
+    assign_task: { head: true, designer: false, requester: false, viewer: false },
+    request_rev: { head: true, designer: true, requester: true, viewer: false },
+    view_report: { head: true, designer: true, requester: false, viewer: false },
+    manage_role: { head: true, designer: false, requester: false, viewer: false },
+    download:    { head: true, designer: true, requester: true, viewer: true },
+  };
+
+  const PERM_DEFINITIONS = [
     {
+      key: "create_task",
       action: "สร้างและเปิดบรีฟงานใหม่ (Create Tasks)",
       desc: "เปิดคำขอชิ้นงานใหม่ กรอกขนาด ช่องทาง และสเปกบรีฟ",
-      head: true,
-      designer: true,
-      requester: true,
-      viewer: false
     },
     {
+      key: "work_task",
       action: "รับงานและลงมือผลิต (Drafting & Work)",
       desc: "เปลี่ยนสถานะเป็นกำลังดราฟต์ ทำอาร์ตเวิร์ก และแก้งาน",
-      head: true,
-      designer: true,
-      requester: false,
-      viewer: false
     },
     {
+      key: "review_task",
       action: "ตรวจสอบ อนุมัติ และส่งมอบงาน (Review & Deliver)",
       desc: "ตรวจคุณภาพงาน อนุมัติแบบ และส่งมอบงานสำเร็จ",
-      head: true,
-      designer: false,
-      requester: false,
-      viewer: false
     },
     {
+      key: "assign_task",
       action: "มอบหมายงานและเปลี่ยนคนทำ (Assign Team)",
       desc: "แจกจ่ายงานให้ดีไซเนอร์ในทีมตามคิวงานที่เหมาะสม",
-      head: true,
-      designer: false,
-      requester: false,
-      viewer: false
     },
     {
+      key: "request_rev",
       action: "ส่งข้อเสนอแนะและขอแก้ไขงาน (Request Revisions)",
       desc: "คอมเมนต์จุดแก้ไข และระบุรอบแก้ไขงาน",
-      head: true,
-      designer: true,
-      requester: true,
-      viewer: false
     },
     {
+      key: "view_report",
       action: "ดูรายงานสถิติและประสิทธิภาพทีม (View Reports)",
       desc: "เข้าถึงแดชบอร์ดสรุป Throughput, Heatmap และ SLA",
-      head: true,
-      designer: true,
-      requester: false,
-      viewer: false
     },
     {
+      key: "manage_role",
       action: "จัดการสมาชิกและกำหนดบทบาท (Manage Roles)",
       desc: "เพิ่ม/ลบสมาชิก และตั้งค่าสิทธิ์ผู้ใช้งานในระบบ",
-      head: true,
-      designer: false,
-      requester: false,
-      viewer: false
     },
     {
+      key: "download",
       action: "ดาวน์โหลดชิ้นงานและไฟล์แนบ (Download Assets)",
       desc: "ดาวน์โหลดไฟล์ภาพที่เสร็จแล้ว และ Export ข้อมูลรายงาน",
-      head: true,
-      designer: true,
-      requester: true,
-      viewer: true
-    }
+    },
   ];
 
+  const getSavedPermissions = () => {
+    try {
+      const raw = localStorage.getItem("CONT_ROLE_PERMS");
+      if (!raw) return { ...DEFAULT_PERMS };
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_PERMS, ...parsed };
+    } catch {
+      return { ...DEFAULT_PERMS };
+    }
+  };
+
+  const savePermissions = (perms) => {
+    try {
+      localStorage.setItem("CONT_ROLE_PERMS", JSON.stringify(perms));
+    } catch (e) {
+      console.error("Save perms error", e);
+    }
+  };
+
   const renderPermissionsTableHtml = () => {
-    return permissionsList.map((p) => {
+    const perms = getSavedPermissions();
+    return PERM_DEFINITIONS.map((p) => {
+      const row = perms[p.key] || DEFAULT_PERMS[p.key];
       return `
         <tr>
           <td>
-            <div style="font-weight:600;color:#f8fafc;">${escapeHtml(p.action)}</div>
-            <div style="font-size:0.75rem;color:#94a3b8;margin-top:2px;">${escapeHtml(p.desc)}</div>
+            <div style="font-weight:600;color:#f8fafc;font-size:0.84rem;">${escapeHtml(p.action)}</div>
+            <div style="font-size:0.74rem;color:#94a3b8;margin-top:2px;">${escapeHtml(p.desc)}</div>
           </td>
           <td>
-            ${p.head ? '<span class="perm-toggle-on" title="มีสิทธิ์">✓</span>' : '<span class="perm-toggle-off">✕</span>'}
+            <span class="owner-perm-check" title="หัวหน้าทีมมีสิทธิ์สูงสุดทุกด้าน">✓</span>
           </td>
           <td>
-            ${p.designer ? '<span class="perm-toggle-on" title="มีสิทธิ์">✓</span>' : '<span class="perm-toggle-off">✕</span>'}
+            <label class="role-perm-switch" title="คลิกสลับสิทธิ์ ดีไซเนอร์">
+              <input type="checkbox" class="perm-toggle-input" data-perm-key="${p.key}" data-role="designer" ${row.designer ? "checked" : ""}>
+              <span class="role-perm-slider"></span>
+            </label>
           </td>
           <td>
-            ${p.requester ? '<span class="perm-toggle-on" title="มีสิทธิ์">✓</span>' : '<span class="perm-toggle-off">✕</span>'}
+            <label class="role-perm-switch" title="คลิกสลับสิทธิ์ ผู้ขอรับบริการ">
+              <input type="checkbox" class="perm-toggle-input" data-perm-key="${p.key}" data-role="requester" ${row.requester ? "checked" : ""}>
+              <span class="role-perm-slider"></span>
+            </label>
           </td>
           <td>
-            ${p.viewer ? '<span class="perm-toggle-on" title="มีสิทธิ์">✓</span>' : '<span class="perm-toggle-off">✕</span>'}
+            <label class="role-perm-switch" title="คลิกสลับสิทธิ์ ผู้ชมทั่วไป">
+              <input type="checkbox" class="perm-toggle-input" data-perm-key="${p.key}" data-role="viewer" ${row.viewer ? "checked" : ""}>
+              <span class="role-perm-slider"></span>
+            </label>
           </td>
         </tr>
       `;
     }).join("");
+  };
+
+  const bindPermToggles = () => {
+    qsa(".perm-toggle-input").forEach((toggle) => {
+      toggle.addEventListener("change", (e) => {
+        const key = e.target.dataset.permKey;
+        const role = e.target.dataset.role;
+        const isChecked = e.target.checked;
+        const currentPerms = getSavedPermissions();
+        if (!currentPerms[key]) currentPerms[key] = { ...DEFAULT_PERMS[key] };
+        currentPerms[key][role] = isChecked;
+        savePermissions(currentPerms);
+
+        const roleName = role === "designer" ? "ดีไซเนอร์" : role === "requester" ? "ผู้ขอรับบริการ" : "ผู้ชมทั่วไป";
+        const permItem = PERM_DEFINITIONS.find((p) => p.key === key);
+        const actionName = permItem ? permItem.action.split(" ")[0] : "สิทธิ์";
+        toast(`อัปเดตสิทธิ์ "${actionName}" ของ ${roleName} เป็น ${isChecked ? 'เปิดใช้งาน' : 'ปิดการใช้งาน'} แล้ว`, "success");
+      });
+    });
   };
 
   /* ─── 3. Member Cards View ─── */
@@ -540,121 +575,14 @@ export async function render(ctx) {
     return list;
   };
 
-  const renderActiveTabContent = () => {
-    const container = qs("#team-tab-content-slot");
+  /* ─── 6. Workload Slot Renderer ─── */
+  const renderWorkloadSlot = () => {
+    const container = qs("#team-workload-results-slot");
     if (!container) return;
 
-    if (currentMainTab === "permissions") {
-      // Permissions Matrix View
-      container.innerHTML = `
-        <div class="team-bento-panel" style="margin-bottom:24px;">
-          <div class="team-panel-head">
-            <div>
-              <h3 class="team-panel-title">สิทธิ์การใช้งานแต่ละบทบาท (What each role can do)</h3>
-              <p class="team-panel-sub">หัวหน้าทีมมีสิทธิ์สูงสุดทุกด้าน; กำหนดสิทธิ์ตามหน้าที่รับผิดชอบของแต่ละบทบาท</p>
-            </div>
-            ${canManage(ctx.member) ? `
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-perm-manage-members">
-                ⚙️ แก้ไขสิทธิ์สมาชิก
-              </button>
-            ` : ''}
-          </div>
-
-          <div class="perm-matrix-wrap">
-            <table class="perm-matrix-table">
-              <thead>
-                <tr>
-                  <th style="width:42%;">สิทธิ์การใช้งาน (Permissions)</th>
-                  <th>👑 หัวหน้าทีม (Head)</th>
-                  <th>🎨 ดีไซเนอร์ (Designer)</th>
-                  <th>📝 ผู้ขอรับบริการ (Requester)</th>
-                  <th>👁️ ผู้ชมทั่วไป (Viewer)</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${renderPermissionsTableHtml()}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="perm-roles-guide">
-            <div class="perm-role-card">
-              <div class="perm-role-head">
-                <span>👑 หัวหน้าทีม (Team Head / Supervisor)</span>
-              </div>
-              <p class="perm-role-desc">
-                มีสิทธิ์สูงสุดในการควบคุมคิวงานทั้งหมด ตรวจสอบ อนุมัติ ส่งมอบงาน มอบหมายงาน และจัดการสมาชิกในระบบ
-              </p>
-            </div>
-
-            <div class="perm-role-card">
-              <div class="perm-role-head">
-                <span>🎨 ดีไซเนอร์ (Visual & Design)</span>
-              </div>
-              <p class="perm-role-desc">
-                รับบรีฟงาน ลงมือดราฟต์ แก้ไขงาน ส่งงานตรวจ และดูรายงานประสิทธิภาพของตนเอง
-              </p>
-            </div>
-
-            <div class="perm-role-card">
-              <div class="perm-role-head">
-                <span>📝 ผู้ขอรับบริการ (Requester)</span>
-              </div>
-              <p class="perm-role-desc">
-                เปิดบรีฟงานใหม่ ติดตามสถานะชิ้นงาน และส่งข้อเสนอแนะรอบแก้ไข (Revision)
-              </p>
-            </div>
-
-            <div class="perm-role-card">
-              <div class="perm-role-head">
-                <span>👁️ ผู้ชมทั่วไป (Viewer)</span>
-              </div>
-              <p class="perm-role-desc">
-                ดูภาพรวมสถานะความคืบหน้าของงาน และดาวน์โหลดชิ้นงานที่เสร็จแล้ว (Read-only)
-              </p>
-            </div>
-          </div>
-        </div>
-      `;
-      qs("#btn-perm-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
-      return;
-    }
-
-    if (currentMainTab === "people") {
-      // People List View
-      container.innerHTML = `
-        <div class="team-bento-panel" style="margin-bottom:24px;">
-          <div class="team-panel-head">
-            <div>
-              <h3 class="team-panel-title">สมาชิกในทีมทั้งหมด (People List)</h3>
-              <p class="team-panel-sub">${members.length} สมาชิกที่ลงทะเบียนในระบบ (${designers.length} ดีไซเนอร์ · ${requesters.length} ผู้ขอรับบริการ)</p>
-            </div>
-            ${canManage(ctx.member) ? `
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-people-manage-members">
-                ⚙️ จัดการสิทธิ์ & สมาชิก
-              </button>
-            ` : ''}
-          </div>
-          <div class="people-rows-wrap">
-            ${renderPeopleRowsHtml()}
-          </div>
-        </div>
-      `;
-      qs("#btn-people-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
-      container.querySelectorAll(".btn-quick-assign").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          openCreateTask(ctx, { assignee_id: btn.dataset.memberId });
-        });
-      });
-      return;
-    }
-
-    // Default: Workload & Tasks View
     const list = getFilteredData();
-    let workloadContent = "";
-
     if (!list.length) {
-      workloadContent = `
+      container.innerHTML = `
         <div class="card" style="background:#141828;border:1px solid #2b344c;text-align:center;padding:36px 20px;">
           <div style="font-size:1.5rem;margin-bottom:8px;">○</div>
           <div style="font-size:1rem;font-weight:700;color:#ffffff;margin-bottom:4px;">ไม่พบสมาชิกตามตัวกรองที่เลือก</div>
@@ -662,84 +590,24 @@ export async function render(ctx) {
           <button class="btn btn-sm btn-secondary" id="reset-team-filter" style="margin-top:14px;">ล้างตัวกรองทั้งหมด</button>
         </div>
       `;
-    } else if (currentView === "cards") {
-      workloadContent = `<div class="grid grid-2">${list.map(renderMemberCard).join("")}</div>`;
-    } else {
-      workloadContent = renderTableView(list);
+      qs("#reset-team-filter", container)?.addEventListener("click", () => {
+        currentFilter = "all";
+        currentSearch = "";
+        const searchInput = qs("#team-search-input");
+        if (searchInput) searchInput.value = "";
+        qsa(".filter-pills .filter-pill").forEach((btn) => {
+          btn.classList.toggle("is-active", btn.dataset.filter === "all");
+        });
+        renderWorkloadSlot();
+      });
+      return;
     }
 
-    container.innerHTML = `
-      <!-- Filter Bar for Workload -->
-      <div class="filter-bar" style="justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <div class="field grow" style="min-width:240px">
-          <div class="search-inline" style="min-width:0">
-            <span>⌕</span>
-            <input id="team-search-input" type="search" value="${escapeHtml(currentSearch)}" placeholder="ค้นหาชื่อสมาชิก ชื่องาน หรือ Project..." />
-          </div>
-        </div>
-
-        <div class="filter-pills" style="margin:4px 0">
-          <button class="filter-pill ${currentFilter === 'all' ? 'is-active' : ''}" data-filter="all">
-            ทั้งหมด <span class="pill-count">(${members.length})</span>
-          </button>
-          <button class="filter-pill ${currentFilter === 'working' ? 'is-active' : ''}" data-filter="working">
-            กำลังทำอยู่ <span class="pill-count">(${workingMembersAll.length})</span>
-          </button>
-          <button class="filter-pill ${currentFilter === 'today' ? 'is-active' : ''}" data-filter="today">
-            ส่งวันนี้ <span class="pill-count">(${analyzed.filter((a) => a.todayTasks.length > 0).length})</span>
-          </button>
-          <button class="filter-pill ${currentFilter === 'review' ? 'is-active' : ''}" data-filter="review">
-            รอตรวจ <span class="pill-count">(${analyzed.filter((a) => a.reviewTasks.length > 0).length})</span>
-          </button>
-          <button class="filter-pill ${currentFilter === 'overdue' ? 'is-active' : ''}" data-filter="overdue">
-            งานเลท <span class="pill-count">(${analyzed.filter((a) => a.overdueTasks.length > 0).length})</span>
-          </button>
-          <button class="filter-pill ${currentFilter === 'available' ? 'is-active' : ''}" data-filter="available">
-            พร้อมรับงาน <span class="pill-count">(${idleMembersAll.length})</span>
-          </button>
-        </div>
-
-        <div class="team-view-toggle">
-          <button class="team-view-btn ${currentView === 'table' ? 'is-active' : ''}" data-view="table" title="มุมมองตารางภาพรวม">
-            ตารางภาพรวม
-          </button>
-          <button class="team-view-btn ${currentView === 'cards' ? 'is-active' : ''}" data-view="cards" title="มุมมองการ์ดรายละเอียด">
-            การ์ดสมาชิก
-          </button>
-        </div>
-      </div>
-
-      <!-- Main Workload Table or Cards -->
-      <div id="team-workload-results-slot">
-        ${workloadContent}
-      </div>
-    `;
-
-    // Bind workload search and filters
-    qs("#team-search-input")?.addEventListener("input", (e) => {
-      currentSearch = e.target.value.trim();
-      renderActiveTabContent();
-    });
-
-    qsa(".filter-pills .filter-pill", container).forEach((btn) => {
-      btn.addEventListener("click", () => {
-        currentFilter = btn.dataset.filter;
-        renderActiveTabContent();
-      });
-    });
-
-    qsa(".team-view-toggle .team-view-btn", container).forEach((btn) => {
-      btn.addEventListener("click", () => {
-        currentView = btn.dataset.view;
-        renderActiveTabContent();
-      });
-    });
-
-    qs("#reset-team-filter", container)?.addEventListener("click", () => {
-      currentFilter = "all";
-      currentSearch = "";
-      renderActiveTabContent();
-    });
+    if (currentView === "cards") {
+      container.innerHTML = `<div class="grid grid-2">${list.map(renderMemberCard).join("")}</div>`;
+    } else {
+      container.innerHTML = renderTableView(list);
+    }
 
     container.querySelectorAll(".btn-assign-member").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -748,7 +616,7 @@ export async function render(ctx) {
     });
   };
 
-  /* ─────────── Full Page Shell ─────────── */
+  /* ─────────── Full Page Shell (Tabs removed per request; Full Unified View) ─────────── */
   qs("#page-content").innerHTML = `
     <!-- Top Header -->
     <div class="page-header" style="margin-bottom:20px;">
@@ -768,7 +636,7 @@ export async function render(ctx) {
       </div>
     </div>
 
-    <!-- Overview Stats: 5 High-Contrast Bento Cards (Preserved exactly as requested) -->
+    <!-- Overview Stats: 5 High-Contrast Bento Cards (Preserved exactly) -->
     <div class="team-stats-grid">
       <div class="team-stat-card card-white">
         <div class="stat-label">สมาชิกในทีม</div>
@@ -801,41 +669,199 @@ export async function render(ctx) {
       </div>
     </div>
 
-    <!-- Modern Segmented Navigation Tabs (Solves cluttered view) -->
-    <div class="team-nav-tabs">
-      <button type="button" class="team-nav-tab is-active" data-main-tab="workload">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span>ภาพรวมภาระงานวันนี้ (Workload & Tasks)</span>
-      </button>
-      <button type="button" class="team-nav-tab" data-main-tab="permissions">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>สิทธิ์การใช้งานแต่ละบทบาท (What each role can do)</span>
-      </button>
-      <button type="button" class="team-nav-tab" data-main-tab="people">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>รายชื่อสมาชิกในทีม (People List)</span>
-      </button>
+    <!-- Dual Bento Panels: People List (Left) + Interactive Permissions Matrix (Right) -->
+    <div class="team-bento-dual">
+      <!-- Left Panel: People List -->
+      <div class="team-bento-panel">
+        <div class="team-panel-head">
+          <div>
+            <h3 class="team-panel-title">รายชื่อสมาชิกในทีม (People List)</h3>
+            <p class="team-panel-sub">${members.length} สมาชิก (${designers.length} ดีไซเนอร์ · ${requesters.length} ผู้ขอรับบริการ)</p>
+          </div>
+          ${canManage(ctx.member) ? `
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-people-manage-members" style="font-size:0.78rem;padding:6px 12px;">
+              ⚙️ จัดการสิทธิ์
+            </button>
+          ` : ""}
+        </div>
+        <div class="people-rows-wrap">
+          ${renderPeopleRowsHtml()}
+        </div>
+      </div>
+
+      <!-- Right Panel: Permissions Matrix (Interactive & Configurable) -->
+      <div class="team-bento-panel">
+        <div class="team-panel-head">
+          <div>
+            <h3 class="team-panel-title">สิทธิ์การใช้งานแต่ละบทบาท (What each role can do)</h3>
+            <p class="team-panel-sub">หัวหน้าทีมมีสิทธิ์สูงสุดทุกด้าน; สวิตช์สามารถคลิกปรับเปลี่ยนสิทธิ์ได้ตามต้องการ</p>
+          </div>
+          <button type="button" class="btn btn-sm btn-ghost" id="btn-reset-perms" style="font-size:0.75rem;color:#94a3b8;padding:5px 8px;" title="คืนค่าสิทธิ์เริ่มต้น">
+            ↺ รีเซ็ตสิทธิ์
+          </button>
+        </div>
+
+        <div class="perm-matrix-wrap">
+          <table class="perm-matrix-table">
+            <thead>
+              <tr>
+                <th style="width:42%;">สิทธิ์การใช้งาน (Permissions)</th>
+                <th>👑 หัวหน้าทีม (Head)</th>
+                <th>🎨 ดีไซเนอร์ (Designer)</th>
+                <th>📝 ผู้ขอรับบริการ (Requester)</th>
+                <th>👁️ ผู้ชมทั่วไป (Viewer)</th>
+              </tr>
+            </thead>
+            <tbody id="perm-matrix-body">
+              ${renderPermissionsTableHtml()}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="perm-roles-guide">
+          <div class="perm-role-card">
+            <div class="perm-role-head">
+              <span>👑 หัวหน้าทีม (Team Head / Supervisor)</span>
+            </div>
+            <p class="perm-role-desc">
+              มีสิทธิ์สูงสุดในการควบคุมคิวงานทั้งหมด ตรวจสอบ อนุมัติ ส่งมอบงาน มอบหมายงาน และจัดการสมาชิกในระบบ
+            </p>
+          </div>
+
+          <div class="perm-role-card">
+            <div class="perm-role-head">
+              <span>🎨 ดีไซเนอร์ (Visual & Design)</span>
+            </div>
+            <p class="perm-role-desc">
+              รับบรีฟงาน ลงมือดราฟต์ แก้ไขงาน ส่งงานตรวจ และดูรายงานประสิทธิภาพของตนเอง
+            </p>
+          </div>
+
+          <div class="perm-role-card">
+            <div class="perm-role-head">
+              <span>📝 ผู้ขอรับบริการ (Requester)</span>
+            </div>
+            <p class="perm-role-desc">
+              เปิดบรีฟงานใหม่ ติดตามสถานะชิ้นงาน และส่งข้อเสนอแนะรอบแก้ไข (Revision)
+            </p>
+          </div>
+
+          <div class="perm-role-card">
+            <div class="perm-role-head">
+              <span>👁️ ผู้ชมทั่วไป (Viewer)</span>
+            </div>
+            <p class="perm-role-desc">
+              ดูภาพรวมสถานะความคืบหน้าของงาน และดาวน์โหลดชิ้นงานที่เสร็จแล้ว (Read-only)
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Active Tab Content Container -->
-    <div id="team-tab-content-slot"></div>
+    <!-- Section Header for Workload -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:32px 0 16px;padding-top:20px;border-top:1px solid #23293c;">
+      <div>
+        <h3 style="font-size:1.25rem;font-weight:700;color:#ffffff;margin:0 0 4px;">ภาพรวมภาระงานและรายการงานปัจจุบัน (Workload & Tasks)</h3>
+        <p style="color:#94a3b8;font-size:0.82rem;margin:0;">ติดตามสถานะงาน กำหนดส่ง และการกระจายงานของสมาชิกแต่ละคน</p>
+      </div>
+    </div>
+
+    <!-- Filter Bar for Workload -->
+    <div class="filter-bar" style="justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div class="field grow" style="min-width:240px">
+        <div class="search-inline" style="min-width:0">
+          <span>⌕</span>
+          <input id="team-search-input" type="search" value="${escapeHtml(currentSearch)}" placeholder="ค้นหาชื่อสมาชิก ชื่องาน หรือ Project..." />
+        </div>
+      </div>
+
+      <div class="filter-pills" style="margin:4px 0">
+        <button class="filter-pill ${currentFilter === 'all' ? 'is-active' : ''}" data-filter="all">
+          ทั้งหมด <span class="pill-count">(${members.length})</span>
+        </button>
+        <button class="filter-pill ${currentFilter === 'working' ? 'is-active' : ''}" data-filter="working">
+          กำลังทำอยู่ <span class="pill-count">(${workingMembersAll.length})</span>
+        </button>
+        <button class="filter-pill ${currentFilter === 'today' ? 'is-active' : ''}" data-filter="today">
+          ส่งวันนี้ <span class="pill-count">(${analyzed.filter((a) => a.todayTasks.length > 0).length})</span>
+        </button>
+        <button class="filter-pill ${currentFilter === 'review' ? 'is-active' : ''}" data-filter="review">
+          รอตรวจ <span class="pill-count">(${analyzed.filter((a) => a.reviewTasks.length > 0).length})</span>
+        </button>
+        <button class="filter-pill ${currentFilter === 'overdue' ? 'is-active' : ''}" data-filter="overdue">
+          งานเลท <span class="pill-count">(${analyzed.filter((a) => a.overdueTasks.length > 0).length})</span>
+        </button>
+        <button class="filter-pill ${currentFilter === 'available' ? 'is-active' : ''}" data-filter="available">
+          พร้อมรับงาน <span class="pill-count">(${idleMembersAll.length})</span>
+        </button>
+      </div>
+
+      <div class="team-view-toggle">
+        <button class="team-view-btn ${currentView === 'table' ? 'is-active' : ''}" data-view="table" title="มุมมองตารางภาพรวม">
+          ตารางภาพรวม
+        </button>
+        <button class="team-view-btn ${currentView === 'cards' ? 'is-active' : ''}" data-view="cards" title="มุมมองการ์ดรายละเอียด">
+          การ์ดสมาชิก
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workload Table or Cards -->
+    <div id="team-workload-results-slot"></div>
   `;
 
-  // Bind Main Navigation Tabs
-  qsa(".team-nav-tabs .team-nav-tab").forEach((tabBtn) => {
-    tabBtn.addEventListener("click", () => {
-      qsa(".team-nav-tabs .team-nav-tab").forEach((b) => b.classList.remove("is-active"));
-      tabBtn.classList.add("is-active");
-      currentMainTab = tabBtn.dataset.mainTab;
-      renderActiveTabContent();
+  // Bind permissions interactive toggles
+  bindPermToggles();
+
+  // Reset permissions button listener
+  qs("#btn-reset-perms")?.addEventListener("click", () => {
+    localStorage.removeItem("CONT_ROLE_PERMS");
+    const tbody = qs("#perm-matrix-body");
+    if (tbody) tbody.innerHTML = renderPermissionsTableHtml();
+    bindPermToggles();
+    toast("รีเซ็ตสิทธิ์เริ่มต้นเรียบร้อยแล้ว", "info");
+  });
+
+  // Top header and people panel buttons
+  qs("#team-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
+  qs("#btn-people-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
+  qs("#team-create-task")?.addEventListener("click", () => openCreateTask(ctx));
+
+  // Quick assign buttons in people rows
+  qsa(".btn-quick-assign").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      openCreateTask(ctx, { assignee_id: btn.dataset.memberId });
     });
   });
 
-  // Top header button listeners
-  qs("#team-manage-members")?.addEventListener("click", () => openManageTeamModal(ctx));
-  qs("#team-create-task")?.addEventListener("click", () => openCreateTask(ctx));
+  // Workload search input
+  qs("#team-search-input")?.addEventListener("input", (e) => {
+    currentSearch = e.target.value.trim();
+    renderWorkloadSlot();
+  });
 
-  renderActiveTabContent();
+  // Workload filter pills
+  qsa(".filter-pills .filter-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      qsa(".filter-pills .filter-pill").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      currentFilter = btn.dataset.filter;
+      renderWorkloadSlot();
+    });
+  });
+
+  // Workload view toggle (table vs cards)
+  qsa(".team-view-toggle .team-view-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      qsa(".team-view-toggle .team-view-btn").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      currentView = btn.dataset.view;
+      renderWorkloadSlot();
+    });
+  });
+
+  // Initial render of workload slot
+  renderWorkloadSlot();
 }
 
 /* ─── Manage Team Modal (Fixes white box & invisible text in Image 3) ─── */
