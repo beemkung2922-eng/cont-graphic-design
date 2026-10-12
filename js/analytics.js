@@ -1472,7 +1472,7 @@ export function renderMemberComparisonHtml({
             <span>KKP Creative Operations & Workload Deep-Dive (วิเคราะห์ภาระงานและเจาะลึกรายคน)</span>
           </h3>
           <p>
-            วิเคราะห์ภาระงานรายคน, สัดส่วนประเภทงาน 4 หมวด, Throughput การส่งมอบรายสัปดาห์, Heatmap รายวัน และเปรียบเทียบ Est vs Actual Hours
+            วิเคราะห์ภาระงานรายคน, สัดส่วนประเภทงาน 4 หมวด, Throughput การส่งมอบรายสัปดาห์ และสัดส่วนงานรายโปรเจกต์
           </p>
         </div>
         <div class="comparison-toolbar">
@@ -1561,50 +1561,7 @@ export function renderMemberComparisonHtml({
         </div>
       </div>
 
-      <!-- 3. Chart 5: Heat Map คนคูณวัน (Designer × Day Heatmap) -->
-      <div class="analytics-chart-card">
-        <div class="analytics-chart-header">
-          <div>
-            <div class="analytics-chart-title">
-              <span>Heat Map คนคูณวัน (ดูว่าสัปดาห์นี้ / สัปดาห์หน้า ใครหนักวันไหน)</span>
-              <span class="analytics-chart-tag tag-matrix">Matrix</span>
-            </div>
-            <div class="analytics-chart-sub">
-              Matrix คน × วัน: เฉดสีเข้มขึ้นตามจำนวนเดดไลน์และโหลดงาน (เขียว = ปกติ, ส้ม = งานแน่น, แดง = OVERLOAD)
-            </div>
-          </div>
-          <div class="row" style="gap:6px;">
-            <button type="button" class="btn btn-sm ${weekOffset === 0 ? "btn-primary" : "btn-ghost"}" id="btn-heatmap-this-week">
-              สัปดาห์นี้ (This Week)
-            </button>
-            <button type="button" class="btn btn-sm ${weekOffset === 1 ? "btn-primary" : "btn-ghost"}" id="btn-heatmap-next-week">
-              สัปดาห์หน้า (Next Week)
-            </button>
-          </div>
-        </div>
-
-        ${renderHeatmapTableHtml(heatmapData)}
-      </div>
-
-      <!-- 4. Chart 6: Scatter / Bubble Chart (Est_Hours vs Actual_Hours) -->
-      <div class="analytics-chart-card">
-        <div class="analytics-chart-header">
-          <div>
-            <div class="analytics-chart-title">
-              <span>Scatter / Bubble: เทียบ Est_Hours กับ Actual_Hours</span>
-              <span class="analytics-chart-tag tag-scatter">Bubble Score</span>
-            </div>
-            <div class="analytics-chart-sub">
-              แกน X = เวลาประเมิน (Est) | แกน Y = เวลาจริง (Actual) | ขนาดฟอง (Bubble) = จำนวนชิ้นงาน & Multitask Score (จุดสีแดงคือใช้เวลาเกินแผน)
-            </div>
-          </div>
-        </div>
-        <div class="analytics-canvas-wrap" style="height:310px;">
-          <canvas id="chart-bubble-hours"></canvas>
-        </div>
-      </div>
-
-      <!-- 4.5. สัดส่วนงานแยกตามโปรเจกต์ (Pie Chart) & สำรวจงานรายโปรเจกต์ (Project Explorer) -->
+      <!-- 3. สัดส่วนงานแยกตามโปรเจกต์ (Pie Chart) & สำรวจงานรายโปรเจกต์ (Project Explorer) -->
       ${renderProjectBreakdownHtml({
         breakdown: projectBreakdown,
         projects,
@@ -1873,75 +1830,7 @@ export function initAdvancedCharts({
     });
   }
 
-  // 5. Scatter / Bubble Chart (Est_Hours vs Actual_Hours)
-  destroyAdvancedChart("bubbleHours");
-  const bubbleCanvas = container.querySelector("#chart-bubble-hours");
-  if (bubbleCanvas) {
-    const bubbleData = calculateBubbleChartData(taskScope, allTasks.length ? allTasks : effectiveTasks, selectedMemberId);
-    _advancedChartInstances["bubbleHours"] = new Chart(bubbleCanvas, {
-      type: "bubble",
-      data: {
-        datasets: [
-          {
-            label: "งานที่ใช้เวลาตามแผน / เร็วกว่าแผน (On / Ahead)",
-            data: bubbleData.underTrack,
-            backgroundColor: "rgba(25, 195, 235, 0.65)",
-            borderColor: "#19C3EB",
-            borderWidth: 1.5,
-          },
-          {
-            label: "งานที่ใช้เวลาจริงเกินแผน (Over Est. Hours)",
-            data: bubbleData.overTrack,
-            backgroundColor: "rgba(232, 32, 42, 0.75)",
-            borderColor: "#E8202A",
-            borderWidth: 1.5,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "top",
-            labels: { color: "#c5cadc", font: { family: "IBM Plex Sans Thai", size: 11 }, usePointStyle: true },
-          },
-          tooltip: {
-            backgroundColor: "#12131d",
-            borderColor: "#30344d",
-            borderWidth: 1,
-            padding: 12,
-            callbacks: {
-              label: (ctx) => {
-                const pt = ctx.raw;
-                return [
-                  `ชื่องาน: ${pt.title}`,
-                  `ผู้รับผิดชอบ: ${pt.assigneeName}`,
-                  `Est Hours: ${pt.x} ชม. | Actual: ${pt.y} ชม.`,
-                  `ขนาดงาน: ${pt.items} ชิ้น (Multitask Score: ${pt.multitaskScore})`,
-                  `หมวดหมู่: ${pt.categoryLabel}`,
-                ];
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            title: { display: true, text: "Estimated Hours (เวลาประเมิน)", color: "#9ca2bb", font: { size: 11 } },
-            grid: { color: "#232536" },
-            ticks: { color: "#888d9f", font: { family: "Space Mono", size: 10 } },
-          },
-          y: {
-            title: { display: true, text: "Actual Hours (เวลาที่ใช้จริง)", color: "#9ca2bb", font: { size: 11 } },
-            grid: { color: "#232536" },
-            ticks: { color: "#888d9f", font: { family: "Space Mono", size: 10 } },
-          },
-        },
-      },
-    });
-  }
-
-  // 6. Project Distribution Pie Chart (ตามภาพที่ 3)
+  // 5. Project Distribution Pie Chart (ตามภาพที่ 3)
   destroyAdvancedChart("projectPie");
   const projectPieCanvas = container.querySelector("#chart-project-pie");
   if (projectPieCanvas) {
