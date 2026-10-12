@@ -2070,6 +2070,7 @@ input:focus, select:focus, textarea:focus {
    ========================================================================== */
 
 :root {
+  color-scheme: dark;
   --font-flap: "Bebas Neue", "Impact", "Share Tech Mono", monospace;
   --font-mono: "Share Tech Mono", "Consolas", monospace;
   --rail-bg: #121316;
@@ -2081,6 +2082,41 @@ input:focus, select:focus, textarea:focus {
   --rail-amber-glow: rgba(229, 147, 36, 0.4);
   --rail-green: #38bdf8;
   --rail-red: #ef4444;
+}
+
+/* Global Dark Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2e3247 #11121b;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #11121b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #282c40;
+  border-radius: 4px;
+  border: 2px solid #11121b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3e4460;
+}
+
+::-webkit-scrollbar-corner {
+  background: #11121b;
 }
 
 /* Split-flap Hero Banner */
@@ -4287,6 +4323,38 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   border: 1px solid #26283b;
   border-radius: 8px;
   position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #2e3247 #11121b;
+}
+
+.deepdive-table-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.deepdive-table-wrap::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.deepdive-table-wrap::-webkit-scrollbar-track {
+  background: #11121b;
+  border-radius: 4px;
+}
+
+.deepdive-table-wrap::-webkit-scrollbar-thumb {
+  background: #282c40;
+  border-radius: 4px;
+  border: 2px solid #11121b;
+}
+
+.deepdive-table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #3e4460;
+}
+
+.deepdive-table-wrap::-webkit-scrollbar-corner {
+  background: #11121b;
 }
 
 .deepdive-table {
@@ -4348,79 +4416,6 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   font-weight: 600;
 }
 
-/* Deepdive Pagination Bar */
-.proj-pagination-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 12px 16px;
-  background: #141521;
-  border: 1px solid #26283b;
-  border-radius: 8px;
-}
-
-.proj-pagination-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.82rem;
-  color: #8f95ae;
-  flex-wrap: wrap;
-}
-
-.proj-pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.proj-pg-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 6px 12px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  background: #1c1e2e;
-  border: 1px solid #2f334a;
-  border-radius: 5px;
-  color: #e1e4ef;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-
-.proj-pg-btn:hover:not(:disabled) {
-  background: #282c42;
-  border-color: var(--cyan, #19C3EB);
-  color: #ffffff;
-}
-
-.proj-pg-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.proj-pg-select {
-  background: #191b29;
-  color: #ffffff;
-  border: 1px solid #2e3247;
-  border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 0.78rem;
-  outline: none;
-  cursor: pointer;
-}
-
-.proj-pg-select:focus {
-  border-color: var(--cyan, #19C3EB);
-}
-
 /* ─────────────────────────────────────────────────────────────────────────
    RESPONSIVE MEMBER DEEP-DIVE (DESKTOP TABLE vs MOBILE TASK CARDS)
    ───────────────────────────────────────────────────────────────────────── */
@@ -4447,17 +4442,26 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #2e3247 #11121b;
   }
-  .proj-pagination-bar {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
+  .deepdive-mobile-cards::-webkit-scrollbar {
+    width: 6px;
   }
-  .proj-pagination-info {
-    justify-content: space-between;
+  .deepdive-mobile-cards::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
-  .proj-pagination-controls {
-    justify-content: center;
+  .deepdive-mobile-cards::-webkit-scrollbar-track {
+    background: #11121b;
+  }
+  .deepdive-mobile-cards::-webkit-scrollbar-thumb {
+    background: #282c40;
+    border-radius: 4px;
+  }
+  .deepdive-mobile-cards::-webkit-scrollbar-thumb:hover {
+    background: #3e4460;
   }
 }
 
