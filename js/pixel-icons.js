@@ -238,4 +238,15 @@ export const pixelIcons = {
       <rect x="5" y="11" width="2" height="2" fill="currentColor"/>
     </svg>
   `,
+
+  sparkle: `
+    <svg class="pixel-art" width="18" height="18" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="7" y="1" width="2" height="4" fill="#FFC61A"/>
+      <rect x="7" y="11" width="2" height="4" fill="#FFC61A"/>
+      <rect x="1" y="7" width="4" height="2" fill="#FFC61A"/>
+      <rect x="11" y="7" width="4" height="2" fill="#FFC61A"/>
+      <rect x="5" y="5" width="6" height="6" fill="#FFE58F"/>
+      <rect x="6" y="6" width="4" height="4" fill="#FFFFFF"/>
+    </svg>
+  `,
 };
