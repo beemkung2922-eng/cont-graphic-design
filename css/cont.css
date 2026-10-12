@@ -5142,3 +5142,327 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
     padding: 18px;
   }
 }
+
+/* ========================================================
+   PROJECT WORKLOAD BREAKDOWN (PIE CHART) & PROJECT EXPLORER
+   ======================================================== */
+.project-breakdown-card {
+  margin-top: 24px;
+}
+
+.project-breakdown-grid {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 960px) {
+  .project-breakdown-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Left: Pie Chart Column */
+.project-pie-column {
+  background: #10111a;
+  border: 1px solid #232536;
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.project-pie-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 250px;
+}
+
+.project-pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.project-legend-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #161824;
+  border: 1px solid #282a3c;
+  border-radius: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.project-legend-btn:hover {
+  background: #1f2233;
+  border-color: var(--cyan);
+  transform: translateX(2px);
+}
+
+.proj-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.proj-legend-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #ffffff;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proj-legend-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.proj-legend-count {
+  font-size: 0.72rem;
+  color: #8a90a4;
+  font-family: var(--font-mono, monospace);
+}
+
+/* Right: Project Explorer Column */
+.project-explorer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.project-tabs-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.btn-proj-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #161824;
+  border: 1px solid #282a3c;
+  border-radius: 6px;
+  color: #c5cadc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-proj-tab:hover {
+  background: #1f2233;
+  color: #ffffff;
+  border-color: #3b3f57;
+}
+
+.btn-proj-tab.is-active {
+  background: rgba(25, 195, 235, 0.15);
+  border-color: var(--cyan);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(25, 195, 235, 0.25);
+}
+
+.proj-tab-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.proj-tab-count {
+  font-size: 0.7rem;
+  color: #8a90a4;
+  background: #0d0e16;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono, monospace);
+}
+
+.btn-proj-tab.is-active .proj-tab-count {
+  background: rgba(25, 195, 235, 0.3);
+  color: #ffffff;
+}
+
+/* Active Project Info Box */
+.project-active-box {
+  background: #10111a;
+  border: 1px solid #232536;
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+
+.proj-box-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #1f2130;
+  margin-bottom: 14px;
+}
+
+.proj-box-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.proj-dot-inline {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.proj-box-sub {
+  font-size: 0.76rem;
+  color: #8c92a7;
+  margin-top: 3px;
+}
+
+.proj-box-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .proj-box-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+.proj-kpi-item {
+  background: #161824;
+  border: 1px solid #282a3c;
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.proj-kpi-item .kpi-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  color: #ffffff;
+}
+
+.proj-kpi-item .kpi-lbl {
+  font-size: 0.72rem;
+  color: #8c92a7;
+}
+
+/* Task Explorer & Member Filter */
+.project-tasks-explorer {
+  background: #10111a;
+  border: 1px solid #232536;
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.proj-filter-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #1f2130;
+}
+
+.proj-filter-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proj-filter-member-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.proj-member-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #161824;
+  border: 1px solid #282a3c;
+  border-radius: 6px;
+  color: #c5cadc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.proj-member-pill:hover {
+  background: #1f2233;
+  color: #ffffff;
+  border-color: #3b3f57;
+}
+
+.proj-member-pill.is-active {
+  background: var(--cyan);
+  color: #000000;
+  font-weight: 700;
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px rgba(25, 195, 235, 0.4);
+}
+
+.member-pill-count {
+  font-size: 0.68rem;
+  font-family: var(--font-mono, monospace);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.proj-member-pill.is-active .member-pill-count {
+  background: rgba(0, 0, 0, 0.2);
+  color: #000000;
+}
+
+.proj-tasks-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
