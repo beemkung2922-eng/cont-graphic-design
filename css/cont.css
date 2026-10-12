@@ -4280,10 +4280,13 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
 /* Deep-dive Detailed Table */
 .deepdive-table-wrap {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 560px;
   -webkit-overflow-scrolling: touch;
   background: #11121b;
   border: 1px solid #26283b;
   border-radius: 8px;
+  position: relative;
 }
 
 .deepdive-table {
@@ -4294,12 +4297,16 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
 }
 
 .deepdive-table th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   background: #181a28;
   color: #9ca2bb;
   font-weight: 600;
   text-align: left;
   padding: 12px 14px;
   border-bottom: 1px solid #2b2e44;
+  box-shadow: 0 1px 0 #2b2e44;
   font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -4341,6 +4348,79 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   font-weight: 600;
 }
 
+/* Deepdive Pagination Bar */
+.proj-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: #141521;
+  border: 1px solid #26283b;
+  border-radius: 8px;
+}
+
+.proj-pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: #8f95ae;
+  flex-wrap: wrap;
+}
+
+.proj-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proj-pg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #1c1e2e;
+  border: 1px solid #2f334a;
+  border-radius: 5px;
+  color: #e1e4ef;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.proj-pg-btn:hover:not(:disabled) {
+  background: #282c42;
+  border-color: var(--cyan, #19C3EB);
+  color: #ffffff;
+}
+
+.proj-pg-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.proj-pg-select {
+  background: #191b29;
+  color: #ffffff;
+  border: 1px solid #2e3247;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.proj-pg-select:focus {
+  border-color: var(--cyan, #19C3EB);
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    RESPONSIVE MEMBER DEEP-DIVE (DESKTOP TABLE vs MOBILE TASK CARDS)
    ───────────────────────────────────────────────────────────────────────── */
@@ -4363,6 +4443,21 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
     gap: 12px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    max-height: 560px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+  }
+  .proj-pagination-bar {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .proj-pagination-info {
+    justify-content: space-between;
+  }
+  .proj-pagination-controls {
+    justify-content: center;
   }
 }
 
