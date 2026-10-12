@@ -1,5 +1,12 @@
-import { escapeHtml, avatar, roleLabel, formatDateTime, formatDate, statusBadge, projectFor } from "./formatters.js";
+import { escapeHtml, avatar, roleLabel, formatDateTime, formatDate, statusBadge, projectFor, memberFor } from "./formatters.js";
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
+
+let _analyticsContext = {
+  tasks: [],
+  allTasks: [],
+  projects: [],
+  members: [],
+};
 
 export const MONTH_NAMES_TH = [
   "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
@@ -549,10 +556,557 @@ export function calculateBubbleChartData(tasks, allTasks, selectedMemberId = "al
   return { underTrack, overTrack, total: enriched.length };
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   7. PROJECT WORKLOAD BREAKDOWN (PIE CHART) & PROJECT EXPLORER
+───────────────────────────────────────────────────────────────────────── */
+export const PROJECT_PALETTE = [
+  "#19C3EB", // Cyan
+  "#FFC61A", // Yellow
+  "#FF7A00", // Orange
+  "#E8202A", // Red
+  "#8B4DFF", // Purple
+  "#2BD14B", // Green
+  "#FF007F", // Neon Pink
+  "#00D2D3", // Bright Teal
+  "#5F27CD", // Deep Iris
+  "#FFA801", // Gold
+  "#48DBFB", // Sky Blue
+  "#1DD1A1", // Mint
+];
+
+/**
+ * Calculates task distribution and workload breakdown per Project
+ */
+export function calculateProjectBreakdown(tasks = [], projects = [], members = []) {
+  const totalTasks = tasks.length;
+  const projectMap = new Map();
+
+  // Initialize registered projects
+  projects.forEach((proj, idx) => {
+    projectMap.set(proj.id, {
+      id: proj.id,
+      name: proj.name || "โปรเจกต์",
+      color: proj.color || PROJECT_PALETTE[idx % PROJECT_PALETTE.length],
+      tasks: [],
+    });
+  });
+
+  // Collect tasks under project
+  tasks.forEach((task) => {
+    const proj = projectFor(task, projects);
+    const pId = proj ? proj.id : (task.project_id || "unassigned");
+    if (!projectMap.has(pId)) {
+      const pName = proj ? proj.name : (task.project_id ? `โปรเจกต์ (${task.project_id.slice(0, 8)})` : "งานทั่วไป (ไม่ระบุโปรเจกต์)");
+      projectMap.set(pId, {
+        id: pId,
+        name: pName,
+        color: PROJECT_PALETTE[projectMap.size % PROJECT_PALETTE.length],
+        tasks: [],
+      });
+    }
+    projectMap.get(pId).tasks.push(task);
+  });
+
+  let list = Array.from(projectMap.values()).map((p) => {
+    const pTasks = p.tasks;
+    const count = pTasks.length;
+    const percentage = totalTasks > 0 ? ((count / totalTasks) * 100).toFixed(1) : "0.0";
+    const active = pTasks.filter((t) => t.status !== "completed").length;
+    const completed = pTasks.filter((t) => t.status === "completed").length;
+    const review = pTasks.filter((t) => t.status === "review").length;
+    const revision = pTasks.filter((t) => t.status === "revision").length;
+    const brief = pTasks.filter((t) => t.status === "brief").length;
+    const drafting = pTasks.filter((t) => t.status === "drafting").length;
+
+    // Member distribution in this project
+    const memberMap = new Map();
+    pTasks.forEach((t) => {
+      const m = memberFor(t, members);
+      const mId = m ? m.id : (t.assignee_id || "unassigned");
+      if (!memberMap.has(mId)) {
+        memberMap.set(mId, {
+          member: m || { id: mId, name: "ยังไม่ระบุดีไซเนอร์" },
+          count: 0,
+          tasks: [],
+        });
+      }
+      const entry = memberMap.get(mId);
+      entry.count++;
+      entry.tasks.push(t);
+    });
+
+    const projectMembers = Array.from(memberMap.values()).sort((a, b) => b.count - a.count);
+
+    return {
+      ...p,
+      count,
+      percentage: Number(percentage),
+      percentageStr: `${percentage}%`,
+      active,
+      completed,
+      review,
+      revision,
+      brief,
+      drafting,
+      members: projectMembers,
+    };
+  });
+
+  if (totalTasks > 0) {
+    list = list.filter((p) => p.count > 0);
+  }
+  list.sort((a, b) => b.count - a.count);
+
+  list.forEach((p, idx) => {
+    p.color = PROJECT_PALETTE[idx % PROJECT_PALETTE.length];
+  });
+
+  return {
+    projects: list,
+    totalTasks,
+    chartLabels: list.map((p) => p.name),
+    chartData: list.map((p) => p.count),
+    chartColors: list.map((p) => p.color),
+  };
+}
+
+/**
+ * Renders the HTML for the Project Breakdown Pie Chart & Project Explorer
+ */
+export function renderProjectBreakdownHtml({ breakdown, projects = [], members = [] }) {
+  const allCount = breakdown.totalTasks;
+
+  return `
+    <div class="analytics-chart-card project-breakdown-card" id="project-breakdown-card">
+      <div class="analytics-chart-header">
+        <div>
+          <div class="analytics-chart-title">
+            <span>สัดส่วนงานแยกตามโปรเจกต์ (Project Workload & Explorer)</span>
+            <span class="analytics-chart-tag tag-comparison">Pie Chart & Drill-down</span>
+          </div>
+          <div class="analytics-chart-sub">
+            สัดส่วนงานแต่ละโปรเจกต์ (Pie Chart) · คลิกเลือกโปรเจกต์เพื่อดูว่ามีงานอะไรบ้างกี่งาน · เลือกคนได้ (Filter by Designer) · คลิกดูรายละเอียดของงานแต่ละชิ้นได้ทันที
+          </div>
+        </div>
+      </div>
+
+      <div class="project-breakdown-grid">
+        <!-- Left: Pie Chart with Legend (ตามสไตล์ภาพที่ 3) -->
+        <div class="project-pie-column">
+          <div class="project-pie-chart-wrap">
+            <canvas id="chart-project-pie"></canvas>
+          </div>
+          <div class="project-pie-legend" id="project-pie-legend">
+            ${breakdown.projects.map((p) => `
+              <button type="button" class="project-legend-btn" data-pick-project="${escapeHtml(p.id)}">
+                <span class="proj-legend-dot" style="background:${p.color};"></span>
+                <span class="proj-legend-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+                <span class="proj-legend-badge" style="background:${p.color}26;color:${p.color};border:1px solid ${p.color}66;">
+                  ${p.percentageStr}
+                </span>
+                <span class="proj-legend-count">${p.count} งาน</span>
+              </button>
+            `).join("")}
+          </div>
+        </div>
+
+        <!-- Right: Project Selection Tabs & Active KPI Box -->
+        <div class="project-explorer-column">
+          <div class="project-tabs-scroll" id="project-tabs-bar">
+            <button type="button" class="btn-proj-tab is-active" data-proj-tab="all">
+              <span>📁 ทุกโปรเจกต์ (${allCount} งาน)</span>
+            </button>
+            ${breakdown.projects.map((p) => `
+              <button type="button" class="btn-proj-tab" data-proj-tab="${escapeHtml(p.id)}">
+                <span class="proj-tab-dot" style="background:${p.color};"></span>
+                <span class="proj-tab-name">${escapeHtml(p.name)}</span>
+                <span class="proj-tab-count">${p.count} งาน (${p.percentageStr})</span>
+              </button>
+            `).join("")}
+          </div>
+
+          <div class="project-active-box" id="project-active-box">
+            <!-- Populated dynamically by bindProjectExplorer -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Task Deep-Dive & Designer Filter Container -->
+      <div class="project-tasks-explorer" id="project-tasks-explorer">
+        <div class="proj-filter-head">
+          <div class="proj-filter-label">
+            <span>👤</span>
+            <span>เลือกคนในโปรเจกต์ (Filter by Designer):</span>
+          </div>
+          <div class="proj-filter-member-chips" id="proj-filter-member-chips">
+            <!-- Populated dynamically by bindProjectExplorer -->
+          </div>
+        </div>
+
+        <div class="proj-tasks-meta-bar">
+          <div id="proj-tasks-count-label" style="font-size:0.88rem;font-weight:700;color:#ffffff;">
+            รายการงานใน: ทุกโปรเจกต์ (${allCount} งาน)
+          </div>
+          <span style="font-size:0.75rem;color:#8f95ae;">
+            คลิกที่ชื่องานหรือกดปุ่ม "ดูรายละเอียดงาน" เพื่อเปิดดูเนื้อหาบรีฟและไฟล์
+          </span>
+        </div>
+
+        <div id="proj-tasks-list-container">
+          <!-- Populated dynamically by bindProjectExplorer -->
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Binds interactivity for Project Explorer, Designer Filter, and Task Drilldown
+ */
+export function bindProjectExplorer(container, { tasks = [], projects = [], members = [] } = {}) {
+  const root = (container && typeof container.querySelector === "function")
+    ? (container.querySelector("#project-breakdown-card") || container)
+    : document.querySelector("#project-breakdown-card");
+  if (!root || !root.querySelector("#project-tabs-bar")) return;
+
+  const breakdown = calculateProjectBreakdown(tasks, projects, members);
+  let currentProjectId = "all";
+  let currentMemberId = "all";
+
+  const renderActiveBox = (projId) => {
+    const box = root.querySelector("#project-active-box");
+    if (!box) return;
+
+    if (projId === "all") {
+      const activeCount = tasks.filter((t) => t.status !== "completed").length;
+      const completedCount = tasks.filter((t) => t.status === "completed").length;
+      const reviewRevCount = tasks.filter((t) => t.status === "review" || t.status === "revision").length;
+      box.innerHTML = `
+        <div class="proj-box-head">
+          <div>
+            <div class="proj-box-title" style="color:var(--cyan);">ภาพรวมทุกโปรเจกต์ (All Projects Overview)</div>
+            <div class="proj-box-sub">รวบรวมงานกราฟิกดีไซน์และแคมเปญทั้งหมดของทีม KKP (${breakdown.projects.length} โปรเจกต์)</div>
+          </div>
+          <span class="badge badge-info">${tasks.length} งานทั้งหมด</span>
+        </div>
+        <div class="proj-box-kpis">
+          <div class="proj-kpi-item">
+            <span class="kpi-val">${tasks.length}</span>
+            <span class="kpi-lbl">งานทั้งหมด</span>
+          </div>
+          <div class="proj-kpi-item">
+            <span class="kpi-val" style="color:var(--cyan);">${activeCount}</span>
+            <span class="kpi-lbl">กำลังทำ (Active)</span>
+          </div>
+          <div class="proj-kpi-item">
+            <span class="kpi-val" style="color:var(--yellow);">${reviewRevCount}</span>
+            <span class="kpi-lbl">รอตรวจ / แก้ไข</span>
+          </div>
+          <div class="proj-kpi-item">
+            <span class="kpi-val" style="color:var(--green);">${completedCount}</span>
+            <span class="kpi-lbl">ส่งมอบสำเร็จ</span>
+          </div>
+        </div>
+      `;
+    } else {
+      const p = breakdown.projects.find((x) => x.id === projId) || { name: "โปรเจกต์", count: 0, active: 0, completed: 0, review: 0, revision: 0, color: "#19C3EB", percentageStr: "0%" };
+      box.innerHTML = `
+        <div class="proj-box-head">
+          <div>
+            <div class="proj-box-title" style="color:${p.color};">
+              <span class="proj-dot-inline" style="background:${p.color};"></span>
+              <span>${escapeHtml(p.name)}</span>
+            </div>
+            <div class="proj-box-sub">สัดส่วนในทีม: ${p.percentageStr} · สมาชิกที่รับผิดชอบ ${p.members?.length || 0} คน</div>
+          </div>
+          <span class="badge" style="background:${p.color}26;color:${p.color};border:1px solid ${p.color}66;">
+            ${p.count} งาน (${p.percentageStr})
+          </span>
+        </div>
+        <div class="proj-box-kpis">
+          <div class="proj-kpi-item">
+            <span class="kpi-val">${p.count}</span>
+            <span class="kpi-lbl">งานในโปรเจกต์นี้</span>
+          </div>
+          <div class="proj-kpi-item">
+            <span class="kpi-val" style="color:var(--cyan);">${p.active}</span>
+            <span class="kpi-lbl">กำลังทำ (Active)</span>
+          </div>
+          <div class="proj-kpi-item">
+            <span class="kpi-val" style="color:var(--yellow);">${p.review + p.revision}</span>
+            <span class="kpi-lbl">รอตรวจ / แก้ไข</span>
+          </div>
+          <div class="proj-kpi-item">
+            <span class="kpi-val" style="color:var(--green);">${p.completed}</span>
+            <span class="kpi-lbl">ส่งมอบสำเร็จ</span>
+          </div>
+        </div>
+      `;
+    }
+  };
+
+  const renderMemberChips = (projId) => {
+    const chipsWrap = root.querySelector("#proj-filter-member-chips");
+    if (!chipsWrap) return;
+
+    let availableMembers = [];
+    if (projId === "all") {
+      const mMap = new Map();
+      tasks.forEach((t) => {
+        const m = memberFor(t, members);
+        const mId = m ? m.id : (t.assignee_id || "unassigned");
+        if (!mMap.has(mId)) {
+          mMap.set(mId, { member: m || { id: mId, name: "ยังไม่ระบุ" }, count: 0 });
+        }
+        mMap.get(mId).count++;
+      });
+      availableMembers = Array.from(mMap.values()).sort((a, b) => b.count - a.count);
+    } else {
+      const p = breakdown.projects.find((x) => x.id === projId);
+      availableMembers = p ? p.members : [];
+    }
+
+    const totalInScope = projId === "all" ? tasks.length : (breakdown.projects.find((x) => x.id === projId)?.count || 0);
+
+    chipsWrap.innerHTML = `
+      <button type="button" class="proj-member-pill ${currentMemberId === "all" ? "is-active" : ""}" data-proj-member="all">
+        <span>👥 ทุกคน (${totalInScope})</span>
+      </button>
+      ${availableMembers.map((item) => `
+        <button type="button" class="proj-member-pill ${currentMemberId === item.member.id ? "is-active" : ""}" data-proj-member="${escapeHtml(item.member.id)}">
+          <span>${item.member.avatar_url ? avatar(item.member, "avatar-xs") : "👤"}</span>
+          <span>${escapeHtml(item.member.name)}</span>
+          <span class="member-pill-count">${item.count}</span>
+        </button>
+      `).join("")}
+    `;
+
+    chipsWrap.querySelectorAll("[data-proj-member]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentMemberId = btn.dataset.projMember;
+        chipsWrap.querySelectorAll(".proj-member-pill").forEach((b) => b.classList.toggle("is-active", b.dataset.projMember === currentMemberId));
+        renderTaskList();
+      });
+    });
+  };
+
+  const renderTaskList = () => {
+    const listWrap = root.querySelector("#proj-tasks-list-container");
+    const countLabel = root.querySelector("#proj-tasks-count-label");
+    if (!listWrap) return;
+
+    let scopedTasks = tasks;
+    if (currentProjectId !== "all") {
+      scopedTasks = tasks.filter((t) => {
+        const proj = projectFor(t, projects);
+        const pId = proj ? proj.id : (t.project_id || "unassigned");
+        return pId === currentProjectId;
+      });
+    }
+
+    if (currentMemberId !== "all") {
+      scopedTasks = scopedTasks.filter((t) => (t.assignee_id || "unassigned") === currentMemberId);
+    }
+
+    const enriched = scopedTasks.map((t) => enrichTaskMetrics(t, tasks));
+
+    if (countLabel) {
+      const projName = currentProjectId === "all" ? "ทุกโปรเจกต์" : (breakdown.projects.find((x) => x.id === currentProjectId)?.name || "โปรเจกต์");
+      countLabel.textContent = `รายการงานใน: ${projName} (${enriched.length} งาน)`;
+    }
+
+    if (enriched.length === 0) {
+      listWrap.innerHTML = `
+        <div style="text-align:center;padding:36px 16px;background:#151622;border:1px dashed #2e3247;border-radius:6px;color:#8f95ae;">
+          <div style="font-size:1.8rem;margin-bottom:8px;">📁</div>
+          <div style="font-weight:600;color:#ffffff;font-size:0.95rem;">ไม่พบงานตามเงื่อนไขที่เลือก</div>
+          <div style="font-size:0.8rem;margin-top:4px;">ลองเลือกดูสมาชิกคนอื่น หรือเลือกดูงานทั้งหมดในโปรเจกต์นี้</div>
+        </div>
+      `;
+      return;
+    }
+
+    listWrap.innerHTML = `
+      <div class="deepdive-table-wrap">
+        <table class="deepdive-table">
+          <thead>
+            <tr>
+              <th>ชื่องาน / อาร์ตเวิร์ก</th>
+              <th>ผู้รับผิดชอบ</th>
+              <th>หมวดหมู่</th>
+              <th>โปรเจกต์</th>
+              <th>สถานะ</th>
+              <th>กำหนดส่ง (Deadline)</th>
+              <th style="text-align:center;">Est.</th>
+              <th style="text-align:center;">จริง</th>
+              <th style="text-align:center;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${enriched.map((t) => {
+              const m = memberFor(t, members);
+              const proj = projectFor(t, projects);
+              const isLate = t.status !== "completed" && getTaskDate(t, "deadline") < new Date();
+              const cat = t.category;
+
+              return `
+                <tr>
+                  <td>
+                    <div class="deepdive-task-title-cell">
+                      ${t.preview_url ? `
+                        <img class="deepdive-task-img" src="${escapeHtml(t.preview_url)}" alt="preview" />
+                      ` : `
+                        <div class="deepdive-task-img" style="display:grid;place-items:center;font-size:0.68rem;color:#999;">ART</div>
+                      `}
+                      <div>
+                        <a href="task.html?id=${encodeURIComponent(t.id)}" style="color:#FFFFFF;font-weight:600;text-decoration:none;" class="hover-underline">
+                          ${escapeHtml(t.title)}
+                        </a>
+                        <div style="font-size:0.72rem;color:#8a8f9f;margin-top:2px;">
+                          ${escapeHtml(t.dimensions || "ไม่ระบุขนาด")} · ${escapeHtml(t.channel || "ทั่วไป")}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:7px;">
+                      ${avatar(m, "avatar-xs")}
+                      <span style="font-size:0.8rem;color:#e1e4ef;">${escapeHtml(m?.name || "ยังไม่ระบุ")}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="cat-badge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.border};">
+                      ${cat.icon} ${escapeHtml(cat.shortLabel)}
+                    </span>
+                  </td>
+                  <td>
+                    <span style="color:#c5cadc;font-size:0.78rem;">${escapeHtml(proj?.name || "ทั่วไป")}</span>
+                  </td>
+                  <td>
+                    ${statusBadge(t.status)}
+                  </td>
+                  <td>
+                    <span style="color:${isLate ? "var(--red)" : "#c5cadc"};font-weight:${isLate ? "700" : "500"};font-size:0.8rem;">
+                      ${formatDate(t.deadline_at || t.deadline)} ${isLate ? "⚠️" : ""}
+                    </span>
+                  </td>
+                  <td style="color:#a6acc3;text-align:center;font-size:0.8rem;">${t.estHours}h</td>
+                  <td style="font-weight:600;color:${t.actualHours > t.estHours ? "var(--red)" : "var(--green)"};text-align:center;font-size:0.8rem;">${t.actualHours}h</td>
+                  <td style="text-align:center;">
+                    <a class="btn btn-ghost btn-sm" href="task.html?id=${encodeURIComponent(t.id)}" style="padding:4px 10px;font-size:0.75rem;white-space:nowrap;">
+                      ดูรายละเอียดงาน →
+                    </a>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile / Tablet Cards -->
+      <div class="deepdive-mobile-cards">
+        ${enriched.map((t) => {
+          const m = memberFor(t, members);
+          const proj = projectFor(t, projects);
+          const isLate = t.status !== "completed" && getTaskDate(t, "deadline") < new Date();
+          const cat = t.category;
+
+          return `
+            <div class="m-task-card">
+              <div class="m-task-card-top">
+                <div class="m-task-card-thumb">
+                  ${t.preview_url ? `
+                    <img src="${escapeHtml(t.preview_url)}" alt="preview" />
+                  ` : `
+                    <div class="m-task-card-placeholder">ART</div>
+                  `}
+                </div>
+                <div class="m-task-card-main">
+                  <a href="task.html?id=${encodeURIComponent(t.id)}" class="m-task-card-title">
+                    ${escapeHtml(t.title)}
+                  </a>
+                  <div class="m-task-card-sub">
+                    <span class="m-task-card-proj">${escapeHtml(proj?.name || "ทั่วไป")}</span>
+                    ${t.dimensions ? `<span class="m-task-card-dim">· ${escapeHtml(t.dimensions)}</span>` : ""}
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+                ${avatar(m, "avatar-xs")}
+                <span style="font-size:0.78rem;color:#e1e4ef;font-weight:500;">${escapeHtml(m?.name || "ยังไม่ระบุ")}</span>
+              </div>
+
+              <div class="m-task-card-badges">
+                <span class="cat-badge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.border};">
+                  ${cat.icon} ${escapeHtml(cat.shortLabel)}
+                </span>
+                ${statusBadge(t.status)}
+                <span class="m-task-deadline-pill" style="color:${isLate ? "var(--red)" : "#c5cadc"};font-weight:${isLate ? "700" : "500"};">
+                  📅 ${formatDate(t.deadline_at || t.deadline)} ${isLate ? "⚠️" : ""}
+                </span>
+              </div>
+
+              <div class="m-task-card-metrics">
+                <div class="m-metric-chip">
+                  <span class="m-metric-label">จำนวน:</span>
+                  <span class="m-metric-val">${Number(t.item_count || 1)} ชิ้น</span>
+                </div>
+                <div class="m-metric-chip">
+                  <span class="m-metric-label">Est:</span>
+                  <span class="m-metric-val">${t.estHours}h</span>
+                </div>
+                <div class="m-metric-chip">
+                  <span class="m-metric-label">จริง:</span>
+                  <span class="m-metric-val" style="color:${t.actualHours > t.estHours ? "var(--red)" : "var(--green)"};">${t.actualHours}h</span>
+                </div>
+              </div>
+
+              <div class="m-task-card-action">
+                <a class="btn-pixel btn-pixel-cyan" href="task.html?id=${encodeURIComponent(t.id)}" style="display:flex;width:100%;text-align:center;box-sizing:border-box;padding:9px 12px;font-size:0.82rem;text-decoration:none;justify-content:center;">
+                  ดูรายละเอียดงาน →
+                </a>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  };
+
+  const tabsWrap = root.querySelector("#project-tabs-bar");
+  if (tabsWrap) {
+    tabsWrap.querySelectorAll("[data-proj-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentProjectId = btn.dataset.projTab;
+        currentMemberId = "all";
+        tabsWrap.querySelectorAll(".btn-proj-tab").forEach((b) => b.classList.toggle("is-active", b.dataset.projTab === currentProjectId));
+        renderActiveBox(currentProjectId);
+        renderMemberChips(currentProjectId);
+        renderTaskList();
+      });
+    });
+  }
+
+  root.querySelectorAll("[data-pick-project]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const pId = btn.dataset.pickProject;
+      const tabBtn = tabsWrap?.querySelector(`[data-proj-tab="${pId}"]`);
+      if (tabBtn) tabBtn.click();
+    });
+  });
+
+  renderActiveBox(currentProjectId);
+  renderMemberChips(currentProjectId);
+  renderTaskList();
+}
+
 /**
  * Renders the HTML table for the Heatmap Matrix
  */
 export function renderHeatmapTableHtml(heatmapData) {
+
   const { days, rows, weekOffset } = heatmapData;
 
   return `
@@ -636,6 +1190,19 @@ export function renderMemberComparisonHtml({
     allTasks.length ? allTasks : filteredTasks,
     selectedMemberId
   );
+
+  const projectBreakdown = calculateProjectBreakdown(
+    filteredTasks.length ? filteredTasks : allTasks,
+    projects,
+    members.length ? members : memberStats.map((s) => s.member)
+  );
+
+  _analyticsContext = {
+    tasks: filteredTasks.length ? filteredTasks : allTasks,
+    allTasks,
+    projects,
+    members: members.length ? members : memberStats.map((s) => s.member),
+  };
 
   // Member Quick-Select Pills
   const memberPillsHtml = `
@@ -1037,6 +1604,13 @@ export function renderMemberComparisonHtml({
         </div>
       </div>
 
+      <!-- 4.5. สัดส่วนงานแยกตามโปรเจกต์ (Pie Chart) & สำรวจงานรายโปรเจกต์ (Project Explorer) -->
+      ${renderProjectBreakdownHtml({
+        breakdown: projectBreakdown,
+        projects,
+        members: members.length ? members : memberStats.map((s) => s.member),
+      })}
+
       <!-- 5. Individual Deep-Dive Panel (เมื่อเลือกดูรายคน) -->
       ${deepDivePanelHtml}
     </section>
@@ -1064,6 +1638,7 @@ export function initAdvancedCharts({
   tasks = [],
   allTasks = [],
   members = [],
+  projects = [],
   selectedMemberId = "all",
 } = {}) {
   if (typeof Chart === "undefined") {
@@ -1365,6 +1940,64 @@ export function initAdvancedCharts({
       },
     });
   }
+
+  // 6. Project Distribution Pie Chart (ตามภาพที่ 3)
+  destroyAdvancedChart("projectPie");
+  const projectPieCanvas = container.querySelector("#chart-project-pie");
+  if (projectPieCanvas) {
+    const pieTasks = taskScope.length ? taskScope : (_analyticsContext.tasks.length ? _analyticsContext.tasks : effectiveTasks);
+    const pieProjects = (projects && projects.length) ? projects : (_analyticsContext.projects || []);
+    const pieMembers = (members && members.length) ? members : (_analyticsContext.members || []);
+    const breakdown = calculateProjectBreakdown(pieTasks, pieProjects, pieMembers);
+
+    _advancedChartInstances["projectPie"] = new Chart(projectPieCanvas, {
+      type: "pie",
+      data: {
+        labels: breakdown.chartLabels,
+        datasets: [{
+          data: breakdown.chartData,
+          backgroundColor: breakdown.chartColors,
+          borderColor: "#10111a",
+          borderWidth: 2,
+          hoverOffset: 10,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            backgroundColor: "#12131d",
+            borderColor: "#30344d",
+            borderWidth: 1,
+            padding: 10,
+            callbacks: {
+              label: (ctx) => {
+                const val = ctx.parsed || 0;
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : "0";
+                return ` ${ctx.label}: ${val} งาน (${pct}%)`;
+              },
+            },
+          },
+        },
+        onClick: (evt, elements) => {
+          if (elements && elements.length > 0) {
+            const idx = elements[0].index;
+            const picked = breakdown.projects[idx];
+            if (picked) {
+              const rootEl = container.querySelector("#project-breakdown-card") || document.querySelector("#project-breakdown-card");
+              const tabBtn = rootEl?.querySelector(`[data-proj-tab="${picked.id}"]`);
+              if (tabBtn) tabBtn.click();
+            }
+          }
+        },
+      },
+    });
+  }
 }
 
 /**
@@ -1407,6 +2040,9 @@ export function bindMemberComparison(container, options = {}) {
   // Heatmap week toggle
   root.querySelector("#btn-heatmap-this-week")?.addEventListener("click", () => onToggleWeek(0));
   root.querySelector("#btn-heatmap-next-week")?.addEventListener("click", () => onToggleWeek(1));
+
+  // Project Explorer & Drilldown binding
+  bindProjectExplorer(root, _analyticsContext);
 }
 
 /**
