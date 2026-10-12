@@ -5152,7 +5152,7 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
 
 .project-breakdown-grid {
   display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 460px) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
   margin-bottom: 20px;
@@ -5164,7 +5164,7 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
 }
 
-/* Left: Pie Chart Column */
+/* Left: Chart Column (Horizontal Bar & Pie) */
 .project-pie-column {
   background: #10111a;
   border: 1px solid #232536;
@@ -5179,7 +5179,7 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
 .project-pie-chart-wrap {
   position: relative;
   width: 100%;
-  height: 250px;
+  height: 320px;
 }
 
 .project-pie-legend {
