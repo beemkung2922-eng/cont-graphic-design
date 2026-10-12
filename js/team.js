@@ -552,10 +552,86 @@ export async function render(ctx) {
   renderWorkloadSlot();
 }
 
-/* ─── Manage Team Modal (Fixes white box & invisible text in Image 3) ─── */
+/* ─── Manage Team & Roles Modal (Matching Image 1 & Image 2) ─── */
+const MODAL_PERMISSIONS_LIST = [
+  { key: "create_task", name: "Create and edit tasks", desc: "Open new artwork requests and fill briefs" },
+  { key: "work_task",   name: "Draft and work on tasks", desc: "Change status to drafting and update artwork" },
+  { key: "review_task", name: "Review and approve", desc: "Quality check, review proof and approve work" },
+  { key: "assign_task", name: "Assign team members", desc: "Distribute tasks and assign designers" },
+  { key: "request_rev", name: "Request revisions", desc: "Leave feedback comments and revision points" },
+  { key: "view_report", name: "See reports and analytics", desc: "Access throughput, heatmap and SLA metrics" },
+  { key: "manage_role", name: "Invite and remove people", desc: "Manage member roles and system permissions" },
+  { key: "download",    name: "Download assets and files", desc: "Download high-res exports and project files" },
+];
+
+const MODAL_DEFAULT_PERMS = {
+  create_task: { head: true, designer: true, requester: true, viewer: false },
+  work_task:   { head: true, designer: true, requester: false, viewer: false },
+  review_task: { head: true, designer: false, requester: false, viewer: false },
+  assign_task: { head: true, designer: false, requester: false, viewer: false },
+  request_rev: { head: true, designer: true, requester: true, viewer: false },
+  view_report: { head: true, designer: true, requester: false, viewer: false },
+  manage_role: { head: true, designer: false, requester: false, viewer: false },
+  download:    { head: true, designer: true, requester: true, viewer: true },
+};
+
+function getSavedModalPerms() {
+  try {
+    const raw = localStorage.getItem("CONT_ROLE_PERMS");
+    if (!raw) return { ...MODAL_DEFAULT_PERMS };
+    return { ...MODAL_DEFAULT_PERMS, ...JSON.parse(raw) };
+  } catch {
+    return { ...MODAL_DEFAULT_PERMS };
+  }
+}
+
+function saveModalPerms(perms) {
+  try {
+    localStorage.setItem("CONT_ROLE_PERMS", JSON.stringify(perms));
+  } catch (e) {
+    console.error("Save perms error", e);
+  }
+}
+
+function renderModalPermsRows() {
+  const perms = getSavedModalPerms();
+  return MODAL_PERMISSIONS_LIST.map((p) => {
+    const row = perms[p.key] || MODAL_DEFAULT_PERMS[p.key];
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:600;color:#f8fafc;font-size:0.86rem;">${escapeHtml(p.name)}</div>
+          <div style="font-size:0.74rem;color:#94a3b8;margin-top:2px;">${escapeHtml(p.desc)}</div>
+        </td>
+        <td>
+          <span class="owner-perm-check" title="Owner has full access">✓</span>
+        </td>
+        <td>
+          <label class="role-perm-switch" title="Toggle Designer">
+            <input type="checkbox" class="modal-perm-toggle" data-key="${p.key}" data-role="designer" ${row.designer ? "checked" : ""}>
+            <span class="role-perm-slider"></span>
+          </label>
+        </td>
+        <td>
+          <label class="role-perm-switch" title="Toggle Requester">
+            <input type="checkbox" class="modal-perm-toggle" data-key="${p.key}" data-role="requester" ${row.requester ? "checked" : ""}>
+            <span class="role-perm-slider"></span>
+          </label>
+        </td>
+        <td>
+          <label class="role-perm-switch" title="Toggle Viewer">
+            <input type="checkbox" class="modal-perm-toggle" data-key="${p.key}" data-role="viewer" ${row.viewer ? "checked" : ""}>
+            <span class="role-perm-slider"></span>
+          </label>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
 export function openManageTeamModal(ctx) {
   if (!canManage(ctx.member)) {
-    toast("เฉพาะ Team Head of Visual & Design เท่านั้นที่จัดการสิทธิ์ได้", "warn");
+    toast("เฉพาะ Team Head เท่านั้นที่จัดการสิทธิ์ได้", "warn");
     return;
   }
 
@@ -572,33 +648,46 @@ export function openManageTeamModal(ctx) {
       </td>
       <td>
         <select class="modal-role-select" data-role-select="${escapeHtml(m.id)}">
-          <option value="designer" ${m.role === "designer" ? "selected" : ""}>🎨 Visual & Design (ดีไซเนอร์)</option>
-          <option value="supervisor" ${["supervisor", "admin"].includes(m.role) ? "selected" : ""}>👑 Team Head (หัวหน้าทีม)</option>
-          <option value="requester" ${m.role === "requester" ? "selected" : ""}>📝 ผู้ขอรับบริการ (Requester)</option>
-          <option value="viewer" ${m.role === "viewer" ? "selected" : ""}>👁️ ผู้เข้าชมทั่วไป (Viewer)</option>
+          <option value="supervisor" ${["supervisor", "admin"].includes(m.role) ? "selected" : ""}>👑 Team Head (Owner)</option>
+          <option value="designer" ${m.role === "designer" ? "selected" : ""}>🎨 Designer</option>
+          <option value="requester" ${m.role === "requester" ? "selected" : ""}>📝 Requester</option>
+          <option value="viewer" ${m.role === "viewer" ? "selected" : ""}>👁️ Viewer</option>
         </select>
       </td>
       <td style="text-align:right;">
-        <button class="btn-modal-save" data-save-member="${escapeHtml(m.id)}">บันทึก</button>
+        <button class="btn-modal-save" data-save-member="${escapeHtml(m.id)}">Save</button>
       </td>
     </tr>
   `).join("");
 
   const body = `
-    <div class="stack" style="gap:20px;">
-      <!-- Member Roles List -->
-      <div>
-        <div style="font-weight:700;color:#ffffff;font-size:0.95rem;margin-bottom:4px;">รายชื่อสมาชิกและสิทธิ์การใช้งาน</div>
+    <div>
+      <!-- Modal Navigation Tabs -->
+      <div class="modal-nav-tabs">
+        <button type="button" class="modal-nav-tab is-active" data-modal-tab="roles">
+          👥 Member Roles
+        </button>
+        <button type="button" class="modal-nav-tab" data-modal-tab="perms">
+          🛡️ What each role can do
+        </button>
+        <button type="button" class="modal-nav-tab" data-modal-tab="add">
+          ＋ Add Member
+        </button>
+      </div>
+
+      <!-- Tab 1: Member Roles (Image 2) -->
+      <div data-modal-tab-content="roles">
+        <div style="font-weight:700;color:#ffffff;font-size:0.95rem;margin-bottom:4px;">Member Roles & Assignments</div>
         <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:14px;">
-          กำหนดสิทธิ์ระหว่าง <strong>Visual & Design (ดีไซเนอร์)</strong>, <strong>Team Head (หัวหน้าทีม)</strong>, <strong>ผู้ขอรับบริการ (Requester)</strong> หรือ <strong>ผู้เข้าชม (Viewer)</strong>
+          Assign roles: <strong>Team Head (Owner)</strong>, <strong>Designer</strong>, <strong>Requester</strong>, or <strong>Viewer</strong>
         </div>
         <div style="overflow-x:auto; border:1px solid #283148; border-radius:8px;">
           <table class="modal-role-table" style="width:100%; margin:0;">
             <thead>
               <tr>
-                <th>สมาชิก</th>
-                <th>สิทธิ์การใช้งาน</th>
-                <th style="width:100px;text-align:right;">จัดการ</th>
+                <th>Member</th>
+                <th>Role</th>
+                <th style="width:100px;text-align:right;">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -608,37 +697,66 @@ export function openManageTeamModal(ctx) {
         </div>
       </div>
 
-      <hr style="border:0; border-top:1px solid #283148; margin:4px 0;"/>
+      <!-- Tab 2: What each role can do (Image 1) -->
+      <div data-modal-tab-content="perms" style="display:none;">
+        <div class="role-matrix-card">
+          <div class="role-matrix-head">
+            <div>
+              <div class="role-matrix-title">What each role can do</div>
+              <div class="role-matrix-sub">Owners can do everything; switch the rest</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-ghost" id="btn-modal-reset-perms" style="font-size:0.75rem;color:#94a3b8;padding:4px 8px;" title="Reset to default">
+              ↺ Reset to default
+            </button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="role-matrix-table">
+              <thead>
+                <tr>
+                  <th style="width:42%;">Permission</th>
+                  <th>Owner</th>
+                  <th>Designer</th>
+                  <th>Requester</th>
+                  <th>Viewer</th>
+                </tr>
+              </thead>
+              <tbody id="modal-matrix-body">
+                ${renderModalPermsRows()}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-      <!-- Pre-configure New Member Form -->
-      <div>
-        <div style="font-weight:700;color:#ffffff;font-size:0.95rem;margin-bottom:4px;">＋ เพิ่มสมาชิกล่วงหน้า (Pre-configure Member)</div>
-        <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:12px;">
-          ระบุอีเมลบริษัทไว้ล่วงหน้า เมื่อสมาชิกท่านนั้นล็อกอินด้วยรหัส OTP จะได้รับชื่อและสิทธิ์ที่กำหนดไว้ทันที
+      <!-- Tab 3: Pre-configure New Member -->
+      <div data-modal-tab-content="add" style="display:none;">
+        <div style="font-weight:700;color:#ffffff;font-size:0.95rem;margin-bottom:4px;">Pre-configure New Member</div>
+        <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:14px;">
+          Specify company email in advance. When the member logs in via OTP, their name and role will be assigned automatically.
         </div>
         <form id="pre-add-member-form" class="stack" style="gap:12px;">
           <div class="form-grid">
             <div class="field field-full">
-              <label for="new-member-email" style="color:#cbd5e1;font-size:0.8rem;font-weight:600;">อีเมลบริษัท (@kkpfg.com) *</label>
-              <input id="new-member-email" type="email" placeholder="เช่น somchai.p@kkpfg.com" class="input-clean" required />
+              <label for="new-member-email" style="color:#cbd5e1;font-size:0.8rem;font-weight:600;">Company Email (@kkpfg.com) *</label>
+              <input id="new-member-email" type="email" placeholder="e.g. somchai.p@kkpfg.com" class="input-clean" required />
             </div>
             <div class="field">
-              <label for="new-member-name" style="color:#cbd5e1;font-size:0.8rem;font-weight:600;">ชื่อ-นามสกุล (เว้นว่างไว้จะดึงจากอีเมล)</label>
-              <input id="new-member-name" placeholder="เช่น Somchai Prasert" class="input-clean" />
+              <label for="new-member-name" style="color:#cbd5e1;font-size:0.8rem;font-weight:600;">Full Name (optional)</label>
+              <input id="new-member-name" placeholder="e.g. Somchai Prasert" class="input-clean" />
             </div>
             <div class="field">
-              <label for="new-member-role" style="color:#cbd5e1;font-size:0.8rem;font-weight:600;">สิทธิ์การใช้งาน</label>
+              <label for="new-member-role" style="color:#cbd5e1;font-size:0.8rem;font-weight:600;">Role</label>
               <select id="new-member-role" class="modal-role-select">
-                <option value="designer">🎨 Visual & Design (ดีไซเนอร์)</option>
-                <option value="supervisor">👑 Team Head (หัวหน้าทีม)</option>
-                <option value="requester" selected>📝 ผู้ขอรับบริการ (Requester)</option>
-                <option value="viewer">👁️ ผู้เข้าชมทั่วไป (Viewer)</option>
+                <option value="designer">🎨 Designer</option>
+                <option value="supervisor">👑 Team Head (Owner)</option>
+                <option value="requester" selected>📝 Requester</option>
+                <option value="viewer">👁️ Viewer</option>
               </select>
             </div>
           </div>
           <div id="pre-add-error" class="error-text"></div>
           <button type="button" class="btn btn-secondary" id="submit-pre-add-member" style="align-self:flex-start;margin-top:6px;">
-            ＋ เพิ่มสมาชิกล่วงหน้า
+            ＋ Pre-configure Member
           </button>
         </form>
       </div>
@@ -646,9 +764,52 @@ export function openManageTeamModal(ctx) {
   `;
 
   const modal = openModal({
-    title: "จัดการสิทธิ์ & สมาชิกทีม",
+    title: "Manage Team & Roles",
+    size: "lg",
     body,
-    footer: `<button class="btn btn-ghost" data-close-modal>ปิด</button>`,
+    footer: `<button class="btn btn-ghost" data-close-modal>Close</button>`,
+  });
+
+  // Tab switching
+  qsa(".modal-nav-tab", modal).forEach((tabBtn) => {
+    tabBtn.addEventListener("click", () => {
+      qsa(".modal-nav-tab", modal).forEach((b) => b.classList.remove("is-active"));
+      tabBtn.classList.add("is-active");
+      const target = tabBtn.dataset.modalTab;
+      qsa("[data-modal-tab-content]", modal).forEach((content) => {
+        content.style.display = content.dataset.modalTabContent === target ? "block" : "none";
+      });
+    });
+  });
+
+  // Bind role matrix switches
+  const bindModalMatrixToggles = () => {
+    qsa(".modal-perm-toggle", modal).forEach((toggle) => {
+      toggle.addEventListener("change", (e) => {
+        const key = e.target.dataset.key;
+        const role = e.target.dataset.role;
+        const isChecked = e.target.checked;
+        const perms = getSavedModalPerms();
+        if (!perms[key]) perms[key] = { ...MODAL_DEFAULT_PERMS[key] };
+        perms[key][role] = isChecked;
+        saveModalPerms(perms);
+
+        const permDef = MODAL_PERMISSIONS_LIST.find((p) => p.key === key);
+        const permName = permDef ? permDef.name : key;
+        const roleName = role === "designer" ? "Designer" : role === "requester" ? "Requester" : "Viewer";
+        toast(`Updated "${permName}" for ${roleName} to ${isChecked ? 'Enabled' : 'Disabled'}`, "success");
+      });
+    });
+  };
+  bindModalMatrixToggles();
+
+  // Reset matrix listener
+  qs("#btn-modal-reset-perms", modal)?.addEventListener("click", () => {
+    localStorage.removeItem("CONT_ROLE_PERMS");
+    const tbody = qs("#modal-matrix-body", modal);
+    if (tbody) tbody.innerHTML = renderModalPermsRows();
+    bindModalMatrixToggles();
+    toast("Reset permissions to default", "info");
   });
 
   // Bind role save buttons
@@ -664,13 +825,13 @@ export function openManageTeamModal(ctx) {
       try {
         const cap = ["requester", "viewer"].includes(newRole) ? 0 : 10;
         await api.updateMember(memberId, { role: newRole, capacity_points: cap });
-        toast("อัปเดตสิทธิ์เรียบร้อยแล้ว", "success");
-        btn.textContent = "สำเร็จ ✓";
+        toast("Updated member role successfully", "success");
+        btn.textContent = "Saved ✓";
         window.setTimeout(() => { window.location.reload(); }, 600);
       } catch (err) {
-        toast(err.message || "ไม่สามารถอัปเดตสิทธิ์ได้", "danger");
+        toast(err.message || "Failed to update role", "danger");
         btn.disabled = false;
-        btn.textContent = "บันทึก";
+        btn.textContent = "Save";
       }
     });
   });
@@ -684,7 +845,7 @@ export function openManageTeamModal(ctx) {
 
     const email = emailInput?.value.trim().toLowerCase();
     if (!email || !email.includes("@")) {
-      if (errNode) errNode.textContent = "กรุณากรอกอีเมลบริษัทให้ถูกต้อง";
+      if (errNode) errNode.textContent = "Please enter a valid company email (@kkpfg.com)";
       emailInput?.focus();
       return;
     }
@@ -698,7 +859,7 @@ export function openManageTeamModal(ctx) {
 
     const submitBtn = qs("#submit-pre-add-member", modal);
     submitBtn.disabled = true;
-    submitBtn.textContent = "กำลังเพิ่มสมาชิก…";
+    submitBtn.textContent = "Adding member…";
     if (errNode) errNode.textContent = "";
 
     try {
@@ -710,13 +871,13 @@ export function openManageTeamModal(ctx) {
         capacity_points: cap,
         is_active: true,
       });
-      toast("เพิ่มสมาชิกล่วงหน้าเรียบร้อยแล้ว", "success");
+      toast("Pre-configured member successfully", "success");
       closeModal();
       window.setTimeout(() => { window.location.reload(); }, 500);
     } catch (err) {
-      if (errNode) errNode.textContent = err.message || "ไม่สามารถเพิ่มสมาชิกได้";
+      if (errNode) errNode.textContent = err.message || "Failed to add member";
       submitBtn.disabled = false;
-      submitBtn.textContent = "＋ เพิ่มสมาชิกล่วงหน้า";
+      submitBtn.textContent = "＋ Pre-configure Member";
     }
   });
 }
