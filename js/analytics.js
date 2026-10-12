@@ -1616,11 +1616,11 @@ export function renderMemberComparisonHtml({
       <div class="analytics-header-banner">
         <div class="analytics-title-group">
           <h3>
-            <span>📊</span>
-            <span>KKP Creative Operations & Workload Deep-Dive (วิเคราะห์ภาระงานและเจาะลึกรายคน)</span>
+            <span>👥</span>
+            <span>เจาะลึกภาระงานรายคน (Team Members Overview)</span>
           </h3>
           <p>
-            วิเคราะห์ภาระงานรายคน, สัดส่วนประเภทงาน 4 หมวด, Throughput การส่งมอบรายสัปดาห์ และสัดส่วนงานรายโปรเจกต์
+            คลิกเลือกชื่อดีไซเนอร์เพื่อดูรายละเอียดงานและ KPI ประจำบุคคล
           </p>
         </div>
         <div class="comparison-toolbar">
@@ -1628,114 +1628,15 @@ export function renderMemberComparisonHtml({
         </div>
       </div>
 
-      <!-- 2. Consolidated Tabbed Card: 4 Core Comparison & Trend Charts -->
-      <div class="analytics-tabbed-card" id="analytics-deepdive-tabbed-card">
-        <div class="analytics-tabbed-header">
-          <div class="analytics-tabbed-title-wrap">
-            <span class="analytics-tabbed-icon">📊</span>
-            <div>
-              <div class="analytics-tabbed-title">เครื่องมือวิเคราะห์เชิงลึก (Deep-Dive Analytics)</div>
-              <div class="analytics-tabbed-sub">กดเลือกแท็บเพื่อสลับดูกราฟที่ต้องการ (รวม 4 การ์ดในกล่องเดียว ไม่ต้องเลื่อนหายาว)</div>
-            </div>
-          </div>
-          <div class="analytics-chart-tabs" id="analytics-chart-tabs">
-            <button type="button" class="btn-chart-tab is-active" data-chart-tab="workload">
-              <span>⚖️</span> <span>ภาระงานรายคน (% Capacity)</span>
-            </button>
-            <button type="button" class="btn-chart-tab" data-chart-tab="stacked">
-              <span>🎨</span> <span>ประเภทงานรายคน (4 หมวด)</span>
-            </button>
-            <button type="button" class="btn-chart-tab" data-chart-tab="catTotals">
-              <span>📊</span> <span>สัดส่วน 4 ประเภทหลัก</span>
-            </button>
-            <button type="button" class="btn-chart-tab" data-chart-tab="throughput">
-              <span>📈</span> <span>การส่งมอบรายสัปดาห์ (Throughput)</span>
-            </button>
-          </div>
-        </div>
+      <!-- Individual Deep-Dive Panel (เมื่อเลือกดูรายคน) -->
+      ${deepDivePanelHtml}
 
-        <div class="analytics-tab-panes">
-          <!-- Pane 1: ใครแบกงานหนักกว่าใคร -->
-          <div class="analytics-tab-pane" id="pane-chart-workload" style="display:block;">
-            <div class="pane-meta-bar">
-              <div>
-                <strong style="color:#ffffff;font-size:0.95rem;">ใครแบกงานหนักกว่าใคร (ภาระงานรายคน)</strong>
-                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
-                  Bar Chart แนวนอน เรียงมากไปน้อย · ไฮไลต์สีแดงเฉพาะคนที่ภาระงานเกิน 100% Capacity
-                </span>
-              </div>
-              <span class="analytics-chart-tag tag-comparison">Comparison</span>
-            </div>
-            <div class="analytics-canvas-wrap" style="height:320px;">
-              <canvas id="chart-workload-bar"></canvas>
-            </div>
-          </div>
-
-          <!-- Pane 2: แต่ละคนมีงานประเภทไหนกี่ชิ้น -->
-          <div class="analytics-tab-pane" id="pane-chart-stacked" style="display:none;">
-            <div class="pane-meta-bar">
-              <div>
-                <strong style="color:#ffffff;font-size:0.95rem;">แต่ละคนมีงานประเภทไหนกี่ชิ้น</strong>
-                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
-                  Stacked Bar Chart หนึ่งแท่งต่อหนึ่งคน แบ่งสีตามประเภทงาน เห็นทั้งยอดรวมและสัดส่วน
-                </span>
-              </div>
-              <span class="analytics-chart-tag tag-comparison">Comparison</span>
-            </div>
-            <div class="cat-legend-bar" style="margin-bottom:12px;">
-              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.social.color}"></span> Social Media</span>
-              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.key_visual.color}"></span> Key Visual</span>
-              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.print.color}"></span> Print & POSM</span>
-              <span class="cat-legend-chip"><span class="cat-legend-dot" style="background:${TASK_CATEGORIES.ads_resize.color}"></span> Ads & Resizes</span>
-            </div>
-            <div class="analytics-canvas-wrap" style="height:300px;">
-              <canvas id="chart-stacked-categories"></canvas>
-            </div>
-          </div>
-
-          <!-- Pane 3: งานทั้งหมดแยกตามประเภท -->
-          <div class="analytics-tab-pane" id="pane-chart-catTotals" style="display:none;">
-            <div class="pane-meta-bar">
-              <div>
-                <strong style="color:#ffffff;font-size:0.95rem;">งานทั้งหมดแยกตามประเภท (4 ประเภทหลัก)</strong>
-                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
-                  Bar Chart เรียงตามจำนวนชิ้นงานจากมากไปน้อย
-                </span>
-              </div>
-              <span class="analytics-chart-tag tag-comparison">Comparison</span>
-            </div>
-            <div class="analytics-canvas-wrap" style="height:300px;">
-              <canvas id="chart-category-totals"></canvas>
-            </div>
-          </div>
-
-          <!-- Pane 4: ปริมาณงานที่ส่งมอบต่อสัปดาห์ (Throughput) -->
-          <div class="analytics-tab-pane" id="pane-chart-throughput" style="display:none;">
-            <div class="pane-meta-bar">
-              <div>
-                <strong style="color:#ffffff;font-size:0.95rem;">ปริมาณงานที่ส่งมอบต่อสัปดาห์ (Throughput)</strong>
-                <span class="analytics-chart-sub" style="display:block;margin-top:2px;">
-                  Line Chart แสดง Throughput การส่งมอบงานเสร็จต่อสัปดาห์ · สไตล์หลัก: <strong>${escapeHtml(throughputData.primaryStyleLabel)}</strong>
-                </span>
-              </div>
-              <span class="analytics-chart-tag tag-trend">Trend</span>
-            </div>
-            <div class="analytics-canvas-wrap" style="height:300px;">
-              <canvas id="chart-throughput-line"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. สัดส่วนงานแยกตามโปรเจกต์ (Pie Chart) & สำรวจงานรายโปรเจกต์ (Project Explorer) -->
+      <!-- สัดส่วนงานแยกตามโปรเจกต์ & สำรวจงานรายโปรเจกต์ (Project Explorer) -->
       ${renderProjectBreakdownHtml({
         breakdown: projectBreakdown,
         projects,
         members: members.length ? members : memberStats.map((s) => s.member),
       })}
-
-      <!-- 5. Individual Deep-Dive Panel (เมื่อเลือกดูรายคน) -->
-      ${deepDivePanelHtml}
     </section>
   `;
 }
@@ -2122,30 +2023,6 @@ export function bindMemberComparison(container, options = {}) {
   // Heatmap week toggle
   root.querySelector("#btn-heatmap-this-week")?.addEventListener("click", () => onToggleWeek(0));
   root.querySelector("#btn-heatmap-next-week")?.addEventListener("click", () => onToggleWeek(1));
-
-  // Deep-Dive Consolidated Chart Tabs Switcher
-  const chartTabsWrap = root.querySelector("#analytics-chart-tabs");
-  if (chartTabsWrap) {
-    chartTabsWrap.querySelectorAll("[data-chart-tab]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const tabKey = btn.dataset.chartTab;
-        chartTabsWrap.querySelectorAll(".btn-chart-tab").forEach((b) => b.classList.toggle("is-active", b === btn));
-        root.querySelectorAll(".analytics-tab-pane").forEach((pane) => {
-          pane.style.display = pane.id === `pane-chart-${tabKey}` ? "block" : "none";
-        });
-        const instanceMap = {
-          workload: "workloadBar",
-          stacked: "stackedCat",
-          catTotals: "catTotals",
-          throughput: "throughputLine",
-        };
-        const chartId = instanceMap[tabKey];
-        if (chartId && _advancedChartInstances[chartId]) {
-          _advancedChartInstances[chartId].resize();
-        }
-      });
-    });
-  }
 
   // Project Explorer & Drilldown binding
   bindProjectExplorer(root, _analyticsContext);
