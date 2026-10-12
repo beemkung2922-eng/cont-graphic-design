@@ -6466,5 +6466,318 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
 }
 
+/* ==========================================================================
+   MODERN PERFORMANCE REPORTS LAYOUT (MATCHING EXECUTIVE REFERENCE)
+   ========================================================================== */
+.reports-shell {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 4px 0 40px;
+}
+
+.reports-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.reports-title {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+
+.reports-subtitle {
+  font-size: 0.9rem;
+  color: #8b92ad;
+  margin: 0;
+}
+
+.reports-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* --- Top Row: 4 KPI Stat Cards --- */
+.reports-top-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.report-kpi-card {
+  background: #131522;
+  border: 1px solid #262a3e;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.report-kpi-label {
+  font-size: 0.78rem;
+  color: #8b92ad;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.report-kpi-val {
+  font-family: var(--font-mono, "Space Mono", monospace) !important;
+  font-size: 1.85rem !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.report-kpi-delta {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #22c55e;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.report-kpi-delta.text-dim {
+  color: #8b92ad;
+}
+
+.report-kpi-delta.text-warn {
+  color: #ffc61a;
+}
+
+/* --- Middle Row: Weekly Throughput + Categories --- */
+.reports-mid-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.reports-card {
+  background: #131522;
+  border: 1px solid #262a3e;
+  border-radius: 14px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+}
+
+.reports-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.reports-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 3px;
+}
+
+.reports-card-sub {
+  font-size: 0.78rem;
+  color: #7b829e;
+  margin: 0;
+}
+
+.chart-legend-pills {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.76rem;
+  color: #8b92ad;
+}
+
+.legend-pill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-color-box {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+
+.reports-bar-canvas-wrap {
+  width: 100%;
+  height: 240px;
+  position: relative;
+}
+
+/* --- Category List in Right Card --- */
+.rep-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.rep-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rep-cat-label {
+  width: 110px;
+  font-size: 0.8rem;
+  color: #adb4cb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.rep-cat-track {
+  flex: 1;
+  height: 8px;
+  background: #202438;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rep-cat-fill {
+  height: 100%;
+  background: #ffc61a;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.rep-cat-val {
+  font-family: var(--font-mono, "Space Mono", monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  min-width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* --- Bottom Row: Heatmap Card --- */
+.heatmap-card {
+  background: #131522;
+  border: 1px solid #262a3e;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+  margin-bottom: 28px;
+}
+
+.heatmap-scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 14px;
+}
+
+.heatmap-grid-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: separate;
+  border-spacing: 5px;
+}
+
+.heatmap-grid-table th {
+  font-family: var(--font-mono, "Space Mono", monospace);
+  font-size: 0.72rem;
+  color: #727a94;
+  font-weight: 500;
+  text-align: center;
+  padding: 4px 0 8px;
+}
+
+.heatmap-grid-table td.day-label {
+  font-size: 0.76rem;
+  color: #8b92ad;
+  font-weight: 600;
+  padding-right: 12px;
+  text-align: right;
+  white-space: nowrap;
+  width: 40px;
+}
+
+.heatmap-cell {
+  height: 28px;
+  border-radius: 4px;
+  background: #1b1e2f;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
+  z-index: 2;
+}
+
+.heatmap-cell.lvl-0 { background: #181b2a; }
+.heatmap-cell.lvl-1 { background: rgba(255, 198, 26, 0.18); border: 1px solid rgba(255, 198, 26, 0.25); }
+.heatmap-cell.lvl-2 { background: rgba(255, 198, 26, 0.40); border: 1px solid rgba(255, 198, 26, 0.45); }
+.heatmap-cell.lvl-3 { background: rgba(255, 198, 26, 0.68); border: 1px solid rgba(255, 198, 26, 0.75); }
+.heatmap-cell.lvl-4 { background: #ffc61a; box-shadow: 0 0 8px rgba(255, 198, 26, 0.4); }
+
+/* --- Responsive & Print Optimizations --- */
+@media (max-width: 1024px) {
+  .reports-top-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .reports-mid-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .reports-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  #sidebar-slot, #topbar-slot, .reports-header-actions, .dash-filter-bar {
+    display: none !important;
+  }
+  .reports-shell {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .report-kpi-card, .reports-card, .heatmap-card {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  .reports-title, .reports-card-title, .report-kpi-val, .rep-cat-val, .rep-cat-label {
+    color: #000000 !important;
+  }
+  .heatmap-cell.lvl-1 { background: #fee2e2 !important; }
+  .heatmap-cell.lvl-2 { background: #fef08a !important; }
+  .heatmap-cell.lvl-3 { background: #fed7aa !important; }
+  .heatmap-cell.lvl-4 { background: #f59e0b !important; }
+}
+
+
 
 
