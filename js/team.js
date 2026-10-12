@@ -229,7 +229,7 @@ export async function render(ctx) {
 
           <div style="margin-top:2px;">
             <button class="btn btn-primary btn-sm btn-assign-member" data-member-id="${escapeHtml(member.id)}" style="width:100%;justify-content:center;font-size:0.82rem;padding:8px 12px;">
-              ＋ มอบหมายงานให้ ${escapeHtml(member.name.split(" ")[0])}
+              ＋ มอบหมายงานให้ ${escapeHtml((member?.name || "สมาชิก").split(" ")[0])}
             </button>
           </div>
         </section>
@@ -561,6 +561,8 @@ export async function render(ctx) {
           </div>
         </section>
       `;
+    }
+
     resultsContainer.innerHTML = designersHtml + requestersHtml;
 
     // Bind Quick Assign Buttons on available member cards
