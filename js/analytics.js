@@ -682,19 +682,31 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
         <div>
           <div class="analytics-chart-title">
             <span>สัดส่วนงานแยกตามโปรเจกต์ (Project Workload & Explorer)</span>
-            <span class="analytics-chart-tag tag-comparison">Pie Chart & Drill-down</span>
+            <span class="analytics-chart-tag tag-comparison">Horizontal Bar & Drill-down</span>
           </div>
           <div class="analytics-chart-sub">
-            สัดส่วนงานแต่ละโปรเจกต์ (Pie Chart) · คลิกเลือกโปรเจกต์เพื่อดูว่ามีงานอะไรบ้างกี่งาน · เลือกคนได้ (Filter by Designer) · คลิกดูรายละเอียดของงานแต่ละชิ้นได้ทันที
+            กราฟแท่งแนวนอน (Horizontal Bar Chart) แสดงสัดส่วนงานแต่ละโปรเจกต์ · คลิกแท่งหรือเลือกแท็บเพื่อดูงาน · เลือกคนได้ (Filter by Designer) · คลิกดูรายละเอียดของงานแต่ละชิ้นได้ทันที
           </div>
+        </div>
+        <div class="row" style="gap:6px;align-items:center;">
+          <button type="button" class="btn btn-sm btn-primary" id="btn-chart-mode-bar" style="font-size:0.75rem;padding:5px 12px;">
+            📊 แท่งแนวนอน (Bar)
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost" id="btn-chart-mode-pie" style="font-size:0.75rem;padding:5px 12px;">
+            🥧 วงกลม (Pie)
+          </button>
         </div>
       </div>
 
       <div class="project-breakdown-grid">
-        <!-- Left: Pie Chart with Legend (ตามสไตล์ภาพที่ 3) -->
+        <!-- Left: Horizontal Bar Chart with Legend -->
         <div class="project-pie-column">
-          <div class="project-pie-chart-wrap">
-            <canvas id="chart-project-pie"></canvas>
+          <div class="project-chart-type-label" id="project-chart-type-label" style="font-size:0.78rem;font-weight:700;color:var(--cyan);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>📊 กราฟแท่งแนวนอน (Top 10 โปรเจกต์หลัก)</span>
+            <span style="font-size:0.7rem;color:#8a90a4;">คลิกที่แท่งเพื่อเลือกโปรเจกต์</span>
+          </div>
+          <div class="project-pie-chart-wrap" style="height:320px;">
+            <canvas id="chart-project-visual"></canvas>
           </div>
           <div class="project-pie-legend" id="project-pie-legend">
             ${breakdown.projects.map((p) => `
@@ -1095,6 +1107,14 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
       const tabBtn = tabsWrap?.querySelector(`[data-proj-tab="${pId}"]`);
       if (tabBtn) tabBtn.click();
     });
+  });
+
+  // Chart type mode toggle: Horizontal Bar vs Pie
+  root.querySelector("#btn-chart-mode-bar")?.addEventListener("click", () => {
+    renderProjectDistributionChart(root, "bar");
+  });
+  root.querySelector("#btn-chart-mode-pie")?.addEventListener("click", () => {
+    renderProjectDistributionChart(root, "pie");
   });
 
   renderActiveBox(currentProjectId);
@@ -1830,16 +1850,115 @@ export function initAdvancedCharts({
     });
   }
 
-  // 5. Project Distribution Pie Chart (ตามภาพที่ 3)
-  destroyAdvancedChart("projectPie");
-  const projectPieCanvas = container.querySelector("#chart-project-pie");
-  if (projectPieCanvas) {
-    const pieTasks = taskScope.length ? taskScope : (_analyticsContext.tasks.length ? _analyticsContext.tasks : effectiveTasks);
-    const pieProjects = (projects && projects.length) ? projects : (_analyticsContext.projects || []);
-    const pieMembers = (members && members.length) ? members : (_analyticsContext.members || []);
-    const breakdown = calculateProjectBreakdown(pieTasks, pieProjects, pieMembers);
+  // 5. Project Workload & Distribution Chart (Default: Horizontal Bar Chart)
+  renderProjectDistributionChart(container, _currentProjectChartMode);
+}
 
-    _advancedChartInstances["projectPie"] = new Chart(projectPieCanvas, {
+let _currentProjectChartMode = "bar"; // Default to Horizontal Bar Chart as requested
+
+/**
+ * Renders either Horizontal Bar Chart or Pie Chart for Projects
+ */
+export function renderProjectDistributionChart(container = document, mode = _currentProjectChartMode) {
+  _currentProjectChartMode = mode;
+  destroyAdvancedChart("projectVisual");
+
+  const canvas = container.querySelector("#chart-project-visual") || document.querySelector("#chart-project-visual");
+  if (!canvas) return;
+
+  const pieTasks = _analyticsContext.tasks.length ? _analyticsContext.tasks : [];
+  const pieProjects = _analyticsContext.projects || [];
+  const pieMembers = _analyticsContext.members || [];
+  const breakdown = calculateProjectBreakdown(pieTasks, pieProjects, pieMembers);
+
+  // Update label
+  const labelEl = container.querySelector("#project-chart-type-label") || document.querySelector("#project-chart-type-label");
+  if (labelEl) {
+    if (mode === "bar") {
+      labelEl.innerHTML = `<span>📊 กราฟแท่งแนวนอน (Top 10 โปรเจกต์หลัก)</span><span style="font-size:0.7rem;color:#8a90a4;">คลิกที่แท่งเพื่อเลือกโปรเจกต์</span>`;
+    } else {
+      labelEl.innerHTML = `<span>🥧 กราฟวงกลม (สัดส่วนโปรเจกต์ทั้งหมด)</span><span style="font-size:0.7rem;color:#8a90a4;">คลิกที่ชิ้นเค้กเพื่อเลือกโปรเจกต์</span>`;
+    }
+  }
+
+  // Update toggle button active styles
+  const root = container.querySelector("#project-breakdown-card") || document.querySelector("#project-breakdown-card") || container;
+  if (root) {
+    const btnBar = root.querySelector("#btn-chart-mode-bar");
+    const btnPie = root.querySelector("#btn-chart-mode-pie");
+    if (btnBar) btnBar.className = `btn btn-sm ${mode === "bar" ? "btn-primary" : "btn-ghost"}`;
+    if (btnPie) btnPie.className = `btn btn-sm ${mode === "pie" ? "btn-primary" : "btn-ghost"}`;
+  }
+
+  if (mode === "bar") {
+    // 📊 HORIZONTAL BAR CHART (Top 10 Projects)
+    const topProjects = breakdown.projects.slice(0, 10);
+    _advancedChartInstances["projectVisual"] = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: topProjects.map((p) => (p.name.length > 24 ? p.name.slice(0, 23) + "…" : p.name)),
+        datasets: [{
+          label: "จำนวนงาน (ชิ้นงาน)",
+          data: topProjects.map((p) => p.count),
+          backgroundColor: topProjects.map((p) => p.color),
+          borderColor: topProjects.map((p) => p.color),
+          borderWidth: 1,
+          borderRadius: 4,
+          borderSkipped: false,
+        }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "#12131d",
+            borderColor: "#30344d",
+            borderWidth: 1,
+            padding: 10,
+            callbacks: {
+              title: (items) => topProjects[items[0].dataIndex]?.name || items[0].label,
+              label: (ctx) => {
+                const val = ctx.parsed.x || 0;
+                const total = breakdown.totalTasks;
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : "0";
+                return ` จำนวน: ${val} งาน (${pct}%)`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { color: "#232536" },
+            ticks: { color: "#888d9f", font: { family: "Space Mono", size: 10 } },
+          },
+          y: {
+            grid: { display: false },
+            ticks: {
+              color: "#ffffff",
+              font: { family: "IBM Plex Sans Thai", size: 11, weight: "500" },
+            },
+          },
+        },
+        onClick: (evt, elements) => {
+          if (elements && elements.length > 0) {
+            const idx = elements[0].index;
+            const picked = topProjects[idx];
+            if (picked) {
+              const rootEl = container.querySelector("#project-breakdown-card") || document.querySelector("#project-breakdown-card");
+              const tabBtn = rootEl?.querySelector(`[data-proj-tab="${picked.id}"]`);
+              if (tabBtn) tabBtn.click();
+            }
+          }
+        },
+      },
+    });
+  } else {
+    // 🥧 PIE CHART
+    _advancedChartInstances["projectVisual"] = new Chart(canvas, {
       type: "pie",
       data: {
         labels: breakdown.chartLabels,
@@ -1855,9 +1974,7 @@ export function initAdvancedCharts({
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: false,
-          },
+          legend: { display: false },
           tooltip: {
             backgroundColor: "#12131d",
             borderColor: "#30344d",
