@@ -3,181 +3,327 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-  <title>CONT — ระบบจัดการงานออกแบบกราฟิก (Graphic Design Operations Engine)</title>
+  <title>CONT — แพลตฟอร์มจัดการงานออกแบบกราฟิก (Graphic Design Operations)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Pixelify+Sans:wght@600;700&family=Press+Start+2P&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cont.css">
 </head>
-<body class="login-body-clean">
-  <div class="login-viewport-clean">
+<body class="fresh-landing-body">
+  <div class="fresh-landing-container">
     
-    <!-- LEFT SIDE: รูปภาพเมืองพร้อมคำบรรยาย (สมส่วน ไม่รก สไตล์ภาพที่ 2) -->
-    <section class="login-showcase-left">
-      
-      <!-- Top Brand Tag -->
-      <div class="showcase-top-row">
-        <div class="pixel-brand-badge">
-          <span class="pixel-brand-icon">C</span>
-          <span class="pixel-brand-text">CONT</span>
-        </div>
-        <div class="pixel-status-badge">
-          <span class="pulse-green-dot"></span>
-          <span>ออนไลน์ 100% · V2.4</span>
-        </div>
-      </div>
-
-      <!-- Balanced Typography & Description -->
-      <div class="showcase-heading-group">
-        <span class="showcase-kicker">BUILD YOUR WORKFLOW</span>
-        <h1 class="showcase-title">
-          สร้างสรรค์งานดีไซน์. ไปด้วยกัน. <span class="pixel-heart">❤️</span>
-        </h1>
-        <p class="showcase-desc">
-          ศูนย์กลางการบริหารจัดการงานออกแบบกราฟิกแบบครบวงจร ติดตามสถานะงาน จัดสรรกำลังคนในทีม และส่งมอบผลงานคุณภาพได้อย่างแม่นยำ
-        </p>
-      </div>
-
-      <!-- City Artwork Image (อยู่ด้านซ้ายคู่กับคำบรรยาย) -->
-      <div class="showcase-artwork-card">
-        <img 
-          src="assets/hero-city.png" 
-          alt="CONT Pixel Art City" 
-          class="showcase-artwork-img"
-        />
-        <div class="showcase-artwork-footer">
-          <span>⚡ 5 ขั้นตอนมาตรฐาน: รับบรีฟ ➔ ดราฟต์ ➔ ตรวจงาน ➔ แก้ไข ➔ ส่งมอบ</span>
-          <span class="showcase-squad-tag">KKP GRAPHIC SQUAD</span>
-        </div>
-      </div>
-
-      <!-- Footer Info -->
-      <div class="showcase-credit">
-        KKP Graphic Design Team · แพลตฟอร์มบริหารจัดการงานออกแบบและครีเอทีฟ
-      </div>
-
-    </section>
-
-    <!-- RIGHT SIDE: กล่องล็อกอิน เรียบง่าย สะอาดตา ไม่รก (Clean Login Card) -->
-    <section class="login-form-right">
-      <div class="login-card-clean">
-        
-        <!-- Header -->
-        <div class="card-clean-header">
-          <span class="card-clean-badge">✦ พื้นที่ทำงาน</span>
-          <h2 class="card-clean-title">เข้าสู่ระบบ CONT</h2>
-          <p class="card-clean-sub">
-            สำหรับพนักงานบัญชีบริษัท (@kkpfg.com) หรือเข้าสู่ระบบด้วย Google
-          </p>
-        </div>
-
-        <!-- Dynamic Message Banners -->
-        <div id="login-error" class="banner-error hidden"></div>
-        <div id="login-info" class="banner-info hidden"></div>
-
-        <!-- Step 1: Work Email Input -->
-        <div id="email-step" class="auth-step">
-          <div class="clean-field">
-            <label for="work-email" class="clean-label">
-              อีเมลสำหรับทำงาน (เฉพาะ @kkpfg.com)
-            </label>
-            
-            <!-- Guaranteed Icon & Text Separation: NO OVERLAP! -->
-            <div class="clean-input-wrap">
-              <svg class="clean-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-              </svg>
-              <input
-                id="work-email"
-                type="email"
-                placeholder="your.name@kkpfg.com"
-                autocomplete="email"
-                class="clean-text-input"
-                required
-              />
-            </div>
-
-            <span class="clean-hint">
-              🔒 เฉพาะอีเมล @kkpfg.com (รหัส OTP 6 หลักจะส่งไปยัง Outlook)
-            </span>
-          </div>
-
-          <button class="btn-pixel-submit-clean btn-pixel-red" id="send-otp-btn">
-            <span>📩 ขอรับรหัส OTP ทางอีเมล</span>
-          </button>
-        </div>
-
-        <!-- Step 2: 6-Digit OTP Verification -->
-        <div id="otp-step" class="auth-step hidden">
-          <div class="email-sent-card-clean">
-            <div class="email-sent-icon-clean">🔐</div>
-            <div style="flex:1">
-              <div style="font-weight:700; color:#111; font-size:0.86rem">
-                ส่งรหัส OTP สำเร็จแล้ว
-              </div>
-              <div style="font-size:0.78rem; color:#55596b; margin-top:2px">
-                กรุณาตรวจสอบรหัส 6 หลักใน Outlook ที่ส่งไปยัง <strong id="sent-email-display" style="color:#e52521"></strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="clean-field" style="margin-top:14px">
-            <label for="otp-code" class="clean-label">
-              กรอกรหัส OTP 6 หลัก
-            </label>
-            <input
-              id="otp-code"
-              type="text"
-              maxlength="6"
-              inputmode="numeric"
-              placeholder="• • • • • •"
-              class="clean-text-input otp-centered-clean"
-              autocomplete="one-time-code"
-            />
-            <span class="clean-hint" style="text-align:center; display:block;">
-              รหัสหมดอายุใน 10 นาที (ตรวจสอบในกล่อง Inbox หรือ Junk)
-            </span>
-          </div>
-
-          <button class="btn-pixel-submit-clean btn-pixel-cyan" id="verify-otp-btn">
-            <span>ยืนยันรหัส & เข้าสู่ระบบ ➔</span>
-          </button>
-
-          <div class="row-between" style="margin-top:14px; font-size:0.82rem">
-            <button type="button" class="btn-link" id="resend-otp-btn">ส่งรหัสใหม่อีกครั้ง</button>
-            <button type="button" class="btn-link text-muted" id="back-to-email-btn">← เปลี่ยนอีเมล</button>
-          </div>
-        </div>
-
-        <!-- Divider -->
-        <div class="clean-divider">
-          <span>หรือเข้าสู่ระบบด้วย Google</span>
-        </div>
-
-        <!-- Google Login Button -->
-        <button type="button" class="btn-clean-google" id="google-login">
-          <svg width="18" height="18" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+    <!-- Floating Capsule Navbar at Top (Matches Reference Image Exactly) -->
+    <header class="fresh-floating-navbar">
+      <div class="fresh-nav-logo">
+        <div class="fresh-logo-badge">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
-          <span>เข้าสู่ระบบด้วย Google</span>
-        </button>
+        </div>
+        <span class="fresh-brand-name">CONT</span>
+      </div>
 
-        <!-- Security Footer -->
-        <div class="card-clean-footer">
-          <span>🔒 สำหรับทีมงาน KKP CONT Graphic Design เท่านั้น</span>
+      <nav class="fresh-nav-links">
+        <a href="#hero" class="fresh-nav-link is-active">หน้าหลัก</a>
+        <a href="#features" class="fresh-nav-link" id="nav-workflow-link">ขั้นตอนงาน</a>
+        <a href="#about" class="fresh-nav-link">เกี่ยวกับเรา</a>
+        <a href="#tools" class="fresh-nav-link">เครื่องมือ</a>
+        <a href="#guide" class="fresh-nav-link">คู่มือ</a>
+      </nav>
+
+      <div class="fresh-nav-action">
+        <button type="button" class="btn-fresh-cta-orange" id="top-login-cta">
+          เข้าสู่ระบบ
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Hero Section (Left Content + Right Phone Mockup Login) -->
+    <main class="fresh-hero-section">
+      
+      <!-- LEFT HERO CONTENT: Typography & CTAs (Matches Reference Image) -->
+      <div class="fresh-hero-left">
+        
+        <!-- Eyebrow Pill Badge -->
+        <div class="fresh-pill-eyebrow">
+          <span class="pill-leaf-icon">☘️</span>
+          <span>START DESIGNING WORKFLOW</span>
+        </div>
+
+        <!-- Big Bold Title with Highlighted Colors (Orange & Green Accents!) -->
+        <h1 class="fresh-hero-title">
+          ไม่เสียเวลา <span class="highlight-orange">ลองผิดลองถูก</span>,<br>
+          ยกระดับงานดีไซน์<br>
+          และร่วมสร้างสรรค์งาน<br>
+          <span class="highlight-green">ไปด้วยกัน!</span>
+        </h1>
+
+        <!-- Friendly Thai Description -->
+        <p class="fresh-hero-desc">
+          CONT คือแพลตฟอร์มบริหารจัดการงานออกแบบกราฟิกสำหรับทีม KKP ช่วยติดตามสถานะงานทุกขั้นตอน จัดสรรกำลังคนในทีม และส่งมอบชิ้นงานคุณภาพได้อย่างแม่นยำ
+        </p>
+
+        <!-- Two Rounded Action Buttons -->
+        <div class="fresh-hero-buttons">
+          <button type="button" class="btn-fresh-pill-primary" id="btn-hero-login">
+            <span>🚀 เข้าสู่ระบบทันที</span>
+          </button>
+          <button type="button" class="btn-fresh-pill-outline" id="btn-hero-workflow">
+            <span>📖 ดูขั้นตอนการทำงาน</span>
+          </button>
+        </div>
+
+        <!-- Mascot & Landscape Scene Preview (Like the cute mascot in reference) -->
+        <div class="fresh-mascot-row">
+          <div class="fresh-mascot-card">
+            <div class="mascot-avatar-wrap">
+              <span class="mascot-emoji">🐱🎨</span>
+            </div>
+            <div class="mascot-text-wrap">
+              <strong class="mascot-name">น้อง CONT</strong>
+              <span class="mascot-bubble">"พร้อมช่วยตรวจบรีฟและจัดสรรงานให้ทุกคนแล้วเมี้ยว!"</span>
+            </div>
+          </div>
+          <div class="fresh-stat-pill">
+            <span class="stat-dot-pulse"></span>
+            <span>ออนไลน์ 100% · KKP SQUAD</span>
+          </div>
         </div>
 
       </div>
-    </section>
 
+      <!-- RIGHT HERO CONTENT: Hand-Held Smartphone Mockup / Floating Device Login Form -->
+      <div class="fresh-hero-right">
+        
+        <!-- Smartphone Mockup Frame -->
+        <div class="phone-mockup-shell">
+          
+          <!-- Phone Speaker & Dynamic Island Notch -->
+          <div class="phone-island-notch">
+            <div class="phone-island-pill">
+              <span class="phone-camera-dot"></span>
+            </div>
+          </div>
+
+          <!-- Phone Screen Container -->
+          <div class="phone-screen-content">
+            
+            <!-- App Topbar inside Phone -->
+            <div class="phone-app-topbar">
+              <div class="phone-app-brand">
+                <span class="app-icon-circle">C</span>
+                <span class="app-name-text">CONT Studio</span>
+              </div>
+              <span class="phone-time-text">9:41</span>
+            </div>
+
+            <!-- Login Form Card inside Phone -->
+            <div class="phone-login-card">
+              
+              <div class="phone-login-header">
+                <span class="phone-login-badge">✦ เข้าสู่ระบบพื้นที่ทำงาน</span>
+                <h2 class="phone-login-title">ยินดีต้อนรับสู่ CONT</h2>
+                <p class="phone-login-sub">
+                  กรอกอีเมลบริษัท @kkpfg.com เพื่อรับรหัส OTP หรือเข้าสู่ระบบด้วย Google
+                </p>
+              </div>
+
+              <!-- Dynamic Message Banners -->
+              <div id="login-error" class="banner-error hidden"></div>
+              <div id="login-info" class="banner-info hidden"></div>
+
+              <!-- Step 1: Work Email Input -->
+              <div id="email-step" class="auth-step">
+                <div class="fresh-field">
+                  <label for="work-email" class="fresh-label">
+                    อีเมลสำหรับทำงาน (เฉพาะ @kkpfg.com)
+                  </label>
+                  
+                  <!-- Clean Input with Perfect Icon Spacing: NO OVERLAP! -->
+                  <div class="fresh-input-wrap">
+                    <svg class="fresh-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                    </svg>
+                    <input
+                      id="work-email"
+                      type="email"
+                      placeholder="your.name@kkpfg.com"
+                      autocomplete="email"
+                      class="fresh-text-input"
+                      required
+                    />
+                  </div>
+
+                  <span class="fresh-hint">
+                    🔒 รหัส OTP 6 หลักจะส่งตรงไปยัง Outlook ของคุณ
+                  </span>
+                </div>
+
+                <button class="btn-fresh-submit-orange" id="send-otp-btn">
+                  <span>📩 ขอรับรหัส OTP ทางอีเมล</span>
+                </button>
+              </div>
+
+              <!-- Step 2: 6-Digit OTP Verification -->
+              <div id="otp-step" class="auth-step hidden">
+                <div class="email-sent-card-fresh">
+                  <div class="email-sent-icon-fresh">🔐</div>
+                  <div style="flex:1">
+                    <div style="font-weight:700; color:#1f2937; font-size:0.86rem">
+                      ส่งรหัส OTP สำเร็จแล้ว
+                    </div>
+                    <div style="font-size:0.78rem; color:#6b7280; margin-top:2px">
+                      กรุณาตรวจสอบรหัสใน Outlook ที่ส่งไปยัง <strong id="sent-email-display" style="color:#f97316"></strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="fresh-field" style="margin-top:14px">
+                  <label for="otp-code" class="fresh-label">
+                    กรอกรหัส OTP 6 หลัก
+                  </label>
+                  <input
+                    id="otp-code"
+                    type="text"
+                    maxlength="6"
+                    inputmode="numeric"
+                    placeholder="• • • • • •"
+                    class="fresh-text-input otp-centered-fresh"
+                    autocomplete="one-time-code"
+                  />
+                  <span class="fresh-hint" style="text-align:center; display:block;">
+                    รหัสหมดอายุใน 10 นาที (ตรวจสอบในกล่อง Inbox หรือ Junk)
+                  </span>
+                </div>
+
+                <button class="btn-fresh-submit-green" id="verify-otp-btn">
+                  <span>ยืนยันรหัส & เข้าสู่ระบบ ➔</span>
+                </button>
+
+                <div class="row-between" style="margin-top:14px; font-size:0.82rem">
+                  <button type="button" class="btn-link" id="resend-otp-btn">ส่งรหัสใหม่อีกครั้ง</button>
+                  <button type="button" class="btn-link text-muted" id="back-to-email-btn">← เปลี่ยนอีเมล</button>
+                </div>
+              </div>
+
+              <!-- Divider -->
+              <div class="fresh-divider">
+                <span>หรือเข้าสู่ระบบด้วย Google</span>
+              </div>
+
+              <!-- Google Login Button -->
+              <button type="button" class="btn-fresh-google" id="google-login">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>เข้าสู่ระบบด้วย Google</span>
+              </button>
+
+              <!-- Security Footer -->
+              <div class="phone-security-footer">
+                <span>🔒 สำหรับทีมงาน KKP CONT Graphic Design เท่านั้น</span>
+              </div>
+
+            </div>
+
+            <!-- Phone Bottom Home Indicator Bar -->
+            <div class="phone-home-indicator"></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Interactive Workflow Modal -->
+  <div id="fresh-workflow-modal" class="fresh-modal-overlay hidden">
+    <div class="fresh-modal-card">
+      <div class="fresh-modal-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.3rem;">🎨</span>
+          <h3 style="font-size:1.15rem;font-weight:700;margin:0;color:#1f2937;">5 ขั้นตอนกระบวนการทำงานใน CONT</h3>
+        </div>
+        <button type="button" class="fresh-modal-close" id="close-fresh-modal">✕</button>
+      </div>
+      <div class="fresh-modal-body">
+        <div class="fresh-step-row">
+          <div class="fresh-step-badge step-orange">1</div>
+          <div>
+            <strong style="color:#111;">รอรับบรีฟ (Brief Intake):</strong> ตรวจสอบความพร้อมของบรีฟ ไฟล์แนบ และขนาดภาพก่อนเริ่มทำ
+          </div>
+        </div>
+        <div class="fresh-step-row">
+          <div class="fresh-step-badge step-blue">2</div>
+          <div>
+            <strong style="color:#111;">กำลังดราฟต์ (Drafting):</strong> ดีไซเนอร์ลงมือออกแบบและอัปโหลด Artwork ชิ้นงานขึ้นระบบ
+          </div>
+        </div>
+        <div class="fresh-step-row">
+          <div class="fresh-step-badge step-yellow">3</div>
+          <div>
+            <strong style="color:#111;">รอคอมเมนต์ (Review):</strong> หัวหน้าทีมหรือผู้สั่งงานตรวจแบบ ปักหมุดคอมเมนต์แก้ไข
+          </div>
+        </div>
+        <div class="fresh-step-row">
+          <div class="fresh-step-badge step-coral">4</div>
+          <div>
+            <strong style="color:#111;">แก้ไขงาน (Revision):</strong> เก็บรายละเอียดตามคอมเมนต์ พร้อมนับรอบ Revision
+          </div>
+        </div>
+        <div class="fresh-step-row">
+          <div class="fresh-step-badge step-green">5</div>
+          <div>
+            <strong style="color:#111;">ส่งมอบสำเร็จ (Completed):</strong> แนบไฟล์สมบูรณ์ (AI/PSD/PNG) และปิดจบงานอย่างเป็นทางการ
+          </div>
+        </div>
+      </div>
+      <div class="fresh-modal-footer">
+        <button type="button" class="btn-fresh-cta-orange" id="modal-focus-login-btn">
+          <span>เข้าสู่ระบบทันที 🚀</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <script src="js/config.local.js"></script>
   <script type="module" src="js/login.js"></script>
+  <script>
+    // Smooth scroll and focus
+    const focusEmailInput = () => {
+      document.getElementById("work-email")?.focus();
+      document.querySelector(".phone-mockup-shell")?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    document.getElementById("top-login-cta")?.addEventListener("click", focusEmailInput);
+    document.getElementById("btn-hero-login")?.addEventListener("click", focusEmailInput);
+
+    // Modal triggers
+    const modal = document.getElementById("fresh-workflow-modal");
+    const openModal = () => modal?.classList.remove("hidden");
+    const closeModal = () => modal?.classList.add("hidden");
+
+    document.getElementById("nav-workflow-link")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      openModal();
+    });
+    document.getElementById("btn-hero-workflow")?.addEventListener("click", openModal);
+    document.getElementById("close-fresh-modal")?.addEventListener("click", closeModal);
+    document.getElementById("modal-focus-login-btn")?.addEventListener("click", () => {
+      closeModal();
+      focusEmailInput();
+    });
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+  </script>
 </body>
 </html>
