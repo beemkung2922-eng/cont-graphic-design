@@ -10,272 +10,174 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cont.css">
 </head>
-<body class="login-body-single-page">
-  <div class="login-viewport-single">
+<body class="login-body-clean">
+  <div class="login-viewport-clean">
     
-    <!-- Top Header Bar (Compact & Clean) -->
-    <header class="login-topbar-single">
-      <div class="login-topbar-left">
-        <div class="pixel-brand-tag-compact">
-          <span class="pixel-tag-box-sm">C</span>
-          <span class="pixel-tag-text-sm">CONT</span>
-        </div>
-        <span class="topbar-team-label">KKP GRAPHIC DESIGN OPERATIONS</span>
-      </div>
-      <div class="login-topbar-right">
-        <div class="pixel-status-pill">
-          <span class="pulse-green-dot"></span>
-          <span>ระบบออนไลน์ 100% · V2.4</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main Content: Single Screen (No Scroll Needed!) -->
-    <main class="login-main-single">
+    <!-- LEFT SIDE: รูปภาพเมืองพร้อมคำบรรยาย (สมส่วน ไม่รก สไตล์ภาพที่ 2) -->
+    <section class="login-showcase-left">
       
-      <!-- Left & Center: Reference Banner (Text Left + Pixel City Right Side-by-Side!) -->
-      <section class="hero-banner-frame">
+      <!-- Top Brand Tag -->
+      <div class="showcase-top-row">
+        <div class="pixel-brand-badge">
+          <span class="pixel-brand-icon">C</span>
+          <span class="pixel-brand-text">CONT</span>
+        </div>
+        <div class="pixel-status-badge">
+          <span class="pulse-green-dot"></span>
+          <span>ออนไลน์ 100% · V2.4</span>
+        </div>
+      </div>
+
+      <!-- Balanced Typography & Description -->
+      <div class="showcase-heading-group">
+        <span class="showcase-kicker">BUILD YOUR WORKFLOW</span>
+        <h1 class="showcase-title">
+          สร้างสรรค์งานดีไซน์. ไปด้วยกัน. <span class="pixel-heart">❤️</span>
+        </h1>
+        <p class="showcase-desc">
+          ศูนย์กลางการบริหารจัดการงานออกแบบกราฟิกแบบครบวงจร ติดตามสถานะงาน จัดสรรกำลังคนในทีม และส่งมอบผลงานคุณภาพได้อย่างแม่นยำ
+        </p>
+      </div>
+
+      <!-- City Artwork Image (อยู่ด้านซ้ายคู่กับคำบรรยาย) -->
+      <div class="showcase-artwork-card">
+        <img 
+          src="assets/hero-city.png" 
+          alt="CONT Pixel Art City" 
+          class="showcase-artwork-img"
+        />
+        <div class="showcase-artwork-footer">
+          <span>⚡ 5 ขั้นตอนมาตรฐาน: รับบรีฟ ➔ ดราฟต์ ➔ ตรวจงาน ➔ แก้ไข ➔ ส่งมอบ</span>
+          <span class="showcase-squad-tag">KKP GRAPHIC SQUAD</span>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="showcase-credit">
+        KKP Graphic Design Team · แพลตฟอร์มบริหารจัดการงานออกแบบและครีเอทีฟ
+      </div>
+
+    </section>
+
+    <!-- RIGHT SIDE: กล่องล็อกอิน เรียบง่าย สะอาดตา ไม่รก (Clean Login Card) -->
+    <section class="login-form-right">
+      <div class="login-card-clean">
         
-        <!-- Banner Left: Typography & Actions -->
-        <div class="hero-banner-left">
-          <div class="hero-text-content">
-            <span class="pixel-kicker-sm">BUILD YOUR WORKFLOW</span>
-            <h1 class="pixel-hero-title-compact">
-              สร้างสรรค์<br>
-              งานดีไซน์.<br>
-              ไปด้วยกัน. <span class="pixel-heart">❤️</span>
-            </h1>
-            <p class="pixel-hero-desc-compact">
-              CONT คือศูนย์กลางการบริหารจัดการงานออกแบบกราฟิกแบบครบวงจร ติดตามสถานะงาน จัดสรรกำลังคนในทีม และส่งมอบผลงานคุณภาพได้อย่างแม่นยำ
-            </p>
-          </div>
-
-          <div class="hero-actions-content">
-            <!-- Chunky Pixel Buttons -->
-            <div class="pixel-hero-buttons-compact">
-              <button type="button" class="btn-retro-pixel-red-sm" id="hero-start-btn">
-                <span>🚀 เข้าสู่ระบบทันที</span>
-              </button>
-              <button type="button" class="btn-retro-pixel-cyan-sm" id="hero-workflow-btn">
-                <span>➔ ดูขั้นตอนการทำงาน</span>
-              </button>
-            </div>
-
-            <!-- News Ticker -->
-            <div class="pixel-news-ticker-compact">
-              <span class="ticker-badge-sm">ข่าวสาร</span>
-              <span class="ticker-title-sm">อัปเดตระบบ CONT V2.4</span>
-              <span class="ticker-text-sm">รองรับการจัดการบรีฟ, อนุมัติงาน, และติดตาม SLA</span>
-              <span class="ticker-arrow-sm">➔</span>
-            </div>
-          </div>
+        <!-- Header -->
+        <div class="card-clean-header">
+          <span class="card-clean-badge">✦ พื้นที่ทำงาน</span>
+          <h2 class="card-clean-title">เข้าสู่ระบบ CONT</h2>
+          <p class="card-clean-sub">
+            สำหรับพนักงานบัญชีบริษัท (@kkpfg.com) หรือเข้าสู่ระบบด้วย Google
+          </p>
         </div>
 
-        <!-- Banner Right: Pixel Art City (Directly Side-by-Side with Text!) -->
-        <div class="hero-banner-right">
-          <img 
-            src="assets/hero-city.png" 
-            alt="CONT Pixel Operations City" 
-            class="hero-city-pixel-img"
-          />
-          <div class="hero-city-overlay-pill">
-            <span>⚡ 5 STAGES: BRIEF ➔ DRAFT ➔ REVIEW ➔ REVISE ➔ DELIVER</span>
-          </div>
-        </div>
+        <!-- Dynamic Message Banners -->
+        <div id="login-error" class="banner-error hidden"></div>
+        <div id="login-info" class="banner-info hidden"></div>
 
-      </section>
-
-      <!-- Right Column: Login Card (Fitted & Clean) -->
-      <section class="login-panel-single">
-        <div class="login-card-single">
-          
-          <div class="login-card-head">
-            <span class="login-badge-single">✦ เข้าสู่ระบบพื้นที่ทำงาน</span>
-            <h2 class="login-title-single">เข้าสู่ระบบ CONT</h2>
-            <p class="login-sub-single">
-              สำหรับพนักงานบัญชีบริษัท (@kkpfg.com) หรือเข้าสู่ระบบด้วย Google
-            </p>
-          </div>
-
-          <!-- Dynamic Error/Info Banners -->
-          <div id="login-error" class="banner-error hidden"></div>
-          <div id="login-info" class="banner-info hidden"></div>
-
-          <!-- Step 1: Work Email Input -->
-          <div id="email-step" class="auth-step">
-            <div class="single-field">
-              <label for="work-email" class="single-label">
-                อีเมลสำหรับทำงาน (เฉพาะ @kkpfg.com)
-              </label>
-              
-              <!-- Fixed Icon & Input Clearance (No Text Overlap!) -->
-              <div class="single-input-wrap">
-                <svg class="single-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                </svg>
-                <input
-                  id="work-email"
-                  type="email"
-                  placeholder="เช่น your.name@kkpfg.com"
-                  autocomplete="email"
-                  class="single-text-input"
-                  required
-                />
-              </div>
-
-              <span class="single-hint">
-                🔒 เฉพาะอีเมล @kkpfg.com (รหัส OTP จะส่งตรงไปยัง Outlook)
-              </span>
-            </div>
-
-            <button class="btn-single-submit btn-pixel-red-submit" id="send-otp-btn">
-              <span>📩 ขอรับรหัส OTP ทางอีเมล</span>
-            </button>
-          </div>
-
-          <!-- Step 2: 6-Digit OTP Verification -->
-          <div id="otp-step" class="auth-step hidden">
-            <div class="email-sent-card-single">
-              <div class="email-sent-icon-sm">🔐</div>
-              <div style="flex:1">
-                <div style="font-weight:700; color:#111; font-size:0.86rem">
-                  ส่งรหัส OTP สำเร็จแล้ว
-                </div>
-                <div style="font-size:0.78rem; color:#55596b; margin-top:2px">
-                  กรุณาตรวจสอบรหัส 6 หลักใน Outlook ที่ส่งไปยัง <strong id="sent-email-display" style="color:#e52521"></strong>
-                </div>
-              </div>
-            </div>
-
-            <div class="single-field" style="margin-top:12px">
-              <label for="otp-code" class="single-label">
-                กรอกรหัส OTP 6 หลัก
-              </label>
+        <!-- Step 1: Work Email Input -->
+        <div id="email-step" class="auth-step">
+          <div class="clean-field">
+            <label for="work-email" class="clean-label">
+              อีเมลสำหรับทำงาน (เฉพาะ @kkpfg.com)
+            </label>
+            
+            <!-- Guaranteed Icon & Text Separation: NO OVERLAP! -->
+            <div class="clean-input-wrap">
+              <svg class="clean-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+              </svg>
               <input
-                id="otp-code"
-                type="text"
-                maxlength="6"
-                inputmode="numeric"
-                placeholder="• • • • • •"
-                class="single-text-input otp-input-centered"
-                autocomplete="one-time-code"
+                id="work-email"
+                type="email"
+                placeholder="your.name@kkpfg.com"
+                autocomplete="email"
+                class="clean-text-input"
+                required
               />
-              <span class="single-hint" style="text-align:center; display:block;">
-                รหัสหมดอายุใน 10 นาที (ตรวจสอบกล่อง Inbox หรือ Junk)
-              </span>
             </div>
 
-            <button class="btn-single-submit btn-pixel-cyan-submit" id="verify-otp-btn">
-              <span>ยืนยันรหัส & เข้าสู่ระบบ ➔</span>
-            </button>
+            <span class="clean-hint">
+              🔒 เฉพาะอีเมล @kkpfg.com (รหัส OTP 6 หลักจะส่งไปยัง Outlook)
+            </span>
+          </div>
 
-            <div class="row-between" style="margin-top:12px; font-size:0.8rem">
-              <button type="button" class="btn-link" id="resend-otp-btn">ส่งรหัสใหม่อีกครั้ง</button>
-              <button type="button" class="btn-link text-muted" id="back-to-email-btn">← เปลี่ยนอีเมล</button>
+          <button class="btn-pixel-submit-clean btn-pixel-red" id="send-otp-btn">
+            <span>📩 ขอรับรหัส OTP ทางอีเมล</span>
+          </button>
+        </div>
+
+        <!-- Step 2: 6-Digit OTP Verification -->
+        <div id="otp-step" class="auth-step hidden">
+          <div class="email-sent-card-clean">
+            <div class="email-sent-icon-clean">🔐</div>
+            <div style="flex:1">
+              <div style="font-weight:700; color:#111; font-size:0.86rem">
+                ส่งรหัส OTP สำเร็จแล้ว
+              </div>
+              <div style="font-size:0.78rem; color:#55596b; margin-top:2px">
+                กรุณาตรวจสอบรหัส 6 หลักใน Outlook ที่ส่งไปยัง <strong id="sent-email-display" style="color:#e52521"></strong>
+              </div>
             </div>
           </div>
 
-          <!-- Divider -->
-          <div class="sep-single">
-            <span>หรือเข้าสู่ระบบด้วย Google</span>
+          <div class="clean-field" style="margin-top:14px">
+            <label for="otp-code" class="clean-label">
+              กรอกรหัส OTP 6 หลัก
+            </label>
+            <input
+              id="otp-code"
+              type="text"
+              maxlength="6"
+              inputmode="numeric"
+              placeholder="• • • • • •"
+              class="clean-text-input otp-centered-clean"
+              autocomplete="one-time-code"
+            />
+            <span class="clean-hint" style="text-align:center; display:block;">
+              รหัสหมดอายุใน 10 นาที (ตรวจสอบในกล่อง Inbox หรือ Junk)
+            </span>
           </div>
 
-          <!-- Google Button -->
-          <button type="button" class="btn-single-google" id="google-login">
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span>เข้าสู่ระบบด้วย Google</span>
+          <button class="btn-pixel-submit-clean btn-pixel-cyan" id="verify-otp-btn">
+            <span>ยืนยันรหัส & เข้าสู่ระบบ ➔</span>
           </button>
 
-          <!-- Security Footer -->
-          <div class="login-footer-single">
-            <span>🔒 สำหรับทีมงาน KKP CONT Graphic Design เท่านั้น</span>
+          <div class="row-between" style="margin-top:14px; font-size:0.82rem">
+            <button type="button" class="btn-link" id="resend-otp-btn">ส่งรหัสใหม่อีกครั้ง</button>
+            <button type="button" class="btn-link text-muted" id="back-to-email-btn">← เปลี่ยนอีเมล</button>
           </div>
+        </div>
 
+        <!-- Divider -->
+        <div class="clean-divider">
+          <span>หรือเข้าสู่ระบบด้วย Google</span>
         </div>
-      </section>
 
-    </main>
-
-  </div>
-
-  <!-- Interactive Workflow Modal -->
-  <div id="workflow-modal" class="modal-retro-overlay hidden">
-    <div class="modal-retro-card">
-      <div class="modal-retro-header">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:1.3rem;">🏗️</span>
-          <h3 style="font-size:1.1rem;font-weight:700;margin:0;color:#111;">5 ขั้นตอนกระบวนการทำงานใน CONT</h3>
-        </div>
-        <button type="button" class="modal-retro-close" id="close-workflow-modal">✕</button>
-      </div>
-      <div class="modal-retro-body">
-        <div class="workflow-step-item">
-          <div class="step-num red">1</div>
-          <div>
-            <strong>รอรับบรีฟ (Brief Intake):</strong> ตรวจสอบความพร้อมของบรีฟ ไฟล์แนบ และขนาดภาพก่อนเริ่มทำ
-          </div>
-        </div>
-        <div class="workflow-step-item">
-          <div class="step-num blue">2</div>
-          <div>
-            <strong>กำลังดราฟต์ (Drafting):</strong> ดีไซเนอร์ลงมือออกแบบและอัปโหลด Artwork ชิ้นงานขึ้นระบบ
-          </div>
-        </div>
-        <div class="workflow-step-item">
-          <div class="step-num yellow">3</div>
-          <div>
-            <strong>รอคอมเมนต์ (Review):</strong> หัวหน้าทีมหรือผู้สั่งงานตรวจแบบ ปักหมุดคอมเมนต์แก้ไข
-          </div>
-        </div>
-        <div class="workflow-step-item">
-          <div class="step-num red">4</div>
-          <div>
-            <strong>แก้ไขงาน (Revision):</strong> เก็บรายละเอียดตามคอมเมนต์ พร้อมนับรอบ Revision
-          </div>
-        </div>
-        <div class="workflow-step-item">
-          <div class="step-num green">5</div>
-          <div>
-            <strong>ส่งมอบสำเร็จ (Completed):</strong> แนบไฟล์สมบูรณ์ (AI/PSD/PNG) และปิดจบงานอย่างเป็นทางการ
-          </div>
-        </div>
-      </div>
-      <div class="modal-retro-footer">
-        <button type="button" class="btn-retro-pixel-red-sm" id="modal-start-login-btn">
-          <span>🚀 เข้าสู่ระบบ</span>
+        <!-- Google Login Button -->
+        <button type="button" class="btn-clean-google" id="google-login">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>เข้าสู่ระบบด้วย Google</span>
         </button>
+
+        <!-- Security Footer -->
+        <div class="card-clean-footer">
+          <span>🔒 สำหรับทีมงาน KKP CONT Graphic Design เท่านั้น</span>
+        </div>
+
       </div>
-    </div>
+    </section>
+
   </div>
 
   <script src="js/config.local.js"></script>
   <script type="module" src="js/login.js"></script>
-  <script>
-    // Hero Buttons interaction
-    document.getElementById("hero-start-btn")?.addEventListener("click", () => {
-      document.getElementById("work-email")?.focus();
-    });
-
-    const wfModal = document.getElementById("workflow-modal");
-    document.getElementById("hero-workflow-btn")?.addEventListener("click", () => {
-      wfModal?.classList.remove("hidden");
-    });
-    document.getElementById("close-workflow-modal")?.addEventListener("click", () => {
-      wfModal?.classList.add("hidden");
-    });
-    document.getElementById("modal-start-login-btn")?.addEventListener("click", () => {
-      wfModal?.classList.add("hidden");
-      document.getElementById("work-email")?.focus();
-    });
-    wfModal?.addEventListener("click", (e) => {
-      if (e.target === wfModal) wfModal.classList.add("hidden");
-    });
-  </script>
 </body>
 </html>
