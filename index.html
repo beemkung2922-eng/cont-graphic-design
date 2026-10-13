@@ -12,7 +12,7 @@
 
   <style>
     /* ==========================================================================
-       RETRO PIXEL GAME TITLE SCREEN - CLEAN CENTERED & THEMEABLE
+       CONT RETRO PIXEL TITLE SCREEN (MATCHING USER MOCKUP EXACTLY)
        ========================================================================== */
     :root {
       --retro-red: #E62846;
@@ -20,58 +20,50 @@
       --retro-red-deep: #5A0A17;
       --retro-cyan: #1CE0D8;
       --retro-yellow: #FFD23F;
+      --purple-accent: #9D55F7;
+      --purple-border: #6248B2;
     }
 
-    /* --- Dark Theme (Default) --- */
+    /* Dark Theme (Default) */
     html[data-theme="dark"] {
-      --card-bg: rgba(18, 21, 33, 0.94);
-      --card-border: #2C334A;
-      --card-shadow: #0C0E17;
-      --badge-bg: #22283A;
-      --badge-border: #3A4462;
-      --badge-color: #FFD23F;
-      --text-main: #FFFFFF;
-      --text-sub: #9FA8BF;
-      --input-bg: #0E1018;
-      --input-border: #2B3249;
+      --card-bg: rgba(20, 23, 40, 0.94);
+      --card-border: #6248B2;
+      --card-outer: #3A2B70;
+      --card-shadow: #0C0E1A;
+      --input-bg: #1B2035;
+      --input-border: #2D3654;
       --input-color: #FFFFFF;
-      --input-placeholder: #5A637B;
-      --sep-line: #2B3249;
-      --sep-text: #7E88A2;
-      --hint-color: #8C96B0;
-      --footer-bg: rgba(16, 18, 28, 0.9);
-      --footer-border: #24293D;
+      --input-placeholder: #687496;
+      --text-main: #FFFFFF;
+      --text-sub: #9EA8C2;
+      --hint-color: #BAC3D6;
+      --sep-line: #2C344E;
+      --sep-text: #6B7694;
       --footer-text: #8E98B0;
-      --toggle-bg: #1C2130;
-      --toggle-border: #343D56;
+      --toggle-bg: rgba(20, 23, 40, 0.85);
+      --toggle-border: #4B3888;
       --toggle-color: #E2E6F2;
-      --backdrop-filter: blur(8px);
     }
 
-    /* --- Light Theme --- */
+    /* Light Theme */
     html[data-theme="light"] {
       --card-bg: rgba(255, 255, 255, 0.96);
-      --card-border: #1C2130;
+      --card-border: #3A2B70;
+      --card-outer: #6248B2;
       --card-shadow: #141724;
-      --badge-bg: #1C2130;
-      --badge-border: #141724;
-      --badge-color: #FFFFFF;
-      --text-main: #141724;
-      --text-sub: #4A536B;
       --input-bg: #F4F6FB;
       --input-border: #CCD3E3;
       --input-color: #141724;
       --input-placeholder: #828CA5;
+      --text-main: #141724;
+      --text-sub: #545E75;
+      --hint-color: #4A536B;
       --sep-line: #D8DFEE;
       --sep-text: #67728D;
-      --hint-color: #58637C;
-      --footer-bg: rgba(255, 255, 255, 0.92);
-      --footer-border: #CCD3E3;
       --footer-text: #4A536B;
-      --toggle-bg: #FFFFFF;
+      --toggle-bg: rgba(255, 255, 255, 0.9);
       --toggle-border: #CCD3E3;
       --toggle-color: #1C2130;
-      --backdrop-filter: blur(8px);
     }
 
     * {
@@ -89,7 +81,7 @@
       background: #5BA7EC;
     }
 
-    /* Background Shell: Uses Clean Pixel Landscape Art */
+    /* Main Viewport Shell with Panoramic Pixel Art Scenery */
     .login-shell {
       position: fixed;
       inset: 0;
@@ -106,31 +98,11 @@
       background-size: cover;
       background-position: center bottom;
       background-repeat: no-repeat;
-      padding: 16px 20px 12px;
+      padding: 18px 20px 24px;
       z-index: 1;
     }
 
-    /* Light/Dark Subtle Tint Overlay */
-    .login-shell::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      transition: background 0.3s ease;
-    }
-
-    html[data-theme="dark"] .login-shell::after {
-      background: rgba(10, 13, 24, 0.28);
-    }
-
-    html[data-theme="light"] .login-shell::after {
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    /* ==========================================================================
-       TOP THEME TOGGLE SWITCHER
-       ========================================================================== */
+    /* Theme Toggle Switcher (Top Right Corner) */
     .theme-toggle-bar {
       position: absolute;
       top: 14px;
@@ -146,12 +118,14 @@
       border: 2px solid var(--toggle-border);
       box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
       border-radius: 20px;
-      padding: 6px 13px;
+      padding: 5px 12px;
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 600;
       color: var(--toggle-color);
       cursor: pointer;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
       user-select: none;
     }
@@ -167,7 +141,7 @@
     }
 
     /* ==========================================================================
-       TITLE HEADER: 3D PIXEL TITLE BANNER (CONT)
+       TOP TITLE AREA: BADGE + RED 3D PIXEL TITLE + SUBTITLE
        ========================================================================== */
     .retro-title-banner {
       position: relative;
@@ -176,32 +150,32 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       margin-top: 4px;
       flex-shrink: 0;
     }
 
-    /* Top Pill Badge */
+    /* Top Pill Badge (Matching Mockup: Dark pill with glowing purple border) */
     .retro-badge-pill {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      background: #FFFFFF;
-      color: #1F2433;
-      border: 3px solid #141724;
-      box-shadow: 0 4px 0 #141724;
-      padding: 3px 14px;
-      border-radius: 4px;
+      background: #151829;
+      color: #FFFFFF;
+      border: 2px solid #573E9E;
+      box-shadow: 0 3px 0 #0C0E1A;
+      padding: 3px 13px;
+      border-radius: 6px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 0.62rem;
+      font-size: 0.60rem;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       font-weight: 700;
     }
 
     .retro-badge-pill .heart {
-      color: var(--retro-red);
-      font-size: 0.75rem;
+      color: #FF3B5C;
+      font-size: 0.72rem;
       animation: pulse-heart 1.2s infinite ease-in-out;
     }
 
@@ -210,10 +184,10 @@
       50% { transform: scale(1.25); }
     }
 
-    /* Giant 3D Pixel Title */
+    /* Red 3D Pixel Title: CONT (Matching Image 2 Exactly) */
     .retro-main-title {
       font-family: 'Press Start 2P', 'Pixelify Sans', cursive;
-      font-size: clamp(2.4rem, 4.4vw, 3.6rem);
+      font-size: clamp(2.3rem, 4.2vw, 3.5rem);
       line-height: 1.05;
       color: var(--retro-red);
       margin: 4px 0 2px;
@@ -226,113 +200,108 @@
         0 8px 0 var(--retro-red-deep),
         0 10px 0 #10121D,
         0 12px 0 #10121D,
-        0 14px 12px rgba(0, 0, 0, 0.45);
+        0 14px 10px rgba(0, 0, 0, 0.45);
       filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
       user-select: none;
     }
 
-    /* Thai Subtitle */
+    /* Thai Subtitle: Outlined text matching Image 2 */
     .retro-thai-subtitle {
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-weight: 600;
+      font-weight: 700;
       font-size: clamp(0.85rem, 1.1vw, 0.96rem);
       color: #FFFFFF;
       margin: 0;
       text-shadow: 
-        -1px -1px 0 #121522,
-         1px -1px 0 #121522,
-        -1px  1px 0 #121522,
-         1px  1px 0 #121522,
-         0 2px 6px rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+        -2px -2px 0 #121526,
+         2px -2px 0 #121526,
+        -2px  2px 0 #121526,
+         2px  2px 0 #121526,
+         0 3px 6px rgba(0, 0, 0, 0.75);
     }
 
     /* ==========================================================================
-       CENTERED RETRO LOGIN CARD (CLEAN & NON-CLUTTERED)
+       LOGIN CARD: MATCHING USER MOCKUP EXACTLY
        ========================================================================== */
     .retro-stage-center {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin: 6px auto;
+      margin: 4px auto 8px;
     }
 
     .retro-login-card {
       position: relative;
       width: 100%;
       background: var(--card-bg);
-      border: 3px solid var(--card-border);
+      border: 4px solid var(--card-border);
+      outline: 2px solid var(--card-outer);
       box-shadow: 
+        0 0 0 2px var(--card-outer),
         0 8px 0 var(--card-shadow),
-        0 16px 28px rgba(0, 0, 0, 0.35);
+        0 16px 32px rgba(0, 0, 0, 0.45);
       border-radius: 12px;
-      padding: 24px 28px 20px;
+      padding: 22px 24px 20px;
       display: flex;
       flex-direction: column;
       gap: 13px;
-      backdrop-filter: var(--backdrop-filter);
-      -webkit-backdrop-filter: var(--backdrop-filter);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
-    /* Top Floating Tab Badge */
-    .retro-card-tab {
-      position: absolute;
-      top: -16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--badge-bg);
-      border: 2px solid var(--badge-border);
-      box-shadow: 0 3px 0 var(--card-shadow);
-      color: var(--badge-color);
-      border-radius: 6px;
-      padding: 4px 16px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
+    /* Card Title Row with Purple Vertical Accent Bar */
+    .card-title-row {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      user-select: none;
+      align-items: flex-start;
+      gap: 10px;
     }
 
-    .retro-card-header {
-      text-align: center;
-      margin-top: 4px;
+    .purple-accent-bar {
+      width: 4px;
+      height: 38px;
+      background: var(--purple-accent);
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(157, 85, 247, 0.6);
+      flex-shrink: 0;
+      margin-top: 2px;
     }
 
-    .retro-card-title {
+    .card-title-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card-title-text {
       font-size: 1.35rem;
       font-weight: 700;
       color: var(--text-main);
       margin: 0;
-      line-height: 1.3;
+      line-height: 1.25;
     }
 
-    .retro-card-sub {
+    .card-sub-text {
       font-size: 0.82rem;
       color: var(--text-sub);
-      margin: 4px 0 0;
-      line-height: 1.45;
+      margin: 0;
+      line-height: 1.4;
     }
 
     /* Form Fields */
-    .retro-field {
+    .field-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
-    .retro-label {
+    .field-label {
       font-size: 0.82rem;
       font-weight: 600;
       color: var(--text-main);
@@ -341,27 +310,30 @@
       gap: 6px;
     }
 
-    .retro-input-wrap {
+    .field-label-icon {
+      font-size: 0.9rem;
+    }
+
+    .input-wrapper {
       position: relative;
       display: flex;
       align-items: center;
     }
 
-    .retro-input-icon {
+    .input-icon-left {
       position: absolute;
       left: 12px;
-      width: 17px;
-      height: 17px;
-      color: var(--hint-color);
+      font-size: 0.95rem;
+      color: var(--input-placeholder);
       pointer-events: none;
     }
 
-    .retro-input {
+    .text-input {
       width: 100%;
-      height: 44px;
+      height: 42px;
       background: var(--input-bg);
       border: 2px solid var(--input-border);
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 0 14px 0 38px;
       font-size: 0.88rem;
       font-family: 'IBM Plex Sans Thai', sans-serif;
@@ -370,36 +342,36 @@
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .retro-input:focus {
-      border-color: var(--retro-red);
-      box-shadow: 0 0 0 3px rgba(230, 40, 70, 0.2);
+    .text-input:focus {
+      border-color: var(--purple-accent);
+      box-shadow: 0 0 0 3px rgba(157, 85, 247, 0.25);
     }
 
-    .retro-input::placeholder {
+    .text-input::placeholder {
       color: var(--input-placeholder);
     }
 
-    .retro-hint {
+    .field-hint-line {
       font-size: 0.74rem;
       color: var(--hint-color);
-      line-height: 1.4;
       display: flex;
       align-items: center;
       gap: 5px;
+      margin-top: 1px;
     }
 
-    /* Chunky Arcade Start Button (Red) */
-    .retro-btn-start {
+    /* Red Primary Button (Matching Mockup) */
+    .btn-red-arcade {
       position: relative;
       width: 100%;
-      height: 46px;
-      background: var(--retro-red);
+      height: 44px;
+      background: #FF3B5C;
       color: #FFFFFF;
-      border: 2px solid #FFAAB7;
-      border-radius: 6px;
-      box-shadow: 0 5px 0 var(--retro-red-dark);
+      border: 2px solid #FF8095;
+      border-radius: 8px;
+      box-shadow: 0 4px 0 #B31433;
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -411,34 +383,51 @@
       user-select: none;
     }
 
-    .retro-btn-start:hover:not(:disabled) {
-      background: #FF3352;
+    .btn-red-arcade:hover:not(:disabled) {
+      background: #FF4D6D;
       transform: translateY(2px);
-      box-shadow: 0 3px 0 var(--retro-red-dark);
+      box-shadow: 0 2px 0 #B31433;
     }
 
-    .retro-btn-start:active:not(:disabled) {
-      transform: translateY(5px);
-      box-shadow: 0 0 0 var(--retro-red-dark);
+    .btn-red-arcade:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: none;
     }
 
-    .retro-btn-start:disabled {
+    .btn-red-arcade:disabled {
       opacity: 0.65;
       cursor: not-allowed;
       transform: none;
-      box-shadow: 0 3px 0 var(--retro-red-dark);
     }
 
-    /* Google Button */
-    .retro-btn-google {
+    /* Divider */
+    .field-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--sep-text);
+      font-size: 0.74rem;
+      margin: 1px 0;
+    }
+
+    .field-divider::before,
+    .field-divider::after {
+      content: "";
+      height: 1px;
+      background: var(--sep-line);
+      flex: 1;
+    }
+
+    /* Google Button (White Rounded Button Matching Mockup) */
+    .btn-white-google {
       position: relative;
       width: 100%;
       height: 42px;
       background: #FFFFFF;
-      color: #1A1F2C;
-      border: 2px solid #D6DBE8;
-      border-radius: 6px;
-      box-shadow: 0 4px 0 #9BA4BC;
+      color: #1A1E2D;
+      border: 1px solid #D8DFEE;
+      border-radius: 8px;
+      box-shadow: 0 3px 0 #A8B2C8;
       font-family: 'IBM Plex Sans Thai', sans-serif;
       font-size: 0.88rem;
       font-weight: 600;
@@ -451,51 +440,39 @@
       user-select: none;
     }
 
-    html[data-theme="light"] .retro-btn-google {
-      border: 2px solid #1C2130;
-      box-shadow: 0 3px 0 #1C2130;
-    }
-
-    .retro-btn-google:hover:not(:disabled) {
+    .btn-white-google:hover:not(:disabled) {
       background: #F4F6FC;
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #9BA4BC;
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 #A8B2C8;
     }
 
-    .retro-btn-google:active:not(:disabled) {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #9BA4BC;
+    .btn-white-google:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: none;
     }
 
-    .retro-btn-google:disabled {
+    .btn-white-google:disabled {
       opacity: 0.65;
       cursor: not-allowed;
       transform: none;
     }
 
-    /* Divider */
-    .retro-sep {
+    /* Footer Security Line */
+    .card-footer-note {
+      font-size: 0.72rem;
+      color: var(--footer-text);
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: var(--sep-text);
-      font-size: 0.74rem;
-      margin: 2px 0;
-    }
-
-    .retro-sep::before,
-    .retro-sep::after {
-      content: "";
-      height: 1px;
-      background: var(--sep-line);
-      flex: 1;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 1px;
     }
 
     /* OTP Verification Step */
     .email-sent-card {
       background: var(--input-bg);
       border: 1px solid var(--input-border);
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 10px 14px;
       display: flex;
       align-items: center;
@@ -504,12 +481,12 @@
 
     .otp-input {
       width: 100%;
-      height: 48px;
+      height: 46px;
       background: var(--input-bg);
       border: 2px solid var(--input-border);
-      border-radius: 6px;
+      border-radius: 8px;
       font-family: 'Space Mono', monospace;
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 700;
       letter-spacing: 0.45em;
       text-align: center;
@@ -518,8 +495,8 @@
     }
 
     .otp-input:focus {
-      border-color: var(--retro-red);
-      box-shadow: 0 0 0 3px rgba(230, 40, 70, 0.2);
+      border-color: var(--purple-accent);
+      box-shadow: 0 0 0 3px rgba(157, 85, 247, 0.25);
     }
 
     /* Dynamic Banner Messages */
@@ -547,57 +524,8 @@
       display: none !important;
     }
 
-    .retro-card-footer {
-      font-size: 0.72rem;
-      color: var(--hint-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 1px;
-    }
-
-    /* ==========================================================================
-       BOTTOM STATUS TICKER (32px)
-       ========================================================================== */
-    .retro-bottom-bar {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 960px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      background: var(--footer-bg);
-      border: 2px solid var(--footer-border);
-      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
-      border-radius: 6px;
-      padding: 5px 14px;
-      color: var(--footer-text);
-      font-size: 0.72rem;
-      flex-shrink: 0;
-      backdrop-filter: var(--backdrop-filter);
-      -webkit-backdrop-filter: var(--backdrop-filter);
-      margin-bottom: 2px;
-    }
-
-    .retro-bottom-bar .status-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .retro-bottom-bar .status-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.68rem;
-    }
-
     /* Mobile Responsive */
-    @media (max-width: 600px) {
+    @media (max-width: 540px) {
       html, body {
         overflow-y: auto !important;
         height: auto !important;
@@ -620,18 +548,13 @@
       .retro-login-card {
         padding: 20px 18px 16px !important;
       }
-      .retro-bottom-bar {
-        flex-direction: column !important;
-        gap: 4px !important;
-        text-align: center !important;
-      }
     }
   </style>
 </head>
 <body>
   <div class="login-shell">
     
-    <!-- Top Theme Toggle (Dark Tone / Light Tone) -->
+    <!-- Theme Toggle Switcher (Top Right Corner) -->
     <div class="theme-toggle-bar">
       <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" aria-label="สลับธีมสี">
         <span id="theme-icon">☀️</span>
@@ -639,32 +562,29 @@
       </button>
     </div>
 
-    <!-- Top Header: Retro 3D Pixel Title Banner -->
+    <!-- Top Header: Pill Badge + Red 3D Pixel Title CONT + Outlined Subtitle -->
     <header class="retro-title-banner">
       <div class="retro-badge-pill">
         <span class="heart">♥</span>
-        <span>KKP CREATIVE OPERATIONS · 2026</span>
+        <span>KKP CREATIVE OPERATIONS - 2026</span>
       </div>
       <h1 class="retro-main-title">CONT</h1>
       <p class="retro-thai-subtitle">
-        <span>ระบบบริหารและจัดการงานออกแบบ Graphic Design</span>
+        ระบบบริหารและจัดการงานออกแบบ Graphic Design
       </p>
     </header>
 
-    <!-- Main Stage: Single Centered Clean Login Card (ไม่รก) -->
+    <!-- Main Stage: Center Login Card Matching User Mockup Exactly -->
     <main class="retro-stage-center">
       <div class="retro-login-card">
-        <!-- Floating Tab Badge (No purple! Uses Sleek Dark / Theme Accent) -->
-        <div class="retro-card-tab">
-          <span>👤</span>
-          <span>LOGIN · เข้าสู่ระบบ</span>
-        </div>
-
-        <div class="retro-card-header">
-          <h2 class="retro-card-title">เข้าสู่ระบบ CONT</h2>
-          <p class="retro-card-sub">
-            เชื่อมต่อเพื่อจัดการบรีฟ, คิวงานกราฟิก, และทีมงานอย่างมีประสิทธิภาพ
-          </p>
+        
+        <!-- Header with Glowing Purple Bar -->
+        <div class="card-title-row">
+          <div class="purple-accent-bar"></div>
+          <div class="card-title-content">
+            <h2 class="card-title-text">เข้าสู่ระบบ CONT</h2>
+            <p class="card-sub-text">จัดการบรีฟ คิวงาน และทีมในที่เดียว</p>
+          </div>
         </div>
 
         <!-- Dynamic Message Banners -->
@@ -672,37 +592,36 @@
         <div id="login-info" class="banner-info hidden"></div>
 
         <!-- Step 1: Work Email Input (OTP Login) -->
-        <div id="email-step" class="retro-field">
-          <label for="work-email" class="retro-label">
-            <span>📧 อีเมลที่ทำงาน (@kkpfg.com)</span>
+        <div id="email-step" class="field-group">
+          <label for="work-email" class="field-label">
+            <span class="field-label-icon">✉️</span>
+            <span>อีเมลที่ทำงาน (@kkpfg.com)</span>
           </label>
-          <div class="retro-input-wrap">
-            <svg class="retro-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-            </svg>
+          <div class="input-wrapper">
+            <span class="input-icon-left">✉️</span>
             <input
               id="work-email"
-              class="retro-input"
+              class="text-input"
               type="email"
-              placeholder="e.g. your.name@kkpfg.com"
+              placeholder="your.name@kkpfg.com"
               autocomplete="email"
               required
             />
           </div>
-          <span class="retro-hint">
+          <div class="field-hint-line">
             <span>🔒</span>
-            <span>ระบบจะส่งรหัส OTP 6 หลักไปยังกล่องข้อความ Outlook ของท่าน</span>
-          </span>
+            <span>รับรหัส OTP 6 หลักทาง Outlook</span>
+          </div>
 
-          <!-- Chunky Red Arcade Button -->
-          <button class="retro-btn-start" id="send-otp-btn" type="button">
-            <span>📩 ขอรหัส OTP ทางอีเมล (PRESS START)</span>
+          <!-- Red Arcade Primary Button -->
+          <button class="btn-red-arcade" id="send-otp-btn" type="button">
+            <span>✉️</span>
+            <span>ขอรหัส OTP ทางอีเมล</span>
           </button>
         </div>
 
         <!-- Step 2: 6-Digit OTP Verification -->
-        <div id="otp-step" class="retro-field hidden">
+        <div id="otp-step" class="field-group hidden">
           <div class="email-sent-card">
             <div style="font-size:1.4rem;">🔐</div>
             <div style="flex:1">
@@ -714,7 +633,7 @@
           </div>
 
           <div style="margin-top:8px;">
-            <label for="otp-code" class="retro-label">กรอกรหัสยืนยัน OTP 6 หลัก</label>
+            <label for="otp-code" class="field-label">กรอกรหัสยืนยัน OTP 6 หลัก</label>
             <input
               id="otp-code"
               type="text"
@@ -724,58 +643,44 @@
               class="otp-input"
               autocomplete="one-time-code"
             />
-            <span class="retro-hint" style="justify-content:center; margin-top:4px;">
-              รหัสหมดอายุใน 10 นาที (ตรวจดูในกล่องข้อความหรืออีเมลขยะ)
-            </span>
+            <div class="field-hint-line" style="justify-content:center; margin-top:4px;">
+              <span>รหัสหมดอายุใน 10 นาที (ตรวจดูในกล่องข้อความหรืออีเมลขยะ)</span>
+            </div>
           </div>
 
-          <button class="retro-btn-start" id="verify-otp-btn" type="button" style="margin-top:10px;">
+          <button class="btn-red-arcade" id="verify-otp-btn" type="button" style="margin-top:8px;">
             <span>ยืนยันรหัสและเข้าสู่ระบบ →</span>
           </button>
 
-          <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.8rem;">
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.8rem;">
             <button type="button" class="btn-link" id="resend-otp-btn" style="color:var(--retro-red); background:none; border:none; cursor:pointer; font-family:inherit; font-weight:600;">ส่งรหัสใหม่อีกครั้ง</button>
             <button type="button" class="btn-link text-muted" id="back-to-email-btn" style="color:var(--hint-color); background:none; border:none; cursor:pointer; font-family:inherit;">← เปลี่ยนอีเมล</button>
           </div>
         </div>
 
         <!-- Divider -->
-        <div class="retro-sep">
-          <span>หรือเข้าสู่ระบบด้วย Google</span>
+        <div class="field-divider">
+          <span>หรือ</span>
         </div>
 
-        <!-- Secondary Option: Google Login -->
-        <button type="button" class="retro-btn-google" id="google-login">
+        <!-- Secondary Option: Google Login Button -->
+        <button type="button" class="btn-white-google" id="google-login">
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
-          <span>เข้าสู่ระบบด้วย Google Account</span>
+          <span>เข้าสู่ระบบด้วย Google</span>
         </button>
 
         <!-- Security Footer -->
-        <div class="retro-card-footer">
+        <div class="card-footer-note">
           <span>🔒</span>
-          <span>สงวนสิทธิ์สำหรับบุคลากรกลุ่มธุรกิจการเงินเกียรตินาคินภัทร (KKP)</span>
+          <span>สำหรับบุคลากร KKP</span>
         </div>
       </div>
     </main>
-
-    <!-- Bottom Status Ticker Bar -->
-    <footer class="retro-bottom-bar">
-      <div class="status-left">
-        <span>🎮 KKP GRAPHIC DESIGN WORKFLOW ENGINE</span>
-        <span style="opacity:0.4;">|</span>
-        <span>ONE UNIFIED WORKSPACE</span>
-      </div>
-      <div class="status-right">
-        <span>STATUS: READY</span>
-        <span>•</span>
-        <span>VER: 2.4.0</span>
-      </div>
-    </footer>
 
   </div>
 
