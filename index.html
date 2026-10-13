@@ -1,112 +1,825 @@
-﻿<!doctype html>
-<html lang="en">
+<!doctype html>
+<html lang="th">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-  <title>CONT — Graphic Design Workflow Engine</title>
+  <title>CONT — ระบบจัดการงานออกแบบ Graphic Design KKP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Pixelify+Sans:wght@600;700&family=Press+Start+2P&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Pixelify+Sans:wght@600;700&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cont.css">
+
+  <style>
+    /* ==========================================================================
+       RETRO PIXEL GAME TITLE SCREEN - 100VH SINGLE SCREEN
+       Inspired by Retro 16-Bit Start Screens (Mob Psycho 100 / Humble Bundle Tribute)
+       ========================================================================== */
+    :root {
+      --retro-red: #E62846;
+      --retro-red-dark: #A8142D;
+      --retro-red-deep: #5A0A17;
+      --retro-cyan: #1CE0D8;
+      --retro-yellow: #FFD23F;
+      --retro-sky-top: #5BA7EC;
+      --retro-sky-mid: #86C4F8;
+      --retro-sky-btm: #B8E4FB;
+      --retro-grass-top: #4E9B56;
+      --retro-grass-mid: #387841;
+      --retro-grass-dark: #23502B;
+      --retro-panel-bg: #151824;
+      --retro-panel-border: #2C334A;
+      --retro-panel-shadow: #0C0E17;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #5BA7EC;
+    }
+
+    /* Override login-shell to be single-screen pixel arcade world */
+    .login-shell {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      background: 
+        radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.3) 0%, transparent 60%),
+        linear-gradient(180deg, 
+          var(--retro-sky-top) 0%, 
+          var(--retro-sky-mid) 42%, 
+          var(--retro-sky-btm) 68%, 
+          var(--retro-grass-top) 68.1%, 
+          var(--retro-grass-mid) 84%, 
+          var(--retro-grass-dark) 100%
+        );
+      padding: 16px 24px 12px;
+      z-index: 1;
+    }
+
+    /* Retro Pixel Clouds floating effect */
+    .login-shell::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48%;
+      background-image: 
+        radial-gradient(circle at 12% 28%, rgba(255,255,255,0.7) 0, rgba(255,255,255,0.7) 32px, transparent 33px),
+        radial-gradient(circle at 16% 22%, rgba(255,255,255,0.85) 0, rgba(255,255,255,0.85) 45px, transparent 46px),
+        radial-gradient(circle at 21% 28%, rgba(255,255,255,0.7) 0, rgba(255,255,255,0.7) 32px, transparent 33px),
+        radial-gradient(circle at 82% 24%, rgba(255,255,255,0.7) 0, rgba(255,255,255,0.7) 36px, transparent 37px),
+        radial-gradient(circle at 87% 18%, rgba(255,255,255,0.85) 0, rgba(255,255,255,0.85) 50px, transparent 51px),
+        radial-gradient(circle at 92% 24%, rgba(255,255,255,0.7) 0, rgba(255,255,255,0.7) 36px, transparent 37px);
+      pointer-events: none;
+      opacity: 0.75;
+      z-index: 0;
+    }
+
+    /* ==========================================================================
+       TOP SECTION: RETRO 3D PIXEL TITLE BANNER
+       ========================================================================== */
+    .retro-title-banner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Tribute / System Pill Badge */
+    .retro-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #FFFFFF;
+      color: #1F2433;
+      border: 3px solid #141724;
+      box-shadow: 0 4px 0 #141724;
+      padding: 3px 14px;
+      border-radius: 4px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .retro-badge-pill .heart {
+      color: var(--retro-red);
+      font-size: 0.75rem;
+      animation: pulse-heart 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-heart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+    }
+
+    /* Giant 3D Pixel Title */
+    .retro-main-title {
+      font-family: 'Press Start 2P', 'Pixelify Sans', cursive;
+      font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+      line-height: 1.05;
+      color: var(--retro-red);
+      margin: 4px 0 2px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-shadow: 
+        0 2px 0 var(--retro-red-dark),
+        0 4px 0 var(--retro-red-dark),
+        0 6px 0 var(--retro-red-deep),
+        0 8px 0 var(--retro-red-deep),
+        0 10px 0 #10121D,
+        0 12px 0 #10121D,
+        0 14px 12px rgba(0, 0, 0, 0.45);
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+      user-select: none;
+    }
+
+    /* Thai Subtitle */
+    .retro-thai-subtitle {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-weight: 600;
+      font-size: clamp(0.85rem, 1.15vw, 0.98rem);
+      color: #FFFFFF;
+      margin: 0;
+      text-shadow: 
+        -1px -1px 0 #121522,
+         1px -1px 0 #121522,
+        -1px  1px 0 #121522,
+         1px  1px 0 #121522,
+         0 2px 6px rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .retro-thai-subtitle .tag {
+      background: rgba(18, 21, 34, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      padding: 1px 8px;
+      font-size: 0.78rem;
+      color: var(--retro-yellow);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       MAIN STAGE: TWO-COLUMN SIDE-BY-SIDE (FITS IN SINGLE SCREEN)
+       ========================================================================== */
+    .retro-stage {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1140px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 22px;
+      align-items: center;
+      justify-content: center;
+      max-height: calc(100vh - 170px);
+      margin: 8px auto;
+    }
+
+    /* Left Frame: Arcade Monitor Showcase (องค์ประกอบเดิม hero-city.png) */
+    .retro-arcade-frame {
+      background: var(--retro-panel-bg);
+      border: 4px solid var(--retro-panel-border);
+      box-shadow: 
+        0 8px 0 var(--retro-panel-shadow),
+        0 14px 20px rgba(0, 0, 0, 0.35);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-height: calc(100vh - 180px);
+    }
+
+    .arcade-top-bar {
+      background: #10121C;
+      border-bottom: 2px solid #24293E;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .arcade-lights {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .arcade-light {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.4);
+    }
+    .arcade-light.red { background: #FF4757; }
+    .arcade-light.yellow { background: #FFA502; }
+    .arcade-light.green { background: #2ED573; box-shadow: 0 0 6px #2ED573; }
+
+    .arcade-title-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.58rem;
+      color: #A3ADC2;
+      letter-spacing: 0.04em;
+    }
+
+    .arcade-live-badge {
+      background: rgba(46, 213, 115, 0.15);
+      border: 1px solid #2ED573;
+      color: #2ED573;
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-size: 0.66rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .arcade-screen-wrap {
+      flex: 1;
+      position: relative;
+      background: #0E1018;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    /* Hero City Pixel Art */
+    .arcade-screen-img {
+      width: 100%;
+      height: 100%;
+      max-height: 40vh;
+      object-fit: contain;
+      image-rendering: pixelated;
+      display: block;
+      border-radius: 4px;
+    }
+
+    /* CRT scanline overlay */
+    .arcade-screen-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .arcade-footer-strip {
+      background: #111420;
+      border-top: 2px solid #24293E;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .arcade-flow-title {
+      font-size: 0.76rem;
+      color: var(--retro-cyan);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .arcade-steps-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      font-size: 0.74rem;
+      color: #CAD0E0;
+      background: #181C2B;
+      border: 1px solid #2A3048;
+      padding: 6px 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+
+    .arcade-steps-bar .step-item {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .arcade-steps-bar .step-arrow {
+      color: var(--retro-yellow);
+      font-weight: 700;
+    }
+
+    /* Right Frame: Retro Start Menu / Login Card */
+    .retro-menu-card {
+      background: var(--retro-panel-bg);
+      border: 4px solid var(--retro-panel-border);
+      box-shadow: 
+        0 8px 0 var(--retro-panel-shadow),
+        0 14px 20px rgba(0, 0, 0, 0.35);
+      border-radius: 10px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
+
+    .retro-menu-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .retro-menu-pill {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1B2133;
+      border: 1px solid #3B4566;
+      color: var(--retro-yellow);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .retro-menu-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 2px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .retro-menu-sub {
+      font-size: 0.82rem;
+      color: #9EA8C0;
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* Form Fields */
+    .retro-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .retro-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #E2E6F2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .retro-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .retro-input-wrap .retro-input-icon {
+      position: absolute;
+      left: 12px;
+      width: 17px;
+      height: 17px;
+      color: #8C96B0;
+      pointer-events: none;
+    }
+
+    .retro-input {
+      width: 100%;
+      height: 44px;
+      background: #0E1018;
+      border: 2px solid #2B3249;
+      border-radius: 6px;
+      padding: 0 14px 0 38px;
+      font-size: 0.88rem;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      color: #FFFFFF;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .retro-input:focus {
+      border-color: var(--retro-cyan);
+      box-shadow: 0 0 0 3px rgba(28, 224, 216, 0.2);
+    }
+
+    .retro-input::placeholder {
+      color: #5D667E;
+    }
+
+    .retro-hint {
+      font-size: 0.74rem;
+      color: #8C96B0;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Chunky Arcade Start Buttons */
+    .retro-btn-start {
+      position: relative;
+      width: 100%;
+      height: 46px;
+      background: var(--retro-red);
+      color: #FFFFFF;
+      border: 2px solid #FFAAB7;
+      border-radius: 6px;
+      box-shadow: 0 5px 0 var(--retro-red-dark);
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+      user-select: none;
+    }
+
+    .retro-btn-start:hover:not(:disabled) {
+      background: #FF3352;
+      transform: translateY(2px);
+      box-shadow: 0 3px 0 var(--retro-red-dark);
+    }
+
+    .retro-btn-start:active:not(:disabled) {
+      transform: translateY(5px);
+      box-shadow: 0 0 0 var(--retro-red-dark);
+    }
+
+    .retro-btn-start:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 3px 0 var(--retro-red-dark);
+    }
+
+    /* Google Button */
+    .retro-btn-google {
+      position: relative;
+      width: 100%;
+      height: 42px;
+      background: #FFFFFF;
+      color: #1A1F2C;
+      border: 2px solid #D6DBE8;
+      border-radius: 6px;
+      box-shadow: 0 4px 0 #9BA4BC;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+      user-select: none;
+    }
+
+    .retro-btn-google:hover:not(:disabled) {
+      background: #F4F6FC;
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #9BA4BC;
+    }
+
+    .retro-btn-google:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #9BA4BC;
+    }
+
+    .retro-btn-google:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Divider */
+    .retro-sep {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #7A859E;
+      font-size: 0.74rem;
+      margin: 4px 0;
+    }
+
+    .retro-sep::before,
+    .retro-sep::after {
+      content: "";
+      height: 1px;
+      background: #2D344B;
+      flex: 1;
+    }
+
+    /* OTP Step Styling */
+    .email-sent-card {
+      background: #111420;
+      border: 1px solid #2B324A;
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .otp-input {
+      width: 100%;
+      height: 48px;
+      background: #0E1018;
+      border: 2px solid #2B3249;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.45em;
+      text-align: center;
+      color: var(--retro-cyan);
+      outline: none;
+    }
+
+    .otp-input:focus {
+      border-color: var(--retro-cyan);
+      box-shadow: 0 0 0 3px rgba(28, 224, 216, 0.2);
+    }
+
+    /* Banner Messages */
+    .banner-error {
+      background: #3B1218;
+      border: 1px solid #E62846;
+      color: #FFB3BF;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .banner-info {
+      background: #0F2A38;
+      border: 1px solid var(--retro-cyan);
+      color: #B5F5F2;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .retro-card-footer {
+      font-size: 0.72rem;
+      color: #727C94;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       BOTTOM STATUS TICKER (32px)
+       ========================================================================== */
+    .retro-bottom-bar {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1140px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: #141724;
+      border: 2px solid #282E44;
+      box-shadow: 0 4px 0 #0C0E17;
+      border-radius: 6px;
+      padding: 5px 14px;
+      color: #8E98B0;
+      font-size: 0.72rem;
+      flex-shrink: 0;
+      margin-bottom: 2px;
+    }
+
+    .retro-bottom-bar .status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .retro-bottom-bar .status-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+    }
+
+    /* Responsive for small screens / mobile */
+    @media (max-width: 900px) {
+      html, body {
+        overflow-y: auto !important;
+        height: auto !important;
+      }
+      .login-shell {
+        position: relative !important;
+        inset: auto !important;
+        width: 100% !important;
+        min-height: 100vh !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        padding: 20px 14px 28px !important;
+      }
+      .retro-stage {
+        grid-template-columns: 1fr !important;
+        max-height: none !important;
+        gap: 16px !important;
+      }
+      .retro-arcade-frame {
+        max-height: 380px !important;
+      }
+      .retro-menu-card {
+        max-height: none !important;
+      }
+      .retro-bottom-bar {
+        flex-direction: column !important;
+        gap: 4px !important;
+        text-align: center !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="login-shell">
-    <!-- Left Hero Section -->
-    <section class="login-hero">
-      <div>
-        <div class="brand-mark">
-          <div class="brand-logo">C</div>
-          <div class="brand-name">CONT</div>
+    
+    <!-- Top Header: Retro 3D Pixel Title Banner -->
+    <header class="retro-title-banner">
+      <div class="retro-badge-pill">
+        <span class="heart">♥</span>
+        <span>KKP CREATIVE OPERATIONS · 2026</span>
+      </div>
+      <h1 class="retro-main-title">CONT</h1>
+      <p class="retro-thai-subtitle">
+        <span>ระบบบริหารและจัดการงานออกแบบ Graphic Design</span>
+        <span class="tag">⚡ อัจฉริยะ & เรียลไทม์</span>
+      </p>
+    </header>
+
+    <!-- Main Stage: Two Columns (Monitor Showcase + Start Menu) -->
+    <main class="retro-stage">
+      
+      <!-- Left Column: Arcade Monitor Frame with Existing Hero City Asset -->
+      <section class="retro-arcade-frame" aria-label="ภาพรวมกระบวนการทำงาน">
+        <div class="arcade-top-bar">
+          <div class="arcade-lights">
+            <span class="arcade-light red"></span>
+            <span class="arcade-light yellow"></span>
+            <span class="arcade-light green"></span>
+          </div>
+          <span class="arcade-title-text">CONT STUDIO PIPELINE</span>
+          <div class="arcade-live-badge">
+            <span>●</span> ออนไลน์ 100%
+          </div>
         </div>
-        <div style="margin-top:72px">
-          <h1 style="font-size:2.2rem; line-height:1.25; font-weight:700; color:#FFFFFF;">
-            Full Pipeline Visibility.<br>One Unified Workspace.
-          </h1>
-          <p style="margin-top:16px; font-size:0.95rem; line-height:1.6; color:#ADB2C6;">
-            Real-time creative operations platform for the KKP Graphic Design team. Track briefs, iterations, designer bandwidth, and deadlines with SLA precision.
+
+        <div class="arcade-screen-wrap">
+          <img 
+            src="assets/hero-city.png" 
+            alt="CONT Graphic Design Operations City" 
+            class="arcade-screen-img"
+          />
+        </div>
+
+        <div class="arcade-footer-strip">
+          <div class="arcade-flow-title">
+            <span>⚡ กระบวนการทำงาน 5 ขั้นตอน (5-STAGE PIPELINE)</span>
+          </div>
+          <div class="arcade-steps-bar">
+            <span class="step-item">① รับบรีฟ</span>
+            <span class="step-arrow">➔</span>
+            <span class="step-item">② ร่างแบบ</span>
+            <span class="step-arrow">➔</span>
+            <span class="step-item">③ ตรวจแบบ</span>
+            <span class="step-arrow">➔</span>
+            <span class="step-item">④ ปรับแก้</span>
+            <span class="step-arrow">➔</span>
+            <span class="step-item">⑤ ส่งมอบงาน</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Retro Start Menu / Thai Login Card -->
+      <section class="retro-menu-card" aria-label="แบบฟอร์มเข้าสู่ระบบ">
+        <div class="retro-menu-header">
+          <div class="retro-menu-pill">
+            <span>▶</span> START GAME · เมนูเข้าสู่ระบบ
+          </div>
+          <h2 class="retro-menu-title">เข้าสู่ระบบ CONT</h2>
+          <p class="retro-menu-sub">
+            เชื่อมต่อเพื่อจัดการบรีฟ, คิวงานกราฟิก, และทีมงานอย่างมีประสิทธิภาพ
           </p>
-          <div class="login-steps" style="margin-top:28px">
-            <div class="login-step">
-              <span class="n">1</span>
-              <span><strong>End-to-End Pipeline:</strong> Track every job from brief intake to final artwork delivery.</span>
-            </div>
-            <div class="login-step">
-              <span class="n">2</span>
-              <span><strong>Team Bandwidth:</strong> Know who is designing what and balance workload across the squad.</span>
-            </div>
-            <div class="login-step">
-              <span class="n">3</span>
-              <span><strong>SLA & Review Deadlines:</strong> Eliminate bottlenecks with structured revision cycles.</span>
-            </div>
-          </div>
-
-          <!-- Dark Aesthetic Preview Card (No white image!) -->
-          <div style="margin-top:28px; background:#12131b; border:2px solid #2d3042; box-shadow:0 4px 0 #000; overflow:hidden;">
-            <img src="assets/hero-city.png" alt="CONT Operations Engine" style="width:100%; display:block; image-rendering:pixelated; border-bottom:1px solid #282b3c;" />
-            <div style="padding:10px 16px; display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#a6acbf; font-family:var(--font); background:#161822;">
-              <span>⚡ 5-STAGE PIPELINE: BRIEF ➔ DRAFT ➔ REVIEW ➔ REVISION ➔ DELIVERED</span>
-              <span style="color:var(--green); font-weight:700;">● 100% ONLINE</span>
-            </div>
-          </div>
         </div>
-      </div>
-      <div class="text-sm" style="color:rgba(255,255,255,0.45); margin-top:32px;">
-        KKP Graphic Design Team · Creative Operations & Workflow Cloud
-      </div>
-    </section>
-
-    <!-- Right Login Panel -->
-    <section class="login-panel">
-      <div class="login-card">
-        <span class="login-badge">WORKSPACE ACCESS</span>
-        <h2 style="font-size:1.65rem; font-weight:700; margin-top:6px; color:#FFFFFF;">Sign In to CONT</h2>
-        <p class="login-sub">Authorized company accounts (@kkpfg.com) or Google sign-in</p>
 
         <!-- Dynamic Message Banners -->
         <div id="login-error" class="banner-error hidden"></div>
         <div id="login-info" class="banner-info hidden"></div>
 
         <!-- Step 1: Work Email Input (OTP Login) -->
-        <div id="email-step" class="auth-step" style="margin-top:20px">
-          <div class="field">
-            <label for="work-email" style="font-weight:600; font-size:0.82rem; color:#FFFFFF;">Work Email (@kkpfg.com only)</label>
-            <div class="input-with-icon">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-              </svg>
-              <input
-                id="work-email"
-                type="email"
-                placeholder="e.g. your.name@kkpfg.com"
-                autocomplete="email"
-                required
-              />
-            </div>
-            <span class="field-hint" style="color:#8f94a8;">
-              🔒 Authorized @kkpfg.com emails only (6-digit OTP will be sent to Outlook)
-            </span>
+        <div id="email-step" class="retro-field">
+          <label for="work-email" class="retro-label">
+            <span>📧 อีเมลที่ทำงาน (@kkpfg.com)</span>
+          </label>
+          <div class="retro-input-wrap">
+            <svg class="retro-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+            </svg>
+            <input
+              id="work-email"
+              class="retro-input"
+              type="email"
+              placeholder="e.g. your.name@kkpfg.com"
+              autocomplete="email"
+              required
+            />
           </div>
-          <button class="btn btn-primary btn-block btn-lg" id="send-otp-btn" style="margin-top:16px">
-            <span>📩 Request OTP via Email</span>
+          <span class="retro-hint">
+            <span>🔒</span>
+            <span>ระบบจะส่งรหัส OTP 6 หลักไปยังกล่องข้อความ Outlook ของท่าน</span>
+          </span>
+
+          <button class="retro-btn-start" id="send-otp-btn" type="button">
+            <span>📩 ขอรหัส OTP ทางอีเมล (PRESS START)</span>
           </button>
         </div>
 
         <!-- Step 2: 6-Digit OTP Verification -->
-        <div id="otp-step" class="auth-step hidden" style="margin-top:20px">
-          <div class="email-sent-card" style="background:#1b1d28; border:1px solid #323548;">
-            <div class="email-sent-icon">🔐</div>
+        <div id="otp-step" class="retro-field hidden">
+          <div class="email-sent-card">
+            <div style="font-size:1.4rem;">🔐</div>
             <div style="flex:1">
-              <div style="font-weight:700; color:#FFFFFF; font-size:0.92rem">OTP Code Sent Successfully</div>
-              <div style="font-size:0.82rem; color:#9fa4b8; margin-top:2px">
-                Please check Outlook for the 6-digit code sent to <strong id="sent-email-display" style="color:#19C3EB"></strong>
+              <div style="font-weight:700; color:#FFFFFF; font-size:0.88rem;">ส่งรหัส OTP สำเร็จแล้ว</div>
+              <div style="font-size:0.78rem; color:#9fa4b8; margin-top:2px;">
+                กรุณาตรวจสอบรหัส 6 หลักที่ส่งไปยัง <strong id="sent-email-display" style="color:var(--retro-cyan);"></strong>
               </div>
             </div>
           </div>
 
-          <div class="field" style="margin-top:16px">
-            <label for="otp-code" style="font-weight:600; font-size:0.82rem; color:#FFFFFF;">Enter 6-digit OTP Code</label>
+          <div style="margin-top:8px;">
+            <label for="otp-code" class="retro-label">กรอกรหัสยืนยัน OTP 6 หลัก</label>
             <input
               id="otp-code"
               type="text"
@@ -116,42 +829,59 @@
               class="otp-input"
               autocomplete="one-time-code"
             />
-            <span class="field-hint" style="text-align:center; display:block; color:#8f94a8;">
-              Code expires in 10 minutes (check your Inbox or Junk folder)
+            <span class="retro-hint" style="justify-content:center; margin-top:4px;">
+              รหัสหมดอายุใน 10 นาที (ตรวจดูในกล่องข้อความหรืออีเมลขยะ)
             </span>
           </div>
-          <button class="btn btn-primary btn-block btn-lg" id="verify-otp-btn" style="margin-top:14px">
-            <span>Verify & Sign In →</span>
+
+          <button class="retro-btn-start" id="verify-otp-btn" type="button" style="margin-top:10px;">
+            <span>ยืนยันรหัสและเข้าสู่ระบบ →</span>
           </button>
-          <div class="row-between" style="margin-top:16px; font-size:0.82rem">
-            <button type="button" class="btn-link" id="resend-otp-btn">Resend Code</button>
-            <button type="button" class="btn-link text-muted" id="back-to-email-btn">← Change Email</button>
+
+          <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.8rem;">
+            <button type="button" class="btn-link" id="resend-otp-btn" style="color:var(--retro-cyan); background:none; border:none; cursor:pointer; font-family:inherit;">ส่งรหัสใหม่อีกครั้ง</button>
+            <button type="button" class="btn-link text-muted" id="back-to-email-btn" style="color:#8A94AC; background:none; border:none; cursor:pointer; font-family:inherit;">← เปลี่ยนอีเมล</button>
           </div>
         </div>
 
         <!-- Divider -->
-        <div class="sep" style="margin:24px 0">
-          <span>Or sign in with authorized Google account</span>
+        <div class="retro-sep">
+          <span>หรือเข้าสู่ระบบด้วย Google</span>
         </div>
 
         <!-- Secondary Option: Google Login -->
-        <button type="button" class="btn-google" id="google-login">
+        <button type="button" class="retro-btn-google" id="google-login">
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
-          <span>Sign In with Google</span>
+          <span>เข้าสู่ระบบด้วย Google Account</span>
         </button>
 
         <!-- Security Footer -->
-        <div class="login-footer-security" style="color:#787d94;">
+        <div class="retro-card-footer">
           <span>🔒</span>
-          <span>Authorized KKP CONT team members only</span>
+          <span>สงวนสิทธิ์สำหรับบุคลากรกลุ่มธุรกิจการเงินเกียรตินาคินภัทร (KKP)</span>
         </div>
+      </section>
+    </main>
+
+    <!-- Bottom Status Ticker Bar -->
+    <footer class="retro-bottom-bar">
+      <div class="status-left">
+        <span>🎮 KKP GRAPHIC DESIGN WORKFLOW ENGINE</span>
+        <span style="color:#4B5570;">|</span>
+        <span>ONE UNIFIED WORKSPACE</span>
       </div>
-    </section>
+      <div class="status-right">
+        <span>STATUS: READY</span>
+        <span>•</span>
+        <span>VER: 2.4.0</span>
+      </div>
+    </footer>
+
   </div>
 
   <script src="js/config.local.js"></script>
