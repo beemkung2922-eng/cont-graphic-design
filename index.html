@@ -1,467 +1,444 @@
 <!doctype html>
-<html lang="th">
+<html lang="th" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
   <title>CONT — ระบบจัดการงานออกแบบ Graphic Design KKP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Caveat:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Pixelify+Sans:wght@600;700&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cont.css">
 
   <style>
     /* ==========================================================================
-       CONT CINEMATIC MEADOW LANDING & SEAMLESS LOGIN
+       RETRO PIXEL GAME TITLE SCREEN - CLEAN CENTERED & THEMEABLE
        ========================================================================== */
+    :root {
+      --retro-red: #E62846;
+      --retro-red-dark: #A8142D;
+      --retro-red-deep: #5A0A17;
+      --retro-cyan: #1CE0D8;
+      --retro-yellow: #FFD23F;
+    }
+
+    /* --- Dark Theme (Default) --- */
+    html[data-theme="dark"] {
+      --card-bg: rgba(18, 21, 33, 0.94);
+      --card-border: #2C334A;
+      --card-shadow: #0C0E17;
+      --badge-bg: #22283A;
+      --badge-border: #3A4462;
+      --badge-color: #FFD23F;
+      --text-main: #FFFFFF;
+      --text-sub: #9FA8BF;
+      --input-bg: #0E1018;
+      --input-border: #2B3249;
+      --input-color: #FFFFFF;
+      --input-placeholder: #5A637B;
+      --sep-line: #2B3249;
+      --sep-text: #7E88A2;
+      --hint-color: #8C96B0;
+      --footer-bg: rgba(16, 18, 28, 0.9);
+      --footer-border: #24293D;
+      --footer-text: #8E98B0;
+      --toggle-bg: #1C2130;
+      --toggle-border: #343D56;
+      --toggle-color: #E2E6F2;
+      --backdrop-filter: blur(8px);
+    }
+
+    /* --- Light Theme --- */
+    html[data-theme="light"] {
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --card-border: #1C2130;
+      --card-shadow: #141724;
+      --badge-bg: #1C2130;
+      --badge-border: #141724;
+      --badge-color: #FFFFFF;
+      --text-main: #141724;
+      --text-sub: #4A536B;
+      --input-bg: #F4F6FB;
+      --input-border: #CCD3E3;
+      --input-color: #141724;
+      --input-placeholder: #828CA5;
+      --sep-line: #D8DFEE;
+      --sep-text: #67728D;
+      --hint-color: #58637C;
+      --footer-bg: rgba(255, 255, 255, 0.92);
+      --footer-border: #CCD3E3;
+      --footer-text: #4A536B;
+      --toggle-bg: #FFFFFF;
+      --toggle-border: #CCD3E3;
+      --toggle-color: #1C2130;
+      --backdrop-filter: blur(8px);
+    }
+
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     html, body {
+      margin: 0;
+      padding: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
       font-family: 'IBM Plex Sans Thai', sans-serif;
       -webkit-font-smoothing: antialiased;
-      background: #051a34;
+      background: #5BA7EC;
     }
 
-    /* Main Viewport Container with Background Image */
-    .landing-shell {
+    /* Background Shell: Uses Clean Pixel Landscape Art */
+    .login-shell {
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
       max-height: 100vh;
       overflow: hidden;
-      background-color: #061e3d;
-      background-image: url('assets/hero-meadow.jpg');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      align-items: center;
+      background-color: #5BA7EC;
+      background-image: url('assets/pixel-bg.jpg');
+      background-size: cover;
+      background-position: center bottom;
+      background-repeat: no-repeat;
+      padding: 16px 20px 12px;
       z-index: 1;
     }
 
-    /* ==========================================================================
-       TOP NAVIGATION BAR (COVERS OLD BUTTONS & REPLACES WITH ABOUT BUTTON)
-       ========================================================================== */
-    .top-navbar {
+    /* Light/Dark Subtle Tint Overlay */
+    .login-shell::after {
+      content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 78px;
-      background: linear-gradient(180deg, #051a34 0%, #062244 55%, rgba(6, 34, 68, 0.92) 80%, transparent 100%);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 44px;
-      z-index: 20;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      transition: background 0.3s ease;
     }
 
-    .nav-brand {
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #FFFFFF;
-      letter-spacing: 0.08em;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      user-select: none;
+    html[data-theme="dark"] .login-shell::after {
+      background: rgba(10, 13, 24, 0.28);
     }
 
-    .nav-brand-badge {
-      font-size: 0.72rem;
-      font-weight: 500;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 999px;
-      padding: 2px 10px;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    /* About Website Glassmorphism Button */
-    .nav-about-btn {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 999px;
-      padding: 8px 22px;
-      color: #FFFFFF;
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-
-    .nav-about-btn:hover {
-      background: rgba(255, 255, 255, 0.22);
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-    }
-
-    .nav-about-btn:active {
-      transform: translateY(1px);
+    html[data-theme="light"] .login-shell::after {
+      background: rgba(255, 255, 255, 0.08);
     }
 
     /* ==========================================================================
-       MAIN HERO CTA BUTTON (ALIGNED OVER เข้าสู่ระบบ CONT ➔)
+       TOP THEME TOGGLE SWITCHER
        ========================================================================== */
-    .hero-action-anchor {
+    .theme-toggle-bar {
       position: absolute;
-      top: 62.6%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 14px;
+      right: 20px;
       z-index: 10;
     }
 
-    .hero-login-pill {
-      background: #FFFFFF;
-      color: #0E1626;
-      border: none;
-      border-radius: 999px;
-      padding: 10px 28px;
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 0.96rem;
-      font-weight: 600;
+    .theme-toggle-btn {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 7px;
+      background: var(--toggle-bg);
+      border: 2px solid var(--toggle-border);
+      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      padding: 6px 13px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--toggle-color);
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
       user-select: none;
     }
 
-    .hero-login-pill:hover {
-      transform: scale(1.04);
-      background: #F8FAFC;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    .theme-toggle-btn:hover {
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
     }
 
-    .hero-login-pill:active {
-      transform: scale(0.98);
-    }
-
-    .hero-login-pill .pill-arrow {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #0E1626;
-      color: #FFFFFF;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.76rem;
-      margin-left: 2px;
-      transition: transform 0.2s ease;
-    }
-
-    .hero-login-pill:hover .pill-arrow {
-      transform: translateX(2px);
+    .theme-toggle-btn:active {
+      transform: translateY(3px);
+      box-shadow: none;
     }
 
     /* ==========================================================================
-       MODALS: ABOUT MODAL & LOGIN MODAL
+       TITLE HEADER: 3D PIXEL TITLE BANNER (CONT)
        ========================================================================== */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(4, 15, 33, 0.65);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-
-    .modal-overlay.is-active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-dialog {
-      width: 100%;
-      max-width: 520px;
-      background: rgba(14, 22, 38, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 30px 32px 28px;
-      color: #FFFFFF;
-      transform: translateY(16px) scale(0.98);
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    .retro-title-banner {
       position: relative;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-overlay.is-active .modal-dialog {
-      transform: translateY(0) scale(1);
-    }
-
-    .modal-close-btn {
-      position: absolute;
-      top: 18px;
-      right: 20px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: #CAD0E0;
-      font-size: 1.1rem;
+      z-index: 2;
+      text-align: center;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease;
+      gap: 3px;
+      margin-top: 4px;
+      flex-shrink: 0;
     }
 
-    .modal-close-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: #FFFFFF;
-    }
-
-    /* About Modal Content */
-    .about-header {
-      margin-bottom: 20px;
-    }
-
-    .about-badge {
+    /* Top Pill Badge */
+    .retro-badge-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(28, 224, 216, 0.15);
-      border: 1px solid rgba(28, 224, 216, 0.4);
-      color: #1CE0D8;
-      border-radius: 999px;
-      padding: 3px 12px;
-      font-size: 0.74rem;
-      font-weight: 600;
-      margin-bottom: 8px;
+      gap: 7px;
+      background: #FFFFFF;
+      color: #1F2433;
+      border: 3px solid #141724;
+      box-shadow: 0 4px 0 #141724;
+      padding: 3px 14px;
+      border-radius: 4px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
     }
 
-    .about-title {
-      font-size: 1.45rem;
-      font-weight: 700;
+    .retro-badge-pill .heart {
+      color: var(--retro-red);
+      font-size: 0.75rem;
+      animation: pulse-heart 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-heart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+    }
+
+    /* Giant 3D Pixel Title */
+    .retro-main-title {
+      font-family: 'Press Start 2P', 'Pixelify Sans', cursive;
+      font-size: clamp(2.4rem, 4.4vw, 3.6rem);
+      line-height: 1.05;
+      color: var(--retro-red);
+      margin: 4px 0 2px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-shadow: 
+        0 2px 0 var(--retro-red-dark),
+        0 4px 0 var(--retro-red-dark),
+        0 6px 0 var(--retro-red-deep),
+        0 8px 0 var(--retro-red-deep),
+        0 10px 0 #10121D,
+        0 12px 0 #10121D,
+        0 14px 12px rgba(0, 0, 0, 0.45);
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+      user-select: none;
+    }
+
+    /* Thai Subtitle */
+    .retro-thai-subtitle {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-weight: 600;
+      font-size: clamp(0.85rem, 1.1vw, 0.96rem);
       color: #FFFFFF;
+      margin: 0;
+      text-shadow: 
+        -1px -1px 0 #121522,
+         1px -1px 0 #121522,
+        -1px  1px 0 #121522,
+         1px  1px 0 #121522,
+         0 2px 6px rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       CENTERED RETRO LOGIN CARD (CLEAN & NON-CLUTTERED)
+       ========================================================================== */
+    .retro-stage-center {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 480px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 6px auto;
+    }
+
+    .retro-login-card {
+      position: relative;
+      width: 100%;
+      background: var(--card-bg);
+      border: 3px solid var(--card-border);
+      box-shadow: 
+        0 8px 0 var(--card-shadow),
+        0 16px 28px rgba(0, 0, 0, 0.35);
+      border-radius: 12px;
+      padding: 24px 28px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      backdrop-filter: var(--backdrop-filter);
+      -webkit-backdrop-filter: var(--backdrop-filter);
+      transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    /* Top Floating Tab Badge */
+    .retro-card-tab {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--badge-bg);
+      border: 2px solid var(--badge-border);
+      box-shadow: 0 3px 0 var(--card-shadow);
+      color: var(--badge-color);
+      border-radius: 6px;
+      padding: 4px 16px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .retro-card-header {
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .retro-card-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
       line-height: 1.3;
     }
 
-    .about-subtitle {
-      font-size: 0.88rem;
-      color: #A0ACC8;
-      margin-top: 4px;
-      line-height: 1.5;
-    }
-
-    .about-section {
-      margin-top: 18px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .about-feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .about-feature-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.95rem;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .about-feature-title {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: #FFFFFF;
-    }
-
-    .about-feature-desc {
-      font-size: 0.78rem;
-      color: #A4B0CB;
+    .retro-card-sub {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      margin: 4px 0 0;
       line-height: 1.45;
-      margin-top: 2px;
     }
 
-    /* Login Modal Specifics */
-    .login-dialog {
-      max-width: 440px;
-    }
-
-    .login-modal-header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .login-modal-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #FFFFFF;
-    }
-
-    .login-modal-sub {
-      font-size: 0.82rem;
-      color: #9EA8C2;
-      margin-top: 4px;
-    }
-
-    .form-field {
+    /* Form Fields */
+    .retro-field {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 14px;
     }
 
-    .form-label {
+    .retro-label {
       font-size: 0.82rem;
       font-weight: 600;
-      color: #E2E6F2;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .form-input-wrap {
+    .retro-input-wrap {
       position: relative;
       display: flex;
       align-items: center;
     }
 
-    .form-input-icon {
+    .retro-input-icon {
       position: absolute;
-      left: 14px;
-      font-size: 0.9rem;
-      color: #6C7896;
+      left: 12px;
+      width: 17px;
+      height: 17px;
+      color: var(--hint-color);
       pointer-events: none;
     }
 
-    .form-input {
+    .retro-input {
       width: 100%;
       height: 44px;
-      background: #111827;
-      border: 1px solid #2E3852;
-      border-radius: 8px;
-      padding: 0 14px 0 40px;
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
+      border-radius: 6px;
+      padding: 0 14px 0 38px;
       font-size: 0.88rem;
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      color: #FFFFFF;
+      color: var(--input-color);
       outline: none;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .form-input:focus {
-      border-color: #38BDF8;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    .retro-input:focus {
+      border-color: var(--retro-red);
+      box-shadow: 0 0 0 3px rgba(230, 40, 70, 0.2);
     }
 
-    .form-input::placeholder {
-      color: #616C88;
+    .retro-input::placeholder {
+      color: var(--input-placeholder);
     }
 
-    .form-hint {
+    .retro-hint {
       font-size: 0.74rem;
-      color: #8C98B2;
+      color: var(--hint-color);
+      line-height: 1.4;
       display: flex;
       align-items: center;
       gap: 5px;
-      margin-top: 2px;
     }
 
-    .btn-submit-otp {
+    /* Chunky Arcade Start Button (Red) */
+    .retro-btn-start {
+      position: relative;
       width: 100%;
-      height: 44px;
-      background: #E62846;
+      height: 46px;
+      background: var(--retro-red);
       color: #FFFFFF;
-      border: none;
-      border-radius: 8px;
+      border: 2px solid #FFAAB7;
+      border-radius: 6px;
+      box-shadow: 0 5px 0 var(--retro-red-dark);
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 0.92rem;
-      font-weight: 600;
+      font-size: 0.95rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       cursor: pointer;
-      margin-top: 16px;
-      box-shadow: 0 4px 12px rgba(230, 40, 70, 0.35);
-      transition: background 0.15s ease, transform 0.1s ease;
+      margin-top: 4px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+      user-select: none;
     }
 
-    .btn-submit-otp:hover:not(:disabled) {
+    .retro-btn-start:hover:not(:disabled) {
       background: #FF3352;
-      transform: translateY(-1px);
+      transform: translateY(2px);
+      box-shadow: 0 3px 0 var(--retro-red-dark);
     }
 
-    .btn-submit-otp:active:not(:disabled) {
-      transform: translateY(1px);
+    .retro-btn-start:active:not(:disabled) {
+      transform: translateY(5px);
+      box-shadow: 0 0 0 var(--retro-red-dark);
     }
 
-    .btn-submit-otp:disabled {
+    .retro-btn-start:disabled {
       opacity: 0.65;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 3px 0 var(--retro-red-dark);
     }
 
-    .form-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #727E9A;
-      font-size: 0.74rem;
-      margin: 18px 0;
-    }
-
-    .form-divider::before,
-    .form-divider::after {
-      content: "";
-      height: 1px;
-      background: #232B40;
-      flex: 1;
-    }
-
-    .btn-google-sign {
+    /* Google Button */
+    .retro-btn-google {
+      position: relative;
       width: 100%;
       height: 42px;
       background: #FFFFFF;
-      color: #1A1E2D;
-      border: none;
-      border-radius: 8px;
+      color: #1A1F2C;
+      border: 2px solid #D6DBE8;
+      border-radius: 6px;
+      box-shadow: 0 4px 0 #9BA4BC;
       font-family: 'IBM Plex Sans Thai', sans-serif;
       font-size: 0.88rem;
       font-weight: 600;
@@ -470,51 +447,82 @@
       justify-content: center;
       gap: 10px;
       cursor: pointer;
-      transition: background 0.15s ease, transform 0.1s ease;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+      user-select: none;
     }
 
-    .btn-google-sign:hover {
+    html[data-theme="light"] .retro-btn-google {
+      border: 2px solid #1C2130;
+      box-shadow: 0 3px 0 #1C2130;
+    }
+
+    .retro-btn-google:hover:not(:disabled) {
       background: #F4F6FC;
-      transform: translateY(-1px);
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #9BA4BC;
     }
 
-    .btn-google-sign:active {
-      transform: translateY(1px);
+    .retro-btn-google:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #9BA4BC;
     }
 
-    /* OTP Verification Step 2 */
-    .email-sent-badge {
-      background: #111A2E;
-      border: 1px solid #233355;
-      border-radius: 8px;
+    .retro-btn-google:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Divider */
+    .retro-sep {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--sep-text);
+      font-size: 0.74rem;
+      margin: 2px 0;
+    }
+
+    .retro-sep::before,
+    .retro-sep::after {
+      content: "";
+      height: 1px;
+      background: var(--sep-line);
+      flex: 1;
+    }
+
+    /* OTP Verification Step */
+    .email-sent-card {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
       padding: 10px 14px;
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-top: 12px;
     }
 
-    .otp-digits-input {
+    .otp-input {
       width: 100%;
-      height: 46px;
-      background: #111827;
-      border: 1px solid #2E3852;
-      border-radius: 8px;
+      height: 48px;
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
+      border-radius: 6px;
       font-family: 'Space Mono', monospace;
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 700;
       letter-spacing: 0.45em;
       text-align: center;
-      color: #38BDF8;
+      color: var(--retro-red);
       outline: none;
     }
 
-    .otp-digits-input:focus {
-      border-color: #38BDF8;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    .otp-input:focus {
+      border-color: var(--retro-red);
+      box-shadow: 0 0 0 3px rgba(230, 40, 70, 0.2);
     }
 
-    /* Error & Info Banners */
+    /* Dynamic Banner Messages */
     .banner-error {
       background: #3B1218;
       border: 1px solid #E62846;
@@ -523,284 +531,283 @@
       border-radius: 6px;
       font-size: 0.78rem;
       line-height: 1.45;
-      margin-bottom: 10px;
     }
 
     .banner-info {
       background: #0F2A38;
-      border: 1px solid #38BDF8;
+      border: 1px solid var(--retro-cyan);
       color: #B5F5F2;
       padding: 8px 12px;
       border-radius: 6px;
       font-size: 0.78rem;
       line-height: 1.45;
-      margin-bottom: 10px;
     }
 
     .hidden {
       display: none !important;
     }
 
-    @media (max-width: 640px) {
-      .top-navbar {
-        padding: 0 20px;
-        height: 68px;
+    .retro-card-footer {
+      font-size: 0.72rem;
+      color: var(--hint-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
+    /* ==========================================================================
+       BOTTOM STATUS TICKER (32px)
+       ========================================================================== */
+    .retro-bottom-bar {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--footer-bg);
+      border: 2px solid var(--footer-border);
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+      border-radius: 6px;
+      padding: 5px 14px;
+      color: var(--footer-text);
+      font-size: 0.72rem;
+      flex-shrink: 0;
+      backdrop-filter: var(--backdrop-filter);
+      -webkit-backdrop-filter: var(--backdrop-filter);
+      margin-bottom: 2px;
+    }
+
+    .retro-bottom-bar .status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .retro-bottom-bar .status-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 600px) {
+      html, body {
+        overflow-y: auto !important;
+        height: auto !important;
       }
-      .hero-action-anchor {
-        top: 64%;
+      .login-shell {
+        position: relative !important;
+        inset: auto !important;
+        width: 100% !important;
+        min-height: 100vh !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        padding: 20px 14px 28px !important;
       }
-      .modal-dialog {
-        padding: 24px 20px 22px;
+      .theme-toggle-bar {
+        position: static !important;
+        align-self: flex-end;
+        margin-bottom: 8px;
+      }
+      .retro-login-card {
+        padding: 20px 18px 16px !important;
+      }
+      .retro-bottom-bar {
+        flex-direction: column !important;
+        gap: 4px !important;
+        text-align: center !important;
       }
     }
   </style>
 </head>
 <body>
-
-  <!-- Main Viewport Shell -->
-  <div class="landing-shell">
+  <div class="login-shell">
     
-    <!-- Top Navbar: Covers old baked buttons and provides "เกี่ยวกับเว็บไซต์" -->
-    <header class="top-navbar">
-      <div class="nav-brand">
-        <span>CONT</span>
-        <span class="nav-brand-badge">KKP Creative Operations</span>
-      </div>
-      
-      <!-- New "เกี่ยวกับเว็บไซต์" Button Replacing Old Top Buttons -->
-      <button id="about-btn" class="nav-about-btn" type="button" aria-label="เกี่ยวกับเว็บไซต์">
-        <span>✨ เกี่ยวกับเว็บไซต์</span>
+    <!-- Top Theme Toggle (Dark Tone / Light Tone) -->
+    <div class="theme-toggle-bar">
+      <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" aria-label="สลับธีมสี">
+        <span id="theme-icon">☀️</span>
+        <span id="theme-label">โหมดสว่าง</span>
       </button>
+    </div>
+
+    <!-- Top Header: Retro 3D Pixel Title Banner -->
+    <header class="retro-title-banner">
+      <div class="retro-badge-pill">
+        <span class="heart">♥</span>
+        <span>KKP CREATIVE OPERATIONS · 2026</span>
+      </div>
+      <h1 class="retro-main-title">CONT</h1>
+      <p class="retro-thai-subtitle">
+        <span>ระบบบริหารและจัดการงานออกแบบ Graphic Design</span>
+      </p>
     </header>
 
-    <!-- Center Hero Action Button (Aligned seamlessly over เข้าสู่ระบบ CONT ➔) -->
-    <div class="hero-action-anchor">
-      <button id="hero-login-btn" class="hero-login-pill" type="button" aria-label="เข้าสู่ระบบ CONT">
-        <span>เข้าสู่ระบบ CONT</span>
-        <span class="pill-arrow">➔</span>
-      </button>
-    </div>
-
-  </div>
-
-  <!-- ==========================================================================
-       MODAL 1: ABOUT CONT (คำบรรยายเกี่ยวกับเว็บไซต์)
-       ========================================================================== -->
-  <div id="about-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title">
-    <div class="modal-dialog">
-      <button id="about-close-btn" class="modal-close-btn" type="button" aria-label="ปิดหน้าต่าง">✕</button>
-      
-      <div class="about-header">
-        <div class="about-badge">CREATIVE OPERATIONS ENGINE</div>
-        <h2 id="about-title" class="about-title">เกี่ยวกับระบบ CONT</h2>
-        <p class="about-subtitle">
-          ระบบบริหารและติดตามงานออกแบบ Graphic Design สำหรับทีมครีเอทีฟและผู้สั่งงานกลุ่มธุรกิจการเงินเกียรตินาคินภัทร (KKP)
-        </p>
-      </div>
-
-      <div class="about-section">
-        <div class="about-feature-item">
-          <div class="about-feature-icon">⚡</div>
-          <div>
-            <div class="about-feature-title">ไปป์ไลน์ 5 ขั้นตอน (5-Stage Pipeline)</div>
-            <div class="about-feature-desc">
-              ติดตามงานแบบเรียลไทม์: <strong>รับบรีฟ ➔ ร่างแบบ ➔ ตรวจสอบแบบ ➔ ปรับแก้ ➔ ส่งมอบเสร็จสมบูรณ์</strong> อย่างแม่นยำ
-            </div>
-          </div>
+    <!-- Main Stage: Single Centered Clean Login Card (ไม่รก) -->
+    <main class="retro-stage-center">
+      <div class="retro-login-card">
+        <!-- Floating Tab Badge (No purple! Uses Sleek Dark / Theme Accent) -->
+        <div class="retro-card-tab">
+          <span>👤</span>
+          <span>LOGIN · เข้าสู่ระบบ</span>
         </div>
 
-        <div class="about-feature-item">
-          <div class="about-feature-icon">⏱️</div>
-          <div>
-            <div class="about-feature-title">ควบคุมรอบการปรับแก้และกำหนดส่ง (SLA Precision)</div>
-            <div class="about-feature-desc">
-              ลดปัญหางานคอขวด ควบคุมรอบการแก้ไข (Revision Loop) และแจ้งเตือนก่อนถึงวันครบกำหนดส่งมอบงาน
-            </div>
-          </div>
+        <div class="retro-card-header">
+          <h2 class="retro-card-title">เข้าสู่ระบบ CONT</h2>
+          <p class="retro-card-sub">
+            เชื่อมต่อเพื่อจัดการบรีฟ, คิวงานกราฟิก, และทีมงานอย่างมีประสิทธิภาพ
+          </p>
         </div>
 
-        <div class="about-feature-item">
-          <div class="about-feature-icon">👥</div>
-          <div>
-            <div class="about-feature-title">บริหารภาระงานทีม (Team Bandwidth)</div>
-            <div class="about-feature-desc">
-              ทราบสถานะภาระงานของนักออกแบบแต่ละท่านแบบเรียลไทม์ ช่วยกระจายงานอย่างเป็นธรรมและมีประสิทธิภาพ
-            </div>
-          </div>
-        </div>
+        <!-- Dynamic Message Banners -->
+        <div id="login-error" class="banner-error hidden"></div>
+        <div id="login-info" class="banner-info hidden"></div>
 
-        <div class="about-feature-item">
-          <div class="about-feature-icon">📊</div>
-          <div>
-            <div class="about-feature-title">สถิติและรายงานสรุปผลงาน (Creative Analytics)</div>
-            <div class="about-feature-desc">
-              วิเคราะห์ความเร็วการทำงาน (Design Velocity), ปริมาณงานในแต่ละไตรมาส, และประสิทธิภาพของทีมอย่างโปร่งใส
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:20px; display:flex; gap:12px; justify-content:flex-end;">
-        <button id="about-to-login-btn" type="button" class="btn-submit-otp" style="margin-top:0; width:auto; padding:0 24px;">
-          <span>เข้าสู่ระบบ CONT →</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================================================
-       MODAL 2: SEAMLESS LOGIN (เข้าสู่ระบบ - ไม่มีกล่องแยกบนหน้าหลัก)
-       ========================================================================== -->
-  <div id="login-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="login-title">
-    <div class="modal-dialog login-dialog">
-      <button id="login-close-btn" class="modal-close-btn" type="button" aria-label="ปิดหน้าต่าง">✕</button>
-
-      <div class="login-modal-header">
-        <h2 id="login-title" class="login-modal-title">เข้าสู่ระบบ CONT</h2>
-        <p class="login-modal-sub">เฉพาะบัญชีทางการ (@kkpfg.com) หรือ Google Workspace</p>
-      </div>
-
-      <!-- Dynamic Message Banners -->
-      <div id="login-error" class="banner-error hidden"></div>
-      <div id="login-info" class="banner-info hidden"></div>
-
-      <!-- Step 1: Work Email Input (OTP Login) -->
-      <div id="email-step">
-        <div class="form-field">
-          <label for="work-email" class="form-label">
-            <span>✉️ อีเมลที่ทำงาน (@kkpfg.com)</span>
+        <!-- Step 1: Work Email Input (OTP Login) -->
+        <div id="email-step" class="retro-field">
+          <label for="work-email" class="retro-label">
+            <span>📧 อีเมลที่ทำงาน (@kkpfg.com)</span>
           </label>
-          <div class="form-input-wrap">
-            <span class="form-input-icon">✉️</span>
+          <div class="retro-input-wrap">
+            <svg class="retro-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+            </svg>
             <input
               id="work-email"
-              class="form-input"
+              class="retro-input"
               type="email"
               placeholder="e.g. your.name@kkpfg.com"
               autocomplete="email"
               required
             />
           </div>
-          <div class="form-hint">
+          <span class="retro-hint">
             <span>🔒</span>
-            <span>ระบบจะส่งรหัส OTP 6 หลักไปยัง Outlook ของท่าน</span>
-          </div>
+            <span>ระบบจะส่งรหัส OTP 6 หลักไปยังกล่องข้อความ Outlook ของท่าน</span>
+          </span>
+
+          <!-- Chunky Red Arcade Button -->
+          <button class="retro-btn-start" id="send-otp-btn" type="button">
+            <span>📩 ขอรหัส OTP ทางอีเมล (PRESS START)</span>
+          </button>
         </div>
 
-        <button class="btn-submit-otp" id="send-otp-btn" type="button">
-          <span>📩 ขอรหัส OTP ทางอีเมล</span>
-        </button>
-      </div>
-
-      <!-- Step 2: 6-Digit OTP Verification -->
-      <div id="otp-step" class="hidden">
-        <div class="email-sent-badge">
-          <div style="font-size:1.4rem;">🔐</div>
-          <div style="flex:1">
-            <div style="font-weight:700; color:#FFFFFF; font-size:0.88rem;">ส่งรหัส OTP สำเร็จแล้ว</div>
-            <div style="font-size:0.78rem; color:#A4B0CB; margin-top:2px;">
-              กรุณาตรวจสอบรหัส 6 หลักที่ส่งไปยัง <strong id="sent-email-display" style="color:#38BDF8;"></strong>
+        <!-- Step 2: 6-Digit OTP Verification -->
+        <div id="otp-step" class="retro-field hidden">
+          <div class="email-sent-card">
+            <div style="font-size:1.4rem;">🔐</div>
+            <div style="flex:1">
+              <div style="font-weight:700; color:var(--text-main); font-size:0.88rem;">ส่งรหัส OTP สำเร็จแล้ว</div>
+              <div style="font-size:0.78rem; color:var(--text-sub); margin-top:2px;">
+                กรุณาตรวจสอบรหัส 6 หลักที่ส่งไปยัง <strong id="sent-email-display" style="color:var(--retro-red);"></strong>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="form-field" style="margin-top:14px;">
-          <label for="otp-code" class="form-label">กรอกรหัสยืนยัน OTP 6 หลัก</label>
-          <input
-            id="otp-code"
-            type="text"
-            maxlength="6"
-            inputmode="numeric"
-            placeholder="• • • • • •"
-            class="otp-digits-input"
-            autocomplete="one-time-code"
-          />
-          <div class="form-hint" style="justify-content:center; margin-top:4px;">
-            <span>รหัสหมดอายุใน 10 นาที (ตรวจดูในกล่องข้อความหรืออีเมลขยะ)</span>
+          <div style="margin-top:8px;">
+            <label for="otp-code" class="retro-label">กรอกรหัสยืนยัน OTP 6 หลัก</label>
+            <input
+              id="otp-code"
+              type="text"
+              maxlength="6"
+              inputmode="numeric"
+              placeholder="• • • • • •"
+              class="otp-input"
+              autocomplete="one-time-code"
+            />
+            <span class="retro-hint" style="justify-content:center; margin-top:4px;">
+              รหัสหมดอายุใน 10 นาที (ตรวจดูในกล่องข้อความหรืออีเมลขยะ)
+            </span>
+          </div>
+
+          <button class="retro-btn-start" id="verify-otp-btn" type="button" style="margin-top:10px;">
+            <span>ยืนยันรหัสและเข้าสู่ระบบ →</span>
+          </button>
+
+          <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.8rem;">
+            <button type="button" class="btn-link" id="resend-otp-btn" style="color:var(--retro-red); background:none; border:none; cursor:pointer; font-family:inherit; font-weight:600;">ส่งรหัสใหม่อีกครั้ง</button>
+            <button type="button" class="btn-link text-muted" id="back-to-email-btn" style="color:var(--hint-color); background:none; border:none; cursor:pointer; font-family:inherit;">← เปลี่ยนอีเมล</button>
           </div>
         </div>
 
-        <button class="btn-submit-otp" id="verify-otp-btn" type="button" style="margin-top:14px;">
-          <span>ยืนยันรหัสและเข้าสู่ระบบ →</span>
+        <!-- Divider -->
+        <div class="retro-sep">
+          <span>หรือเข้าสู่ระบบด้วย Google</span>
+        </div>
+
+        <!-- Secondary Option: Google Login -->
+        <button type="button" class="retro-btn-google" id="google-login">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>เข้าสู่ระบบด้วย Google Account</span>
         </button>
 
-        <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:0.8rem;">
-          <button type="button" class="btn-link" id="resend-otp-btn" style="color:#38BDF8; background:none; border:none; cursor:pointer; font-family:inherit; font-weight:600;">ส่งรหัสใหม่อีกครั้ง</button>
-          <button type="button" class="btn-link text-muted" id="back-to-email-btn" style="color:#8E9AB4; background:none; border:none; cursor:pointer; font-family:inherit;">← เปลี่ยนอีเมล</button>
+        <!-- Security Footer -->
+        <div class="retro-card-footer">
+          <span>🔒</span>
+          <span>สงวนสิทธิ์สำหรับบุคลากรกลุ่มธุรกิจการเงินเกียรตินาคินภัทร (KKP)</span>
         </div>
       </div>
+    </main>
 
-      <!-- Divider -->
-      <div class="form-divider">
-        <span>หรือเข้าสู่ระบบด้วย Google</span>
+    <!-- Bottom Status Ticker Bar -->
+    <footer class="retro-bottom-bar">
+      <div class="status-left">
+        <span>🎮 KKP GRAPHIC DESIGN WORKFLOW ENGINE</span>
+        <span style="opacity:0.4;">|</span>
+        <span>ONE UNIFIED WORKSPACE</span>
       </div>
-
-      <!-- Secondary Option: Google Login -->
-      <button type="button" class="btn-google-sign" id="google-login">
-        <svg width="18" height="18" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        <span>เข้าสู่ระบบด้วย Google</span>
-      </button>
-
-      <div style="text-align:center; margin-top:14px; font-size:0.72rem; color:#7886A2;">
-        🔒 สำหรับบุคลากรกลุ่มธุรกิจการเงินเกียรตินาคินภัทร (KKP)
+      <div class="status-right">
+        <span>STATUS: READY</span>
+        <span>•</span>
+        <span>VER: 2.4.0</span>
       </div>
-    </div>
+    </footer>
+
   </div>
 
-  <!-- Interactive Modal Controller Script -->
+  <!-- Theme Toggle Script -->
   <script>
     (function() {
-      const aboutBtn = document.getElementById('about-btn');
-      const aboutModal = document.getElementById('about-modal');
-      const aboutCloseBtn = document.getElementById('about-close-btn');
-      const aboutToLoginBtn = document.getElementById('about-to-login-btn');
+      const toggleBtn = document.getElementById('theme-toggle-btn');
+      const themeIcon = document.getElementById('theme-icon');
+      const themeLabel = document.getElementById('theme-label');
+      
+      const savedTheme = localStorage.getItem('cont_login_theme') || 'dark';
+      applyTheme(savedTheme);
 
-      const heroLoginBtn = document.getElementById('hero-login-btn');
-      const loginModal = document.getElementById('login-modal');
-      const loginCloseBtn = document.getElementById('login-close-btn');
-
-      function openModal(modal) {
-        if (!modal) return;
-        modal.classList.add('is-active');
-      }
-
-      function closeModal(modal) {
-        if (!modal) return;
-        modal.classList.remove('is-active');
-      }
-
-      // About Modal triggers
-      aboutBtn?.addEventListener('click', () => openModal(aboutModal));
-      aboutCloseBtn?.addEventListener('click', () => closeModal(aboutModal));
-      aboutModal?.addEventListener('click', (e) => {
-        if (e.target === aboutModal) closeModal(aboutModal);
-      });
-
-      // Switch from About to Login
-      aboutToLoginBtn?.addEventListener('click', () => {
-        closeModal(aboutModal);
-        openModal(loginModal);
-      });
-
-      // Login Modal triggers
-      heroLoginBtn?.addEventListener('click', () => openModal(loginModal));
-      loginCloseBtn?.addEventListener('click', () => closeModal(loginModal));
-      loginModal?.addEventListener('click', (e) => {
-        if (e.target === loginModal) closeModal(loginModal);
-      });
-
-      // Esc key closes modals
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeModal(aboutModal);
-          closeModal(loginModal);
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('cont_login_theme', theme);
+        if (theme === 'light') {
+          if (themeIcon) themeIcon.textContent = '🌙';
+          if (themeLabel) themeLabel.textContent = 'โหมดมืด';
+        } else {
+          if (themeIcon) themeIcon.textContent = '☀️';
+          if (themeLabel) themeLabel.textContent = 'โหมดสว่าง';
         }
-      });
+      }
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          const current = document.documentElement.getAttribute('data-theme') || 'dark';
+          const next = current === 'dark' ? 'light' : 'dark';
+          applyTheme(next);
+        });
+      }
     })();
   </script>
 
