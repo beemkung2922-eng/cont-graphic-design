@@ -158,6 +158,7 @@ export async function render(ctx) {
   };
 
   let heatmapWeekOffset = 0;
+  let mobileFilterOpen = false;
 
   const draw = () => {
     const filtered = filterTasksByTimeRange(tasks, filterState);
@@ -290,53 +291,78 @@ export async function render(ctx) {
       return d ? d.getFullYear() : null;
     }).filter(Boolean))].sort((a, b) => b - a);
 
-    /* ── 7. Period filter bar HTML ── */
+    /* ── 7. Period filter bar HTML (Adaptive Desktop Inline / Mobile Collapsible) ── */
+    const hasAdvancedFilter = filterState.year !== "all" ||
+      filterState.month !== "all" ||
+      filterState.memberId !== "all" ||
+      filterState.status !== "all" ||
+      Boolean(filterState.startDate) ||
+      Boolean(filterState.endDate);
+
+    const isFilterExpanded = mobileFilterOpen || hasAdvancedFilter;
+
     const periodFilterHtml = `
       <div class="dash-filter-bar" id="dash-filter-bar" style="margin-bottom:20px;border-radius:10px;">
-        <div class="dfb-group">
-          <label class="dfb-label">Timeframe</label>
-          <div class="dfb-chips">
-            ${["all","today","7days","month","year"].map(p => `
-              <button class="dfb-chip${filterState.period===p?" is-active":""}" data-period="${p}">
-                ${{ all:"All Time", today:"Today", "7days":"7 Days", month:"This Month", year:"This Year" }[p]}
-              </button>`).join("")}
+        <div class="dfb-top-row">
+          <div class="dfb-chips-group">
+            <span class="dfb-label">Timeframe</span>
+            <div class="dfb-chips">
+              ${["all","today","7days","month","year"].map(p => `
+                <button type="button" class="dfb-chip${filterState.period===p?" is-active":""}" data-period="${p}">
+                  ${{ all:"All Time", today:"Today", "7days":"7 Days", month:"This Month", year:"This Year" }[p]}
+                </button>`).join("")}
+            </div>
+          </div>
+          <button type="button" class="dfb-toggle-btn${isFilterExpanded ? " is-open" : ""}${hasAdvancedFilter ? " has-active" : ""}" id="dfb-toggle-btn" aria-label="Toggle Advanced Filters">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span>ตัวกรองละเอียด</span>
+            ${hasAdvancedFilter ? `<span class="dfb-active-badge">●</span>` : `<span class="dfb-toggle-icon">${isFilterExpanded ? "▲" : "▼"}</span>`}
+          </button>
+        </div>
+
+        <div class="dfb-advanced-panel${isFilterExpanded ? " is-open" : ""}" id="dfb-advanced-panel">
+          <div class="dfb-fields-grid">
+            <div class="dfb-group">
+              <label class="dfb-label">Year</label>
+              <select class="dfb-select" id="dfb-year">
+                <option value="all"${filterState.year==="all"?" selected":""}>All Years</option>
+                ${allYears.map(y => `<option value="${y}"${filterState.year==y?" selected":""}>${y}</option>`).join("")}
+              </select>
+            </div>
+            <div class="dfb-group">
+              <label class="dfb-label">Month</label>
+              <select class="dfb-select" id="dfb-month">
+                <option value="all"${filterState.month==="all"?" selected":""}>All Months</option>
+                ${MONTH_NAMES_EN.map((m, i) => `<option value="${i+1}"${filterState.month==i+1?" selected":""}>${m}</option>`).join("")}
+              </select>
+            </div>
+            <div class="dfb-group">
+              <label class="dfb-label">Member</label>
+              <select class="dfb-select" id="dfb-member">
+                <option value="all"${filterState.memberId==="all"?" selected":""}>All Members</option>
+                ${members.map(m => `<option value="${m.id}"${filterState.memberId===m.id?" selected":""}>${escapeHtml(m.name)}</option>`).join("")}
+              </select>
+            </div>
+            <div class="dfb-group">
+              <label class="dfb-label">Status</label>
+              <select class="dfb-select" id="dfb-status">
+                <option value="all"${filterState.status==="all"?" selected":""}>All Statuses</option>
+                ${STATUS_ORDER.map(s => `<option value="${s}"${filterState.status===s?" selected":""}>${STATUS_EN[s]}</option>`).join("")}
+              </select>
+            </div>
+            <div class="dfb-group dfb-range">
+              <label class="dfb-label">Date Range</label>
+              <div class="dfb-range-inputs">
+                <input type="date" class="dfb-input" id="dfb-start" value="${filterState.startDate}" placeholder="Start Date">
+                <span class="dfb-sep">–</span>
+                <input type="date" class="dfb-input" id="dfb-end" value="${filterState.endDate}" placeholder="End Date">
+              </div>
+            </div>
+            <div class="dfb-reset-wrap">
+              <button type="button" class="dfb-reset" id="dfb-reset">× ล้างตัวกรอง</button>
+            </div>
           </div>
         </div>
-        <div class="dfb-group">
-          <label class="dfb-label">Year</label>
-          <select class="dfb-select" id="dfb-year">
-            <option value="all"${filterState.year==="all"?" selected":""}>All Years</option>
-            ${allYears.map(y => `<option value="${y}"${filterState.year==y?" selected":""}>${y}</option>`).join("")}
-          </select>
-        </div>
-        <div class="dfb-group">
-          <label class="dfb-label">Month</label>
-          <select class="dfb-select" id="dfb-month">
-            <option value="all"${filterState.month==="all"?" selected":""}>All Months</option>
-            ${MONTH_NAMES_EN.map((m, i) => `<option value="${i+1}"${filterState.month==i+1?" selected":""}>${m}</option>`).join("")}
-          </select>
-        </div>
-        <div class="dfb-group">
-          <label class="dfb-label">Member</label>
-          <select class="dfb-select" id="dfb-member">
-            <option value="all"${filterState.memberId==="all"?" selected":""}>All Members</option>
-            ${members.map(m => `<option value="${m.id}"${filterState.memberId===m.id?" selected":""}>${escapeHtml(m.name)}</option>`).join("")}
-          </select>
-        </div>
-        <div class="dfb-group">
-          <label class="dfb-label">Status</label>
-          <select class="dfb-select" id="dfb-status">
-            <option value="all"${filterState.status==="all"?" selected":""}>All Statuses</option>
-            ${STATUS_ORDER.map(s => `<option value="${s}"${filterState.status===s?" selected":""}>${STATUS_EN[s]}</option>`).join("")}
-          </select>
-        </div>
-        <div class="dfb-group dfb-range">
-          <label class="dfb-label">Date Range</label>
-          <input type="date" class="dfb-input" id="dfb-start" value="${filterState.startDate}" placeholder="Start Date">
-          <span class="dfb-sep">–</span>
-          <input type="date" class="dfb-input" id="dfb-end" value="${filterState.endDate}" placeholder="End Date">
-        </div>
-        <button class="dfb-reset" id="dfb-reset">× Reset</button>
       </div>
     `;
 
@@ -391,7 +417,7 @@ export async function render(ctx) {
             </button>
             <button type="button" class="btn-overview-primary" id="btn-overview-new-task">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ สร้างงานใหม่</span>
+              <span>สร้างงานใหม่</span>
             </button>
           </div>
         </div>
@@ -692,7 +718,19 @@ export async function render(ctx) {
         filterState.period = "custom";
         draw();
       });
+      qs("#dfb-toggle-btn")?.addEventListener("click", () => {
+        mobileFilterOpen = !mobileFilterOpen;
+        const panel = qs("#dfb-advanced-panel");
+        const btn = qs("#dfb-toggle-btn");
+        if (panel) panel.classList.toggle("is-open", mobileFilterOpen);
+        if (btn) {
+          btn.classList.toggle("is-open", mobileFilterOpen);
+          const icon = btn.querySelector(".dfb-toggle-icon");
+          if (icon) icon.textContent = mobileFilterOpen ? "▲" : "▼";
+        }
+      });
       qs("#dfb-reset")?.addEventListener("click", () => {
+        mobileFilterOpen = false;
         filterState.period = "all";
         filterState.year = "all";
         filterState.month = "all";
