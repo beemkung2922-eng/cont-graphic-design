@@ -185,6 +185,10 @@ function topbarHtml(page, member) {
           ${pixelIcons.book}
           <span>GUIDE</span>
         </a>
+        <a class="pixel-nav-link" href="intro.html" title="Watch Brand Intro Video Reel">
+          ${pixelIcons.rocket}
+          <span>REEL</span>
+        </a>
       </nav>
 
       <!-- Right: Search, Notifications, User Capsule, and Create CTA -->
@@ -281,6 +285,10 @@ function topbarHtml(page, member) {
         <a class="mobile-nav-link" href="#" id="drawer-workflow-guide-link">
           ${pixelIcons.book}
           <span>WORKFLOW GUIDE</span>
+        </a>
+        <a class="mobile-nav-link" href="intro.html">
+          ${pixelIcons.rocket}
+          <span>INTRO VIDEO REEL</span>
         </a>
       </nav>
 
