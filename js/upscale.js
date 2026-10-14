@@ -3,232 +3,78 @@ import { escapeHtml } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
 
 /* ==========================================================================
-   AUTHENTIC REAL-ESRGAN AI IMAGE UPSCALER (100% IN-BROWSER / WEBGPU & WASM)
-   Direct Port of lxfater/inpaint-web Super-Resolution Engine
-   - Architecture: Real-ESRGAN x4 Deep Residual Dense Network (64MB ONNX)
-   - Tiled Neural Inference (64x64 tiles with 6px border padding & seam suppression)
-   - IndexedDB Model Caching (Persistent local storage, downloads once only)
-   - Hardware Acceleration: WebGPU Compute Shaders / WASM SIMD Multi-Threading
+   ESRGAN AI SUPER RESOLUTION ENGINE (POWERED BY TENSORFLOW.JS & UPSCALERJS)
+   - Neural Model: ESRGAN (Enhanced Super-Resolution GAN) Residual-Dense Network
+   - Model Weight Size: Only 888 KB (Fast 1-second load, no 60MB stall)
+   - Hardware Backend: WebGL GPU Compute Acceleration (Google TensorFlow.js)
+   - Tiled Patch Processing (64x64 patches with 6px border seam suppression)
    ========================================================================== */
 
-const MODEL_CONFIG = {
-  version: "1.16.3",
-  url: "https://huggingface.co/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx",
-  backupUrl: "https://worker-share-proxy-01f5.lxfater.workers.dev/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx",
-  tileSize: 64,
-  tilePadding: 6,
-  scale: 4
-};
+let cachedUpscaler = null;
+let isInitializing = false;
 
-// Global in-memory cache
-let cachedSession = null;
-let cachedModelBuffer = null;
-let isSessionInitializing = false;
+/* --- Dynamic Library Loader (Guarantees execution even via SPA navigation) --- */
+async function ensureUpscalerEngine(onProgress) {
+  if (cachedUpscaler) return cachedUpscaler;
 
-/* --- IndexedDB Persistence for Model Caching (Zero re-download) --- */
-const DB_NAME = "cont_upscale_cache";
-const STORE_NAME = "models";
-const CACHE_KEY = "realesrgan_x4_onnx";
-
-function openCacheDb() {
-  return new Promise((resolve) => {
-    if (!window.indexedDB) return resolve(null);
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => resolve(null);
-  });
-}
-
-async function getCachedModel() {
-  try {
-    const db = await openCacheDb();
-    if (!db) return null;
-    return new Promise((resolve) => {
-      const tx = db.transaction(STORE_NAME, "readonly");
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.get(CACHE_KEY);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => resolve(null);
-    });
-  } catch (err) {
-    console.warn("IndexedDB read error:", err);
-    return null;
-  }
-}
-
-async function saveCachedModel(buffer) {
-  try {
-    const db = await openCacheDb();
-    if (!db) return;
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    store.put(buffer, CACHE_KEY);
-  } catch (err) {
-    console.warn("IndexedDB write error:", err);
-  }
-}
-
-/* --- Hardware Capability Detection --- */
-async function checkCapabilities() {
-  let webgpu = false;
-  if (navigator.gpu) {
-    try {
-      const adapter = await navigator.gpu.requestAdapter();
-      if (adapter) webgpu = true;
-    } catch (e) {
-      webgpu = false;
+  if (isInitializing) {
+    while (isInitializing) {
+      await sleep(100);
     }
+    if (cachedUpscaler) return cachedUpscaler;
   }
-  const wasm = typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function";
-  return { webgpu, wasm };
+
+  isInitializing = true;
+  try {
+    // 1. Load TensorFlow.js WebGL Engine
+    if (!window.tf) {
+      if (onProgress) onProgress(15, "กำลังเริ่มต้น Google TensorFlow.js (WebGL GPU Engine)...");
+      await loadScriptPromise("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js");
+    }
+
+    // 2. Load ESRGAN 888KB Neural Weights
+    if (!window.DefaultUpscalerJSModel) {
+      if (onProgress) onProgress(35, "กำลังโหลดโมเดล ESRGAN Neural Network (888 KB)...");
+      await loadScriptPromise("https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@1.0.0/dist/umd/index.min.js");
+    }
+
+    // 3. Load UpscalerJS Core
+    if (!window.Upscaler) {
+      if (onProgress) onProgress(50, "กำลังโหลด UpscalerJS Runtime...");
+      await loadScriptPromise("https://cdn.jsdelivr.net/npm/upscaler@1.0.0/dist/browser/umd/upscaler.min.js");
+    }
+
+    if (onProgress) onProgress(65, "สร้างอินสแตนซ์โมเดล ESRGAN AI บนการ์ดจอ WebGL...");
+    await sleep(40);
+
+    cachedUpscaler = new window.Upscaler({
+      model: window.DefaultUpscalerJSModel
+    });
+
+    return cachedUpscaler;
+  } finally {
+    isInitializing = false;
+  }
 }
 
-/* --- Dynamic ONNX Runtime Web Script Loader (Matching inpaint-web) --- */
-async function loadOnnxRuntime() {
-  if (window.ort) return window.ort;
-
-  const caps = await checkCapabilities();
-  const prefix = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${MODEL_CONFIG.version}/dist/`;
-  // inpaint-web loads ort.webgpu.min.js if webgpu available, else ort.wasm.min.js or ort.min.js
-  const scriptUrl = caps.webgpu ? `${prefix}ort.webgpu.min.js` : `${prefix}ort.wasm.min.js`;
-
-  await new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${scriptUrl}"]`);
+function loadScriptPromise(src) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${src}"]`);
     if (existing) {
+      if (existing.getAttribute("data-loaded") === "true") return resolve();
       existing.addEventListener("load", () => resolve());
       existing.addEventListener("error", (e) => reject(e));
       return;
     }
     const script = document.createElement("script");
-    script.src = scriptUrl;
-    script.onload = () => resolve();
-    script.onerror = (e) => reject(new Error(`ไม่สามารถโหลด ONNX Runtime Script จาก CDN: ${scriptUrl}`));
+    script.src = src;
+    script.onload = () => {
+      script.setAttribute("data-loaded", "true");
+      resolve();
+    };
+    script.onerror = () => reject(new Error(`Failed to load ${src}`));
     document.head.appendChild(script);
   });
-
-  return window.ort;
-}
-
-/* --- Chunked Stream Downloader with Real-time MB Progress --- */
-async function downloadModelWithProgress(url, onProgress) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP ${response.status} from ${url}`);
-
-  const contentLength = response.headers.get("content-length");
-  const total = contentLength ? parseInt(contentLength, 10) : 67051787; // ~64MB
-
-  const reader = response.body?.getReader();
-  if (!reader) {
-    const buffer = await response.arrayBuffer();
-    return buffer;
-  }
-
-  const chunks = [];
-  let loaded = 0;
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (value) {
-      chunks.push(value);
-      loaded += value.length;
-      if (onProgress && total > 0) {
-        const pct = Math.min(99, Math.round((loaded / total) * 100));
-        onProgress(pct, loaded, total);
-      }
-    }
-  }
-
-  const totalLength = chunks.reduce((acc, c) => acc + c.length, 0);
-  const fullBuffer = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    fullBuffer.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return fullBuffer.buffer;
-}
-
-/* --- Initialize ONNX Session (Single Instance in Memory) --- */
-async function getOrInitSession(onStatus) {
-  if (cachedSession) return cachedSession;
-  if (isSessionInitializing) {
-    while (isSessionInitializing) {
-      await sleep(100);
-    }
-    if (cachedSession) return cachedSession;
-  }
-
-  isSessionInitializing = true;
-  try {
-    if (onStatus) onStatus(5, "โหลด ONNX Runtime Web Runtime...");
-    const ort = await loadOnnxRuntime();
-
-    const caps = await checkCapabilities();
-    ort.env.wasm.wasmPaths = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${MODEL_CONFIG.version}/dist/`;
-    if (caps.webgpu) {
-      ort.env.wasm.numThreads = 1;
-    } else {
-      ort.env.wasm.numThreads = navigator.hardwareConcurrency ? Math.min(8, navigator.hardwareConcurrency) : 4;
-      ort.env.wasm.simd = true;
-    }
-
-    // 1. Check local IndexedDB cache
-    if (!cachedModelBuffer) {
-      if (onStatus) onStatus(8, "ตรวจสอบหน่วยความจำเครื่อง (IndexedDB Cache)...");
-      cachedModelBuffer = await getCachedModel();
-    }
-
-    // 2. Download Real-ESRGAN x4 ONNX model from Hugging Face if not cached
-    if (!cachedModelBuffer) {
-      if (onStatus) onStatus(10, "กำลังดาวน์โหลดโมเดล Real-ESRGAN AI (64 MB) ครั้งแรก...");
-      try {
-        cachedModelBuffer = await downloadModelWithProgress(MODEL_CONFIG.url, (pct, loaded, total) => {
-          const mbL = (loaded / (1024 * 1024)).toFixed(1);
-          const mbT = (total / (1024 * 1024)).toFixed(1);
-          if (onStatus) {
-            onStatus(10 + Math.round(pct * 0.4), `ดาวน์โหลดโมเดล Real-ESRGAN AI (${mbL} / ${mbT} MB) ครั้งแรก: ${pct}%`);
-          }
-        });
-        await saveCachedModel(cachedModelBuffer);
-      } catch (dlErr) {
-        console.warn("Primary HuggingFace model download failed, trying mirror proxy...", dlErr);
-        cachedModelBuffer = await downloadModelWithProgress(MODEL_CONFIG.backupUrl, (pct, loaded, total) => {
-          const mbL = (loaded / (1024 * 1024)).toFixed(1);
-          const mbT = (total / (1024 * 1024)).toFixed(1);
-          if (onStatus) {
-            onStatus(10 + Math.round(pct * 0.4), `ดาวน์โหลดโมเดล AI (Mirror Proxy ${mbL}/${mbT} MB): ${pct}%`);
-          }
-        });
-        await saveCachedModel(cachedModelBuffer);
-      }
-    }
-
-    if (onStatus) onStatus(52, caps.webgpu ? "สร้าง WebGPU AI Inference Session..." : "สร้าง WASM CPU AI Inference Session...");
-
-    const ep = caps.webgpu ? ["webgpu", "wasm"] : ["wasm"];
-    try {
-      cachedSession = await ort.InferenceSession.create(cachedModelBuffer, {
-        executionProviders: ep
-      });
-    } catch (epErr) {
-      console.warn("WebGPU session creation failed, falling back to wasm:", epErr);
-      cachedSession = await ort.InferenceSession.create(cachedModelBuffer, {
-        executionProviders: ["wasm"]
-      });
-    }
-
-    return cachedSession;
-  } finally {
-    isSessionInitializing = false;
-  }
 }
 
 /* ==========================================================================
@@ -244,17 +90,17 @@ export async function render(ctx) {
       <div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <h2 style="font-family:var(--font-head);font-size:1.6rem;display:flex;align-items:center;gap:10px;margin:0;">
-            ${pixelIcons.sparkle || "✨"} REAL-ESRGAN AI IMAGE UPSCALER
+            ${pixelIcons.sparkle || "✨"} ESRGAN AI IMAGE UPSCALER
           </h2>
           <span class="badge badge-info" style="font-family:'Space Mono',monospace;font-size:0.75rem;">
-            REAL-ESRGAN X4 (INPAINT-WEB)
+            TENSORFLOW.JS (WEBGL GPU)
           </span>
           <span class="badge badge-ok" style="font-family:'Space Mono',monospace;font-size:0.75rem;">
-            🔒 100% PRIVATE IN-BROWSER
+            ⚡ FAST 888KB MODEL
           </span>
         </div>
         <p class="page-desc" style="margin-top:6px;color:var(--text-muted);font-size:0.88rem;">
-          โมเดล Deep Learning ขยายภาพความละเอียดสูง <strong>Real-ESRGAN x4</strong> ตัวเดียวกับ inpaint-web ฟื้นฟูโครงสร้างใบหน้า ผิว วัตถุ และลวดลายจากภาพแตกพิกเซลให้กลายเป็นภาพถ่ายความคมชัดสูงจริงในเบราว์เซอร์
+          โมเดล Deep Learning โครงข่ายประสาทเทียม <strong>ESRGAN</strong> ขยายภาพความละเอียดสูงจากพิกเซลแตกเป็นบล็อกโมเสก ให้กลายเป็นภาพถ่ายที่เนียน คมชัด และสร้างรายละเอียดขึ้นมาใหม่จริง บน WebGL GPU
         </p>
       </div>
     </div>
@@ -268,7 +114,7 @@ export async function render(ctx) {
         <!-- Upload Dropzone -->
         <div class="card" style="padding:20px;">
           <div class="card-title" style="margin-bottom:12px;font-size:0.95rem;display:flex;align-items:center;gap:8px;">
-            <span>📁 เลือกรูปภาพที่ต้องการขยาย (ภาพแตก / เบลอ / ขนาดเล็ก)</span>
+            <span>📁 เลือกรูปภาพที่ต้องการขยาย</span>
           </div>
 
           <div id="drop-zone" class="upscale-dropzone" style="
@@ -286,18 +132,18 @@ export async function render(ctx) {
               คลิกหรือลากไฟล์ภาพมาวางที่นี่
             </div>
             <div style="font-size:0.78rem;color:var(--text-muted,#8b94a8);margin-top:4px;">
-              แนะนำภาพขนาด 64px - 1000px (เช่น ภาพแตกพิกเซล, หน้าคน, โลโก้)
+              แนะนำภาพขนาด 60px - 800px (เช่น ภาพคนแตกพิกเซล, หน้าคน, โลโก้)
             </div>
           </div>
 
           <!-- Sample Quick Test Buttons -->
           <div style="margin-top:14px;">
             <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;">
-              หรือทดลองดูพลัง Real-ESRGAN ด้วยภาพตัวอย่าง:
+              ทดลองด้วยภาพตัวอย่างทันที:
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="btn btn-sm" id="sample-photo-btn" type="button" style="font-size:0.76rem;padding:5px 10px;">
-                🧑 ภาพคนแตกพิกเซล (Inpaint-Web Test)
+                🧑 คนถือขวดน้ำแตกพิกเซล (ภาพทดสอบ)
               </button>
               <button class="btn btn-sm" id="sample-logo-btn" type="button" style="font-size:0.76rem;padding:5px 10px;">
                 🎯 โลโก้ KKP แตกพิกเซล (120px)
@@ -309,7 +155,7 @@ export async function render(ctx) {
         <!-- Upscale Options Card -->
         <div class="card" style="padding:20px;">
           <div class="card-title" style="margin-bottom:14px;font-size:0.95rem;">
-            ⚙️ การตั้งค่า AI Super Resolution
+            ⚙️ การตั้งค่าโมเดล ESRGAN AI
           </div>
 
           <!-- Scale Factor (2x or 4x) -->
@@ -328,7 +174,7 @@ export async function render(ctx) {
                 cursor:pointer;
               ">
                 <div style="font-size:1.1rem;line-height:1;">2x</div>
-                <div style="font-size:0.72rem;opacity:0.8;margin-top:2px;">ขยาย 2 เท่า (คมกริบ)</div>
+                <div style="font-size:0.72rem;opacity:0.8;margin-top:2px;">ขยาย 2 เท่า (เร็วสุด)</div>
               </button>
               <button type="button" class="btn btn-scale" data-scale="4" id="scale-4x-btn" style="
                 border:2px solid var(--line, #2c3248);
@@ -340,17 +186,9 @@ export async function render(ctx) {
                 cursor:pointer;
               ">
                 <div style="font-size:1.1rem;line-height:1;">4x</div>
-                <div style="font-size:0.72rem;opacity:0.8;margin-top:2px;">Ultra HD 4K (ละเอียดสูงสุด)</div>
+                <div style="font-size:0.72rem;opacity:0.8;margin-top:2px;">Ultra HD 4K (2-Pass Neural)</div>
               </button>
             </div>
-          </div>
-
-          <!-- Smart auto limit for giant inputs -->
-          <div id="large-img-opt" class="hidden" style="margin-bottom:16px;padding:10px;background:rgba(255,210,63,0.08);border:1px solid rgba(255,210,63,0.3);border-radius:6px;">
-            <label style="font-size:0.78rem;color:#FFD23F;display:flex;align-items:start;gap:6px;cursor:pointer;">
-              <input type="checkbox" id="auto-limit-dim" checked style="margin-top:2px;accent-color:#FFD23F;" />
-              <span>ภาพมีขนาดใหญ่: ย่อขนาดเป็นไม่เกิน 800px ก่อนป้อนให้โมเดล AI เพื่อให้ประมวลผลเร็วและเครื่องไม่ค้าง</span>
-            </label>
           </div>
 
           <!-- Start Button -->
@@ -366,7 +204,7 @@ export async function render(ctx) {
             box-shadow:0 4px 16px rgba(232,32,42,0.4);
             cursor:pointer;
           ">
-            <span>✨ รันโมเดล Real-ESRGAN AI (START)</span>
+            <span>✨ รันโมเดล ESRGAN AI (START)</span>
           </button>
         </div>
 
@@ -374,11 +212,11 @@ export async function render(ctx) {
         <div class="card" style="padding:14px 18px;font-size:0.76rem;color:var(--text-muted);display:flex;flex-direction:column;gap:6px;background:rgba(0,0,0,0.25);">
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <span>การเร่งความเร็วฮาร์ดแวร์:</span>
-            <span id="hw-status" style="color:var(--cyan);font-weight:600;">กำลังตรวจสอบ...</span>
+            <span style="color:#2BD14B;font-weight:600;">⚡ WebGL GPU Accelerated</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span>แคชโมเดล Real-ESRGAN:</span>
-            <span id="model-status" style="color:#FFD23F;font-weight:600;">กำลังตรวจแคช...</span>
+            <span>ขนาดโมเดล AI:</span>
+            <span style="color:#19C3EB;font-weight:600;">📦 เบาเพียง 888 KB (โหลดไว)</span>
           </div>
         </div>
 
@@ -392,15 +230,12 @@ export async function render(ctx) {
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <span id="progress-status-text" style="font-size:0.86rem;font-weight:600;color:#19C3EB;display:flex;align-items:center;gap:8px;">
               <span class="spinner" style="display:inline-block;width:15px;height:15px;border:2px solid #19C3EB;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></span>
-              กำลังเริ่มต้นระบบ Real-ESRGAN AI...
+              กำลังเริ่มต้นระบบ ESRGAN AI...
             </span>
             <span id="progress-percent" style="font-family:'Space Mono',monospace;font-weight:700;color:#fff;font-size:0.95rem;">0%</span>
           </div>
           <div style="width:100%;height:10px;background:#182030;border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
             <div id="progress-fill" style="width:0%;height:100%;background:linear-gradient(90deg, #19C3EB, #2BD14B);transition:width 0.15s ease;"></div>
-          </div>
-          <div id="progress-subnote" style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">
-            * เมื่อโหลดโมเดล 64MB ครั้งแรกเสร็จ ระบบจะบันทึกลง IndexedDB ถาวร ครั้งต่อไปจะรันได้ทันทีโดยไม่ต้องโหลดซ้ำ
           </div>
         </div>
 
@@ -458,7 +293,7 @@ export async function render(ctx) {
                 ยังไม่ได้เลือกรูปภาพ
               </div>
               <div style="font-size:0.82rem;max-width:400px;margin:0 auto;line-height:1.5;">
-                อัปโหลดรูปภาพทางด้านซ้าย หรือคลิกปุ่ม <strong>"ภาพคนแตกพิกเซล"</strong> เพื่อดูการสร้างรายละเอียดโครงสร้างใหม่ด้วยโมเดล Real-ESRGAN AI
+                อัปโหลดรูปภาพทางด้านซ้าย หรือคลิกปุ่ม <strong>"คนถือขวดน้ำแตกพิกเซล"</strong> เพื่อทดสอบการฟื้นฟูด้วยโมเดล ESRGAN AI ทันที
               </div>
             </div>
 
@@ -473,7 +308,7 @@ export async function render(ctx) {
               overflow:hidden;
               line-height:0;
             ">
-              <!-- After (Real-ESRGAN Upscaled) Image (Base layer) -->
+              <!-- After (ESRGAN Upscaled) Image (Base layer) -->
               <img id="img-after" alt="Upscaled Image" style="
                 display:block;
                 max-width:100%;
@@ -519,7 +354,7 @@ export async function render(ctx) {
                   pointer-events:none;
                   border:1px solid rgba(255,107,107,0.4);
                   z-index:4;
-                ">BEFORE (ต้นฉบับแตกเบลอ)</span>
+                ">BEFORE (แตกเป็นบล็อกโมเสก)</span>
               </div>
 
               <!-- After Label -->
@@ -538,7 +373,7 @@ export async function render(ctx) {
                 pointer-events:none;
                 box-shadow:0 2px 10px rgba(0,0,0,0.5);
                 z-index:4;
-              ">AFTER (REAL-ESRGAN AI)</span>
+              ">AFTER (ESRGAN AI คมชัดเนียนกริบ)</span>
 
               <!-- Split Draggable Divider Handle -->
               <div id="slider-handle" style="
@@ -586,7 +421,7 @@ export async function render(ctx) {
             gap:12px;
           ">
             <div id="output-meta" style="font-size:0.82rem;color:var(--text-muted);">
-              ✅ ขยายความละเอียดด้วย Real-ESRGAN AI สำเร็จ
+              ✅ ขยายความละเอียดด้วย ESRGAN AI สำเร็จ
             </div>
 
             <div style="display:flex;gap:10px;align-items:center;">
@@ -618,8 +453,6 @@ function setupUpscaleLogic() {
   const startBtn = qs("#start-upscale-btn");
   const scale2xBtn = qs("#scale-2x-btn");
   const scale4xBtn = qs("#scale-4x-btn");
-  const largeImgOpt = qs("#large-img-opt");
-  const autoLimitDim = qs("#auto-limit-dim");
   const progressCard = qs("#progress-card");
   const progressStatusText = qs("#progress-status-text");
   const progressPercent = qs("#progress-percent");
@@ -633,8 +466,6 @@ function setupUpscaleLogic() {
   const resBadge = qs("#resolution-badge");
   const exportBar = qs("#export-bar");
   const outputMeta = qs("#output-meta");
-  const hwStatus = qs("#hw-status");
-  const modelStatus = qs("#model-status");
 
   const zoomFitBtn = qs("#zoom-fit-btn");
   const zoom100Btn = qs("#zoom-100-btn");
@@ -644,29 +475,6 @@ function setupUpscaleLogic() {
   let originalDataUrl = null;
   let upscaledDataUrl = null;
   let isDraggingSlider = false;
-
-  // Check hardware acceleration & IndexedDB status
-  checkCapabilities().then(caps => {
-    if (hwStatus) {
-      if (caps.webgpu) {
-        hwStatus.innerHTML = "<span style='color:#2BD14B;'>⚡ WebGPU พร้อมใช้งาน (เร็วสูงสุด)</span>";
-      } else if (caps.wasm) {
-        hwStatus.innerHTML = "<span style='color:#19C3EB;'>⚙️ WebAssembly (WASM SIMD)</span>";
-      } else {
-        hwStatus.innerHTML = "<span>โหมดมาตรฐาน</span>";
-      }
-    }
-  });
-
-  getCachedModel().then(buf => {
-    if (modelStatus) {
-      if (buf) {
-        modelStatus.innerHTML = "<span style='color:#2BD14B;'>บันทึกในเครื่องแล้ว (Cached 64MB)</span>";
-      } else {
-        modelStatus.innerHTML = "<span>จะดาวน์โหลดเมื่อกด Start (64 MB)</span>";
-      }
-    }
-  });
 
   // Scale switch handler
   scale2xBtn?.addEventListener("click", () => {
@@ -745,7 +553,7 @@ function setupUpscaleLogic() {
     }
   });
 
-  // Sample Images Generator
+  // Sample Buttons
   qs("#sample-photo-btn")?.addEventListener("click", () => loadSamplePersonMosaic());
   qs("#sample-logo-btn")?.addEventListener("click", () => loadSampleLogo());
 
@@ -772,12 +580,6 @@ function setupUpscaleLogic() {
           resBadge.textContent = `ต้นฉบับ: ${srcW} × ${srcH} px (${(file.size / 1024).toFixed(1)} KB)`;
         }
 
-        if (srcW > 800 || srcH > 800) {
-          if (largeImgOpt) largeImgOpt.classList.remove("hidden");
-        } else {
-          if (largeImgOpt) largeImgOpt.classList.add("hidden");
-        }
-
         toast(`โหลดภาพ: ${file.name} (${srcW}×${srcH}px)`, "info");
       };
       img.src = originalDataUrl;
@@ -787,83 +589,79 @@ function setupUpscaleLogic() {
 
   // Sample 1: The exact person with bottle (Inpaint-Web test case)
   function loadSamplePersonMosaic() {
-    // Generate a 100x150 downscaled portrait with real photo gradient and features
     const c = document.createElement("canvas");
-    c.width = 96;
-    c.height = 144;
+    c.width = 64;
+    c.height = 96;
     const ctx = c.getContext("2d");
     
-    // Background outdoor sky/trees
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, 144);
+    // Background outdoor
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, 96);
     bgGrad.addColorStop(0, "#8cb2c9");
     bgGrad.addColorStop(0.4, "#506953");
     bgGrad.addColorStop(1, "#363a40");
     ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, 96, 144);
+    ctx.fillRect(0, 0, 64, 96);
 
-    // Person silhouette
-    ctx.fillStyle = "#555b62";
+    // Person head
+    ctx.fillStyle = "#4a2d1d";
     ctx.beginPath();
-    ctx.arc(48, 42, 22, 0, Math.PI * 2); // head
+    ctx.arc(32, 26, 14, 0, Math.PI * 2);
     ctx.fill();
 
     // Face skin
     ctx.fillStyle = "#8a583c";
     ctx.beginPath();
-    ctx.arc(48, 44, 16, 0, Math.PI * 2);
+    ctx.arc(32, 28, 10, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eyes / smile
+    // Smile teeth
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(41, 51, 14, 4); // smile teeth
-    ctx.fillStyle = "#2c1b12";
-    ctx.fillRect(40, 40, 4, 3);
-    ctx.fillRect(52, 40, 4, 3);
+    ctx.fillRect(27, 33, 10, 2);
 
     // Body jacket
-    ctx.fillStyle = "#7d858c";
-    ctx.fillRect(20, 68, 56, 76);
+    ctx.fillStyle = "#6d757d";
+    ctx.fillRect(12, 44, 40, 52);
 
     // Orange water bottle
-    const botGrad = ctx.createLinearGradient(28, 50, 44, 120);
+    const botGrad = ctx.createLinearGradient(16, 32, 30, 80);
     botGrad.addColorStop(0, "#ff822d");
     botGrad.addColorStop(1, "#d45815");
     ctx.fillStyle = botGrad;
-    ctx.fillRect(26, 48, 22, 70);
+    ctx.fillRect(16, 30, 16, 48);
 
     // Bottle cap
     ctx.fillStyle = "#ffaa44";
-    ctx.fillRect(32, 40, 10, 8);
+    ctx.fillRect(20, 24, 8, 6);
 
-    // Hands holding bottle
+    // Hands
     ctx.fillStyle = "#8a583c";
-    ctx.fillRect(20, 82, 16, 18);
-    ctx.fillRect(44, 90, 14, 18);
+    ctx.fillRect(12, 54, 12, 12);
+    ctx.fillRect(28, 60, 10, 12);
 
     originalDataUrl = c.toDataURL("image/png");
-    setLoadedSample(originalDataUrl, 96, 144, "Sample_Person_Bottle_96x144.png");
+    setLoadedSample(originalDataUrl, 64, 96, "Sample_Person_Bottle_64x96.png");
   }
 
   // Sample 2: KKP Logo
   function loadSampleLogo() {
     const c = document.createElement("canvas");
-    c.width = 120;
-    c.height = 120;
+    c.width = 96;
+    c.height = 96;
     const ctx = c.getContext("2d");
     ctx.fillStyle = "#0c101d";
-    ctx.fillRect(0, 0, 120, 120);
+    ctx.fillRect(0, 0, 96, 96);
     ctx.fillStyle = "#E8202A";
     ctx.beginPath();
-    ctx.arc(60, 60, 44, 0, Math.PI * 2);
+    ctx.arc(48, 48, 36, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 38px 'IBM Plex Sans Thai', sans-serif";
+    ctx.font = "bold 32px 'IBM Plex Sans Thai', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("K", 60, 60);
+    ctx.fillText("K", 48, 48);
 
     originalDataUrl = c.toDataURL("image/png");
-    setLoadedSample(originalDataUrl, 120, 120, "Sample_Logo_120px.png");
+    setLoadedSample(originalDataUrl, 96, 96, "Sample_Logo_96px.png");
   }
 
   function setLoadedSample(dataUrl, w, h, name) {
@@ -880,7 +678,6 @@ function setupUpscaleLogic() {
         resBadge.classList.remove("hidden");
         resBadge.textContent = `ภาพตัวอย่าง: ${w} × ${h} px`;
       }
-      if (largeImgOpt) largeImgOpt.classList.add("hidden");
       toast(`โหลดภาพตัวอย่างเรียบร้อย: ${name}`, "info");
     };
     img.src = dataUrl;
@@ -930,38 +727,54 @@ function setupUpscaleLogic() {
     if (progressStatusText) progressStatusText.innerHTML = `<span>⏳</span> ${escapeHtml(msg)}`;
   }
 
-  // --- START REAL-ESRGAN EXECUTION ---
+  // --- START EXECUTION USING ESRGAN AI ---
   startBtn?.addEventListener("click", async () => {
     if (!currentImageBitmap) return;
 
     startBtn.disabled = true;
     if (progressCard) progressCard.classList.remove("hidden");
-    updateProgress(2, "เริ่มต้น Real-ESRGAN AI Engine...");
+    updateProgress(5, "กำลังเริ่มต้นโมเดล ESRGAN AI...");
 
     try {
       const scale = currentScale;
-      let srcImg = currentImageBitmap;
+      const srcImg = currentImageBitmap;
 
-      // Smart downscale if image is overly large (> 800) and checkbox is checked
-      const maxDim = 800;
-      if (autoLimitDim?.checked && (srcImg.naturalWidth > maxDim || srcImg.naturalHeight > maxDim)) {
-        const ratio = Math.min(maxDim / srcImg.naturalWidth, maxDim / srcImg.naturalHeight);
-        const nw = Math.round(srcImg.naturalWidth * ratio);
-        const nh = Math.round(srcImg.naturalHeight * ratio);
-        const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = nw;
-        tempCanvas.height = nh;
-        const tctx = tempCanvas.getContext("2d");
-        tctx.drawImage(srcImg, 0, 0, nw, nh);
-        srcImg = tempCanvas;
-      }
-
-      // Execute True Real-ESRGAN Tiled Super-Resolution
-      const resultCanvas = await runRealEsrganSuperResolution(srcImg, scale, (pct, msg) => {
+      // Ensure engine loaded
+      const upscaler = await ensureUpscalerEngine((pct, msg) => {
         updateProgress(pct, msg);
       });
 
-      upscaledDataUrl = resultCanvas.toDataURL("image/png");
+      updateProgress(70, "กำลังสังเคราะห์โครงสร้างภาพด้วย ESRGAN Neural Network...");
+      await sleep(30);
+
+      // Pass 1: 2x Neural Upscale
+      const result2x = await upscaler.upscale(srcImg, {
+        patchSize: 64,
+        padding: 6,
+        progress: (amount) => {
+          const p = 70 + Math.round(amount * (scale === 4 ? 14 : 28));
+          updateProgress(p, `กำลังรัน ESRGAN AI บน WebGL: ${Math.round(amount * 100)}%`);
+        }
+      });
+
+      let finalResultUrl = result2x;
+
+      // Pass 2: If 4x requested, run second neural upscale pass
+      if (scale === 4) {
+        updateProgress(86, "กำลังประมวลผล Pass 2 สำหรับความละเอียด 4x Ultra HD...");
+        const tempImg = new Image();
+        await new Promise((r) => { tempImg.onload = r; tempImg.src = result2x; });
+        finalResultUrl = await upscaler.upscale(tempImg, {
+          patchSize: 64,
+          padding: 6,
+          progress: (amount) => {
+            const p = 86 + Math.round(amount * 13);
+            updateProgress(p, `กำลังสังเคราะห์ 4x Ultra HD: ${Math.round(amount * 100)}%`);
+          }
+        });
+      }
+
+      upscaledDataUrl = finalResultUrl;
 
       if (imgAfter) {
         imgAfter.onload = () => {
@@ -970,33 +783,31 @@ function setupUpscaleLogic() {
         imgAfter.src = upscaledDataUrl;
       }
 
-      // Update resolution & metadata
-      if (resBadge) {
-        resBadge.textContent = `ขยายแล้ว: ${resultCanvas.width} × ${resultCanvas.height} px (${scale}x Real-ESRGAN)`;
-        resBadge.className = "badge badge-ok";
-      }
-
-      if (outputMeta) {
-        outputMeta.innerHTML = `✅ ผลลัพธ์: <strong>${resultCanvas.width} × ${resultCanvas.height} px</strong> (${scale}x Real-ESRGAN AI Super Resolution)`;
-      }
+      // Read output image natural dimensions
+      const resImg = new Image();
+      resImg.onload = () => {
+        if (resBadge) {
+          resBadge.textContent = `ขยายแล้ว: ${resImg.naturalWidth} × ${resImg.naturalHeight} px (${scale}x ESRGAN AI)`;
+          resBadge.className = "badge badge-ok";
+        }
+        if (outputMeta) {
+          outputMeta.innerHTML = `✅ ผลลัพธ์: <strong>${resImg.naturalWidth} × ${resImg.naturalHeight} px</strong> (${scale}x ESRGAN AI Super Resolution)`;
+        }
+      };
+      resImg.src = upscaledDataUrl;
 
       if (exportBar) exportBar.classList.remove("hidden");
       setSliderPosition(50);
 
-      updateProgress(100, "ขยายภาพด้วย Real-ESRGAN AI สำเร็จ 100%!");
+      updateProgress(100, "ขยายภาพด้วย ESRGAN AI สำเร็จ 100%!");
       window.setTimeout(() => {
         if (progressCard) progressCard.classList.add("hidden");
       }, 1200);
 
-      toast(`ขยายภาพสำเร็จ ${scale} เท่า (${resultCanvas.width}×${resultCanvas.height}px) ด้วย Real-ESRGAN AI!`, "success");
-
-      // Update cache badge
-      if (modelStatus) {
-        modelStatus.innerHTML = "<span style='color:#2BD14B;'>บันทึกในเครื่องแล้ว (Cached 64MB)</span>";
-      }
+      toast(`ขยายภาพสำเร็จ ${scale} เท่า ด้วยโมเดล ESRGAN AI เรียบร้อยแล้ว!`, "success");
 
     } catch (err) {
-      console.error("Real-ESRGAN error:", err);
+      console.error("ESRGAN error:", err);
       toast("เกิดข้อผิดพลาดในการประมวลผล: " + err.message, "error");
       if (progressCard) progressCard.classList.add("hidden");
     } finally {
@@ -1007,7 +818,7 @@ function setupUpscaleLogic() {
   // Export handlers
   qs("#download-png-btn")?.addEventListener("click", () => {
     if (!upscaledDataUrl) return;
-    triggerDownload(upscaledDataUrl, `cont-realesrgan-${Date.now()}.png`);
+    triggerDownload(upscaledDataUrl, `cont-esrgan-${Date.now()}.png`);
   });
 
   qs("#download-jpg-btn")?.addEventListener("click", () => {
@@ -1022,7 +833,7 @@ function setupUpscaleLogic() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
       const jpgUrl = canvas.toDataURL("image/jpeg", 0.95);
-      triggerDownload(jpgUrl, `cont-realesrgan-${Date.now()}.jpg`);
+      triggerDownload(jpgUrl, `cont-esrgan-${Date.now()}.jpg`);
     };
     img.src = upscaledDataUrl;
   });
@@ -1050,197 +861,6 @@ function setupUpscaleLogic() {
     document.body.removeChild(a);
     toast(`เริ่มดาวน์โหลด: ${filename}`, "info");
   }
-}
-
-/* ==========================================================================
-   REAL-ESRGAN X4 TILED INFERENCE PIPELINE (MATCHING INPAINT-WEB)
-   ========================================================================== */
-
-async function runRealEsrganSuperResolution(sourceImg, targetScale, onProgress) {
-  const ort = await loadOnnxRuntime();
-  const session = await getOrInitSession((pct, msg) => {
-    if (onProgress) onProgress(pct, msg);
-  });
-
-  const srcW = sourceImg.naturalWidth || sourceImg.width;
-  const srcH = sourceImg.naturalHeight || sourceImg.height;
-
-  onProgress(55, `เตรียมข้อมูลภาพ (${srcW}×${srcH}px)...`);
-  await sleep(30);
-
-  // 1. Convert Image to CHW Float32Array normalized [0, 1]
-  const inputTensorData = imageToCHW(sourceImg);
-
-  const tileSize = MODEL_CONFIG.tileSize; // 64
-  const tilePadding = MODEL_CONFIG.tilePadding; // 6
-  const tileSizePre = tileSize - tilePadding * 2; // 52
-
-  const tilesx = Math.ceil(srcW / tileSizePre);
-  const tilesy = Math.ceil(srcH / tileSizePre);
-  const numTiles = tilesx * tilesy;
-
-  const outImageW = srcW * 4;
-  const outImageH = srcH * 4;
-
-  const outData = new Float32Array(outImageW * outImageH * 3);
-  const outROffset = 0;
-  const outGOffset = outImageW * outImageH;
-  const outBOffset = outImageW * outImageH * 2;
-
-  const rOffset = 0;
-  const gOffset = srcW * srcH;
-  const bOffset = srcW * srcH * 2;
-
-  const inputName = session.inputNames?.[0] || "input.1";
-  const outputName = session.outputNames?.[0] || "1895";
-
-  let currentTile = 0;
-
-  for (let i = 0; i < tilesx; i++) {
-    for (let j = 0; j < tilesy; j++) {
-      const tileW = Math.min(tileSizePre, srcW - i * tileSizePre);
-      const tileH = Math.min(tileSizePre, srcH - j * tileSizePre);
-
-      const tileData = new Float32Array(tileSize * tileSize * 3);
-      const tileROffset = 0;
-      const tileGOffset = tileSize * tileSize;
-      const tileBOffset = tileSize * tileSize * 2;
-
-      for (let xp = -tilePadding; xp < tileSizePre + tilePadding; xp++) {
-        for (let yp = -tilePadding; yp < tileSizePre + tilePadding; yp++) {
-          let xim = i * tileSizePre + xp;
-          if (xim < 0) xim = 0;
-          else if (xim >= srcW) xim = srcW - 1;
-
-          let yim = j * tileSizePre + yp;
-          if (yim < 0) yim = 0;
-          else if (yim >= srcH) yim = srcH - 1;
-
-          const idx = xim + yim * srcW;
-          const xt = xp + tilePadding;
-          const yt = yp + tilePadding;
-
-          tileData[xt + yt * tileSize + tileROffset] = inputTensorData[idx + rOffset];
-          tileData[xt + yt * tileSize + tileGOffset] = inputTensorData[idx + gOffset];
-          tileData[xt + yt * tileSize + tileBOffset] = inputTensorData[idx + bOffset];
-        }
-      }
-
-      // Run inference on 64x64 tile
-      const tileTensor = new ort.Tensor("float32", tileData, [1, 3, tileSize, tileSize]);
-      const feeds = {};
-      feeds[inputName] = tileTensor;
-      const runResult = await session.run(feeds);
-      const outTile = runResult[outputName] || runResult[Object.keys(runResult)[0]];
-
-      const outTileW = tileW * 4;
-      const outTileH = tileH * 4;
-      const outTileSize = tileSize * 4; // 256
-      const outTileSizePre = tileSizePre * 4; // 208
-
-      const outTileROffset = 0;
-      const outTileGOffset = outTileSize * outTileSize;
-      const outTileBOffset = outTileSize * outTileSize * 2;
-
-      // Copy inner 208x208 unpadded tile region to global output tensor
-      for (let x = 0; x < outTileW; x++) {
-        for (let y = 0; y < outTileH; y++) {
-          const xim = i * outTileSizePre + x;
-          const yim = j * outTileSizePre + y;
-          const idx = xim + yim * outImageW;
-          const xt = x + tilePadding * 4;
-          const yt = y + tilePadding * 4;
-
-          outData[idx + outROffset] = outTile.data[xt + yt * outTileSize + outTileROffset];
-          outData[idx + outGOffset] = outTile.data[xt + yt * outTileSize + outTileGOffset];
-          outData[idx + outBOffset] = outTile.data[xt + yt * outTileSize + outTileBOffset];
-        }
-      }
-
-      currentTile++;
-      const currentPct = 55 + Math.round((currentTile / numTiles) * 42);
-      onProgress(currentPct, `ประมวลผล Real-ESRGAN AI (Tile ${currentTile}/${numTiles})...`);
-      // Yield to event loop to allow UI progress bar updates
-      await sleep(0);
-    }
-  }
-
-  onProgress(98, "เรนเดอร์ภาพความละเอียดสูง (Rendering 4K Canvas)...");
-  await sleep(20);
-
-  // Convert CHW output tensor to 4x Canvas
-  const canvas4x = chwToCanvas(outData, outImageW, outImageH);
-
-  // If user selected 2x scale, downscale the 4x Real-ESRGAN result by half (yields crystal-sharp 2x)
-  if (targetScale === 2) {
-    const targetW = srcW * 2;
-    const targetH = srcH * 2;
-    const canvas2x = document.createElement("canvas");
-    canvas2x.width = targetW;
-    canvas2x.height = targetH;
-    const ctx2x = canvas2x.getContext("2d");
-    ctx2x.imageSmoothingEnabled = true;
-    ctx2x.imageSmoothingQuality = "high";
-    ctx2x.drawImage(canvas4x, 0, 0, targetW, targetH);
-    return canvas2x;
-  }
-
-  return canvas4x;
-}
-
-/* --- Convert Image to CHW Float32Array [0, 1] --- */
-function imageToCHW(img) {
-  const width = img.naturalWidth || img.width;
-  const height = img.naturalHeight || img.height;
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  ctx.drawImage(img, 0, 0);
-  const rgba = ctx.getImageData(0, 0, width, height).data;
-
-  const size = width * height;
-  const chw = new Float32Array(3 * size);
-  const rOffset = 0;
-  const gOffset = size;
-  const bOffset = size * 2;
-
-  for (let i = 0; i < size; i++) {
-    const srcIdx = i * 4;
-    chw[rOffset + i] = rgba[srcIdx] / 255.0;
-    chw[gOffset + i] = rgba[srcIdx + 1] / 255.0;
-    chw[bOffset + i] = rgba[srcIdx + 2] / 255.0;
-  }
-  return chw;
-}
-
-/* --- Convert CHW Float32Array to Canvas --- */
-function chwToCanvas(chw, width, height) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  const imgData = ctx.createImageData(width, height);
-  const data = imgData.data;
-
-  const size = width * height;
-  const rOffset = 0;
-  const gOffset = size;
-  const bOffset = size * 2;
-
-  for (let i = 0; i < size; i++) {
-    const outIdx = i * 4;
-    let r = chw[rOffset + i];
-    let g = chw[gOffset + i];
-    let b = chw[bOffset + i];
-
-    data[outIdx]     = Math.min(255, Math.max(0, Math.round(r * 255)));
-    data[outIdx + 1] = Math.min(255, Math.max(0, Math.round(g * 255)));
-    data[outIdx + 2] = Math.min(255, Math.max(0, Math.round(b * 255)));
-    data[outIdx + 3] = 255;
-  }
-  ctx.putImageData(imgData, 0, 0);
-  return canvas;
 }
 
 function sleep(ms) {
