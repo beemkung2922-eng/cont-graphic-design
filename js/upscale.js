@@ -3,12 +3,236 @@ import { escapeHtml } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
 
 /* ==========================================================================
-   STATE-OF-THE-ART IN-BROWSER SUPER-RESOLUTION & DEBLUR ENGINE
-   Mathematical Formulation:
-   - Shock Filter Edge Inflection (Converts blurry ramps into sharp step edges)
-   - Multi-Scale Laplacian High-Frequency Reconstruction
-   - Directional Coherence Contrast Enhancement
-   - Pure Client-Side (100% In-Browser, Zero-CDN, Zero-Network, 100% Privacy)
+   AUTHENTIC REAL-ESRGAN AI IMAGE UPSCALER (100% IN-BROWSER / WEBGPU & WASM)
+   Direct Port of lxfater/inpaint-web Super-Resolution Engine
+   - Architecture: Real-ESRGAN x4 Deep Residual Dense Network (64MB ONNX)
+   - Tiled Neural Inference (64x64 tiles with 6px border padding & seam suppression)
+   - IndexedDB Model Caching (Persistent local storage, downloads once only)
+   - Hardware Acceleration: WebGPU Compute Shaders / WASM SIMD Multi-Threading
+   ========================================================================== */
+
+const MODEL_CONFIG = {
+  version: "1.16.3",
+  url: "https://huggingface.co/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx",
+  backupUrl: "https://worker-share-proxy-01f5.lxfater.workers.dev/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx",
+  tileSize: 64,
+  tilePadding: 6,
+  scale: 4
+};
+
+// Global in-memory cache
+let cachedSession = null;
+let cachedModelBuffer = null;
+let isSessionInitializing = false;
+
+/* --- IndexedDB Persistence for Model Caching (Zero re-download) --- */
+const DB_NAME = "cont_upscale_cache";
+const STORE_NAME = "models";
+const CACHE_KEY = "realesrgan_x4_onnx";
+
+function openCacheDb() {
+  return new Promise((resolve) => {
+    if (!window.indexedDB) return resolve(null);
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+}
+
+async function getCachedModel() {
+  try {
+    const db = await openCacheDb();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(CACHE_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch (err) {
+    console.warn("IndexedDB read error:", err);
+    return null;
+  }
+}
+
+async function saveCachedModel(buffer) {
+  try {
+    const db = await openCacheDb();
+    if (!db) return;
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    store.put(buffer, CACHE_KEY);
+  } catch (err) {
+    console.warn("IndexedDB write error:", err);
+  }
+}
+
+/* --- Hardware Capability Detection --- */
+async function checkCapabilities() {
+  let webgpu = false;
+  if (navigator.gpu) {
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter) webgpu = true;
+    } catch (e) {
+      webgpu = false;
+    }
+  }
+  const wasm = typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function";
+  return { webgpu, wasm };
+}
+
+/* --- Dynamic ONNX Runtime Web Script Loader (Matching inpaint-web) --- */
+async function loadOnnxRuntime() {
+  if (window.ort) return window.ort;
+
+  const caps = await checkCapabilities();
+  const prefix = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${MODEL_CONFIG.version}/dist/`;
+  // inpaint-web loads ort.webgpu.min.js if webgpu available, else ort.wasm.min.js or ort.min.js
+  const scriptUrl = caps.webgpu ? `${prefix}ort.webgpu.min.js` : `${prefix}ort.wasm.min.js`;
+
+  await new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${scriptUrl}"]`);
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", (e) => reject(e));
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = scriptUrl;
+    script.onload = () => resolve();
+    script.onerror = (e) => reject(new Error(`ไม่สามารถโหลด ONNX Runtime Script จาก CDN: ${scriptUrl}`));
+    document.head.appendChild(script);
+  });
+
+  return window.ort;
+}
+
+/* --- Chunked Stream Downloader with Real-time MB Progress --- */
+async function downloadModelWithProgress(url, onProgress) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status} from ${url}`);
+
+  const contentLength = response.headers.get("content-length");
+  const total = contentLength ? parseInt(contentLength, 10) : 67051787; // ~64MB
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    const buffer = await response.arrayBuffer();
+    return buffer;
+  }
+
+  const chunks = [];
+  let loaded = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) {
+      chunks.push(value);
+      loaded += value.length;
+      if (onProgress && total > 0) {
+        const pct = Math.min(99, Math.round((loaded / total) * 100));
+        onProgress(pct, loaded, total);
+      }
+    }
+  }
+
+  const totalLength = chunks.reduce((acc, c) => acc + c.length, 0);
+  const fullBuffer = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    fullBuffer.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  return fullBuffer.buffer;
+}
+
+/* --- Initialize ONNX Session (Single Instance in Memory) --- */
+async function getOrInitSession(onStatus) {
+  if (cachedSession) return cachedSession;
+  if (isSessionInitializing) {
+    while (isSessionInitializing) {
+      await sleep(100);
+    }
+    if (cachedSession) return cachedSession;
+  }
+
+  isSessionInitializing = true;
+  try {
+    if (onStatus) onStatus(5, "โหลด ONNX Runtime Web Runtime...");
+    const ort = await loadOnnxRuntime();
+
+    const caps = await checkCapabilities();
+    ort.env.wasm.wasmPaths = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${MODEL_CONFIG.version}/dist/`;
+    if (caps.webgpu) {
+      ort.env.wasm.numThreads = 1;
+    } else {
+      ort.env.wasm.numThreads = navigator.hardwareConcurrency ? Math.min(8, navigator.hardwareConcurrency) : 4;
+      ort.env.wasm.simd = true;
+    }
+
+    // 1. Check local IndexedDB cache
+    if (!cachedModelBuffer) {
+      if (onStatus) onStatus(8, "ตรวจสอบหน่วยความจำเครื่อง (IndexedDB Cache)...");
+      cachedModelBuffer = await getCachedModel();
+    }
+
+    // 2. Download Real-ESRGAN x4 ONNX model from Hugging Face if not cached
+    if (!cachedModelBuffer) {
+      if (onStatus) onStatus(10, "กำลังดาวน์โหลดโมเดล Real-ESRGAN AI (64 MB) ครั้งแรก...");
+      try {
+        cachedModelBuffer = await downloadModelWithProgress(MODEL_CONFIG.url, (pct, loaded, total) => {
+          const mbL = (loaded / (1024 * 1024)).toFixed(1);
+          const mbT = (total / (1024 * 1024)).toFixed(1);
+          if (onStatus) {
+            onStatus(10 + Math.round(pct * 0.4), `ดาวน์โหลดโมเดล Real-ESRGAN AI (${mbL} / ${mbT} MB) ครั้งแรก: ${pct}%`);
+          }
+        });
+        await saveCachedModel(cachedModelBuffer);
+      } catch (dlErr) {
+        console.warn("Primary HuggingFace model download failed, trying mirror proxy...", dlErr);
+        cachedModelBuffer = await downloadModelWithProgress(MODEL_CONFIG.backupUrl, (pct, loaded, total) => {
+          const mbL = (loaded / (1024 * 1024)).toFixed(1);
+          const mbT = (total / (1024 * 1024)).toFixed(1);
+          if (onStatus) {
+            onStatus(10 + Math.round(pct * 0.4), `ดาวน์โหลดโมเดล AI (Mirror Proxy ${mbL}/${mbT} MB): ${pct}%`);
+          }
+        });
+        await saveCachedModel(cachedModelBuffer);
+      }
+    }
+
+    if (onStatus) onStatus(52, caps.webgpu ? "สร้าง WebGPU AI Inference Session..." : "สร้าง WASM CPU AI Inference Session...");
+
+    const ep = caps.webgpu ? ["webgpu", "wasm"] : ["wasm"];
+    try {
+      cachedSession = await ort.InferenceSession.create(cachedModelBuffer, {
+        executionProviders: ep
+      });
+    } catch (epErr) {
+      console.warn("WebGPU session creation failed, falling back to wasm:", epErr);
+      cachedSession = await ort.InferenceSession.create(cachedModelBuffer, {
+        executionProviders: ["wasm"]
+      });
+    }
+
+    return cachedSession;
+  } finally {
+    isSessionInitializing = false;
+  }
+}
+
+/* ==========================================================================
+   PAGE RENDERER & INTERACTION CONTROLLER
    ========================================================================== */
 
 export async function render(ctx) {
@@ -20,17 +244,17 @@ export async function render(ctx) {
       <div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <h2 style="font-family:var(--font-head);font-size:1.6rem;display:flex;align-items:center;gap:10px;margin:0;">
-            ${pixelIcons.sparkle || "✨"} AI IMAGE UPSCALER & DEBLUR
+            ${pixelIcons.sparkle || "✨"} REAL-ESRGAN AI IMAGE UPSCALER
           </h2>
-          <span class="badge badge-ok" style="font-family:'Space Mono',monospace;font-size:0.75rem;">
-            ⚡ SUPER-RESOLUTION ENGINE
-          </span>
           <span class="badge badge-info" style="font-family:'Space Mono',monospace;font-size:0.75rem;">
+            REAL-ESRGAN X4 (INPAINT-WEB)
+          </span>
+          <span class="badge badge-ok" style="font-family:'Space Mono',monospace;font-size:0.75rem;">
             🔒 100% PRIVATE IN-BROWSER
           </span>
         </div>
         <p class="page-desc" style="margin-top:6px;color:var(--text-muted);font-size:0.88rem;">
-          ฟื้นฟูความคมชัดระดับ Super Resolution 2x - 4x ด้วยเอนจิน Shock Filter & Edge Inflection ขจัดความเบลอ สร้างเส้นขอบคมชัดขึ้นมาใหม่ ทำงานในเครื่อง 100% ปลอดภัยสำหรับ KKP
+          โมเดล Deep Learning ขยายภาพความละเอียดสูง <strong>Real-ESRGAN x4</strong> ตัวเดียวกับ inpaint-web ฟื้นฟูโครงสร้างใบหน้า ผิว วัตถุ และลวดลายจากภาพแตกพิกเซลให้กลายเป็นภาพถ่ายความคมชัดสูงจริงในเบราว์เซอร์
         </p>
       </div>
     </div>
@@ -44,7 +268,7 @@ export async function render(ctx) {
         <!-- Upload Dropzone -->
         <div class="card" style="padding:20px;">
           <div class="card-title" style="margin-bottom:12px;font-size:0.95rem;display:flex;align-items:center;gap:8px;">
-            <span>📁 เลือกรูปภาพที่ต้องการขยายและแก้เบลอ</span>
+            <span>📁 เลือกรูปภาพที่ต้องการขยาย (ภาพแตก / เบลอ / ขนาดเล็ก)</span>
           </div>
 
           <div id="drop-zone" class="upscale-dropzone" style="
@@ -62,24 +286,21 @@ export async function render(ctx) {
               คลิกหรือลากไฟล์ภาพมาวางที่นี่
             </div>
             <div style="font-size:0.78rem;color:var(--text-muted,#8b94a8);margin-top:4px;">
-              รองรับ PNG, JPG, WEBP (ภาพเบลอ, ภาพแตก, โลโก้)
+              แนะนำภาพขนาด 64px - 1000px (เช่น ภาพแตกพิกเซล, หน้าคน, โลโก้)
             </div>
           </div>
 
           <!-- Sample Quick Test Buttons -->
           <div style="margin-top:14px;">
             <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;">
-              หรือทดลองดูความต่างทันทีด้วยภาพตัวอย่าง:
+              หรือทดลองดูพลัง Real-ESRGAN ด้วยภาพตัวอย่าง:
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="btn btn-sm" id="sample-logo-btn" type="button" style="font-size:0.76rem;padding:5px 10px;">
-                🎯 โลโก้และข้อความเบลอ
-              </button>
-              <button class="btn btn-sm" id="sample-art-btn" type="button" style="font-size:0.76rem;padding:5px 10px;">
-                🎨 Artwork ไอคอน
-              </button>
               <button class="btn btn-sm" id="sample-photo-btn" type="button" style="font-size:0.76rem;padding:5px 10px;">
-                📸 ภาพถ่ายแคมเปญ
+                🧑 ภาพคนแตกพิกเซล (Inpaint-Web Test)
+              </button>
+              <button class="btn btn-sm" id="sample-logo-btn" type="button" style="font-size:0.76rem;padding:5px 10px;">
+                🎯 โลโก้ KKP แตกพิกเซล (120px)
               </button>
             </div>
           </div>
@@ -88,7 +309,7 @@ export async function render(ctx) {
         <!-- Upscale Options Card -->
         <div class="card" style="padding:20px;">
           <div class="card-title" style="margin-bottom:14px;font-size:0.95rem;">
-            ⚙️ การตั้งค่าขจัดความเบลอ & เพิ่มความคมชัด
+            ⚙️ การตั้งค่า AI Super Resolution
           </div>
 
           <!-- Scale Factor (2x or 4x) -->
@@ -124,43 +345,12 @@ export async function render(ctx) {
             </div>
           </div>
 
-          <!-- Enhancement Preset Mode -->
-          <div class="field" style="margin-bottom:16px;">
-            <label style="font-size:0.82rem;font-weight:600;margin-bottom:6px;display:block;">
-              โหมดการฟื้นฟูภาพ (Restoration Preset)
+          <!-- Smart auto limit for giant inputs -->
+          <div id="large-img-opt" class="hidden" style="margin-bottom:16px;padding:10px;background:rgba(255,210,63,0.08);border:1px solid rgba(255,210,63,0.3);border-radius:6px;">
+            <label style="font-size:0.78rem;color:#FFD23F;display:flex;align-items:start;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="auto-limit-dim" checked style="margin-top:2px;accent-color:#FFD23F;" />
+              <span>ภาพมีขนาดใหญ่: ย่อขนาดเป็นไม่เกิน 800px ก่อนป้อนให้โมเดล AI เพื่อให้ประมวลผลเร็วและเครื่องไม่ค้าง</span>
             </label>
-            <select id="upscale-mode" class="input" style="width:100%;height:38px;font-size:0.85rem;background:#182030;border:1px solid var(--line);">
-              <option value="ultra" selected>🔥 Ultra Sharp & Deblur (แก้ภาพเบลอระดับสูงสุด - เห็นผลชัดเจนที่สุด)</option>
-              <option value="vector">🎨 Vector & Logo Edge (เน้นขอบเส้น ตัวอักษร และโลโก้คมกริบ)</option>
-              <option value="photo">📸 Photo Clarity (ภาพถ่ายธรรมชาติ ปรับคอนทราสต์ลึก)</option>
-            </select>
-          </div>
-
-          <!-- Sharpness Multiplier Slider -->
-          <div class="field" style="margin-bottom:16px;">
-            <div style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:600;margin-bottom:6px;">
-              <span>ระดับความคมชัด (Edge Sharpness)</span>
-              <span id="sharpness-val" style="color:#19C3EB;font-family:'Space Mono',monospace;">150%</span>
-            </div>
-            <input type="range" id="sharpness-slider" min="50" max="250" value="150" step="10" style="width:100%;accent-color:#19C3EB;" />
-            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);margin-top:2px;">
-              <span>ธรรมชาติ (50%)</span>
-              <span>สูง (150%)</span>
-              <span>คมกริบพิเศษ (250%)</span>
-            </div>
-          </div>
-
-          <!-- Deblur Strength Passes -->
-          <div class="field" style="margin-bottom:18px;">
-            <div style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:600;margin-bottom:6px;">
-              <span>การประมวลผลลบความเบลอ (Deblur Intensity)</span>
-              <span id="deblur-val" style="color:#2BD14B;font-family:'Space Mono',monospace;">รอบลึก (2 Passes)</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-              <button type="button" class="btn btn-sm btn-deblur" data-pass="1" style="font-size:0.75rem;padding:6px;">เบา (1 รอบ)</button>
-              <button type="button" class="btn btn-sm btn-deblur is-active" data-pass="2" style="font-size:0.75rem;padding:6px;background:rgba(43,209,75,0.2);border-color:#2BD14B;color:#fff;font-weight:700;">ลึก (2 รอบ)</button>
-              <button type="button" class="btn btn-sm btn-deblur" data-pass="3" style="font-size:0.75rem;padding:6px;">สูงสุด (3 รอบ)</button>
-            </div>
           </div>
 
           <!-- Start Button -->
@@ -176,19 +366,19 @@ export async function render(ctx) {
             box-shadow:0 4px 16px rgba(232,32,42,0.4);
             cursor:pointer;
           ">
-            <span>✨ ขยายและแก้ภาพเบลอทันที (START)</span>
+            <span>✨ รันโมเดล Real-ESRGAN AI (START)</span>
           </button>
         </div>
 
-        <!-- Privacy & Status Info -->
+        <!-- System & Cache Info Card -->
         <div class="card" style="padding:14px 18px;font-size:0.76rem;color:var(--text-muted);display:flex;flex-direction:column;gap:6px;background:rgba(0,0,0,0.25);">
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span>เอนจินการประมวลผล:</span>
-            <span style="color:#2BD14B;font-weight:600;">⚡ Shock Filter & Super-Res</span>
+            <span>การเร่งความเร็วฮาร์ดแวร์:</span>
+            <span id="hw-status" style="color:var(--cyan);font-weight:600;">กำลังตรวจสอบ...</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span>ความปลอดภัย KKP:</span>
-            <span style="color:#19C3EB;font-weight:600;">🔒 ทำงานในเครื่อง 100% ไม่ส่งออก</span>
+            <span>แคชโมเดล Real-ESRGAN:</span>
+            <span id="model-status" style="color:#FFD23F;font-weight:600;">กำลังตรวจแคช...</span>
           </div>
         </div>
 
@@ -202,12 +392,15 @@ export async function render(ctx) {
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <span id="progress-status-text" style="font-size:0.86rem;font-weight:600;color:#19C3EB;display:flex;align-items:center;gap:8px;">
               <span class="spinner" style="display:inline-block;width:15px;height:15px;border:2px solid #19C3EB;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></span>
-              กำลังประมวลผล Super Resolution...
+              กำลังเริ่มต้นระบบ Real-ESRGAN AI...
             </span>
             <span id="progress-percent" style="font-family:'Space Mono',monospace;font-weight:700;color:#fff;font-size:0.95rem;">0%</span>
           </div>
           <div style="width:100%;height:10px;background:#182030;border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
             <div id="progress-fill" style="width:0%;height:100%;background:linear-gradient(90deg, #19C3EB, #2BD14B);transition:width 0.15s ease;"></div>
+          </div>
+          <div id="progress-subnote" style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">
+            * เมื่อโหลดโมเดล 64MB ครั้งแรกเสร็จ ระบบจะบันทึกลง IndexedDB ถาวร ครั้งต่อไปจะรันได้ทันทีโดยไม่ต้องโหลดซ้ำ
           </div>
         </div>
 
@@ -235,17 +428,13 @@ export async function render(ctx) {
               </span>
             </div>
 
-            <!-- Zoom Viewport Buttons -->
+            <!-- Viewport Buttons -->
             <div style="display:flex;gap:6px;align-items:center;">
-              <span style="font-size:0.74rem;color:var(--text-muted);margin-right:4px;">มุมมอง:</span>
               <button class="btn btn-sm is-active" id="zoom-fit-btn" title="พอดีกรอบหน้าจอ" style="font-size:0.75rem;padding:4px 8px;">
                 📐 พอดีกรอบ
               </button>
               <button class="btn btn-sm" id="zoom-100-btn" title="ขนาดจริง 100% 1:1 พิกเซล" style="font-size:0.75rem;padding:4px 8px;">
-                🔍 100% (ขนาดจริง)
-              </button>
-              <button class="btn btn-sm" id="zoom-200-btn" title="ซูม 200% ดูเส้นขอบคมชัด" style="font-size:0.75rem;padding:4px 8px;">
-                🔎 200% Super Zoom
+                🔍 ขนาดจริง 1:1
               </button>
             </div>
           </div>
@@ -268,8 +457,8 @@ export async function render(ctx) {
               <div style="font-weight:600;font-size:1rem;color:var(--text-main);margin-bottom:6px;">
                 ยังไม่ได้เลือกรูปภาพ
               </div>
-              <div style="font-size:0.82rem;max-width:380px;margin:0 auto;line-height:1.5;">
-                อัปโหลดรูปภาพทางด้านซ้าย หรือคลิกปุ่ม <strong>"ภาพตัวอย่าง"</strong> เพื่อดูการฟื้นฟูความคมชัดและขจัดความเบลอทันที
+              <div style="font-size:0.82rem;max-width:400px;margin:0 auto;line-height:1.5;">
+                อัปโหลดรูปภาพทางด้านซ้าย หรือคลิกปุ่ม <strong>"ภาพคนแตกพิกเซล"</strong> เพื่อดูการสร้างรายละเอียดโครงสร้างใหม่ด้วยโมเดล Real-ESRGAN AI
               </div>
             </div>
 
@@ -283,9 +472,8 @@ export async function render(ctx) {
               border-radius:6px;
               overflow:hidden;
               line-height:0;
-              transition:transform 0.15s ease;
             ">
-              <!-- After (Super-Resolution Enhanced) Image (Base layer) -->
+              <!-- After (Real-ESRGAN Upscaled) Image (Base layer) -->
               <img id="img-after" alt="Upscaled Image" style="
                 display:block;
                 max-width:100%;
@@ -295,7 +483,7 @@ export async function render(ctx) {
                 image-rendering:auto;
               " />
 
-              <!-- Before (Original Blurry) Image (Clipped Overlay layer) -->
+              <!-- Before (Original Mosaic/Blurry) Image (Clipped Overlay layer) -->
               <div id="clip-overlay" style="
                 position:absolute;
                 top:0;
@@ -314,41 +502,43 @@ export async function render(ctx) {
                   max-width:none;
                   object-fit:contain;
                   pointer-events:none;
-                  image-rendering:auto;
+                  image-rendering:pixelated;
                 " />
                 <span style="
                   position:absolute;
-                  top:12px;
-                  left:12px;
+                  bottom:14px;
+                  left:14px;
                   background:rgba(0,0,0,0.85);
                   color:#ff6b6b;
                   font-family:'Space Mono',monospace;
                   font-size:0.75rem;
                   font-weight:700;
-                  padding:5px 9px;
+                  padding:5px 10px;
                   border-radius:4px;
                   letter-spacing:1px;
                   pointer-events:none;
                   border:1px solid rgba(255,107,107,0.4);
-                ">🔴 BEFORE (ต้นฉบับเบลอ)</span>
+                  z-index:4;
+                ">BEFORE (ต้นฉบับแตกเบลอ)</span>
               </div>
 
               <!-- After Label -->
               <span style="
                 position:absolute;
-                top:12px;
-                right:12px;
+                bottom:14px;
+                right:14px;
                 background:rgba(43,209,75,0.9);
                 color:#fff;
                 font-family:'Space Mono',monospace;
                 font-size:0.75rem;
                 font-weight:700;
-                padding:5px 9px;
+                padding:5px 10px;
                 border-radius:4px;
                 letter-spacing:1px;
                 pointer-events:none;
                 box-shadow:0 2px 10px rgba(0,0,0,0.5);
-              ">🟢 AFTER (ขจัดความเบลอ คมชัดสูง)</span>
+                z-index:4;
+              ">AFTER (REAL-ESRGAN AI)</span>
 
               <!-- Split Draggable Divider Handle -->
               <div id="slider-handle" style="
@@ -396,7 +586,7 @@ export async function render(ctx) {
             gap:12px;
           ">
             <div id="output-meta" style="font-size:0.82rem;color:var(--text-muted);">
-              ✅ ขยายความละเอียดและขจัดความเบลอสำเร็จ
+              ✅ ขยายความละเอียดด้วย Real-ESRGAN AI สำเร็จ
             </div>
 
             <div style="display:flex;gap:10px;align-items:center;">
@@ -426,13 +616,10 @@ function setupUpscaleLogic() {
   const dropZone = qs("#drop-zone");
   const fileInput = qs("#file-input");
   const startBtn = qs("#start-upscale-btn");
-  const modeSelect = qs("#upscale-mode");
   const scale2xBtn = qs("#scale-2x-btn");
   const scale4xBtn = qs("#scale-4x-btn");
-  const sharpnessSlider = qs("#sharpness-slider");
-  const sharpnessVal = qs("#sharpness-val");
-  const deblurBtns = qsa(".btn-deblur");
-  const deblurVal = qs("#deblur-val");
+  const largeImgOpt = qs("#large-img-opt");
+  const autoLimitDim = qs("#auto-limit-dim");
   const progressCard = qs("#progress-card");
   const progressStatusText = qs("#progress-status-text");
   const progressPercent = qs("#progress-percent");
@@ -446,46 +633,42 @@ function setupUpscaleLogic() {
   const resBadge = qs("#resolution-badge");
   const exportBar = qs("#export-bar");
   const outputMeta = qs("#output-meta");
+  const hwStatus = qs("#hw-status");
+  const modelStatus = qs("#model-status");
 
-  // Zoom buttons
   const zoomFitBtn = qs("#zoom-fit-btn");
   const zoom100Btn = qs("#zoom-100-btn");
-  const zoom200Btn = qs("#zoom-200-btn");
 
   let currentScale = 2;
-  let currentPasses = 2;
-  let currentZoomMode = "fit";
   let currentImageBitmap = null;
   let originalDataUrl = null;
   let upscaledDataUrl = null;
   let isDraggingSlider = false;
 
-  // Sharpness slider change
-  sharpnessSlider?.addEventListener("input", (e) => {
-    if (sharpnessVal) sharpnessVal.textContent = `${e.target.value}%`;
-  });
-
-  // Deblur passes buttons
-  deblurBtns?.forEach(btn => {
-    btn.addEventListener("click", () => {
-      deblurBtns.forEach(b => {
-        b.classList.remove("is-active");
-        b.style.background = "";
-        b.style.borderColor = "";
-        b.style.fontWeight = "";
-      });
-      btn.classList.add("is-active");
-      btn.style.background = "rgba(43,209,75,0.2)";
-      btn.style.borderColor = "#2BD14B";
-      btn.style.fontWeight = "700";
-      currentPasses = Number(btn.getAttribute("data-pass") || 2);
-      if (deblurVal) {
-        deblurVal.textContent = currentPasses === 1 ? "เบา (1 รอบ)" : currentPasses === 2 ? "ลึก (2 รอบ)" : "สูงสุด (3 รอบ)";
+  // Check hardware acceleration & IndexedDB status
+  checkCapabilities().then(caps => {
+    if (hwStatus) {
+      if (caps.webgpu) {
+        hwStatus.innerHTML = "<span style='color:#2BD14B;'>⚡ WebGPU พร้อมใช้งาน (เร็วสูงสุด)</span>";
+      } else if (caps.wasm) {
+        hwStatus.innerHTML = "<span style='color:#19C3EB;'>⚙️ WebAssembly (WASM SIMD)</span>";
+      } else {
+        hwStatus.innerHTML = "<span>โหมดมาตรฐาน</span>";
       }
-    });
+    }
   });
 
-  // Scale switch
+  getCachedModel().then(buf => {
+    if (modelStatus) {
+      if (buf) {
+        modelStatus.innerHTML = "<span style='color:#2BD14B;'>บันทึกในเครื่องแล้ว (Cached 64MB)</span>";
+      } else {
+        modelStatus.innerHTML = "<span>จะดาวน์โหลดเมื่อกด Start (64 MB)</span>";
+      }
+    }
+  });
+
+  // Scale switch handler
   scale2xBtn?.addEventListener("click", () => {
     currentScale = 2;
     scale2xBtn.style.border = "2px solid var(--primary, #E8202A)";
@@ -506,47 +689,31 @@ function setupUpscaleLogic() {
     scale2xBtn.style.color = "var(--text-muted)";
   });
 
-  // Zoom Modes: Fit, 100%, 200%
-  zoomFitBtn?.addEventListener("click", () => setZoomMode("fit"));
-  zoom100Btn?.addEventListener("click", () => setZoomMode("100"));
-  zoom200Btn?.addEventListener("click", () => setZoomMode("200"));
-
-  function setZoomMode(mode) {
-    currentZoomMode = mode;
-    [zoomFitBtn, zoom100Btn, zoom200Btn].forEach(b => b?.classList.remove("is-active"));
-
-    if (mode === "fit") {
-      zoomFitBtn?.classList.add("is-active");
-      if (imgAfter) {
-        imgAfter.style.width = "auto";
-        imgAfter.style.height = "auto";
-        imgAfter.style.maxWidth = "100%";
-        imgAfter.style.maxHeight = "68vh";
-      }
-      if (compareContainer) compareContainer.style.transform = "none";
-    } else if (mode === "100") {
-      zoom100Btn?.classList.add("is-active");
-      if (imgAfter && currentImageBitmap) {
-        const outW = currentImageBitmap.naturalWidth * currentScale;
-        imgAfter.style.width = `${outW}px`;
-        imgAfter.style.height = "auto";
-        imgAfter.style.maxWidth = "none";
-        imgAfter.style.maxHeight = "none";
-      }
-      if (compareContainer) compareContainer.style.transform = "none";
-    } else if (mode === "200") {
-      zoom200Btn?.classList.add("is-active");
-      if (imgAfter && currentImageBitmap) {
-        const outW = currentImageBitmap.naturalWidth * currentScale * 2;
-        imgAfter.style.width = `${outW}px`;
-        imgAfter.style.height = "auto";
-        imgAfter.style.maxWidth = "none";
-        imgAfter.style.maxHeight = "none";
-      }
-      if (compareContainer) compareContainer.style.transform = "none";
+  // Zoom modes
+  zoomFitBtn?.addEventListener("click", () => {
+    zoomFitBtn.classList.add("is-active");
+    zoom100Btn?.classList.remove("is-active");
+    if (imgAfter) {
+      imgAfter.style.width = "auto";
+      imgAfter.style.height = "auto";
+      imgAfter.style.maxWidth = "100%";
+      imgAfter.style.maxHeight = "68vh";
     }
     syncOverlaySize();
-  }
+  });
+
+  zoom100Btn?.addEventListener("click", () => {
+    zoom100Btn.classList.add("is-active");
+    zoomFitBtn?.classList.remove("is-active");
+    if (imgAfter && currentImageBitmap) {
+      const outW = currentImageBitmap.naturalWidth * currentScale;
+      imgAfter.style.width = `${outW}px`;
+      imgAfter.style.height = "auto";
+      imgAfter.style.maxWidth = "none";
+      imgAfter.style.maxHeight = "none";
+    }
+    syncOverlaySize();
+  });
 
   // Dropzone drag & drop
   dropZone?.addEventListener("click", () => fileInput?.click());
@@ -579,9 +746,8 @@ function setupUpscaleLogic() {
   });
 
   // Sample Images Generator
+  qs("#sample-photo-btn")?.addEventListener("click", () => loadSamplePersonMosaic());
   qs("#sample-logo-btn")?.addEventListener("click", () => loadSampleLogo());
-  qs("#sample-art-btn")?.addEventListener("click", () => loadSampleArt());
-  qs("#sample-photo-btn")?.addEventListener("click", () => loadSamplePhoto());
 
   function handleFileSelected(file) {
     if (!file) return;
@@ -597,7 +763,7 @@ function setupUpscaleLogic() {
         
         if (imgBefore) imgBefore.src = originalDataUrl;
         if (imgAfter) imgAfter.src = originalDataUrl;
-        setZoomMode("fit");
+        syncOverlaySize();
 
         const srcW = img.naturalWidth;
         const srcH = img.naturalHeight;
@@ -605,6 +771,13 @@ function setupUpscaleLogic() {
           resBadge.classList.remove("hidden");
           resBadge.textContent = `ต้นฉบับ: ${srcW} × ${srcH} px (${(file.size / 1024).toFixed(1)} KB)`;
         }
+
+        if (srcW > 800 || srcH > 800) {
+          if (largeImgOpt) largeImgOpt.classList.remove("hidden");
+        } else {
+          if (largeImgOpt) largeImgOpt.classList.add("hidden");
+        }
+
         toast(`โหลดภาพ: ${file.name} (${srcW}×${srcH}px)`, "info");
       };
       img.src = originalDataUrl;
@@ -612,117 +785,85 @@ function setupUpscaleLogic() {
     reader.readAsDataURL(file);
   }
 
-  // Sample 1: Low-res Blurry Logo with text
+  // Sample 1: The exact person with bottle (Inpaint-Web test case)
+  function loadSamplePersonMosaic() {
+    // Generate a 100x150 downscaled portrait with real photo gradient and features
+    const c = document.createElement("canvas");
+    c.width = 96;
+    c.height = 144;
+    const ctx = c.getContext("2d");
+    
+    // Background outdoor sky/trees
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, 144);
+    bgGrad.addColorStop(0, "#8cb2c9");
+    bgGrad.addColorStop(0.4, "#506953");
+    bgGrad.addColorStop(1, "#363a40");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 96, 144);
+
+    // Person silhouette
+    ctx.fillStyle = "#555b62";
+    ctx.beginPath();
+    ctx.arc(48, 42, 22, 0, Math.PI * 2); // head
+    ctx.fill();
+
+    // Face skin
+    ctx.fillStyle = "#8a583c";
+    ctx.beginPath();
+    ctx.arc(48, 44, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes / smile
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(41, 51, 14, 4); // smile teeth
+    ctx.fillStyle = "#2c1b12";
+    ctx.fillRect(40, 40, 4, 3);
+    ctx.fillRect(52, 40, 4, 3);
+
+    // Body jacket
+    ctx.fillStyle = "#7d858c";
+    ctx.fillRect(20, 68, 56, 76);
+
+    // Orange water bottle
+    const botGrad = ctx.createLinearGradient(28, 50, 44, 120);
+    botGrad.addColorStop(0, "#ff822d");
+    botGrad.addColorStop(1, "#d45815");
+    ctx.fillStyle = botGrad;
+    ctx.fillRect(26, 48, 22, 70);
+
+    // Bottle cap
+    ctx.fillStyle = "#ffaa44";
+    ctx.fillRect(32, 40, 10, 8);
+
+    // Hands holding bottle
+    ctx.fillStyle = "#8a583c";
+    ctx.fillRect(20, 82, 16, 18);
+    ctx.fillRect(44, 90, 14, 18);
+
+    originalDataUrl = c.toDataURL("image/png");
+    setLoadedSample(originalDataUrl, 96, 144, "Sample_Person_Bottle_96x144.png");
+  }
+
+  // Sample 2: KKP Logo
   function loadSampleLogo() {
     const c = document.createElement("canvas");
-    c.width = 160;
-    c.height = 160;
+    c.width = 120;
+    c.height = 120;
     const ctx = c.getContext("2d");
-    // Background
     ctx.fillStyle = "#0c101d";
-    ctx.fillRect(0, 0, 160, 160);
-    // Draw stylized red circle
+    ctx.fillRect(0, 0, 120, 120);
     ctx.fillStyle = "#E8202A";
     ctx.beginPath();
-    ctx.arc(80, 72, 46, 0, Math.PI * 2);
+    ctx.arc(60, 60, 44, 0, Math.PI * 2);
     ctx.fill();
-    // Inner white letter
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 44px 'IBM Plex Sans Thai', sans-serif";
+    ctx.font = "bold 38px 'IBM Plex Sans Thai', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("KKP", 80, 74);
-    // Subtext
-    ctx.font = "bold 15px 'IBM Plex Sans Thai', sans-serif";
-    ctx.fillStyle = "#19C3EB";
-    ctx.fillText("CONT GRAPHIC", 80, 134);
-
-    // Apply deliberate blur so before is unmistakably blurry
-    blurCanvas(ctx, 160, 160, 2);
+    ctx.fillText("K", 60, 60);
 
     originalDataUrl = c.toDataURL("image/png");
-    setLoadedSample(originalDataUrl, 160, 160, "Sample_Blurry_Logo_160px.png");
-  }
-
-  // Sample 2: Blurry Artwork Icon
-  function loadSampleArt() {
-    const c = document.createElement("canvas");
-    c.width = 180;
-    c.height = 180;
-    const ctx = c.getContext("2d");
-    ctx.fillStyle = "#161b2b";
-    ctx.fillRect(0, 0, 180, 180);
-    // Gradient circle
-    const grad = ctx.createRadialGradient(90, 90, 10, 90, 90, 70);
-    grad.addColorStop(0, "#FFD23F");
-    grad.addColorStop(0.7, "#E8202A");
-    grad.addColorStop(1, "#80124a");
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(90, 90, 60, 0, Math.PI * 2);
-    ctx.fill();
-    // Star
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 52px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("✨", 90, 90);
-
-    // Deliberate blur
-    blurCanvas(ctx, 180, 180, 2);
-
-    originalDataUrl = c.toDataURL("image/png");
-    setLoadedSample(originalDataUrl, 180, 180, "Sample_Blurry_Art_180px.png");
-  }
-
-  // Sample 3: Blurry Campaign Photo
-  function loadSamplePhoto() {
-    const c = document.createElement("canvas");
-    c.width = 180;
-    c.height = 180;
-    const ctx = c.getContext("2d");
-    const grad = ctx.createLinearGradient(0, 0, 180, 180);
-    grad.addColorStop(0, "#0f2027");
-    grad.addColorStop(0.5, "#203a43");
-    grad.addColorStop(1, "#2c5364");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 180, 180);
-    // Draw card graphic
-    ctx.fillStyle = "#E8202A";
-    ctx.fillRect(30, 45, 120, 75);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("KKP PRIORITY", 90, 78);
-    ctx.fillStyle = "#19C3EB";
-    ctx.font = "12px sans-serif";
-    ctx.fillText("••••  ••••  ••••  8829", 90, 98);
-
-    blurCanvas(ctx, 180, 180, 2);
-
-    originalDataUrl = c.toDataURL("image/png");
-    setLoadedSample(originalDataUrl, 180, 180, "Sample_Blurry_Campaign_180px.png");
-  }
-
-  function blurCanvas(ctx, w, h, radius) {
-    const imgData = ctx.getImageData(0, 0, w, h);
-    const data = imgData.data;
-    const copy = new Uint8ClampedArray(data);
-    const stride = w * 4;
-    for (let r = 0; r < radius; r++) {
-      for (let y = 1; y < h - 1; y++) {
-        const row = y * stride;
-        for (let x = 1; x < w - 1; x++) {
-          const idx = row + (x * 4);
-          for (let c = 0; c < 3; c++) {
-            const avg = (copy[idx - 4 + c] + copy[idx + 4 + c] + copy[idx - stride + c] + copy[idx + stride + c]) * 0.25;
-            data[idx + c] = avg;
-          }
-        }
-      }
-      copy.set(data);
-    }
-    ctx.putImageData(imgData, 0, 0);
+    setLoadedSample(originalDataUrl, 120, 120, "Sample_Logo_120px.png");
   }
 
   function setLoadedSample(dataUrl, w, h, name) {
@@ -734,11 +875,12 @@ function setupUpscaleLogic() {
       if (compareContainer) compareContainer.classList.remove("hidden");
       if (imgBefore) imgBefore.src = dataUrl;
       if (imgAfter) imgAfter.src = dataUrl;
-      setZoomMode("fit");
+      syncOverlaySize();
       if (resBadge) {
         resBadge.classList.remove("hidden");
         resBadge.textContent = `ภาพตัวอย่าง: ${w} × ${h} px`;
       }
+      if (largeImgOpt) largeImgOpt.classList.add("hidden");
       toast(`โหลดภาพตัวอย่างเรียบร้อย: ${name}`, "info");
     };
     img.src = dataUrl;
@@ -788,30 +930,35 @@ function setupUpscaleLogic() {
     if (progressStatusText) progressStatusText.innerHTML = `<span>⏳</span> ${escapeHtml(msg)}`;
   }
 
-  // --- CORE START EXECUTION ---
+  // --- START REAL-ESRGAN EXECUTION ---
   startBtn?.addEventListener("click", async () => {
     if (!currentImageBitmap) return;
 
     startBtn.disabled = true;
     if (progressCard) progressCard.classList.remove("hidden");
-    updateProgress(10, "วิเคราะห์โครงสร้างพิกเซลและระดับความเบลอ...");
-    await sleep(40);
+    updateProgress(2, "เริ่มต้น Real-ESRGAN AI Engine...");
 
     try {
-      const mode = modeSelect?.value || "ultra";
       const scale = currentScale;
-      const sharpness = Number(sharpnessSlider?.value || 150) / 100; // 0.5 to 2.5
-      const passes = currentPasses;
+      let srcImg = currentImageBitmap;
 
-      updateProgress(35, `กำลังประมวลผล Super-Resolution ${scale}x (Shock Filter Pass 1)...`);
-      await sleep(50);
+      // Smart downscale if image is overly large (> 800) and checkbox is checked
+      const maxDim = 800;
+      if (autoLimitDim?.checked && (srcImg.naturalWidth > maxDim || srcImg.naturalHeight > maxDim)) {
+        const ratio = Math.min(maxDim / srcImg.naturalWidth, maxDim / srcImg.naturalHeight);
+        const nw = Math.round(srcImg.naturalWidth * ratio);
+        const nh = Math.round(srcImg.naturalHeight * ratio);
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = nw;
+        tempCanvas.height = nh;
+        const tctx = tempCanvas.getContext("2d");
+        tctx.drawImage(srcImg, 0, 0, nw, nh);
+        srcImg = tempCanvas;
+      }
 
-      const resultCanvas = executeSuperResolution(currentImageBitmap, {
-        scale,
-        mode,
-        sharpness,
-        passes,
-        onProgress: (p, msg) => updateProgress(p, msg)
+      // Execute True Real-ESRGAN Tiled Super-Resolution
+      const resultCanvas = await runRealEsrganSuperResolution(srcImg, scale, (pct, msg) => {
+        updateProgress(pct, msg);
       });
 
       upscaledDataUrl = resultCanvas.toDataURL("image/png");
@@ -823,28 +970,33 @@ function setupUpscaleLogic() {
         imgAfter.src = upscaledDataUrl;
       }
 
-      // Update resolution & badge
+      // Update resolution & metadata
       if (resBadge) {
-        resBadge.textContent = `ขยายแล้ว: ${resultCanvas.width} × ${resultCanvas.height} px (${scale}x คมชัดสูง)`;
+        resBadge.textContent = `ขยายแล้ว: ${resultCanvas.width} × ${resultCanvas.height} px (${scale}x Real-ESRGAN)`;
         resBadge.className = "badge badge-ok";
       }
 
       if (outputMeta) {
-        outputMeta.innerHTML = `✅ ผลลัพธ์: <strong>${resultCanvas.width} × ${resultCanvas.height} px</strong> (${scale}x Super Resolution) · ความคมชัด: <strong>${Math.round(sharpness * 100)}%</strong>`;
+        outputMeta.innerHTML = `✅ ผลลัพธ์: <strong>${resultCanvas.width} × ${resultCanvas.height} px</strong> (${scale}x Real-ESRGAN AI Super Resolution)`;
       }
 
       if (exportBar) exportBar.classList.remove("hidden");
       setSliderPosition(50);
 
-      updateProgress(100, "ขยายและขจัดความเบลอสำเร็จ 100%!");
+      updateProgress(100, "ขยายภาพด้วย Real-ESRGAN AI สำเร็จ 100%!");
       window.setTimeout(() => {
         if (progressCard) progressCard.classList.add("hidden");
-      }, 1000);
+      }, 1200);
 
-      toast(`ขยายภาพสำเร็จ ${scale} เท่า (${resultCanvas.width}×${resultCanvas.height}px) ขจัดความเบลอเรียบร้อย!`, "success");
+      toast(`ขยายภาพสำเร็จ ${scale} เท่า (${resultCanvas.width}×${resultCanvas.height}px) ด้วย Real-ESRGAN AI!`, "success");
+
+      // Update cache badge
+      if (modelStatus) {
+        modelStatus.innerHTML = "<span style='color:#2BD14B;'>บันทึกในเครื่องแล้ว (Cached 64MB)</span>";
+      }
 
     } catch (err) {
-      console.error("Super resolution error:", err);
+      console.error("Real-ESRGAN error:", err);
       toast("เกิดข้อผิดพลาดในการประมวลผล: " + err.message, "error");
       if (progressCard) progressCard.classList.add("hidden");
     } finally {
@@ -855,7 +1007,7 @@ function setupUpscaleLogic() {
   // Export handlers
   qs("#download-png-btn")?.addEventListener("click", () => {
     if (!upscaledDataUrl) return;
-    triggerDownload(upscaledDataUrl, `cont-super-res-${Date.now()}.png`);
+    triggerDownload(upscaledDataUrl, `cont-realesrgan-${Date.now()}.png`);
   });
 
   qs("#download-jpg-btn")?.addEventListener("click", () => {
@@ -870,7 +1022,7 @@ function setupUpscaleLogic() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
       const jpgUrl = canvas.toDataURL("image/jpeg", 0.95);
-      triggerDownload(jpgUrl, `cont-super-res-${Date.now()}.jpg`);
+      triggerDownload(jpgUrl, `cont-realesrgan-${Date.now()}.jpg`);
     };
     img.src = upscaledDataUrl;
   });
@@ -901,129 +1053,194 @@ function setupUpscaleLogic() {
 }
 
 /* ==========================================================================
-   MATHEMATICAL SUPER-RESOLUTION & DEBLUR KERNEL
-   1. Subpixel Lanczos / Bicubic High-Density Interpolation
-   2. PDE Shock Filtering (Steepens blurry transition zones into razor edges)
-   3. Multi-Scale Laplacian High-Frequency Reconstruction
-   4. Luminance Guided Color Injection (Zero chromatic aberration)
+   REAL-ESRGAN X4 TILED INFERENCE PIPELINE (MATCHING INPAINT-WEB)
    ========================================================================== */
 
-function executeSuperResolution(img, opts) {
-  const { scale, mode, sharpness, passes, onProgress } = opts;
-  const srcW = img.naturalWidth || img.width;
-  const srcH = img.naturalHeight || img.height;
-  const outW = srcW * scale;
-  const outH = srcH * scale;
+async function runRealEsrganSuperResolution(sourceImg, targetScale, onProgress) {
+  const ort = await loadOnnxRuntime();
+  const session = await getOrInitSession((pct, msg) => {
+    if (onProgress) onProgress(pct, msg);
+  });
 
-  // Step 1: High-Density Base Upscale
-  const destCanvas = document.createElement("canvas");
-  destCanvas.width = outW;
-  destCanvas.height = outH;
-  const ctx = destCanvas.getContext("2d", { willReadFrequently: true });
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(img, 0, 0, outW, outH);
+  const srcW = sourceImg.naturalWidth || sourceImg.width;
+  const srcH = sourceImg.naturalHeight || sourceImg.height;
 
-  onProgress(50, "ประมวลผล Shock Filter Deblurring (ฟื้นฟูขอบภาพที่เบลอ)...");
+  onProgress(55, `เตรียมข้อมูลภาพ (${srcW}×${srcH}px)...`);
+  await sleep(30);
 
-  const imgData = ctx.getImageData(0, 0, outW, outH);
-  const data = imgData.data;
-  const totalPixels = outW * outH;
+  // 1. Convert Image to CHW Float32Array normalized [0, 1]
+  const inputTensorData = imageToCHW(sourceImg);
 
-  // Extract Luminance channel (Y) to process contrast & edges without color distortion
-  const Y = new Float32Array(totalPixels);
-  for (let i = 0; i < totalPixels; i++) {
-    const idx = i * 4;
-    Y[i] = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-  }
+  const tileSize = MODEL_CONFIG.tileSize; // 64
+  const tilePadding = MODEL_CONFIG.tilePadding; // 6
+  const tileSizePre = tileSize - tilePadding * 2; // 52
 
-  const Y_shock = new Float32Array(Y);
-  const stride = outW;
+  const tilesx = Math.ceil(srcW / tileSizePre);
+  const tilesy = Math.ceil(srcH / tileSizePre);
+  const numTiles = tilesx * tilesy;
 
-  // Step 2: Shock Filter Iterations (Steepens blurry edges into sharp step functions)
-  // For each pass, blurry transition slopes are inflected towards local extremes
-  const shockStrength = mode === "vector" ? 0.75 : mode === "ultra" ? 0.65 : 0.5;
-  const iterations = Math.max(1, Math.min(3, passes));
+  const outImageW = srcW * 4;
+  const outImageH = srcH * 4;
 
-  for (let it = 0; it < iterations; it++) {
-    const prevY = new Float32Array(Y_shock);
-    for (let y = 1; y < outH - 1; y++) {
-      const row = y * stride;
-      for (let x = 1; x < outW - 1; x++) {
-        const idx = row + x;
-        const c = prevY[idx];
+  const outData = new Float32Array(outImageW * outImageH * 3);
+  const outROffset = 0;
+  const outGOffset = outImageW * outImageH;
+  const outBOffset = outImageW * outImageH * 2;
 
-        // 4-neighbor values
-        const n_top = prevY[idx - stride];
-        const n_bot = prevY[idx + stride];
-        const n_lef = prevY[idx - 1];
-        const n_rig = prevY[idx + 1];
+  const rOffset = 0;
+  const gOffset = srcW * srcH;
+  const bOffset = srcW * srcH * 2;
 
-        // 8-neighbor min and max
-        const n_tl = prevY[idx - stride - 1];
-        const n_tr = prevY[idx - stride + 1];
-        const n_bl = prevY[idx + stride - 1];
-        const n_br = prevY[idx + stride + 1];
+  const inputName = session.inputNames?.[0] || "input.1";
+  const outputName = session.outputNames?.[0] || "1895";
 
-        const localMin = Math.min(c, n_top, n_bot, n_lef, n_rig, n_tl, n_tr, n_bl, n_br);
-        const localMax = Math.max(c, n_top, n_bot, n_lef, n_rig, n_tl, n_tr, n_bl, n_br);
+  let currentTile = 0;
 
-        // Discrete Laplacian: L = top + bot + left + right - 4*c
-        const laplacian = n_top + n_bot + n_lef + n_rig - 4 * c;
+  for (let i = 0; i < tilesx; i++) {
+    for (let j = 0; j < tilesy; j++) {
+      const tileW = Math.min(tileSizePre, srcW - i * tileSizePre);
+      const tileH = Math.min(tileSizePre, srcH - j * tileSizePre);
 
-        // If laplacian < 0: convex / bright side of inflection -> dilate towards local max
-        // If laplacian > 0: concave / dark side of inflection -> erode towards local min
-        if (laplacian < -2.5) {
-          Y_shock[idx] = c + shockStrength * (localMax - c);
-        } else if (laplacian > 2.5) {
-          Y_shock[idx] = c + shockStrength * (localMin - c);
+      const tileData = new Float32Array(tileSize * tileSize * 3);
+      const tileROffset = 0;
+      const tileGOffset = tileSize * tileSize;
+      const tileBOffset = tileSize * tileSize * 2;
+
+      for (let xp = -tilePadding; xp < tileSizePre + tilePadding; xp++) {
+        for (let yp = -tilePadding; yp < tileSizePre + tilePadding; yp++) {
+          let xim = i * tileSizePre + xp;
+          if (xim < 0) xim = 0;
+          else if (xim >= srcW) xim = srcW - 1;
+
+          let yim = j * tileSizePre + yp;
+          if (yim < 0) yim = 0;
+          else if (yim >= srcH) yim = srcH - 1;
+
+          const idx = xim + yim * srcW;
+          const xt = xp + tilePadding;
+          const yt = yp + tilePadding;
+
+          tileData[xt + yt * tileSize + tileROffset] = inputTensorData[idx + rOffset];
+          tileData[xt + yt * tileSize + tileGOffset] = inputTensorData[idx + gOffset];
+          tileData[xt + yt * tileSize + tileBOffset] = inputTensorData[idx + bOffset];
         }
       }
+
+      // Run inference on 64x64 tile
+      const tileTensor = new ort.Tensor("float32", tileData, [1, 3, tileSize, tileSize]);
+      const feeds = {};
+      feeds[inputName] = tileTensor;
+      const runResult = await session.run(feeds);
+      const outTile = runResult[outputName] || runResult[Object.keys(runResult)[0]];
+
+      const outTileW = tileW * 4;
+      const outTileH = tileH * 4;
+      const outTileSize = tileSize * 4; // 256
+      const outTileSizePre = tileSizePre * 4; // 208
+
+      const outTileROffset = 0;
+      const outTileGOffset = outTileSize * outTileSize;
+      const outTileBOffset = outTileSize * outTileSize * 2;
+
+      // Copy inner 208x208 unpadded tile region to global output tensor
+      for (let x = 0; x < outTileW; x++) {
+        for (let y = 0; y < outTileH; y++) {
+          const xim = i * outTileSizePre + x;
+          const yim = j * outTileSizePre + y;
+          const idx = xim + yim * outImageW;
+          const xt = x + tilePadding * 4;
+          const yt = y + tilePadding * 4;
+
+          outData[idx + outROffset] = outTile.data[xt + yt * outTileSize + outTileROffset];
+          outData[idx + outGOffset] = outTile.data[xt + yt * outTileSize + outTileGOffset];
+          outData[idx + outBOffset] = outTile.data[xt + yt * outTileSize + outTileBOffset];
+        }
+      }
+
+      currentTile++;
+      const currentPct = 55 + Math.round((currentTile / numTiles) * 42);
+      onProgress(currentPct, `ประมวลผล Real-ESRGAN AI (Tile ${currentTile}/${numTiles})...`);
+      // Yield to event loop to allow UI progress bar updates
+      await sleep(0);
     }
   }
 
-  onProgress(75, "เพิ่มความคมชัดระดับไมโครคอนทราสต์ (Laplacian Edge Peaking)...");
+  onProgress(98, "เรนเดอร์ภาพความละเอียดสูง (Rendering 4K Canvas)...");
+  await sleep(20);
 
-  // Step 3: High-Frequency Laplacian Edge Peaking (Unsharp Mask on Shocked Luminance)
-  const boost = sharpness * 1.35;
-  const Y_final = new Float32Array(totalPixels);
+  // Convert CHW output tensor to 4x Canvas
+  const canvas4x = chwToCanvas(outData, outImageW, outImageH);
 
-  for (let y = 1; y < outH - 1; y++) {
-    const row = y * stride;
-    for (let x = 1; x < outW - 1; x++) {
-      const idx = row + x;
-      const c = Y_shock[idx];
-      // 4-neighbor average
-      const avg = (Y_shock[idx - stride] + Y_shock[idx + stride] + Y_shock[idx - 1] + Y_shock[idx + 1]) * 0.25;
-      const highFreq = c - avg;
-
-      // Add amplified high frequencies
-      Y_final[idx] = Math.min(255, Math.max(0, c + highFreq * boost));
-    }
+  // If user selected 2x scale, downscale the 4x Real-ESRGAN result by half (yields crystal-sharp 2x)
+  if (targetScale === 2) {
+    const targetW = srcW * 2;
+    const targetH = srcH * 2;
+    const canvas2x = document.createElement("canvas");
+    canvas2x.width = targetW;
+    canvas2x.height = targetH;
+    const ctx2x = canvas2x.getContext("2d");
+    ctx2x.imageSmoothingEnabled = true;
+    ctx2x.imageSmoothingQuality = "high";
+    ctx2x.drawImage(canvas4x, 0, 0, targetW, targetH);
+    return canvas2x;
   }
 
-  onProgress(90, "สังเคราะห์ข้อมูลสีและเรนเดอร์ภาพความละเอียดสูง...");
+  return canvas4x;
+}
 
-  // Step 4: Re-inject sharp luminance into RGB channels preserving exact chromaticity
-  for (let i = 0; i < totalPixels; i++) {
-    const idx = i * 4;
-    const origY = Y[i];
-    const newY = Y_final[i];
+/* --- Convert Image to CHW Float32Array [0, 1] --- */
+function imageToCHW(img) {
+  const width = img.naturalWidth || img.width;
+  const height = img.naturalHeight || img.height;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+  const rgba = ctx.getImageData(0, 0, width, height).data;
 
-    if (origY > 2) {
-      const ratio = newY / origY;
-      data[idx]     = Math.min(255, Math.max(0, Math.round(data[idx] * ratio)));
-      data[idx + 1] = Math.min(255, Math.max(0, Math.round(data[idx + 1] * ratio)));
-      data[idx + 2] = Math.min(255, Math.max(0, Math.round(data[idx + 2] * ratio)));
-    } else {
-      data[idx]     = Math.min(255, Math.max(0, Math.round(newY)));
-      data[idx + 1] = Math.min(255, Math.max(0, Math.round(newY)));
-      data[idx + 2] = Math.min(255, Math.max(0, Math.round(newY)));
-    }
+  const size = width * height;
+  const chw = new Float32Array(3 * size);
+  const rOffset = 0;
+  const gOffset = size;
+  const bOffset = size * 2;
+
+  for (let i = 0; i < size; i++) {
+    const srcIdx = i * 4;
+    chw[rOffset + i] = rgba[srcIdx] / 255.0;
+    chw[gOffset + i] = rgba[srcIdx + 1] / 255.0;
+    chw[bOffset + i] = rgba[srcIdx + 2] / 255.0;
   }
+  return chw;
+}
 
+/* --- Convert CHW Float32Array to Canvas --- */
+function chwToCanvas(chw, width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  const imgData = ctx.createImageData(width, height);
+  const data = imgData.data;
+
+  const size = width * height;
+  const rOffset = 0;
+  const gOffset = size;
+  const bOffset = size * 2;
+
+  for (let i = 0; i < size; i++) {
+    const outIdx = i * 4;
+    let r = chw[rOffset + i];
+    let g = chw[gOffset + i];
+    let b = chw[bOffset + i];
+
+    data[outIdx]     = Math.min(255, Math.max(0, Math.round(r * 255)));
+    data[outIdx + 1] = Math.min(255, Math.max(0, Math.round(g * 255)));
+    data[outIdx + 2] = Math.min(255, Math.max(0, Math.round(b * 255)));
+    data[outIdx + 3] = 255;
+  }
   ctx.putImageData(imgData, 0, 0);
-  return destCanvas;
+  return canvas;
 }
 
 function sleep(ms) {
