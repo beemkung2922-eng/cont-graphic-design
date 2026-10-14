@@ -1,0 +1,157 @@
+<!doctype html>
+<!-- CONT — Websites, Campaigns, Creative Workflows. Yours next. -->
+<html lang="th" class="js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="CONT — Kinetic Typography Brand Intro & Creative Studio Reel for KKP Graphic Design.">
+  <meta name="theme-color" content="#0c0d14">
+  <title>CONT — Graphic Design Reel | Every brief. Every artwork. Yours next.</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/intro.css">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+
+  <!-- Top-Left Quick Return Link to CONT App -->
+  <a class="back-link" href="dashboard.html" title="กลับไปหน้าระบบ CONT">
+    <span>← เข้าสู่ระบบ CONT</span>
+  </a>
+
+  <!-- Top-Right Floating Controls (Sound & Aspect Ratio Switcher) -->
+  <aside class="controls-bar" aria-label="Player Controls">
+    <button type="button" class="ctrl-btn" id="btn-toggle-sound" title="เปิด/ปิดเสียงเอฟเฟกต์">
+      <span>🔇 SOUND OFF</span>
+    </button>
+    <button type="button" class="ctrl-btn" id="btn-toggle-ratio" title="สลับอัตราส่วนหน้าจอ">
+      <span>📺 RATIO: FULL</span>
+    </button>
+  </aside>
+
+  <!-- Film Grain Overlay -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Stage Wrapper with Aspect Ratio Support (Full / 9:16 Vertical / 16:9 Cinema) -->
+  <div class="film-wrapper" data-mode="full">
+    <main class="film" id="stage" aria-label="CONT Intro Reel">
+
+      <!-- PAPER SIDE: ACT 1 INTRO -->
+      <div class="grid grid--ink" aria-hidden="true"></div>
+
+      <div class="paper" aria-hidden="true">
+        <!-- Optical Center "HELLO" -->
+        <div class="line line--hi" id="hi">HELLO</div>
+
+        <!-- Optical Center Brand Reveal -->
+        <div class="line line--name" id="name">
+          <span class="name__brand-tag">KKP FINANCIAL GROUP</span>
+          <span class="name__text">This is CONT.</span>
+          <svg class="squiggle" viewBox="0 0 240 26" fill="none" aria-hidden="true">
+            <path class="squiggle__path"
+                  d="M6 17C42 8 96 4 152 6c22 1 46 4 60 9-30 4-72 5-116 4"
+                  stroke="currentColor" stroke-width="3.6"
+                  stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- THE DROPPING DOT: ACCENT TRANSITION -->
+      <div class="dot" id="dot" aria-hidden="true"></div>
+
+      <!-- FLOOD SIDE: VIBRANT KKP PURPLE & GOLD WORLD -->
+      <div class="field" id="field" aria-hidden="true">
+        <div class="blob blob--1"></div>
+        <div class="blob blob--2"></div>
+        <div class="blob blob--3"></div>
+        <div class="grid grid--light"></div>
+        <div class="vignette"></div>
+      </div>
+
+      <!-- THE TYPOGRAPHIC LADDER WITH CONTINUOUS PUSH CAMERA -->
+      <div class="camera" id="camera" aria-hidden="true">
+        <div class="ladder" id="ladder">
+          <div class="lockup" id="lockup">
+            <!-- Anchored Prefix -->
+            <span class="mask mask--anchor"><span class="anchor" id="anchor">Every</span></span>
+
+            <!-- Kinetic 3D Rungs: Brief -> Artwork -> Campaign -> Approval -> Creative Team -->
+            <span class="rung" data-rung="1">
+              <span class="mask"><span class="rung__in">brief</span></span><i class="pd"></i>
+            </span>
+            <span class="rung" data-rung="2">
+              <span class="mask"><span class="rung__in">artwork</span></span><i class="pd"></i>
+            </span>
+            <span class="rung" data-rung="3">
+              <span class="mask"><span class="rung__in">campaign</span></span><i class="pd"></i>
+            </span>
+            <span class="rung" data-rung="4">
+              <span class="mask"><span class="rung__in">approval</span></span><i class="pd"></i>
+            </span>
+            <span class="rung" data-rung="5">
+              <span class="mask"><span class="rung__in">creative team</span></span><i class="pd"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE REVERSE DOT: RETURN TRANSITION -->
+      <div class="dot dot--out" id="dotOut" aria-hidden="true"></div>
+
+      <!-- END CARD: CALL TO ACTION -->
+      <div class="endcard" id="endcard" aria-hidden="true">
+        <div class="endcard__badge">
+          <span>● KKP GRAPHIC DESIGN HUB</span>
+        </div>
+
+        <h1 class="endcard__cta">Design faster. Together.</h1>
+        <p class="endcard__sub">
+          ระบบจัดการกระบวนการทำงาน ออกแบบ และอนุมัติชิ้นงานกราฟิกอย่างมืออาชีพ รวดเร็ว ชัดเจน ทุกขั้นตอน
+        </p>
+
+        <div class="endcard__actions">
+          <a class="contact" href="dashboard.html">
+            <svg class="contact__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            <span class="contact__label">เข้าสู่ระบบ CONT</span>
+          </a>
+        </div>
+
+        <div class="endcard__handle">
+          <span class="endcard__text">@kkpfg · Graphic Design Studio</span>
+          <svg class="squiggle squiggle--sm" viewBox="0 0 240 26" fill="none" aria-hidden="true">
+            <path class="squiggle__path"
+                  d="M6 17C42 8 96 4 152 6c22 1 46 4 60 9-30 4-72 5-116 4"
+                  stroke="currentColor" stroke-width="3.2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- CINEMA SHUTTER LETTERBOX BARS -->
+      <div class="bar bar--top" id="barTop" aria-hidden="true"></div>
+      <div class="bar bar--bot" id="barBot" aria-hidden="true"></div>
+
+      <!-- FLOATING REPLAY BUTTON -->
+      <button class="replay" id="replay" type="button" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
+          <path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor" />
+        </svg>
+        <span>Replay Video</span>
+      </button>
+
+    </main>
+  </div>
+
+  <!-- Accessible Fallback for Screen Readers -->
+  <h2 class="sr-only">
+    HELLO — KKP FINANCIAL GROUP. This is CONT. Every brief, every artwork, every campaign, every approval, every creative team.
+    Design faster. Together. ระบบจัดการกระบวนการทำงานออกแบบกราฟิก เข้าสู่ระบบได้ที่ CONT Dashboard.
+  </h2>
+
+  <script src="js/intro.js"></script>
+</body>
+</html>
