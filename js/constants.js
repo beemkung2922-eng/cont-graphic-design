@@ -80,6 +80,5 @@ export const NAV_ITEMS = [
   { href: "tasks.html", page: "tasks", label: "งานของฉัน", icon: "check" },
   { href: "board.html", page: "board", label: "บอร์ดงาน", icon: "columns" },
   { href: "calendar.html", page: "calendar", label: "ปฏิทิน", icon: "calendar" },
-  { href: "team.html", page: "team", label: "ทีม & กำลังงาน", icon: "users" },
-  { href: "upscale.html", page: "upscale", label: "UPSCALE", icon: "sparkle" },
+  { href: "team.html", page: "team", label: "ทีม & กำลังงาน", icon: "users" }
 ];
