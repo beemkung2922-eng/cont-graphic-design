@@ -3,165 +3,226 @@ import { escapeHtml } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   DATA: SOCIAL LISTENING, NETWORK GRAPHS & VISUAL INTELLIGENCE
+   DATA: KKP GRAPHIC DESIGN & FINANCIAL MARKETING INTELLIGENCE
+   Social Listening 2.0 & AInsight Connected Network Graph Engine
 ───────────────────────────────────────────────────────────────────────── */
 
-// 1. Comparison Mode Mock Data (Volume vs Network Graph)
+// 1. Comparison Mode Mock Data (Volume-Only vs AI Connected Network Graph)
 const VOLUME_DATA = {
-  totalMentions: 148500,
+  totalMentions: 182400,
   brands: [
-    { name: "CONT Sunscreen", count: 38400, pct: 25.8, color: "#19c3eb" },
-    { name: "Brand A (Derma Pro)", count: 42100, pct: 28.3, color: "#ffc61a" },
-    { name: "Brand B (Aqua Sun)", count: 35200, pct: 23.7, color: "#22c55e" },
-    { name: "Brand C (Pure Glow)", count: 32800, pct: 22.2, color: "#a855f7" }
+    { name: "KKP Auto & รถเรียกเงิน (RRN)", count: 46200, pct: 25.3, color: "#5B2D90" },
+    { name: "KKP Dime! (Digital Savings & Stocks)", count: 44800, pct: 24.6, color: "#19C3EB" },
+    { name: "คู่แข่งสินเชื่อรถยนต์ A (Non-Bank)", count: 52100, pct: 28.6, color: "#FFC61A" },
+    { name: "คู่แข่งแอปการเงินดิจิทัล B", count: 39300, pct: 21.5, color: "#22C55E" }
   ],
-  sentiment: { positive: 64, neutral: 24, negative: 12 }
+  sentiment: { positive: 68, neutral: 22, negative: 10 }
 };
 
-// 2. The 6 Strategic Marketing Pillars Data (Sunscreen Case Study)
+// 2. The 6 Strategic Marketing Pillars Data (KKP Financial Group Case Study)
 const PILLARS_DATA = {
   standard: {
     title: "1. Market Standard (เข้าใจมาตรฐานก่อนลงแข่ง)",
-    subtitle: "ประเมิน 'เกณฑ์ขั้นต่ำ' ที่ผู้บริโภคมองเป็นเรื่องปกติ เพื่อไม่ให้เสียเวลาเคลมสิ่งพื้นฐานเป็นจุดขายหลัก",
+    subtitle: "ประเมิน 'เกณฑ์ขั้นต่ำ' ที่ผู้บริโภคและธนาคารแห่งประเทศไทย (ธปท.) กำหนด เพื่อไม่ให้เสียเวลาเคลมสิ่งพื้นฐานเป็นจุดขายหลัก",
     items: [
-      { label: "SPF50+ & PA++++", expectedPct: 98, status: "Must-Have Baseline", desc: "ผู้บริโภค 98% ถือเป็นเกณฑ์ขั้นต่ำที่ต้องมี หากต่ำกว่านี้จะไม่ถูกพิจารณา" },
-      { label: "ไม่วอก / ไม่ลอยบนผิวสองสี", expectedPct: 94, status: "Must-Have Baseline", desc: "เนื้อกันแดดต้องกลืนกับผิวคนไทย ไม่ทิ้งคราบขาว" },
-      { label: "คุมมัน ไม่เยิ้มระหว่างวัน", expectedPct: 89, status: "Must-Have Baseline", desc: "สภาพอากาศร้อนชื้นทำให้การคุมมันกลายเป็นมาตรฐานพื้นฐาน" },
-      { label: "Reef-Safe / เป็นมิตรต่อปะการัง", expectedPct: 52, status: "Value Differentiator", desc: "โอกาสสร้างจุดขายเฉพาะกลุ่ม (Ecological Niche) ที่ยังไม่มีใครครองตลาดเด็ดขาด" },
-      { label: "Blue Light & Anti-Pollution PM2.5", expectedPct: 61, status: "Value Differentiator", desc: "จุดขายเพิ่มมูลค่าสำหรับคนทำงานออฟฟิศและคนเมือง" }
+      { label: "คำเตือน ธปท. 'กู้เท่าที่จำเป็นและชำระคืนไหว'", expectedPct: 100, status: "Must-Have Compliance", desc: "ข้อกำหนดกฎหมาย ธปท. 100% ต้องแสดงในทุกชิ้นงานโฆษณาสินเชื่ออย่างชัดเจนและอ่านออก" },
+      { label: "แสดงอัตราดอกเบี้ยจริง (Effective Rate / APR)", expectedPct: 98, status: "Must-Have Baseline", desc: "ผู้บริโภค 98% คาดหวังให้ระบุดอกเบี้ยต่อปีและตัวอย่างตารางผ่อนชำระอย่างโปร่งใส" },
+      { label: "ตรารับรองสถาบันการเงิน & ความปลอดภัยข้อมูล", expectedPct: 95, status: "Must-Have Baseline", desc: "ความน่าเชื่อถือของใบอนุญาตธนาคารพาณิชย์เป็นเกณฑ์พื้นฐานที่ลูกค้าตรวจสอบก่อนกรอกข้อมูล" },
+      { label: "ดอกเบี้ยคงที่พิเศษเริ่มต้น 0.59% (สถาบันการเงินพาณิชย์)", expectedPct: 62, status: "Value Differentiator", desc: "จุดขายชูโรงของ KKP รถเรียกเงิน ที่ดอกเบี้ยต่ำกว่า Non-bank ในตลาดอย่างมีนัยสำคัญ" },
+      { label: "ไม่ต้องโอนเล่มทะเบียน & ไม่เช็กคนค้ำประกัน", expectedPct: 74, status: "Value Differentiator", desc: "จุดขายคลายความกังวลสูงสุดของลูกค้าที่ต้องการเงินหมุนไปต่อยอดธุรกิจ" }
     ]
   },
   needs: {
     title: "2. Consumer Needs (ฟังเสียงลูกค้าเพื่อหาจุดขายเชื่อมโยง)",
-    subtitle: "วิเคราะห์ความต้องการที่เชื่อมโยงกัน เพื่อดึง Pain Point ลึกๆ มาทำเป็นชิ้นงานครีเอทีฟที่ตรงใจ",
+    subtitle: "วิเคราะห์ความต้องการที่เชื่อมโยงกันของลูกค้ากลุ่มสินเชื่อและแอปการเงิน KKP เพื่อบรีฟงานออกแบบที่ตอบโจทย์ Pain Point จริง",
     clusters: [
       {
-        core: "ผิวมัน & สิวผด",
-        connected: ["เนื้อเซรั่มน้ำนม", "ไม่อุดตันรูขุมขน", "ลดอุณหภูมิผิว (-3°C)"],
-        insight: "คนเป็นสิวไม่ได้มองหาแค่ 'ไม่มัน' แต่มองหาความรู้สึก 'เย็นสบายผิว' ไม่กระตุ้นสิวผดตอนเหงื่อออก",
-        creativeHook: "กันแดดสลายร้อน -3°C คุมมัน 12 ชม. สิวผดไม่กวนใจ"
+        core: "หมุนเงินด่วน & รีไฟแนนซ์รถ (KKP รถเรียกเงิน RRN)",
+        connected: ["ผ่อนอยู่ก็กู้ได้", "ไม่ต้องจอดรถทิ้งไว้", "ไม่เช็กคนค้ำ", "วงเงินเต็ม 100%", "ดอกเบี้ยเริ่มต้น 0.59%"],
+        insight: "ลูกค้าไม่ได้แค่อยากได้เงินกู้ แต่ต้องการความอุ่นใจว่า 'ยังมีรถขับไปทำมาหากิน' และไม่อยากให้คนรอบตัวรู้ว่าต้องมีคนมาเซ็นค้ำประกัน",
+        creativeHook: "รถยังมีขับ ธุรกิจไปต่อได้ ไม่ต้องโอนเล่ม ไม่เช็กคนค้ำ รับเงินก้อนเข้าบัญชีในวันเดียว"
       },
       {
-        core: "แต่งหน้าติดทน & เร่งรีบ",
-        connected: ["เป็นเมคอัพเบสในตัว", "ไม่เป็นขุย (Pilling)", "เซ็ตตัวใน 30 วินาที"],
-        insight: "ผู้หญิงทำงานเร่งรีบช่วงเช้า ต้องการกันแดดที่แทนไพรเมอร์ได้โดยรองพื้นไม่หลุดเป็นคราบ",
-        creativeHook: "30 วินาทีเซ็ตตัว รองพื้นแนบสนิท ไม่หลุดเป็นขุยตลอดวัน"
+        core: "คนรุ่นใหม่ & ออมเงิน-ลงทุนระดับโลก (KKP Dime!)",
+        connected: ["ดอกเบี้ยเงินฝากสูงสุด 3% ต่อปี", "ซื้อหุ้นสหรัฐฯ เริ่ม 50 บาท", "ไม่มีค่าคอมฯ ขั้นต่ำ", "UX เล่นง่ายสไตล์เกม"],
+        insight: "Gen Z และ First Jobber รู้สึกว่าการเปิดพอร์ตหุ้นกับธนาคารแบบเดิมยุ่งยากและเงินไม่พอ อยากได้แอปที่เริ่มด้วยเงินหลักสิบและฝากเงินได้ผลตอบแทนสูง",
+        creativeHook: "สตาร์ทพอร์ตระดับโลกด้วยเงิน 50 บาท ช้อปหุ้น Apple, Tesla พร้อมรับดอกเบี้ยเงินฝากสูงถึง 3% ต่อปี"
       },
       {
-        core: "ทาทับเมคอัพนอกสถานที่",
-        connected: ["Sun Stick แบบแท่ง", "กันแดดสเปรย์ละอองหมอก", "ไม่เลอะมือ"],
-        insight: "ผู้บริโภคตระหนักเรื่องการเติมกันแดดทุก 2 ชม. แต่ติดปัญหาเรื่องมือสกปรกและหน้าเยิ้ม",
-        creativeHook: "เติมได้ตลอดวัน ไม่เลอะมือ ปาดทับเมคอัพเดิมได้ทันที"
+        core: "รวมหนี้ก้อนเดียว ดอกเบี้ยเบาลง (KKP Personal Loan)",
+        connected: ["รวมหนี้บัตรเครดิตหลายใบ", "ผ่อนทางเดียว", "ลดค่างวดต่อเดือน 50%", "ดอกเบี้ยลดต้นลดดอก"],
+        insight: "พนักงานประจำจ่ายขั้นต่ำหลายใบจนเงินเดือนไม่พอใช้ ต้องการรวมหนี้เป็นก้อนเดียวเพื่อลดภาระค่างวดต่อเดือนให้มีเงินเหลือเก็บ",
+        creativeHook: "จบปัญหาจ่ายหนี้หลายทาง รวมหนี้เป็นก้อนเดียวกับ KKP ปรับค่างวดเบาลงครึ่งหนึ่ง สบายใจผ่อนทางเดียว"
       }
     ]
   },
   competitor: {
     title: "3. Real Competitor (หาคู่แข่งตัวจริงจากสายตาผู้บริโภค)",
-    subtitle: "ผู้บริโภคไม่ได้เทียบเรากับแบรนด์ราคาเดียวกันเสมอไป แต่เทียบใน 'บริบทการใช้งาน' จริง",
+    subtitle: "ผู้บริโภคไม่ได้เทียบ KKP กับธนาคารใหญ่เสมอไป แต่เทียบกับ Non-Bank และ FinTech App ในบริบทการใช้งานจริง",
     matrix: [
       {
-        ourBrand: "CONT Sun Hydro",
-        realCompetitor: "Brand X (นำเข้าจากญี่ปุ่น)",
-        context: "กระทู้ 'คนผิวมันเป็นสิวใช้ตัวไหนดีกว่ากัน?'",
-        overlapPct: 78,
-        ourAdvantage: "เนื้อบางเบากว่า คุมมันในอากาศเมืองไทยได้ดีกว่า ไม่เหนียวเหนอะ",
-        actionPlan: "ทำกราฟิกทดสอบความมันด้วยกระดาษซับหน้ามันเทียบผลลัพธ์ใน 8 ชั่วโมง"
+        ourBrand: "KKP รถเรียกเงิน (RRN)",
+        realCompetitor: "เงินติดล้อ / สมหวัง เงินสั่งได้ (Non-Bank)",
+        context: "กระทู้และคอมเมนต์: 'มีรถผ่อนอยู่ จำนำทะเบียนที่ไหนไม่เอาเปรียบ ดอกเบี้ยถูกสุดและอนุมัติไว?'",
+        overlapPct: 82,
+        ourAdvantage: "อัตราดอกเบี้ยระบบธนาคารพาณิชย์ (APR เริ่ม 0.59% ต่อเดือน) ต่ำกว่า Non-bank ชัดเจน วงเงินประเมินให้สูงกว่า",
+        actionPlan: "ดีไซน์ตารางเปรียบเทียบ (Comparison Chart) ชี้ให้เห็นส่วนต่างดอกเบี้ยที่ประหยัดได้หลายหมื่นบาทต่อสัญญา"
       },
       {
-        ourBrand: "CONT Tone-Up SPF",
-        realCompetitor: "Brand Y (แบรนด์เคาน์เตอร์เกาหลี)",
-        context: "TikTok รีวิว 'กันแดดโทนอัพผิวผ่องแบบไม่โป๊ะ'",
-        overlapPct: 65,
-        ourAdvantage: "เฉดสีเข้ากับโทนเหลืองของคนไทย ไม่วอกเทา ราคาเข้าถึงง่ายกว่า 2 เท่า",
-        actionPlan: "ทำคลิปสวอชเปรียบเทียบเทียบผิว 3 เฉดสี (ขาวเหลือง / สองสี / แทน)"
+        ourBrand: "KKP Dime! App",
+        realCompetitor: "Make by KBank / InnovestX",
+        context: "โพสต์ X & Lemon8: 'แอปเก็บเงินดอกเบี้ยสูง 2026 Dime vs Make ตัวไหนคุ้มกว่ากัน?'",
+        overlapPct: 74,
+        ourAdvantage: "Dime! รวมทั้งบัญชีเงินฝากดอกเบี้ยสูง 3% และการซื้อเศษหุ้นอเมริกา (Fractional Shares) เริ่ม 50 บ. ในแอปเดียว",
+        actionPlan: "ทำ Motion Card และ Infographic สไตล์ Dark Neo-FinTech โชว์ฟังก์ชัน Multi-Asset หนึ่งเดียวจบ"
+      },
+      {
+        ourBrand: "KKP Phatra Wealth Management",
+        realCompetitor: "SCB Julius Baer / Citi Private Bank",
+        context: "การจัดสรรพอร์ตความมั่งคั่ง High-Net-Worth ในสภาวะตลาดโลกผันผวน",
+        overlapPct: 61,
+        ourAdvantage: "ทีมวิจัยเศรษฐกิจและการลงทุน KKP Research ชั้นนำระดับประเทศ พร้อมรางวัล Best Private Bank ในไทย",
+        actionPlan: "สร้างสรรค์ Key Visual อัตลักษณ์หรูหรา สง่างาม สไตล์ Minimal Gold Foil ถ่ายทอดความเชี่ยวชาญระดับสากล"
       }
     ]
   },
   influencer: {
-    title: "4. Influencer Role (เลือกอินฟลูเอนเซอร์จากบทบาท & ความน่าเชื่อถือ)",
-    subtitle: "เลิกดูแค่ยอด Followers เปลี่ยนมาดู 'Trust Score' และ 'Engagement Fit' ตามเป้าหมายแคมเปญ",
+    title: "4. Influencer Role (เลือกอินฟลูเอนเซอร์การเงินจากความน่าเชื่อถือ)",
+    subtitle: "ผลิตภัณฑ์การเงินต้องอาศัย 'ความไว้วางใจ' สูงสุด เลิกดูแค่ยอดวิว เปลี่ยนมาคัดเลือกจาก Trust Score และใบอนุญาตผู้ให้คำแนะนำ",
     roles: [
       {
-        roleName: "The Skin Educator (หมอผิวหนัง / เภสัชกร)",
-        followers: "25k - 80k (Micro/Nano)",
-        engagementRate: "8.6%",
-        trustScore: 96,
-        bestFor: "สร้างความน่าเชื่อถือด้านส่วนผสม (Science-backed Claims) อธิบายค่า SPF และงานวิจัย",
+        roleName: "The Certified Financial Planner (CFP / เพจภาษีและการเงิน เช่น TaxBugnoms)",
+        followers: "40k - 180k (Micro/Mid Financial)",
+        engagementRate: "8.4%",
+        trustScore: 98,
+        bestFor: "อธิบายวิธีคำนวณดอกเบี้ย วางแผนภาษี และสอนจัดพอร์ต KKP Dime! ลูกค้าเชื่อถือสูง นำไปสู่ยอดเปิดบัญชีจริง",
         recommended: true
       },
       {
-        roleName: "The Lifestyle Daily Vlogger",
-        followers: "120k - 400k (Mid-Tier)",
-        engagementRate: "5.2%",
-        trustScore: 84,
-        bestFor: "แสดงการใช้จริงในชีวิตประจำวัน (GRWM, ทาก่อนออกกำลังกายกลางแจ้ง)",
+        roleName: "The Automotive & Garage Creator (เพจคนรักรถ / ซ่อมบำรุง / วงการเต็นท์รถ)",
+        followers: "90k - 320k (Mid-Tier Community)",
+        engagementRate: "6.1%",
+        trustScore: 91,
+        bestFor: "รีวิวขั้นตอนขอสินเชื่อ KKP รถเรียกเงิน ตอนเตรียมเงินหมุนขยายอู่หรือรีไฟแนนซ์ เข้าถึงกลุ่มคนมีรถจริง",
         recommended: true
       },
       {
-        roleName: "The Mega Celebrity",
-        followers: "1.5M+",
-        engagementRate: "1.1%",
-        trustScore: 58,
-        bestFor: "สร้างการรับรู้ในวงกว้าง (Mass Awareness) แต่คอนเวอร์ชันต่ำกว่าเนื่องจากความคุ้นชินของผู้บริโภคที่มองว่าเป็นการจ้างโฆษณา",
+        roleName: "The Mega Celebrity / Superstar (ดาราแถวหน้า)",
+        followers: "2.5M+",
+        engagementRate: "1.0%",
+        trustScore: 54,
+        bestFor: "สร้างการรับรู้ในวงกว้าง (Mass Awareness) แต่คอนเวอร์ชันสินเชื่อต่ำเพราะผู้บริโภครู้สึกว่าดาราไม่ได้กู้เงินจริง",
         recommended: false
       }
     ]
   },
   protection: {
-    title: "5. Brand Protection (ปกป้องความเชื่อมั่นและรายได้จากของปลอม)",
-    subtitle: "เฝ้าระวังร้านค้าปลอมและตัวแทนจำหน่ายที่ขายต่ำกว่าราคามาตรฐานบน TikTok Shop & Shopee",
+    title: "5. Brand Protection (ปกป้องแบรนด์ KKP จากเพจสินเชื่อปลอม & มิจฉาชีพ)",
+    subtitle: "เฝ้าระวังเพจเงินกู้ปลอม บัญชี LINE แอบอ้าง และเว็บไซต์ Phishing ที่ใช้ชื่อหรือโลโก้ KKP หลอกลวงประชาชน",
     alerts: [
       {
-        id: "alert-01",
-        platform: "TikTok Shop",
-        shopName: "BeautySuperDeal_Official_Fake",
-        priceDetected: "149 ฿ (ราคาปกติ 690 ฿)",
-        riskLevel: "CRITICAL RISK",
+        id: "alert-kkp-01",
+        platform: "Facebook Sponsored Ads",
+        shopName: "สินเชื่อ เกียรตินาคินภัทร KKP รถเรียกเงิน ออนไลน์ 24 ชม. (เพจปลอม)",
+        priceDetected: "หลอกโอนเงินมัดจำสัญญา 2,000 ฿",
+        riskLevel: "CRITICAL SCAM",
         riskColor: "#ef4444",
-        issue: "ราคาต่ำผิดปกติ 78% และมีคอมเมนต์ 'เนื้อครีมเหลวเป็นน้ำ แสบตา มีกลิ่นสารเคมี'",
-        status: "ส่งดำเนินคดี & แจ้ง Take-down ทันที"
+        issue: "นำโลโก้ KKP ไปดัดแปลง ยิงแอดหลอกว่าอนุมัติใน 5 นาที แล้วส่งลิงก์แอด LINE ให้เหยื่อโอนค่าปลดล็อกสัญญา",
+        status: "ยิง API แจ้ง Meta Cyber Crime ทันที + ออก Warning Artwork เพจจริงมีติ๊กฟ้า"
       },
       {
-        id: "alert-02",
-        platform: "Shopee Affiliate",
-        shopName: "CosmeDirect_TH",
-        priceDetected: "390 ฿",
-        riskLevel: "WARNING",
+        id: "alert-kkp-02",
+        platform: "TikTok & LINE Official",
+        shopName: "@dime_invest_vip_th",
+        priceDetected: "การันตีกำไรวันละ 15%",
+        riskLevel: "HIGH FRAUD RISK",
         riskColor: "#f59e0b",
-        issue: "นำภาพอาร์ตเวิร์กเก่าปีที่แล้วไปดัดแปลง และเคลมสรรพคุณเกินจริง (รักษาฝ้าหายขาดใน 3 วัน)",
-        status: "แจ้งปรับปรุงคอนเทนต์และระงับค่าคอมมิชชันชั่วคราว"
+        issue: "แอบอ้างภาพหน้าจอแอป KKP Dime! ไปชวนลงทุนคริปโตและเทรดหุ้นนอกแบบหลอกลวง",
+        status: "ส่งทีม Compliance ประสานงานปิดบัญชี LINE และนำคลิป TikTok ออก"
+      },
+      {
+        id: "alert-kkp-03",
+        platform: "Phishing Website",
+        shopName: "kkp-loan-apply-urgent.online",
+        priceDetected: "ดักจับเลขบัตร ปชช. / OTP",
+        riskLevel: "CRITICAL SECURITY",
+        riskColor: "#ef4444",
+        issue: "เว็บไซต์ปลอมลอกเลียนแบบหน้าเว็บ KKP Auto เพื่อดักขโมยข้อมูลส่วนบุคคลของลูกค้า",
+        status: "ประสานงาน CERT และผู้ให้บริการโดเมนบล็อกการเข้าถึงทันที"
       }
     ]
   },
   posting: {
-    title: "6. Posting Window (หาช่องว่างเวลาโพสต์ด้วย Heatmap)",
-    subtitle: "หลีกเลี่ยงช่วงเวลา 'แย่งกันยิงแอด' หาช่วงเวลาทองที่ผู้ชมพร้อมมีส่วนร่วมแต่คู่แข่งโพสต์น้อย",
+    title: "6. Posting Window (หาช่องว่างเวลาโพสต์ด้วย Financial Intent Heatmap)",
+    subtitle: "วิเคราะห์พฤติกรรมการตัดสินใจทางการเงินของคนไทย เพื่อยิงแอดในช่วงที่ผู้ชมพร้อมกรอกฟอร์มหรือเปิดแอปที่สุด",
     goldenWindows: [
-      { time: "07:00 - 08:30 น. (จันทร์ - ศุกร์)", intent: "เช็กโทรศัพท์ขณะเดินทาง / เตรียมแต่งหน้าก่อนออกแดด", competition: "ต่ำ - ปานกลาง", efficiency: "+42% Engagement" },
-      { time: "12:15 - 13:00 น. (พักกลางวัน)", intent: "พักเที่ยง แดดจัดที่สุด คนนึกถึงปัญหาความมันและกันแดดหลุด", competition: "สูง", efficiency: "+18% Engagement" },
-      { time: "21:30 - 23:00 น. (ช่วง Skincare Routine)", intent: "ผ่อนคลายบนเตียง อ่านรีวิวสกินแคร์ พร้อมกดใส่ตะกร้าสั่งซื้อ", competition: "ต่ำ", efficiency: "+64% Conversion Rate" }
+      { time: "วันที่ 25 - 5 ของทุกเดือน เวลา 11:30 - 13:30 น.", intent: "ช่วงเงินเดือนออก ตรวจสลิปภาระหนี้ คิดเรื่องรีไฟแนนซ์หรือแบ่งเงินออม", competition: "สูงมาก (Prime Financial Time)", efficiency: "+62% Lead Application Rate" },
+      { time: "วันอาทิตย์ เวลา 20:00 - 22:30 น. (Sunday Planning)", intent: "วางแผนการเงินประจำสัปดาห์ในบ้าน มีเวลาศึกษาแอป Dime! และตัดสินใจเปิดพอร์ต", competition: "ต่ำ - ปานกลาง", efficiency: "+78% App Install & Account Open" },
+      { time: "วันธรรมดา เวลา 06:45 - 08:15 น. (Morning Commute)", intent: "ช่วงรถติดบนท้องถนน คนขับรถเห็นบิลบอร์ด KKP รถเรียกเงิน สอดคล้องกับแอดบนฟีดมือถือ", competition: "ต่ำ", efficiency: "+41% CTR & Brand Recall" }
     ]
   }
 };
 
-// 3. Visual Trend & Design Listening Platforms Mock Data
+// 3. Visual Trend & Design Listening Platforms Mock Data for KKP Graphic Design
 const DESIGN_LISTENING_DATA = {
   elements: [
-    { id: "e1", category: "Color", name: "Cyber Cyan & Slate Dark", freq: 88, lift: "+34.5%" },
-    { id: "e2", category: "Typography", name: "Bold Loopless Thai (ฟอนต์ไม่มีหัว)", freq: 92, lift: "+28.2%" },
-    { id: "e3", category: "Layout", name: "Split Screen Packshot + Texture Zoom", freq: 79, lift: "+41.0%" },
-    { id: "e4", category: "Visual Cue", name: "Droplet Water Ripple (ระลอกน้ำใส)", freq: 84, lift: "+36.8%" },
-    { id: "e5", category: "Badge", name: "SPF50+ Holographic Pill Badge", freq: 95, lift: "+22.4%" }
+    { id: "e1", category: "Color Identity", name: "KKP Corporate Purple (#5B2D90) & Cyber Gold (#E59324)", freq: 92, lift: "+41.5%" },
+    { id: "e2", category: "Typography", name: "Modern Loopless Thai (IBM Plex Sans Thai) & Space Mono Rates", freq: 96, lift: "+38.2%" },
+    { id: "e3", category: "Imagery Cue", name: "Real Vehicle Photography (ภาพรถจริงบนถนน แสงธรรมชาติ แทน 3D Render)", freq: 88, lift: "+48.0%" },
+    { id: "e4", category: "Badge System", name: "Transparent Effective APR Pill Badge (ดอกเบี้ยโปร่งใส เริ่ม 0.59%)", freq: 94, lift: "+36.5%" },
+    { id: "e5", category: "Layout & Legal", name: "Clean FinTech Bento Box with BOT Compliance Footer", freq: 100, lift: "+25.4%" }
   ],
   moodboardKeywords: [
-    { query: "ดูน่าเชื่อถือ (Trust) + วัยรุ่น (Gen Z)", palette: ["#19C3EB", "#0F172A", "#F8FAFC", "#38BDF8"], font: "Display Geometric + Clean Thai", composition: "Asymmetric Bento with clean white space" },
-    { query: "สปอร์ตแอคทีฟ (Active) + กันน้ำกันเหงื่อ", palette: ["#FF5E1E", "#0A0A0A", "#E2E8F0", "#FFE600"], font: "Italic Bold Sans + Dynamic Angle", composition: "Motion blur splash & High contrast badges" },
-    { query: "คลีนบิวตี้ (Clean Beauty) + ออร์แกนิก", palette: ["#2BD14B", "#F5ECD2", "#1E293B", "#86EFAC"], font: "Serif Minimal + Elegant Spacing", composition: "Natural sunlight shadows & Macro botanical textures" }
+    {
+      query: "KKP รถเรียกเงิน (RRN) — มั่นคง เข้าถึงง่าย อนุมัติไว ได้เงินจริง",
+      product: "KKP Auto / รถเรียกเงิน",
+      palette: ["#5B2D90", "#E59324", "#1E293B", "#FFFFFF"],
+      font: "IBM Plex Sans Thai Bold + Space Mono Numerals",
+      composition: "Real Pickup/SUV Hero Shot + Golden Amber APR Badge (0.59%) + Fast Online Form Mockup"
+    },
+    {
+      query: "KKP Dime! — วัยรุ่น Gen Z ดอกเบี้ยสูง 3% ลงทุนหุ้นสหรัฐฯ เริ่ม 50 บ.",
+      product: "KKP Dime! FinTech App",
+      palette: ["#19C3EB", "#5B2D90", "#2BD14B", "#0D0E12"],
+      font: "Clean Neo-Grotesk Thai + High-Tech Sans",
+      composition: "Dark Mode FinTech UI + 3D Floating Global Stock Icons (Apple, Tesla) + Holographic Dime Card"
+    },
+    {
+      query: "KKP Phatra Wealth — บริหารความมั่งคั่งระดับสูง พรีเมียม สง่างาม เหนือกาลเวลา",
+      product: "Phatra Private Wealth Management",
+      palette: ["#2D1445", "#D4AF37", "#334155", "#F8FAFC"],
+      font: "Refined Editorial Serif + Prestigious Sans Thai",
+      composition: "Architectural Minimalist Framing + Subtle Foil Gold Accents + Global Investment Trend Lines"
+    }
   ],
   fatigueData: [
-    { template: "Template A (Hero Model Pointing at Sunscreen)", exposureDays: 19, impressions: "1.4M", fatigueStatus: "SEVERE FATIGUE (-52% CTR)", color: "#ef4444", action: "เปลี่ยนอาร์ตเวิร์กด่วน!" },
-    { template: "Template B (Macro Texture Swatch + Droplet)", exposureDays: 8, impressions: "620K", fatigueStatus: "HEALTHY (+14% CTR)", color: "#22c55e", action: "ประสิทธิภาพยังดี ขยายสเกลต่อได้" },
-    { template: "Template C (Comparison 8-Hour Oil Blotting Sheet)", exposureDays: 14, impressions: "980K", fatigueStatus: "MODERATE FATIGUE (-18% CTR)", color: "#f59e0b", action: "แนะนำสลับคู่สีใหม่เพื่อยืดอายุแอด" }
+    {
+      template: "Template A: KKP รถเรียกเงิน (ป้ายแบนเนอร์รูปรถกระบะ + ป้ายแดงดอกเบี้ยด่วน)",
+      product: "KKP Auto RRN",
+      exposureDays: 24,
+      impressions: "2.1M",
+      fatigueStatus: "SEVERE FATIGUE (-54% CTR)",
+      color: "#ef4444",
+      action: "รีเฟรชอาร์ตเวิร์กด่วน! แนะนำเปลี่ยนเป็นรูปรถ SUV ครอบครัว และปรับคู่สีตาม KKP Purple-Gold Guideline"
+    },
+    {
+      template: "Template B: KKP Dime! (Dark Mode FinTech + 3D US Stocks Apple/Tesla)",
+      product: "KKP Dime!",
+      exposureDays: 10,
+      impressions: "820K",
+      fatigueStatus: "HEALTHY (+22% CTR)",
+      color: "#22c55e",
+      action: "ประสิทธิภาพสูงมาก อัตราการเปิดบัญชีเพิ่มขึ้น แนะนำขยายงบและสเกลแคมเปญต่อได้"
+    },
+    {
+      template: "Template C: KKP Personal Loan (รวมหนี้บัตรเครดิต ลดค่างวด 50%)",
+      product: "KKP Loan Sure",
+      exposureDays: 18,
+      impressions: "1.3M",
+      fatigueStatus: "MODERATE FATIGUE (-21% CTR)",
+      color: "#f59e0b",
+      action: "เริ่มเกิดอาการมองข้าม แนะนำทำ A/B Testing สลับ Headline และเปลี่ยนชาร์จคำนวณค่างวดรายเดือนใหม่"
+    }
   ]
 };
 
@@ -171,7 +232,7 @@ const DESIGN_LISTENING_DATA = {
 let currentViewMode = "network"; // "volume" or "network"
 let activePillarKey = "standard";
 let activeDesignModule = "visual-trend";
-let searchKeywordPrompt = "ดูน่าเชื่อถือ (Trust) + วัยรุ่น (Gen Z)";
+let searchKeywordPrompt = "KKP รถเรียกเงิน (RRN) — มั่นคง เข้าถึงง่าย อนุมัติไว ได้เงินจริง";
 
 /* ─────────────────────────────────────────────────────────────────────────
    MAIN RENDER
@@ -186,15 +247,16 @@ export async function render(ctx = {}) {
       <section class="listening-header-hero">
         <div class="listening-hero-badge">
           <span class="pulse-indicator"></span>
-          <span>DATA-DRIVEN MARKETING & SOCIAL LISTENING 2.0</span>
-          <span class="badge-tag">AINSIGHT NETWORK SYSTEM</span>
+          <span>KKP GRAPHIC DESIGN & FINANCIAL MARKETING INTELLIGENCE</span>
+          <span class="badge-tag">AINSIGHT CONNECTED ENGINE</span>
         </div>
         <h1 class="listening-hero-title">
-          เปลี่ยนจากดูแค่ "ปริมาณ" สู่การค้นหา "ความเชื่อมโยง" ด้วย AI Network Graph
+          เปลี่ยนจากดูแค่ "ปริมาณ Mentions" สู่การค้นหา "ความเชื่อมโยง" ด้วย AI Network Graph
         </h1>
         <p class="listening-hero-sub">
-          ปัญหาเดิมของ Social Listening คือการเห็นเพียงแค่ Volume ผ่านกราฟแท่งหรือกราฟวงกลม ซึ่งตอบไม่ได้ว่าข้อมูลเชื่อมโยงกันอย่างไร
-          เมื่อนำ AI มาสร้าง <strong>Network Graph</strong> จะเผยให้เห็นมิติเชิงลึก นำไปสู่ 6 มุมมองการตลาด และ 3 ระบบ Visual Intelligence สำหรับงานออกแบบ
+          ปัญหาเดิมของ Social Listening คือเห็นเพียงแค่ Volume กราฟแท่งหรือกราฟวงกลม ซึ่งตอบไม่ได้ว่าข้อมูลเชื่อมโยงกันอย่างไร
+          เมื่อนำ AI มาสร้าง <strong>Network Graph สำหรับกลุ่มธุรกิจการเงินเกียรตินาคินภัทร (KKP)</strong> จะเผยให้เห็นความเชื่อมโยงระหว่าง
+          <em>พฤติกรรมลูกค้า ↔ ข้อกำหนด ธปท. ↔ คู่แข่ง Non-bank ↔ องค์ประกอบภาพกราฟิกดีไซน์</em> ที่สร้างผลลัพธ์ได้จริง
         </p>
 
         <!-- Toggle Paradigm Switcher -->
@@ -216,12 +278,12 @@ export async function render(ctx = {}) {
         </div>
       </section>
 
-      <!-- 2. Section A: The 6 Strategic Marketing Pillars (Sunscreen Case Study) -->
+      <!-- 2. Section A: The 6 Strategic Marketing Pillars (KKP Financial Group) -->
       <section class="listening-section">
         <div class="section-title-wrap">
-          <div class="section-pill-tag">CASE STUDY: ตลาดครีมกันแดด</div>
-          <h2 class="section-main-heading">6 มุมมองสำคัญในการทำการตลาดด้วย Connected Data</h2>
-          <p class="section-sub-heading">คลิกเลือกแต่ละมุมมองเพื่อดูผลการวิเคราะห์ความเชื่อมโยงและกลยุทธ์ที่นำไปใช้งานได้จริง</p>
+          <div class="section-pill-tag">KKP FINANCIAL GROUP STRATEGY</div>
+          <h2 class="section-main-heading">6 มุมมองสำคัญในการทำการตลาดและสื่อสารด้วย Connected Data</h2>
+          <p class="section-sub-heading">คลิกเลือกแต่ละมุมมองเพื่อดูผลการวิเคราะห์ความเชื่อมโยงและกลยุทธ์ที่ทีมกราฟิกและทีมการตลาด KKP นำไปใช้จริง</p>
         </div>
 
         <div class="pillars-nav-bar">
@@ -247,15 +309,15 @@ export async function render(ctx = {}) {
         </div>
       </section>
 
-      <!-- 3. Section B: The 3 Visual & Design Intelligence Systems for Designers & Teams -->
+      <!-- 3. Section B: The 3 Visual & Design Intelligence Systems for KKP Designers -->
       <section class="listening-section design-intelligence-section">
         <div class="section-title-wrap">
-          <div class="section-pill-tag" style="background:rgba(168,85,247,0.15);color:#c084fc;border-color:rgba(168,85,247,0.3);">
-            FOR DESIGNERS & CREATIVE TEAMS
+          <div class="section-pill-tag" style="background:rgba(91,45,144,0.2);color:#c084fc;border-color:rgba(147,51,234,0.4);">
+            FOR KKP GRAPHIC DESIGN & CREATIVE TEAMS
           </div>
-          <h2 class="section-main-heading">3 ระบบ Visual Intelligence ยกระดับงานดีไซน์ด้วย Data</h2>
+          <h2 class="section-main-heading">3 ระบบ Visual Intelligence ยกระดับงานออกแบบ KKP ด้วย Data</h2>
           <p class="section-sub-heading">
-            เปลี่ยน Social Listening จากการจับข้อความ มาจับ "องค์ประกอบภาพ" ค้นหา Moodboard ด้วยกราฟความสัมพันธ์ และวัดผลงานกราฟิกในระดับไมโคร
+            เปลี่ยนการฟังเสียงโซเชียลจากการจับข้อความ มาจับ "องค์ประกอบภาพทางการเงิน" ค้นหา Moodboard เชื่อมโยงแบรนด์ KKP และวัดผลชิ้นงานกราฟิกในระดับไมโคร
           </p>
         </div>
 
@@ -265,21 +327,21 @@ export async function render(ctx = {}) {
             <span class="design-tab-icon">👁️</span>
             <div>
               <span class="design-tab-title">1. Visual Trend & Design Listening</span>
-              <span class="design-tab-sub">วิเคราะห์องค์ประกอบภาพ (คู่สี ↔ ฟอนต์ ↔ เลย์เอาต์)</span>
+              <span class="design-tab-sub">วิเคราะห์องค์ประกอบภาพ (คู่สี KKP ↔ ฟอนต์ ↔ ภาพรถจริง)</span>
             </div>
           </button>
           <button type="button" class="btn-design-tab ${activeDesignModule === "moodboard-graph" ? "is-active" : ""}" data-module="moodboard-graph">
             <span class="design-tab-icon">💡</span>
             <div>
               <span class="design-tab-title">2. Intelligent Moodboard & Concept</span>
-              <span class="design-tab-sub">แปลงคีย์เวิร์ดเป็นกราฟภาพ & หาช่องว่างไม่ซ้ำคู่แข่ง</span>
+              <span class="design-tab-sub">แปลงคีย์เวิร์ด KKP เป็นกราฟภาพ & หา White Space หลบสีคู่แข่ง</span>
             </div>
           </button>
           <button type="button" class="btn-design-tab ${activeDesignModule === "asset-tracker" ? "is-active" : ""}" data-module="asset-tracker">
             <span class="design-tab-icon">🎯</span>
             <div>
               <span class="design-tab-title">3. Creative Asset Impact Tracker</span>
-              <span class="design-tab-sub">วัดผลองค์ประกอบย่อยในภาพ & ดักจับ Ad Fatigue</span>
+              <span class="design-tab-sub">วัดผลองค์ประกอบแอด KKP & ดักจับ Ad Fatigue ก่อนค่าแอดพุ่ง</span>
             </div>
           </button>
         </div>
@@ -307,10 +369,10 @@ function renderParadigmDemo() {
         <div class="demo-volume-card">
           <div class="demo-card-head">
             <div>
-              <div class="demo-card-title">Share of Voice (จำนวนการพูดถึง)</div>
+              <div class="demo-card-title">Share of Voice ในตลาดสินเชื่อ & การเงินดิจิทัล</div>
               <div class="demo-card-sub">กราฟปริมาณแบบดั้งเดิม แสดงแค่ยอด Mentions โดยรวม</div>
             </div>
-            <span class="badge badge-warn">Total Mentions: 148,500</span>
+            <span class="badge badge-warn">Total Mentions: 182,400</span>
           </div>
           <div class="volume-bars-list">
             ${VOLUME_DATA.brands.map(b => `
@@ -329,14 +391,14 @@ function renderParadigmDemo() {
 
         <div class="demo-limitation-callout">
           <div class="callout-badge-danger">❌ จุดบอดของกราฟปริมาณ (Volume Flaw)</div>
-          <h4>รู้แค่ "ใครถูกพูดถึงเยอะกว่า" แต่ไม่รู้ "ทำไมถึงถูกเลือก"</h4>
+          <h4>รู้แค่ "ใครถูกพูดถึงเยอะกว่า" แต่ไม่รู้ "ทำไมถึงถูกเลือก หรือติดปัญหาอะไร"</h4>
           <p>
-            กราฟแท่งบอกว่าแบรนด์คู่แข่งมียอด Mentions สูงกว่า 42,100 ครั้ง แต่ <strong>บอกไม่ได้เลย</strong> ว่าคนที่พูดถึงกำลังชมหรือบ่น,
-            มีปัญหาเรื่องสิวผดหรือความมัน, หรือผู้บริโภคกำลังเอาแบรนด์เราไปเทียบกับใครในสถานการณ์ใด
-            ทำให้ทีมการตลาดตัดสินใจเพิ่มงบโฆษณาแบบหว่านแหโดยไม่ตรงจุด!
+            กราฟแท่งบอกว่าแบรนด์คู่แข่ง Non-Bank มียอด Mentions สูงกว่าที่ 52,100 ครั้ง แต่ <strong>บอกไม่ได้เลย</strong> ว่าคนที่พูดถึงกำลังร้องเรียนเรื่องดอกเบี้ยแอบแฝง,
+            กังวลเรื่องการเช็กประวัติเครดิตบูโร, หรือต้องการเงินกู้ด่วนแบบไม่ต้องจอดรถทิ้งไว้
+            ผลลัพธ์คือทีมการตลาดอาจทุ่มงบโฆษณาซื้อ Media แบบหว่านแห และดีไซเนอร์ KKP ก็ออกแบบแบนเนอร์ที่ไม่ตรงกับ Pain Point แท้จริง!
           </p>
           <div class="callout-action-hint">
-            💡 กดสลับไปที่ <strong>"วิเคราะห์ความเชื่อมโยง (AI Network Graph)"</strong> ด้านบน เพื่อดูว่าข้อมูลเดียวกันเมื่อเชื่อมโยงกันจะเห็นอะไร
+            💡 กดสลับไปที่ <strong>"วิเคราะห์ความเชื่อมโยง (AI Network Graph)"</strong> ด้านบน เพื่อดูว่าเมื่อข้อมูลเชื่อมโยงกันแล้วจะเห็น Insight ใด
           </div>
         </div>
       </div>
@@ -349,39 +411,39 @@ function renderParadigmDemo() {
       <div class="demo-canvas-card">
         <div class="demo-card-head">
           <div>
-            <div class="demo-card-title">AI Network Graph (Connected Marketing Dimensions)</div>
-            <div class="demo-card-sub">แสดงความเชื่อมโยงระหว่าง แบรนด์ ↔ คุณสมบัติ ↔ Pain Point ↔ ช่องทางจำหน่าย</div>
+            <div class="demo-card-title">KKP AI Network Graph (Connected Financial Dimensions)</div>
+            <div class="demo-card-sub">แสดงความเชื่อมโยงระหว่าง ผลิตภัณฑ์ KKP ↔ Pain Point ผู้กู้ ↔ ข้อกำหนด ธปท. ↔ ช่องทางสื่อสาร</div>
           </div>
           <div class="demo-badges-group">
-            <span class="badge" style="background:#19c3eb22;color:#19c3eb;border:1px solid #19c3eb44;">● แบรนด์</span>
+            <span class="badge" style="background:#5B2D9033;color:#c084fc;border:1px solid #5B2D9088;">● แบรนด์ KKP</span>
             <span class="badge" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44;">● ความต้องการลูกค้า</span>
             <span class="badge" style="background:#ef444422;color:#ef4444;border:1px solid #ef444444;">● Pain Points</span>
-            <span class="badge" style="background:#ffc61a22;color:#ffc61a;border:1px solid #ffc61a44;">● อินฟลูเอนเซอร์</span>
+            <span class="badge" style="background:#ffc61a22;color:#ffc61a;border:1px solid #ffc61a44;">● อินฟลูฯ & สื่อ</span>
           </div>
         </div>
         <div class="network-canvas-container">
           <canvas id="main-network-canvas" width="800" height="380"></canvas>
           <div class="canvas-interactive-hint">
-            <span>🖱️ ลากโหนด (Drag Node) เพื่อปรับมุมมอง หรือชี้โหนดเพื่อดูมิติความเชื่อมโยง</span>
+            <span>🖱️ ลากโหนด (Drag Node) เพื่อปรับมุมมอง หรือชี้โหนดเพื่อดูมิติความเชื่อมโยงทางการเงิน</span>
           </div>
         </div>
       </div>
 
       <div class="demo-insight-callout">
         <div class="callout-badge-success">✨ คุณค่าของ Connected Data (AInsight Paradigm)</div>
-        <h4>เห็นโอกาสทางการตลาดที่ซ่อนอยู่ใต้ตัวเลข</h4>
+        <h4>เห็นโอกาสทางการตลาดและข้อได้เปรียบที่ซ่อนอยู่ใต้ตัวเลข</h4>
         <div class="insight-pill-list">
           <div class="insight-pill-item">
-            <span class="pill-dot bg-cyan"></span>
-            <span><strong>จุดเชื่อมที่ชัดเจน:</strong> 78% ของผู้บริโภคที่บ่นเรื่อง <em>"สิวผด & แดดเมืองไทย"</em> จะนำ CONT ไปเทียบกับ Brand X โดยตรง</span>
+            <span class="pill-dot" style="background:#c084fc;"></span>
+            <span><strong>จุดเชื่อมที่ชัดเจน:</strong> 82% ของลูกค้าที่ค้นหา <em>"รีไฟแนนซ์รถยนต์ ดอกเบี้ยถูก"</em> จะนำ KKP รถเรียกเงิน ไปเทียบกับเงินติดล้อทันที</span>
           </div>
           <div class="insight-pill-item">
             <span class="pill-dot bg-green"></span>
-            <span><strong>โอกาสสร้างจุดขาย:</strong> คนต้องการกันแดดที่ <em>"เซ็ตตัวเร็ว < 30 วินาที"</em> เพื่อแต่งหน้าต่อทันที ซึ่งคู่แข่งยังไม่มีใครเคลม</span>
+            <span><strong>ข้อได้เปรียบเชิงโครงสร้าง:</strong> KKP เป็นธนาคารพาณิชย์ จึงมีจุดเด่นเรื่อง <em>"ดอกเบี้ยถูกกว่า Non-bank อย่างโปร่งใส"</em> ซึ่งเป็น Unmet Need สำคัญ</span>
           </div>
           <div class="insight-pill-item">
-            <span class="pill-dot bg-yellow"></span>
-            <span><strong>ความคุ้มค่าอินฟลูฯ:</strong> Micro-Doctor มีค่า Trust เชื่อมโยงกับยอดสั่งซื้อสูงกว่าดาราดัง 3.2 เท่า</span>
+            <span class="pill-dot bg-cyan"></span>
+            <span><strong>โอกาสครีเอทีฟ KKP Dime!:</strong> คนรุ่นใหม่มองหา <em>"หุ้นอเมริกาเริ่มต้น 50 บาท ควบคู่ดอกเบี้ยเงินฝาก 3%"</em> นำไปสร้าง Key Visual สไตล์ FinTech ได้โดดเด่น</span>
           </div>
         </div>
       </div>
@@ -390,7 +452,7 @@ function renderParadigmDemo() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   SECTION A: 6 PILLARS DETAIL RENDERER
+   SECTION A: 6 PILLARS DETAIL RENDERER (KKP FINANCIAL GROUP)
 ───────────────────────────────────────────────────────────────────────── */
 function renderPillarDetail(key) {
   const data = PILLARS_DATA[key];
@@ -405,16 +467,16 @@ function renderPillarDetail(key) {
         </div>
         <div class="standard-matrix-grid">
           ${data.items.map(item => `
-            <div class="standard-item-card ${item.status === 'Must-Have Baseline' ? 'is-baseline' : 'is-differentiator'}">
+            <div class="standard-item-card ${item.status.includes('Must-Have') ? 'is-baseline' : 'is-differentiator'}">
               <div class="std-head">
                 <span class="std-name">${escapeHtml(item.label)}</span>
-                <span class="std-badge ${item.status === 'Must-Have Baseline' ? 'badge-warn' : 'badge-ok'}">${item.status}</span>
+                <span class="std-badge ${item.status.includes('Must-Have') ? 'badge-warn' : 'badge-ok'}">${item.status}</span>
               </div>
               <div class="std-progress-wrap">
                 <div class="std-progress-bar" style="width:${item.expectedPct}%;"></div>
               </div>
               <div class="std-pct-row">
-                <span>ความคาดหวังของผู้บริโภค:</span>
+                <span>ความคาดหวัง / กฎเกณฑ์ที่ต้องมี:</span>
                 <strong>${item.expectedPct}%</strong>
               </div>
               <p class="std-desc">${escapeHtml(item.desc)}</p>
@@ -422,7 +484,7 @@ function renderPillarDetail(key) {
           `).join("")}
         </div>
         <div class="strategic-takeaway-bar">
-          <strong>💡 กลยุทธ์ที่นำไปใช้:</strong> ครีมกันแดดทุกตัวต้องใส่ SPF50+ & PA++++ เป็นพื้นฐาน แต่ห้ามใช้เป็นคำพาดหัวโฆษณาหลักเด็ดขาด ให้ดึงคุณสมบัติกลุ่ม <em>Value Differentiator</em> เช่น ไม่ทำลายปะการัง หรือกันฝุ่น PM2.5 มาเป็นจุดขายแทน
+          <strong>💡 กลยุทธ์ทีมกราฟิก KKP:</strong> คำเตือน ธปท. "กู้เท่าที่จำเป็นและชำระคืนไหว" เป็นข้อกำหนดกฎหมาย 100% ที่ต้องวางท้ายอาร์ตเวิร์กให้อ่านง่ายเป็นระเบียบตาม Bento System แต่ห้ามใช้เป็นจุดขายหลัก ให้ชู <em>Value Differentiator</em> เช่น "ดอกเบี้ยต่ำระบบธนาคารเริ่มต้น 0.59% & ไม่ต้องโอนเล่มทะเบียน" ขึ้นเป็นข้อความพาดหัวหลักแทน
         </div>
       </div>
     `;
@@ -438,9 +500,9 @@ function renderPillarDetail(key) {
         <div class="needs-cluster-grid">
           ${data.clusters.map(cluster => `
             <div class="needs-cluster-card">
-              <div class="needs-core-tag">🔥 ความต้องการหลัก: ${escapeHtml(cluster.core)}</div>
+              <div class="needs-core-tag">🔥 ผลิตภัณฑ์ & ความต้องการหลัก: ${escapeHtml(cluster.core)}</div>
               <div class="needs-connected-list">
-                <span class="needs-conn-label">คุณสมบัติเชื่อมโยงที่ผู้บริโภคมองหา:</span>
+                <span class="needs-conn-label">คุณสมบัติเชื่อมโยงที่ลูกค้ามองหา:</span>
                 <div class="needs-pills">
                   ${cluster.connected.map(c => `<span class="chip chip-cyan">${escapeHtml(c)}</span>`).join("")}
                 </div>
@@ -449,7 +511,7 @@ function renderPillarDetail(key) {
                 <strong>Insight ลึก:</strong> ${escapeHtml(cluster.insight)}
               </div>
               <div class="needs-creative-hook">
-                <span class="hook-label">🎯 ข้อความพาดหัวโฆษณาแนะนำ (Ad Hook):</span>
+                <span class="hook-label">🎯 ข้อความพาดหัวโฆษณาแนะนำ (Creative Ad Hook):</span>
                 <div class="hook-quote">"${escapeHtml(cluster.creativeHook)}"</div>
               </div>
             </div>
@@ -471,22 +533,22 @@ function renderPillarDetail(key) {
             <div class="competitor-compare-card">
               <div class="comp-head-row">
                 <div class="comp-vs">
-                  <span class="our-brand-badge">${escapeHtml(m.ourBrand)}</span>
+                  <span class="our-brand-badge" style="background:#5B2D90;color:#fff;">${escapeHtml(m.ourBrand)}</span>
                   <span class="vs-text">VS</span>
                   <span class="their-brand-badge">${escapeHtml(m.realCompetitor)}</span>
                 </div>
                 <span class="badge badge-info">ความถี่การถูกนำมาเปรียบเทียบ: ${m.overlapPct}%</span>
               </div>
               <div class="comp-context">
-                <strong>บริบทที่ถูกพูดถึง:</strong> "${escapeHtml(m.context)}"
+                <strong>บริบทที่ลูกค้าเปรียบเทียบในโซเชียล:</strong> "${escapeHtml(m.context)}"
               </div>
               <div class="comp-diff-grid">
                 <div class="diff-box advantage">
-                  <span class="diff-title">✅ จุดที่เราได้เปรียบ:</span>
+                  <span class="diff-title">✅ ข้อได้เปรียบของ KKP:</span>
                   <p>${escapeHtml(m.ourAdvantage)}</p>
                 </div>
                 <div class="diff-box action">
-                  <span class="diff-title">🎨 แผนการออกแบบคอนเทนต์ตั้งรับ:</span>
+                  <span class="diff-title">🎨 แผนการออกแบบคอนเทนต์และกราฟิกตั้งรับ:</span>
                   <p>${escapeHtml(m.actionPlan)}</p>
                 </div>
               </div>
@@ -551,7 +613,7 @@ function renderPillarDetail(key) {
                 <span class="badge" style="background:${a.riskColor}22;color:${a.riskColor};border:1px solid ${a.riskColor}66;">${a.riskLevel}</span>
               </div>
               <div class="alert-price-anomaly">
-                ราคาที่ตรวจจับ: <strong>${escapeHtml(a.priceDetected)}</strong>
+                พฤติกรรมหลอกลวงที่ตรวจจับ: <strong>${escapeHtml(a.priceDetected)}</strong>
               </div>
               <p class="alert-issue">${escapeHtml(a.issue)}</p>
               <div class="alert-status-action">
@@ -577,11 +639,11 @@ function renderPillarDetail(key) {
             <div class="posting-window-card">
               <div class="win-time-badge">${escapeHtml(w.time)}</div>
               <div class="win-intent">
-                <strong>พฤติกรรมผู้ชม:</strong> ${escapeHtml(w.intent)}
+                <strong>พฤติกรรมและความต้องการทางการเงิน:</strong> ${escapeHtml(w.intent)}
               </div>
               <div class="win-meta-row">
                 <div class="win-meta">
-                  <span class="lbl">การแข่งขันของคู่แข่ง:</span>
+                  <span class="lbl">สภาพการแข่งขันในตลาด:</span>
                   <span class="val">${escapeHtml(w.competition)}</span>
                 </div>
                 <div class="win-meta">
@@ -600,16 +662,16 @@ function renderPillarDetail(key) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   SECTION B: 3 DESIGN INTELLIGENCE MODULES RENDERER
+   SECTION B: 3 DESIGN INTELLIGENCE MODULES FOR KKP GRAPHIC DESIGN
 ───────────────────────────────────────────────────────────────────────── */
 function renderDesignModule(moduleKey) {
   if (moduleKey === "visual-trend") {
     return `
       <div class="design-module-container">
         <div class="module-intro-banner">
-          <h3>1. Visual Trend & Design Listening Platform</h3>
+          <h3>1. Visual Trend & Design Listening Platform สำหรับ KKP</h3>
           <p>
-            ใช้ <strong>AI Image Recognition</strong> ดักจับองค์ประกอบภาพของคู่แข่งในตลาด เชื่อมโยงความสัมพันธ์ของคู่สี สไตล์ฟอนต์ และการจัดวางภาพ เพื่อดูว่าสไตล์แบบใดดึงดูด Engagement ได้สูงสุด
+            ใช้ <strong>AI Image Recognition</strong> ดักจับองค์ประกอบภาพของสถาบันการเงินและสินเชื่อในตลาด เชื่อมโยงความสัมพันธ์ของคู่สี KKP สไตล์ฟอนต์ และภาพยานพาหนะจริง เพื่อดูว่าสไตล์แบบใดดึงดูด Lead และ Engagement ได้สูงสุด
           </p>
         </div>
 
@@ -617,8 +679,8 @@ function renderDesignModule(moduleKey) {
           <!-- Left: Design Element Network Table & Metrics -->
           <div class="design-elements-table-card">
             <div class="table-card-head">
-              <span class="card-title">องค์ประกอบภาพยอดนิยม & Engagement Lift</span>
-              <span class="badge badge-info">วิเคราะห์จาก 4,200 ชิ้นงาน</span>
+              <span class="card-title">องค์ประกอบภาพยอดนิยมของ KKP & ประสิทธิภาพ CTR Lift</span>
+              <span class="badge badge-info">วิเคราะห์จาก 6,800 ชิ้นงานการเงิน</span>
             </div>
             <div class="element-network-list">
               ${DESIGN_LISTENING_DATA.elements.map(e => `
@@ -631,7 +693,7 @@ function renderDesignModule(moduleKey) {
                     <div class="elem-freq-bar-wrap">
                       <div class="elem-freq-bar" style="width:${e.freq}%;"></div>
                     </div>
-                    <span class="elem-lift">${e.lift} Engagement</span>
+                    <span class="elem-lift">${e.lift} Lift</span>
                   </div>
                 </div>
               `).join("")}
@@ -641,20 +703,20 @@ function renderDesignModule(moduleKey) {
           <!-- Right: Visual Relationship Graph Canvas -->
           <div class="design-graph-card">
             <div class="table-card-head">
-              <span class="card-title">Design Element Network Graph (โครงข่ายองค์ประกอบ)</span>
-              <span class="badge badge-ok">AI Real-time</span>
+              <span class="card-title">KKP Design Element Network Graph (โครงข่ายอัตลักษณ์)</span>
+              <span class="badge badge-ok">AI Live Analysis</span>
             </div>
             <div class="design-canvas-wrap">
               <canvas id="design-element-canvas" width="480" height="300"></canvas>
             </div>
             <div class="design-canvas-footer">
-              <span>เชื่อมโยง: [คู่สีฟ้า-ดำ] ↔ [ฟอนต์ไม่มีหัวสไตล์โมเดิร์น] ↔ [ภาพซูมเนื้อครีม]</span>
+              <span>เชื่อมโยง: [ม่วง KKP + ทองอำพัน] ↔ [ฟอนต์ไม่มีหัว IBM Plex] ↔ [ภาพถ่ายรถจริง] ↔ [ป้ายดอกเบี้ย APR]</span>
             </div>
           </div>
         </div>
 
         <div class="strategic-takeaway-bar">
-          <strong>🎨 ประโยชน์สำหรับดีไซเนอร์:</strong> ไม่ต้องเถียงกันด้วยความรู้สึก (Gut Feeling) อีกต่อไป ดีไซเนอร์สามารถบอกลูกค้าหรือผู้บริหารได้ว่า <em>"งานแคมเปญนี้เราเลือกใช้คู่สีฟ้าน้ำทะเลตัดดำและฟอนต์ไม่มีหัว เพราะสถิติย้อนหลัง 90 วัน ชี้ชัดว่าสร้าง Engagement สูงขึ้น +34.5% ในกลุ่มเป้าหมาย"</em>
+          <strong>🎨 ประโยชน์สำหรับดีไซเนอร์ KKP:</strong> ไม่ต้องเถียงกันด้วยความรู้สึก (Gut Feeling) อีกต่อไป ดีไซเนอร์สามารถแจ้งทีมการตลาดหรือผู้บริหารได้ทันทีว่า <em>"งานแคมเปญรถเรียกเงินชิ้นนี้ เราเลือกใช้ภาพถ่ายรถกระบะจริงคู่กับป้ายดอกเบี้ยสีทองอำพันบนพื้นม่วง KKP เพราะสถิติ Data listening ชี้ชัดว่าสร้าง Trust Score และยอด Lead สูงกว่าภาพ 3D Render ถึง +48.0%"</em>
         </div>
       </div>
     `;
@@ -666,13 +728,13 @@ function renderDesignModule(moduleKey) {
         <div class="module-intro-banner">
           <h3>2. Intelligent Moodboard & Visual Concept Explorer</h3>
           <p>
-            เปลี่ยนวิธีการหา Reference ที่ต้องนั่งไถ Pinterest เป็นการค้นหาด้วย <strong>ความสัมพันธ์ของข้อมูล (Keyword-to-Visual Graph)</strong> และตรวจจับ White Space เพื่อไม่ให้แบรนด์เราดีไซน์ซ้ำกับคู่แข่ง
+            เปลี่ยนวิธีการหา Reference ของทีมกราฟิก KKP ให้กลายเป็นการค้นหาด้วย <strong>ความสัมพันธ์ของข้อมูล (Keyword-to-Visual Graph)</strong> และตรวจจับ White Space เพื่อสร้างอัตลักษณ์เฉพาะตัวของ KKP ไม่ให้ซ้ำกับธนาคารคู่แข่ง
           </p>
         </div>
 
         <!-- Keyword Prompt Input Box -->
         <div class="concept-explorer-input-box">
-          <label class="explorer-label">ลองคลิกเลือกโจทย์นามธรรม หรือพิมพ์คีย์เวิร์ดของแบรนด์:</label>
+          <label class="explorer-label">ลองคลิกเลือกโจทย์แคมเปญของ KKP:</label>
           <div class="concept-preset-chips">
             ${DESIGN_LISTENING_DATA.moodboardKeywords.map((k, i) => `
               <button type="button" class="chip-preset-keyword ${searchKeywordPrompt === k.query ? 'is-active' : ''}" data-query-index="${i}">
@@ -694,9 +756,9 @@ function renderDesignModule(moduleKey) {
     return `
       <div class="design-module-container">
         <div class="module-intro-banner">
-          <h3>3. Creative Asset Impact Tracker</h3>
+          <h3>3. Creative Asset Impact Tracker สำหรับชิ้นงานโฆษณา KKP</h3>
           <p>
-            ย่อยชิ้นงานกราฟิกออกเป็น <strong>Micro-elements</strong> เพื่อดูว่าองค์ประกอบย่อยใดส่งผลต่อ CTR จริงๆ พร้อม <strong>Fatigue Heatmap</strong> แจ้งเตือนเมื่อภาพโฆษณาเริ่มถูกมองข้าม (Ad Fatigue)
+            ย่อยชิ้นงานกราฟิกออกเป็น <strong>Micro-elements</strong> เพื่อดูว่าองค์ประกอบย่อยใดในภาพโฆษณาส่งผลต่อ CTR และยอดสมัครสินเชื่อจริง พร้อม <strong>Fatigue Heatmap</strong> ดักจับเมื่อผู้บริโภคเริ่มเกิดอาการตาบอดต่อโฆษณา (Ad Fatigue)
           </p>
         </div>
 
@@ -704,37 +766,41 @@ function renderDesignModule(moduleKey) {
           <!-- Left: Micro-Element Breakdown Simulator -->
           <div class="micro-element-card">
             <div class="table-card-head">
-              <span class="card-title">การย่อยองค์ประกอบในภาพ (Micro-level Breakdown)</span>
-              <span class="badge badge-info">A/B Testing Correlation</span>
+              <span class="card-title">การย่อยองค์ประกอบในภาพแอด KKP (Micro-level Breakdown)</span>
+              <span class="badge badge-info">A/B Testing Impact</span>
             </div>
             
             <div class="micro-artwork-preview">
-              <div class="artwork-bbox box-headline" title="Headline: 2 บรรทัด + ขนาดใหญ่ (+19% CTR)">
-                <span>Headline (Font: Space Mono Bold)</span>
+              <div class="artwork-bbox box-headline" title="Headline: สั้น กระชับ มีตัวเลขอัตราดอกเบี้ย (+34% CTR)">
+                <span>Headline: 'ผ่อนรถอยู่ กู้ได้ทันที ดอกเบี้ย 0.59%'</span>
               </div>
-              <div class="artwork-bbox box-packshot" title="Hero Packshot เดี่ยว มีแสงสะท้อน (+28% CTR)">
-                <span>Packshot: 3D Studio Lighting</span>
+              <div class="artwork-bbox box-packshot" title="Hero Real Vehicle: ภาพรถกระบะ/SUV จริง ทะเบียนชัดเจน (+48% CTR)">
+                <span>Hero Imagery: Real Vehicle in Daily Life</span>
               </div>
-              <div class="artwork-bbox box-cta" title="ปุ่ม CTA สีเหลืองตัดชัด (+22% Conversion)">
-                <span>CTA Pill Button</span>
+              <div class="artwork-bbox box-cta" title="ปุ่ม CTA ชัดเจน: 'ประเมินวงเงินฟรีใน 1 นาที' (+28% Conversion)">
+                <span>CTA Button: 'ประเมินวงเงินฟรี'</span>
               </div>
-              <div class="artwork-bbox box-badge" title="Badge SPF50+ มุมขวาบน (+14% CTR)">
-                <span>SPF50+ Badge</span>
+              <div class="artwork-bbox box-badge" title="Badge APR: เริ่ม 0.59% ต่อเดือน (+42% Lead Form Submit)">
+                <span>APR 0.59% Badge</span>
               </div>
             </div>
 
             <div class="impact-breakdown-list">
               <div class="impact-item">
-                <span class="impact-name">Hero Packshot เดี่ยว (แทนรูปนางแบบ)</span>
-                <span class="impact-val text-green">+28% CTR</span>
+                <span class="impact-name">ภาพรถจริงบนถนนแสงธรรมชาติ (แทน 3D Render)</span>
+                <span class="impact-val text-green">+48% CTR & Trust</span>
               </div>
               <div class="impact-item">
-                <span class="impact-name">ข้อความสั้นกระชับ $\le$ 2 บรรทัด</span>
-                <span class="impact-val text-green">+19% CTR</span>
+                <span class="impact-name">ป้ายดอกเบี้ย APR สีทองอำพันตัวเลข Space Mono</span>
+                <span class="impact-val text-green">+42% Lead Form</span>
               </div>
               <div class="impact-item">
-                <span class="impact-name">ปุ่ม CTA สีเหลืองตัดกับพื้นหลัง</span>
-                <span class="impact-val text-green">+22% Conversion</span>
+                <span class="impact-name">พาดหัวระบุชัดเจนว่า 'ผ่อนอยู่ก็กู้ได้'</span>
+                <span class="impact-val text-green">+34% CTR</span>
+              </div>
+              <div class="impact-item">
+                <span class="impact-name">ปุ่ม Call-To-Action เน้นประเมินวงเงินฟรี</span>
+                <span class="impact-val text-green">+28% Conversion</span>
               </div>
             </div>
           </div>
@@ -742,7 +808,7 @@ function renderDesignModule(moduleKey) {
           <!-- Right: Ad Fatigue & Wear-Out Heatmap -->
           <div class="ad-fatigue-card">
             <div class="table-card-head">
-              <span class="card-title">Creative Fatigue Heatmap (ดักจับอาการตาบอดต่อโฆษณา)</span>
+              <span class="card-title">Creative Fatigue Heatmap (ดักจับอาการเบื่อโฆษณา KKP)</span>
               <span class="badge badge-warn">Real-time Decay</span>
             </div>
 
@@ -770,7 +836,7 @@ function renderDesignModule(moduleKey) {
         </div>
 
         <div class="strategic-takeaway-bar">
-          <strong>📊 ประโยชน์ต่อธุรกิจ:</strong> รู้ทันทีว่าป้ายโฆษณาขายดีเพราะ <em>"รูปขวดสินค้าที่ดูพรีเมียม"</em> หรือเพราะ <em>"ตัวเลขโปรโมชัน"</em> และเมื่อถึงวันที่คนเริ่มเบื่อแอด ระบบจะส่งสัญญาณแจ้งเตือนให้ดีไซเนอร์รีเฟรชอาร์ตเวิร์กใหม่ทันทีก่อนที่ต้นทุนค่าแอดจะพุ่งสูง!
+          <strong>📊 ประโยชน์ต่อธุรกิจ KKP:</strong> ทีมการตลาดและทีมออกแบบรู้ทันทีว่าป้ายโฆษณาได้ผลตอบรับดีเพราะ <em>"ภาพรถจริงที่สร้างความน่าเชื่อถือ"</em> หรือเพราะ <em>"ตัวเลขดอกเบี้ยโปรโมชัน"</em> และเมื่อถึงวันที่ผู้บริโภคเริ่มเกิดอาการตาบอดต่อโฆษณา (Ad Fatigue) ระบบจะแจ้งเตือนให้ดีไซเนอร์รีเฟรชอาร์ตเวิร์กใหม่ทันทีก่อนที่ต้นทุนค่า Lead ของ KKP จะสูงเกินเพดาน!
         </div>
       </div>
     `;
@@ -784,7 +850,7 @@ function renderMoodboardResult(query) {
 
   return `
     <div class="concept-card concept-palette-card">
-      <div class="concept-card-title">🎨 แนะนำ Color Palette ตามความรู้สึก</div>
+      <div class="concept-card-title">🎨 Color Palette: ${escapeHtml(match.product)}</div>
       <div class="concept-swatches-grid">
         ${match.palette.map(hex => `
           <div class="concept-swatch-box" style="background:${hex};" data-hex="${hex}" title="คลิกเพื่อคัดลอก ${hex}">
@@ -792,37 +858,38 @@ function renderMoodboardResult(query) {
           </div>
         `).join("")}
       </div>
-      <div class="concept-card-sub">คลิกที่ช่องสีเพื่อคัดลอกรหัส Hex</div>
+      <div class="concept-card-sub">คลิกที่ช่องสีเพื่อคัดลอกรหัส Hex ไปใช้ใน Figma หรือ Photoshop</div>
     </div>
 
     <div class="concept-card concept-typography-card">
-      <div class="concept-card-title">🔤 สไตล์ตัวอักษรที่ตรงโจทย์</div>
+      <div class="concept-card-title">🔤 สไตล์ตัวอักษร & อารมณ์ภาพที่ตรงโจทย์</div>
       <div class="concept-font-preview">
-        <h3>${escapeHtml(match.font)}</h3>
-        <p>ให้ความรู้สึกพรีเมียม หนักแน่น และเข้าถึงง่ายในเวลาเดียวกัน</p>
+        <h3 style="color:#5B2D90;font-size:1.15rem;margin-bottom:6px;">${escapeHtml(match.font)}</h3>
+        <p style="color:#cbd5e1;font-size:0.84rem;line-height:1.5;">${escapeHtml(match.composition)}</p>
       </div>
     </div>
 
     <div class="concept-card concept-whitespace-card">
-      <div class="concept-card-title">🗺️ แผนที่ White Space (หลีกเลี่ยงคู่แข่ง)</div>
+      <div class="concept-card-title">🗺️ แผนที่ White Space (หลีกเลี่ยงสีซ้ำคู่แข่ง)</div>
       <div class="whitespace-radar-box">
-        <div class="competitor-dot dot-a" title="Brand A จองสีส้ม-ขาว">Brand A (ส้ม)</div>
-        <div class="competitor-dot dot-b" title="Brand B จองสีฟ้า-ขาว">Brand B (ฟ้า)</div>
-        <div class="whitespace-sweetspot" title="White Space ของเรา: Cyber Cyan + Deep Obsidian">
-          ★ แนะนำ White Space ของเรา
+        <div class="competitor-dot dot-a" style="background:#00a950;color:#fff;" title="KBANK จองสีเขียว">KBANK (เขียว)</div>
+        <div class="competitor-dot dot-b" style="background:#fecb00;color:#000;" title="BAY จองสีเหลือง">BAY (เหลือง)</div>
+        <div class="competitor-dot" style="position:absolute;top:20px;left:35px;background:#00a3e0;color:#fff;font-size:0.68rem;padding:3px 8px;border-radius:99px;" title="KTB จองสีฟ้า">KTB (ฟ้า)</div>
+        <div class="whitespace-sweetspot" style="border-color:#5B2D90;background:rgba(91,45,144,0.3);color:#e2d9f3;" title="White Space ของ KKP: Corporate Purple + Cyber Gold">
+          ★ White Space ของ KKP: Deep Purple + Amber Gold
         </div>
       </div>
-      <div class="concept-card-sub">หลีกเลี่ยงโทนสีที่คู่แข่งครอบครอง เพื่อสร้างเอกลักษณ์เฉพาะตัว</div>
+      <div class="concept-card-sub">หลีกเลี่ยงโทนสีที่ธนาคารคู่แข่งครอบครอง เพื่อสร้างเอกลักษณ์เฉพาะตัวที่ผู้บริโภคจดจำได้ทันที</div>
     </div>
 
     <div class="concept-card concept-export-card">
-      <div class="concept-card-title">🚀 นำคอนเซปต์ไปใช้งาน</div>
+      <div class="concept-card-title">🚀 นำคอนเซปต์ไปใช้งานใน CONT</div>
       <p style="font-size:0.82rem;color:#8c92ad;margin-bottom:14px;line-height:1.5;">
-        ส่งข้อมูล Color Palette, Typography และ Layout ทั้งหมดนี้เป็น Task บรีฟงานให้นักออกแบบในทีม CONT ได้ทันที
+        ส่งข้อมูล Color Palette, Typography และ Layout ทั้งหมดนี้เป็น Task บรีฟงานให้นักออกแบบในทีมกราฟิก KKP ได้ทันที
       </p>
-      <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-export-concept-task" style="width:100%;justify-content:center;">
+      <button type="button" class="btn-pixel btn-pixel-cyan" id="btn-export-concept-task" style="width:100%;justify-content:center;background:#5B2D90;border-color:#7c3aed;">
         ${pixelIcons.plus}
-        <span>ส่งข้อมูลเป็น Task บรีฟงานดีไซน์</span>
+        <span>ส่งข้อมูลเป็น Task บรีฟงานทีม KKP</span>
       </button>
     </div>
   `;
@@ -901,7 +968,7 @@ function bindSwatchCopy() {
       const hex = box.dataset.hex;
       if (navigator.clipboard) {
         navigator.clipboard.writeText(hex);
-        toast(`คัดลอกรหัสสี ${hex} เรียบร้อยแล้ว`, "success");
+        toast(`คัดลอกรหัสสี KKP ${hex} เรียบร้อยแล้ว`, "success");
       }
     });
   });
@@ -912,9 +979,9 @@ function bindExportTask() {
     const match = DESIGN_LISTENING_DATA.moodboardKeywords.find(k => k.query === searchKeywordPrompt) || DESIGN_LISTENING_DATA.moodboardKeywords[0];
     if (typeof window.openCreateTask === "function") {
       window.openCreateTask({
-        title: `งานออกแบบแคมเปญ: ${match.query}`,
-        description: `บรีฟอาร์ตเวิร์กอ้างอิง Insight จากระบบ Social & Visual Listening:\nโจทย์: ${match.query}\nColor Palette: ${match.palette.join(", ")}\nTypography: ${match.font}\nComposition: ${match.composition}\n\nวัตถุประสงค์: ขยายสัดส่วน White Space ทางการตลาดเพื่อความแตกต่างจากคู่แข่ง`,
-        channel: "Social Media / Digital Ads"
+        title: `งานออกแบบแคมเปญ KKP: ${match.product}`,
+        description: `บรีฟอาร์ตเวิร์กอ้างอิง Insight จากระบบ Social & Visual Listening KKP:\nผลิตภัณฑ์: ${match.product}\nโจทย์: ${match.query}\nColor Palette: ${match.palette.join(", ")}\nTypography: ${match.font}\nComposition: ${match.composition}\n\nวัตถุประสงค์: ขยายสัดส่วน White Space ทางการตลาดเพื่อความแตกต่างจากคู่แข่งตามเกณฑ์ ธปท.`,
+        channel: "Social Media / Performance Ads"
       });
     } else {
       toast("กรุณาเปิดเมนูสร้าง Task ในระบบ CONT", "info");
@@ -935,7 +1002,7 @@ function updateParadigmView() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   CANVAS NETWORK GRAPH ENGINE (INTERACTIVE PHYSICS SIMULATION)
+   CANVAS NETWORK GRAPH ENGINE (INTERACTIVE KKP FINANCIAL ECOSYSTEM)
 ───────────────────────────────────────────────────────────────────────── */
 function initNetworkCanvas() {
   const canvas = qs("#main-network-canvas");
@@ -946,32 +1013,32 @@ function initNetworkCanvas() {
   const width = canvas.width;
   const height = canvas.height;
 
-  // Nodes definition
+  // Nodes definition for KKP Financial & Creative Marketing Ecosystem
   const nodes = [
-    { id: "brand_cont", label: "CONT Sun Hydro", type: "brand", x: width * 0.45, y: height * 0.5, r: 24, color: "#19c3eb", vx: 0, vy: 0 },
-    { id: "brand_x", label: "Brand X (คู่แข่งจริง)", type: "competitor", x: width * 0.65, y: height * 0.35, r: 18, color: "#ff5252", vx: 0, vy: 0 },
-    { id: "brand_y", label: "Brand Y (โทนอัพ)", type: "competitor", x: width * 0.72, y: height * 0.68, r: 16, color: "#ff5252", vx: 0, vy: 0 },
-    { id: "need_oil", label: "คุมมัน 12h", type: "attribute", x: width * 0.3, y: height * 0.3, r: 16, color: "#22c55e", vx: 0, vy: 0 },
-    { id: "need_acne", label: "สิวผด & แดดร้อน", type: "painpoint", x: width * 0.48, y: height * 0.18, r: 16, color: "#ef4444", vx: 0, vy: 0 },
-    { id: "need_fast", label: "เซ็ตตัว <30s", type: "attribute", x: width * 0.22, y: height * 0.55, r: 15, color: "#22c55e", vx: 0, vy: 0 },
-    { id: "need_makeup", label: "รองพื้นไม่เป็นคราบ", type: "attribute", x: width * 0.32, y: height * 0.75, r: 15, color: "#22c55e", vx: 0, vy: 0 },
-    { id: "inf_doc", label: "Dr. Skin (Micro-Trust)", type: "influencer", x: width * 0.52, y: height * 0.82, r: 16, color: "#ffc61a", vx: 0, vy: 0 },
-    { id: "plat_tiktok", label: "TikTok Shop", type: "channel", x: width * 0.82, y: height * 0.45, r: 15, color: "#a855f7", vx: 0, vy: 0 }
+    { id: "brand_rrn", label: "KKP รถเรียกเงิน (RRN)", type: "brand", x: width * 0.44, y: height * 0.46, r: 24, color: "#5B2D90", vx: 0, vy: 0 },
+    { id: "brand_dime", label: "KKP Dime! App", type: "brand", x: width * 0.28, y: height * 0.32, r: 20, color: "#19C3EB", vx: 0, vy: 0 },
+    { id: "comp_tidlor", label: "เงินติดล้อ / Non-Bank", type: "competitor", x: width * 0.68, y: height * 0.35, r: 18, color: "#ff5252", vx: 0, vy: 0 },
+    { id: "comp_make", label: "Make by KBank", type: "competitor", x: width * 0.16, y: height * 0.68, r: 16, color: "#ff5252", vx: 0, vy: 0 },
+    { id: "need_apr", label: "ดอกเบี้ยต่ำ เริ่ม 0.59%", type: "attribute", x: width * 0.38, y: height * 0.76, r: 16, color: "#22c55e", vx: 0, vy: 0 },
+    { id: "need_nocheck", label: "ไม่ต้องโอนเล่ม / ไม่เช็กคนค้ำ", type: "attribute", x: width * 0.62, y: height * 0.72, r: 16, color: "#22c55e", vx: 0, vy: 0 },
+    { id: "need_bureau", label: "ความกังวลบูโร & เงินหมุน", type: "painpoint", x: width * 0.55, y: height * 0.18, r: 16, color: "#ef4444", vx: 0, vy: 0 },
+    { id: "need_stocks", label: "หุ้นสหรัฐฯ เริ่ม 50 บ.", type: "attribute", x: width * 0.18, y: height * 0.18, r: 15, color: "#22c55e", vx: 0, vy: 0 },
+    { id: "inf_taxbug", label: "กูรูการเงิน CFP (Trust 98)", type: "influencer", x: width * 0.78, y: height * 0.62, r: 16, color: "#ffc61a", vx: 0, vy: 0 },
+    { id: "chan_leadads", label: "Facebook Lead Ads", type: "channel", x: width * 0.84, y: height * 0.24, r: 15, color: "#a855f7", vx: 0, vy: 0 }
   ];
 
   // Links definition
   const links = [
-    { source: "brand_cont", target: "need_oil", strength: 3, label: "จุดแข็งหลัก" },
-    { source: "brand_cont", target: "need_acne", strength: 2.5, label: "คนเป็นสิวเลือก" },
-    { source: "brand_cont", target: "brand_x", strength: 3.5, label: "ถูกเทียบกัน 78%" },
-    { source: "brand_x", target: "need_acne", strength: 2 },
-    { source: "brand_cont", target: "need_fast", strength: 2.2, label: "Unmet Need" },
-    { source: "need_fast", target: "need_makeup", strength: 2 },
-    { source: "brand_cont", target: "need_makeup", strength: 1.8 },
-    { source: "brand_cont", target: "inf_doc", strength: 2.8, label: "Trust Score 96" },
-    { source: "brand_cont", target: "brand_y", strength: 1.5 },
-    { source: "brand_y", target: "plat_tiktok", strength: 2.5, label: "ยอดขายหลัก" },
-    { source: "brand_cont", target: "plat_tiktok", strength: 2.8 }
+    { source: "brand_rrn", target: "need_apr", strength: 3.5, label: "ดอกเบี้ยต่ำจริงแบบธนาคาร" },
+    { source: "brand_rrn", target: "need_nocheck", strength: 3.2, label: "ไม่ต้องโอนเล่ม" },
+    { source: "brand_rrn", target: "comp_tidlor", strength: 3.5, label: "ถูกเทียบกัน 82%" },
+    { source: "comp_tidlor", target: "need_bureau", strength: 2.2 },
+    { source: "brand_rrn", target: "need_bureau", strength: 2.8, label: "คลายความกังวล" },
+    { source: "brand_dime", target: "need_stocks", strength: 3.0, label: "US Stocks 50฿" },
+    { source: "brand_dime", target: "comp_make", strength: 2.5, label: "เทียบกัน 74%" },
+    { source: "brand_rrn", target: "inf_taxbug", strength: 2.8, label: "Trust Score 98" },
+    { source: "brand_rrn", target: "chan_leadads", strength: 3.0, label: "ช่องทางหลัก Lead" },
+    { source: "comp_tidlor", target: "chan_leadads", strength: 2.4 }
   ];
 
   let draggedNode = null;
@@ -1014,19 +1081,19 @@ function initNetworkCanvas() {
       ctx.beginPath();
       ctx.moveTo(s.x, s.y);
       ctx.lineTo(t.x, t.y);
-      ctx.strokeStyle = isHighlighted ? "#19c3eb" : "rgba(100, 116, 139, 0.35)";
-      ctx.lineWidth = isHighlighted ? 3 : Math.max(1, link.strength);
+      ctx.strokeStyle = isHighlighted ? "#5B2D90" : "rgba(100, 116, 139, 0.35)";
+      ctx.lineWidth = isHighlighted ? 3.5 : Math.max(1, link.strength);
       ctx.stroke();
 
       // Pulsing energy dot along line
-      if (isHighlighted || link.strength > 2.5) {
+      if (isHighlighted || link.strength > 2.8) {
         const time = Date.now() * 0.0015;
         const progress = (time % 1);
         const px = s.x + (t.x - s.x) * progress;
         const py = s.y + (t.y - s.y) * progress;
         ctx.beginPath();
         ctx.arc(px, py, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#19c3eb";
+        ctx.fillStyle = isHighlighted ? "#E59324" : "#19C3EB";
         ctx.fill();
       }
     });
@@ -1038,7 +1105,7 @@ function initNetworkCanvas() {
       // Glow halo
       ctx.beginPath();
       ctx.arc(node.x, node.y, node.r + (isHovered ? 8 : 4), 0, Math.PI * 2);
-      ctx.fillStyle = `${node.color}22`;
+      ctx.fillStyle = `${node.color}28`;
       ctx.fill();
 
       // Core circle
@@ -1104,18 +1171,19 @@ function initDesignCanvas() {
   const h = canvas.height;
 
   const dNodes = [
-    { label: "Cyber Cyan (#19C3EB)", color: "#19c3eb", x: w * 0.25, y: h * 0.35, r: 16 },
-    { label: "Deep Obsidian (#0F172A)", color: "#94a3b8", x: w * 0.35, y: h * 0.72, r: 14 },
-    { label: "ฟอนต์ไม่มีหัว (Loopless)", color: "#ffc61a", x: w * 0.65, y: h * 0.3, r: 15 },
-    { label: "Split Screen Packshot", color: "#a855f7", x: w * 0.75, y: h * 0.68, r: 15 },
-    { label: "Macro Droplet (หยดน้ำ)", color: "#22c55e", x: w * 0.5, y: h * 0.5, r: 18 }
+    { label: "KKP Purple (#5B2D90)", color: "#5B2D90", x: w * 0.22, y: h * 0.35, r: 18 },
+    { label: "Cyber Gold (#E59324)", color: "#E59324", x: w * 0.32, y: h * 0.72, r: 16 },
+    { label: "ฟอนต์ไม่มีหัว (IBM Plex)", color: "#ffc61a", x: w * 0.65, y: h * 0.28, r: 15 },
+    { label: "ภาพรถจริง (Real Vehicle)", color: "#22c55e", x: w * 0.78, y: h * 0.65, r: 18 },
+    { label: "ป้าย APR 0.59% เริ่มต้น", color: "#19c3eb", x: w * 0.5, y: h * 0.5, r: 17 }
   ];
 
   const dLinks = [
     { s: 0, t: 1 },
     { s: 0, t: 4 },
-    { s: 1, t: 3 },
+    { s: 1, t: 4 },
     { s: 4, t: 2 },
+    { s: 4, t: 3 },
     { s: 2, t: 3 },
     { s: 0, t: 2 }
   ];
