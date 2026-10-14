@@ -1916,12 +1916,16 @@ export function renderProjectDistributionChart(container = document) {
   const pieMembers = _analyticsContext.members || [];
   const breakdown = calculateProjectBreakdown(pieTasks, pieProjects, pieMembers);
 
-  // 📊 HORIZONTAL BAR CHART (Top 10 Projects)
-  const topProjects = breakdown.projects.slice(0, 10);
+  // 📊 HORIZONTAL BAR CHART (Top Projects - Adaptive count & label on mobile)
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 680;
+  const topProjects = breakdown.projects.slice(0, isMobile ? 6 : 10);
   _advancedChartInstances["projectVisual"] = new Chart(canvas, {
       type: "bar",
       data: {
-        labels: topProjects.map((p) => (p.name.length > 24 ? p.name.slice(0, 23) + "…" : p.name)),
+        labels: topProjects.map((p) => {
+          const maxLen = isMobile ? 15 : 24;
+          return p.name.length > maxLen ? p.name.slice(0, maxLen - 1) + "…" : p.name;
+        }),
         datasets: [{
           label: "จำนวนงาน (ชิ้นงาน)",
           data: topProjects.map((p) => p.count),
