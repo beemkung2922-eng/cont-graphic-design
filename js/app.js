@@ -181,6 +181,10 @@ function topbarHtml(page, member) {
           ${pixelIcons.code}
           <span>TEAM</span>
         </a>
+        <a class="pixel-nav-link ${page === "upscale" ? "is-active" : ""}" href="upscale.html" title="AI Image Upscaler">
+          ${pixelIcons.sparkle}
+          <span>UPSCALE</span>
+        </a>
         <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="Workflow Guide">
           ${pixelIcons.book}
           <span>GUIDE</span>
@@ -277,6 +281,10 @@ function topbarHtml(page, member) {
         <a class="mobile-nav-link ${page === "team" ? "is-active" : ""}" href="team.html">
           ${pixelIcons.code}
           <span>TEAM</span>
+        </a>
+        <a class="mobile-nav-link ${page === "upscale" ? "is-active" : ""}" href="upscale.html">
+          ${pixelIcons.sparkle}
+          <span>UPSCALE</span>
         </a>
         <a class="mobile-nav-link" href="#" id="drawer-workflow-guide-link">
           ${pixelIcons.book}
@@ -611,7 +619,8 @@ const pageModules = {
   calendar: "calendar",
   team: "team",
   reports: "reports",
-  trends: "trends"
+  trends: "trends",
+  upscale: "upscale"
 };
 
 if (currentPage && pageModules[currentPage]) {
