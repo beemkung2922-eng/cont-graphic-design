@@ -173,6 +173,11 @@ function topbarHtml(page, member) {
           ${pixelIcons.cubeGreen}
           <span>BOARD</span>
         </a>
+        <a class="pixel-nav-link ${page === "listening" ? "is-active" : ""}" href="listening.html" title="Social Listening & Visual Intelligence">
+          ${pixelIcons.terminal}
+          <span>LISTENING</span>
+          <span style="background:rgba(25,195,235,0.2);color:var(--cyan);border:1px solid rgba(25,195,235,0.4);font-size:0.6rem;padding:1px 4px;border-radius:3px;margin-left:2px;font-family:var(--font-mono);font-weight:700;">AI</span>
+        </a>
         <a class="pixel-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html" title="Calendar Schedule">
           ${pixelIcons.smiley}
           <span>CALENDAR</span>
@@ -269,6 +274,10 @@ function topbarHtml(page, member) {
         <a class="mobile-nav-link ${page === "board" ? "is-active" : ""}" href="board.html">
           ${pixelIcons.cubeGreen}
           <span>BOARD</span>
+        </a>
+        <a class="mobile-nav-link ${page === "listening" ? "is-active" : ""}" href="listening.html">
+          ${pixelIcons.terminal}
+          <span>SOCIAL LISTENING AI</span>
         </a>
         <a class="mobile-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html">
           ${pixelIcons.smiley}
@@ -611,7 +620,8 @@ const pageModules = {
   calendar: "calendar",
   team: "team",
   reports: "reports",
-  trends: "trends"
+  trends: "trends",
+  listening: "listening"
 };
 
 if (currentPage && pageModules[currentPage]) {
