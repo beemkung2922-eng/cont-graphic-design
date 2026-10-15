@@ -3,7 +3,7 @@ import { ensureAccess, mountUser, canManage, errorMessage } from "./auth.js";
 import { api, auth } from "./supabase.js";
 import { escapeHtml, avatar, relativeDeadline, formatDateTime } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
-import { openCreateTask } from "./task-actions.js";
+import { openCreateTask } from "./task-actions.js?v=20261015-02";
 import { startProductTour } from "./onboarding.js";
 
 const icons = {
