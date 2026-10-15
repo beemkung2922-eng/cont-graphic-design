@@ -220,9 +220,9 @@ function topbarHtml(page, member) {
         </div>
 
         <!-- Create Task Button -->
-        <button class="btn-pixel btn-pixel-red" id="quick-create" title="Create New Task">
+        <button class="btn-pixel btn-pixel-red" id="quick-create" title="สร้างงานใหม่ (Create New Task)">
           ${pixelIcons.plus}
-          <span>NEW TASK</span>
+          <span>สร้างงาน</span>
         </button>
       </div>
     </header>
