@@ -1,5 +1,5 @@
 /* ==========================================================================
-   KKP GRAPHIC STUDIO — COZY ISOMETRIC DESIGN OFFICE & TELEMETRY ENGINE
+   KKP GRAPHIC STUDIO — PIXEL ART CHARACTERS & TELEMETRY ENGINE
    100% Real Data Integration · Exact Match with CONT Classic Design System
    ========================================================================== */
 
@@ -19,8 +19,8 @@ export function cleanupStudio3D() {
   }
 }
 
-/* ── Smooth SVG Sparkline Generator (Matching Classic Bento Grid) ── */
-function renderSparklineSvg(points, color = "#ffc61a", height = 36, width = 130) {
+/* ── Smooth SVG Sparkline Generator ── */
+function renderSparklineSvg(points, color = "#ffc61a", height = 32, width = 130) {
   if (!points || points.length < 2) return "";
   const min = Math.min(...points);
   const max = Math.max(...points);
@@ -77,7 +77,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
   let selectedStationIndex = 0;
   let isAutoTouring = false;
 
-  // 1. Core Designers Identification (Using Real Members only, Full names, ZERO parentheses!)
+  // 1. Core Designers Identification (Strictly Full names, ZERO parentheses!)
   const fallbackDesigners = [
     { id: "1fd3ea77-8461-4de1-917a-90a9869428c1", name: "BEEM", role: "supervisor" },
     { id: "a31026f2-adc9-47d7-9ba0-f809be9344f1", name: "Peerapisit Rojatiegpanya", role: "designer" },
@@ -91,86 +91,80 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     ? members.filter(m => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role))
     : fallbackDesigners;
 
-  // Clean member names: remove any parentheses if present
+  // Sanitize name: remove any parentheses
   const sanitizeName = (raw) => (raw || "Designer").replace(/\s*\(.*?\)/g, "").trim();
 
-  // 2. Exact 6 Creative Graphic Design Office Stations (Coordinates in 1376x768 image)
+  // 2. Exact 6 Creative Office Workstations with Character Sprites
   const officeStations = [
     {
       stationId: "DESK-01",
-      stationTitle: "Art Director & Lead Desk",
-      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์ & บัญชาการ",
-      desc: "โต๊ะควบคุมกระบวนการผลิตงานกราฟิก หน้ากระดานไวท์บอร์ดและจอสถิติภาพรวม",
+      stationTitle: "Art Director Desk",
+      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์",
+      sprite: "assets/char-1.png",
       xPct: 27.5,
-      yPct: 56.5,
+      yPct: 59.0,
       zoomX: 27.5,
-      zoomY: 58.0,
-      icon: "🎯",
-      themeColor: "#ffc61a"
+      zoomY: 60.0,
+      icon: "🎯"
     },
     {
       stationId: "DESK-02",
-      stationTitle: "Senior Graphic Workstation",
+      stationTitle: "Senior Designer Desk",
       stationThai: "โต๊ะกราฟิกดีไซเนอร์อาวุโส",
-      desc: "โต๊ะทำงานพร้อมจอคู่ เมาส์ปากกา Wacom และอุปกรณ์จัดทำม็อคอัพ",
-      xPct: 16.0,
-      yPct: 68.0,
-      zoomX: 18.0,
-      zoomY: 70.0,
-      icon: "🖥️",
-      themeColor: "#38bdf8"
+      sprite: "assets/char-2.png",
+      xPct: 15.5,
+      yPct: 71.0,
+      zoomX: 17.0,
+      zoomY: 72.0,
+      icon: "🖥️"
     },
     {
       stationId: "DESK-03",
-      stationTitle: "Digital Illustration Desk",
+      stationTitle: "Illustration Desk",
       stationThai: "โต๊ะวาดภาพประกอบ & วิชวล",
-      desc: "โต๊ะวาดลายเส้น ดิจิทัลเพ้นต์ติ้ง และจัดทำคีย์วิชวลแคมเปญ",
-      xPct: 29.0,
-      yPct: 80.0,
-      zoomX: 30.0,
-      zoomY: 80.0,
-      icon: "🎨",
-      themeColor: "#f43f5e"
+      sprite: "assets/char-3.png",
+      xPct: 28.5,
+      yPct: 83.0,
+      zoomX: 29.5,
+      zoomY: 83.0,
+      icon: "🎨"
     },
     {
       stationId: "DESK-04",
-      stationTitle: "Branding & Layout Studio",
+      stationTitle: "Branding Studio Desk",
       stationThai: "โต๊ะออกแบบแบรนด์ & เลย์เอาต์",
-      desc: "สเตชันออกแบบ CI, Typography, โบรชัวร์ และแบนเนอร์ออนไลน์",
+      sprite: "assets/char-4.png",
       xPct: 39.5,
-      yPct: 70.0,
+      yPct: 73.0,
       zoomX: 40.0,
-      zoomY: 70.0,
-      icon: "📐",
-      themeColor: "#fbbf24"
+      zoomY: 73.0,
+      icon: "📐"
     },
     {
       stationId: "LAB-05",
-      stationTitle: "Print Lab & Large Plotter",
-      stationThai: "ห้องพิมพ์พรูฟ & ปริ้นเตอร์ใหญ่",
-      desc: "โซนตรวจสีพรูฟ เครื่องพิมพ์ขนาดใหญ่ Large-Format และโต๊ะตัดแบบ",
+      stationTitle: "Print Lab & Plotter",
+      stationThai: "ห้องพิมพ์พรูฟ & พล็อตเตอร์ใหญ่",
+      sprite: "assets/char-5.png",
       xPct: 65.0,
-      yPct: 41.0,
+      yPct: 43.5,
       zoomX: 65.0,
-      zoomY: 43.0,
-      icon: "🖨️",
-      themeColor: "#a855f7"
+      zoomY: 45.0,
+      icon: "🖨️"
     },
     {
       stationId: "CAFE-06",
-      stationTitle: "Creative Lounge & Coffee Bar",
+      stationTitle: "Lounge & Coffee Bar",
       stationThai: "มุมคิดงานสร้างสรรค์ & บาร์กาแฟ",
-      desc: "มุมพักผ่อน เติมพลังกาแฟสด ระดมไอเดีย และอ่านหนังสือดีไซน์",
+      sprite: "assets/char-6.png",
       xPct: 84.0,
-      yPct: 64.0,
-      zoomX: 82.0,
-      zoomY: 65.0,
-      icon: "☕",
-      themeColor: "#10b981"
+      yPct: 66.5,
+      zoomX: 82.5,
+      zoomY: 67.0,
+      icon: "☕"
     }
   ];
 
-  // Helper date calculator
+  // Helper date calculations
   function filterTasksByTimeRange(rawTasks, filter) {
     if (!rawTasks) return [];
     const now = new Date();
@@ -192,6 +186,15 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       }
       return true;
     });
+  }
+
+  function isTaskOverdue(t) {
+    if (!t || t.status === "completed") return false;
+    const deadlineStr = t.deadline_at || t.deadline;
+    if (!deadlineStr) return false;
+    const d = new Date(deadlineStr);
+    if (isNaN(d.getTime())) return false;
+    return (d - new Date()) < 0;
   }
 
   function relativeDeadline(deadlineStr) {
@@ -216,44 +219,53 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
   const drawStudio = () => {
     if (!isMounted) return;
 
-    // 1. Real Data Calculations (100% Synchronized with Classic Overview)
+    // 1. Real Data Calculations (Strictly User-Requested 4 KPI Categories)
     const filtered = filterTasksByTimeRange(tasks, filterState);
     const active = filtered.filter(t => t.status !== "completed");
-    const dueSoon = filtered.filter(t => t.status !== "completed" && relativeDeadline(t.deadline_at || t.deadline).className);
-    const review = filtered.filter(t => t.status === "review" || t.status === "revision");
-    const completed = filtered.filter(t => t.status === "completed");
-    const onTimeRate = filtered.length ? ((completed.length / filtered.length) * 100).toFixed(1) : "100.0";
+    
+    // Logic: "งานที่กำลังทำ แต่ถ้ามันเลยกำหนดแล้วจะอยู่ในงานเลท"
+    const overdueTasks = active.filter(t => isTaskOverdue(t));
+    const activeOnSchedule = active.filter(t => !isTaskOverdue(t));
+    const reviewTasks = filtered.filter(t => t.status === "review" || t.status === "revision");
+    const completedTasks = filtered.filter(t => t.status === "completed");
 
+    const totalCount = filtered.length;
+    const overdueCount = overdueTasks.length;
+    const activeCount = activeOnSchedule.length;
+    const reviewCount = reviewTasks.length;
+    const completedCount = completedTasks.length;
+
+    // Pipeline Distribution percentages
+    const baseTotal = totalCount || 1;
     const briefCount = filtered.filter(t => t.status === "brief").length;
     const draftingCount = filtered.filter(t => t.status === "drafting").length;
-    const reviewCount = review.length;
-    const completedCount = completed.length;
-    const totalCount = filtered.length || 1;
-
-    const briefPct = Math.max(1, Math.round((briefCount / totalCount) * 100));
-    const draftingPct = Math.max(1, Math.round((draftingCount / totalCount) * 100));
-    const reviewPct = Math.max(1, Math.round((reviewCount / totalCount) * 100));
+    const briefPct = Math.max(1, Math.round((briefCount / baseTotal) * 100));
+    const draftingPct = Math.max(1, Math.round((draftingCount / baseTotal) * 100));
+    const reviewPct = Math.max(1, Math.round((reviewCount / baseTotal) * 100));
     const completedPct = Math.max(1, 100 - briefPct - draftingPct - reviewPct);
 
-    // Compute Designers Real Telemetry (NO fake tasks! ZERO parentheses in names!)
+    // Compute Designers Real Telemetry
     const teamStations = designMembers.slice(0, 6).map((m, idx) => {
       const station = officeStations[idx] || officeStations[0];
       const assigned = filtered.filter(t => t.assignee_id === m.id);
       const memberActive = assigned.filter(t => t.status !== "completed");
       const memberCompleted = assigned.filter(t => t.status === "completed");
+      const memberOverdue = memberActive.filter(t => isTaskOverdue(t));
       const memberProjectsCount = new Set(assigned.map(t => t.project_id).filter(Boolean)).size;
 
       const currentTask = memberActive[0] || null;
       const memberSla = assigned.length
-        ? ((memberCompleted.length / assigned.length) * 100).toFixed(1)
+        ? (((assigned.length - memberOverdue.length) / assigned.length) * 100).toFixed(1)
         : "100.0";
 
-      let statusBadge = { label: "สแตนด์บาย", class: "status-standby", dot: "status-standby" };
+      let statusBadge = { label: "สแตนด์บาย", class: "status-standby", dot: "dot-standby" };
       if (currentTask) {
-        if (currentTask.status === "review" || currentTask.status === "revision") {
-          statusBadge = { label: "รอตรวจแบบ", class: "status-review", dot: "status-review" };
+        if (isTaskOverdue(currentTask)) {
+          statusBadge = { label: "เลยกำหนด", class: "status-review", dot: "dot-review" };
+        } else if (currentTask.status === "review" || currentTask.status === "revision") {
+          statusBadge = { label: "รอตรวจแบบ", class: "status-review", dot: "dot-review" };
         } else {
-          statusBadge = { label: "กำลังจัดทำ", class: "status-active", dot: "status-active" };
+          statusBadge = { label: "กำลังจัดทำ", class: "status-active", dot: "dot-active" };
         }
       }
 
@@ -264,6 +276,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         assigned,
         memberActive,
         memberCompleted,
+        memberOverdue,
         memberProjectsCount,
         currentTask,
         memberSla,
@@ -281,138 +294,136 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       { id: "month", label: "เดือนนี้" },
       { id: "year", label: "ปีนี้" },
     ].map(chip => `
-      <button type="button" class="dfb-chip ${filterState.period === chip.id ? 'is-active' : ''}" data-period="${chip.id}">
+      <button type="button" class="studio-chip-btn ${filterState.period === chip.id ? 'is-active' : ''}" data-period="${chip.id}">
         ${chip.label}
       </button>
     `).join("");
 
-    // Bento Top 4 KPIs Sparklines Data
-    const sparkPoints1 = [12, 18, 15, 24, 28, 22, 35, filtered.length || 20];
-    const sparkPoints2 = [8, 10, 14, 12, 16, 15, active.length || 10];
-    const sparkPoints3 = [3, 4, 2, 6, 5, 4, review.length || 3];
-    const sparkPoints4 = [95, 96, 98, 97, 99, 100, parseFloat(onTimeRate) || 100];
+    // Sparklines data matching the 4 metrics
+    const sparkTotal = [15, 18, 22, 28, 25, 30, totalCount || 20];
+    const sparkOverdue = [2, 1, 3, 2, 1, 0, overdueCount];
+    const sparkActive = [10, 12, 14, 11, 15, 13, activeCount || 5];
+    const sparkReview = [4, 5, 3, 6, 4, 3, reviewCount];
 
-    // Render Full Page Markup
+    // Render Full HTML Markup
     container.innerHTML = `
       <div class="overview-shell studio-3d-layout">
-        <!-- 1. Page Header (Dual View Switcher) -->
-        <div class="overview-header">
-          <div class="overview-title-group">
-            <h1 class="overview-title">KKP Graphic Studio — Pixel Office Map</h1>
-            <p class="overview-subtitle">แผนผังห้องทำงานทีมกราฟิก KKP สไตล์ Isometric Pixel Art Map เชื่อมต่อข้อมูลจริงแบบเรียลไทม์ 100%</p>
-          </div>
-          <div class="overview-header-actions">
+        
+        <!-- 1. Integrated Header Toolbar (Balanced & Aligned) -->
+        <div class="studio-toolbar-bar">
+          <div class="studio-toolbar-left">
+            <div class="studio-toolbar-title">
+              <span class="studio-brand-dot"></span>
+              <span>KKP GRAPHIC STUDIO</span>
+              <span style="font-weight:400;color:#64748b;">|</span>
+              <span style="font-size:0.75rem;font-weight:500;color:#94a3b8;">แผนผังออฟฟิศดีไซน์ 3D</span>
+            </div>
             <!-- Dual View Switcher -->
-            <div class="view-switcher-pill" style="margin-right: 6px;">
-              <button type="button" class="view-btn is-active is-3d" id="btn-studio-3d" title="มุมมอง 3D Pixel Studio">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <div class="view-switcher-pill">
+              <button type="button" class="view-btn is-active is-3d" id="btn-studio-3d" title="มุมมอง 3D Office">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                 <span>3D Office</span>
               </button>
-              <button type="button" class="view-btn" id="btn-switch-classic" title="สลับกลับไป Classic Overview">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <button type="button" class="view-btn" id="btn-switch-classic" title="สลับไป Classic Overview">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 <span>Classic Overview</span>
               </button>
             </div>
+          </div>
 
-            <button type="button" class="btn-overview-action" id="btn-studio-export">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Export สรุป</span>
+          <div class="studio-toolbar-right">
+            <!-- Timeframe Filter Chips (Right-aligned) -->
+            <div class="studio-filter-chips">
+              ${timeChips}
+            </div>
+
+            <button type="button" class="btn-overview-action" id="btn-studio-export" style="padding:5px 10px;font-size:0.72rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export</span>
             </button>
-            <button type="button" class="btn-overview-primary" id="btn-studio-new-task">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button type="button" class="btn-overview-primary" id="btn-studio-new-task" style="padding:5px 12px;font-size:0.75rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               <span>สร้างงานใหม่</span>
             </button>
           </div>
         </div>
 
-        <!-- 2. Integrated Timeframe Filter Bar -->
-        <div class="dash-filter-bar">
-          <div class="dfb-main">
-            <div class="dfb-quick-chips">
-              ${timeChips}
-            </div>
-            <div class="dfb-summary-text" style="font-size:0.75rem;color:var(--text-dim,#8c91a8);margin-left:auto;">
-              แสดงข้อมูลภาระงานแบบเรียลไทม์ · สมาชิก 6 โต๊ะทำงาน
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Top 4 Bento KPI Cards (100% Real Data with Sparklines) -->
-        <div class="overview-top-grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2px;">
-          <!-- Card 1: Total Jobs -->
-          <div class="stat-bento-card">
-            <div class="stat-bento-head">
-              <div class="stat-bento-title-wrap">
-                <span class="stat-bento-icon icon-yellow">
+        <!-- 2. Top 4 Bento KPI Cards (1. งานทั้งหมด, 2. งานเลท, 3. งานกำลังทำ(ตรงเวลา), 4. รอตรวจ/แก้ไข) -->
+        <div class="studio-kpi-grid">
+          <!-- Card 1: งานทั้งหมด -->
+          <div class="kpi-bento-card">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-yellow">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </span>
-                <span class="stat-bento-label">ชิ้นงานทั้งหมด</span>
+                <span class="kpi-card-label">งานทั้งหมด</span>
               </div>
-              <span class="badge badge-yellow" style="font-size:0.65rem;">Total</span>
+              <span class="kpi-card-badge badge-yellow">Total</span>
             </div>
-            <div class="stat-bento-val-row">
-              <span class="stat-bento-num">${filtered.length}</span>
-              <span class="stat-bento-unit">ชิ้น</span>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num">${totalCount}</span>
+              <span class="kpi-card-unit">ชิ้น</span>
             </div>
-            <div class="stat-bento-chart">${renderSparklineSvg(sparkPoints1, "#ffc61a")}</div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkTotal, "#ffc61a")}</div>
           </div>
 
-          <!-- Card 2: Active / In Progress -->
-          <div class="stat-bento-card">
-            <div class="stat-bento-head">
-              <div class="stat-bento-title-wrap">
-                <span class="stat-bento-icon icon-cyan">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
-                </span>
-                <span class="stat-bento-label">งานกำลังทำ</span>
-              </div>
-              <span class="badge badge-cyan" style="font-size:0.65rem;">Active</span>
-            </div>
-            <div class="stat-bento-val-row">
-              <span class="stat-bento-num">${active.length}</span>
-              <span class="stat-bento-unit">ชิ้น</span>
-            </div>
-            <div class="stat-bento-chart">${renderSparklineSvg(sparkPoints2, "#19c3eb")}</div>
-          </div>
-
-          <!-- Card 3: In Review -->
-          <div class="stat-bento-card">
-            <div class="stat-bento-head">
-              <div class="stat-bento-title-wrap">
-                <span class="stat-bento-icon icon-red">
+          <!-- Card 2: งานเลท (Overdue Tasks) -->
+          <div class="kpi-bento-card card-overdue">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-red">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </span>
-                <span class="stat-bento-label">รอตรวจ/แก้ไข</span>
+                <span class="kpi-card-label" style="color:#f87171;">งานเลท (เลยกำหนด)</span>
               </div>
-              <span class="badge badge-red" style="font-size:0.65rem;">Review</span>
+              <span class="kpi-card-badge badge-red">⚠️ Overdue</span>
             </div>
-            <div class="stat-bento-val-row">
-              <span class="stat-bento-num">${review.length}</span>
-              <span class="stat-bento-unit">ชิ้น</span>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num" style="color:#ef4444;">${overdueCount}</span>
+              <span class="kpi-card-unit" style="color:#fca5a5;">งาน</span>
             </div>
-            <div class="stat-bento-chart">${renderSparklineSvg(sparkPoints3, "#ef4444")}</div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkOverdue, "#ef4444")}</div>
           </div>
 
-          <!-- Card 4: On-time SLA Rate -->
-          <div class="stat-bento-card">
-            <div class="stat-bento-head">
-              <div class="stat-bento-title-wrap">
-                <span class="stat-bento-icon icon-green">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <!-- Card 3: งานที่กำลังทำ (Active On-Schedule) -->
+          <div class="kpi-bento-card">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-cyan">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
                 </span>
-                <span class="stat-bento-label">ส่งตรงเวลา (SLA)</span>
+                <span class="kpi-card-label">งานที่กำลังทำ</span>
               </div>
-              <span class="badge badge-green" style="font-size:0.65rem;">Target 95%</span>
+              <span class="kpi-card-badge badge-cyan">In Progress</span>
             </div>
-            <div class="stat-bento-val-row">
-              <span class="stat-bento-num">${onTimeRate}%</span>
-              <span class="stat-bento-unit">On-Time</span>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num">${activeCount}</span>
+              <span class="kpi-card-unit">ชิ้น</span>
             </div>
-            <div class="stat-bento-chart">${renderSparklineSvg(sparkPoints4, "#22c55e")}</div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkActive, "#19c3eb")}</div>
+          </div>
+
+          <!-- Card 4: รอตรวจ/แก้ไข (In Review / Revision) -->
+          <div class="kpi-bento-card">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-purple">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                </span>
+                <span class="kpi-card-label">รอตรวจ/แก้ไข</span>
+              </div>
+              <span class="kpi-card-badge badge-purple">Review</span>
+            </div>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num">${reviewCount}</span>
+              <span class="kpi-card-unit">ชิ้น</span>
+            </div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkReview, "#c084fc")}</div>
           </div>
         </div>
 
-        <!-- 4. Main Stage Grid (Left: Isometric Creative Office Map | Right: Member Inspector) -->
+        <!-- 3. Main Stage Grid (Left: Pixel Office Viewport with Characters | Right: Inspector) -->
         <div class="studio-stage-grid">
           <!-- Viewport Card -->
           <div class="studio-viewport-card" id="studio-viewport">
@@ -421,14 +432,15 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
               <div class="studio-topbar-left">
                 <div class="studio-brand-badge">
                   <span class="studio-brand-dot"></span>
-                  <span>KKP CREATIVE STUDIO MAP</span>
+                  <span>STUDIO DESKS</span>
                 </div>
                 <!-- Member Quick Jump Pills -->
                 <div class="studio-members-bar">
                   ${teamStations.map((s, idx) => `
                     <button type="button" class="studio-member-pill ${idx === selectedStationIndex ? 'is-active' : ''}" data-station-idx="${idx}">
-                      <span class="studio-member-pill-dot"></span>
+                      <span class="studio-member-pill-dot" style="${s.memberOverdue.length ? 'background:#ef4444;' : ''}"></span>
                       <span>${s.displayName}</span>
+                      ${s.memberOverdue.length ? `<span style="color:#ef4444;font-size:0.6rem;font-weight:700;">⚠️</span>` : ''}
                     </button>
                   `).join("")}
                 </div>
@@ -436,11 +448,11 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
               <div class="studio-topbar-right">
                 <button type="button" class="studio-btn-ctrl" id="btn-camera-overview" title="รีเซ็ตมุมมองภาพรวม">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
                   <span>มุมมองรวม</span>
                 </button>
                 <button type="button" class="studio-btn-ctrl ${isAutoTouring ? 'is-active' : ''}" id="btn-camera-tour" title="โหมดหมุนเวียนทัวร์อัตโนมัติ">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                   <span>ทัวร์สตูดิโอ</span>
                 </button>
               </div>
@@ -449,40 +461,40 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
             <!-- Pannable & Zoomable Stage Viewport -->
             <div class="studio-stage-viewport" id="studio-stage-viewport">
               <div class="studio-scene-world" id="studio-scene-world">
-                <!-- Authentic High-Res Pixel Art Office Background -->
+                <!-- High-Res Pixel Art Graphic Design Office Backdrop -->
                 <img class="studio-pixel-art-img" src="assets/isometric-office.jpg" alt="KKP Graphic Studio Office" />
 
-                <!-- Canvas Overlays (Sunbeams, coffee steam, screen glows, dust motes) -->
+                <!-- Canvas Overlays (Sunlight dust, coffee steam, screen glows) -->
                 <canvas class="studio-fx-canvas" id="studio-fx-canvas" width="1376" height="768"></canvas>
 
-                <!-- Interactive Hotspots & Floating Tags Layer -->
+                <!-- Interactive Characters & Compact Bubbles Layer -->
                 <div class="studio-hotspots-layer" id="studio-hotspots-layer">
                   ${teamStations.map((s, idx) => {
-                    const taskTitle = s.currentTask ? s.currentTask.title : "พร้อมรับงานใหม่ (ว่างในคิว)";
-                    const progressVal = s.currentTask ? (s.currentTask.progress || (s.currentTask.status === "review" ? 85 : 50)) : 100;
+                    const taskTitle = s.currentTask ? s.currentTask.title : "ว่าง (พร้อมรับงาน)";
+                    const hasOverdue = s.memberOverdue.length > 0;
                     return `
-                      <div class="station-hotspot ${idx === selectedStationIndex ? 'is-selected' : ''}" 
+                      <div class="pixel-character-station ${idx === selectedStationIndex ? 'is-selected' : ''}" 
                            style="left: ${s.station.xPct}%; top: ${s.station.yPct}%;" 
                            data-station-idx="${idx}">
                         
-                        <!-- Pulsing Target Ring -->
-                        <div class="station-floor-marker"></div>
-
-                        <!-- Floating HUD Tag -->
-                        <div class="station-hud-tag">
-                          <div class="hud-tag-header">
-                            <span class="hud-tag-station-num">${s.station.stationId}</span>
-                            <span class="hud-tag-name">${s.displayName}</span>
-                            <span class="hud-tag-status-dot ${s.statusBadge.dot}"></span>
+                        <!-- Compact Floating Bubble (Name + Active Task + Overdue Warning) -->
+                        <div class="char-hud-bubble ${hasOverdue ? 'has-overdue' : ''}">
+                          <div class="char-name-row">
+                            <span class="char-status-dot ${s.statusBadge.dot}"></span>
+                            <span class="char-name-text">${s.displayName}</span>
+                            ${hasOverdue ? `<span class="char-overdue-tag">⚠️ เลท ${s.memberOverdue.length}</span>` : ''}
                           </div>
-                          <div class="hud-tag-station-title">${s.station.icon} ${s.station.stationThai}</div>
-                          <div class="hud-tag-task-wrap">
-                            <div class="hud-tag-task-title" title="${taskTitle}">${taskTitle}</div>
-                            <div class="hud-tag-progress-track">
-                              <div class="hud-tag-progress-fill" style="width: ${progressVal}%; background: ${s.currentTask ? '#ffc61a' : '#22c55e'};"></div>
-                            </div>
-                          </div>
+                          <div class="char-task-title" title="${taskTitle}">${taskTitle}</div>
                         </div>
+
+                        <!-- Cute Pixel Art Character Sitting at Desk -->
+                        <div class="char-sprite-wrap">
+                          <div class="char-shadow"></div>
+                          <img class="char-sprite-img" src="${s.station.sprite}" alt="${s.displayName}" />
+                        </div>
+
+                        <!-- Floor Selection Ring -->
+                        <div class="char-floor-ring"></div>
 
                       </div>
                     `;
@@ -513,8 +525,8 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
             <div class="inspector-body">
               <!-- Designer Profile -->
               <div class="inspector-profile-row">
-                <div class="inspector-avatar">
-                  ${activeStation.displayName.slice(0, 2).toUpperCase()}
+                <div class="inspector-avatar-wrap">
+                  <img src="${activeStation.station.sprite}" alt="${activeStation.displayName}" />
                 </div>
                 <div class="inspector-profile-info">
                   <div class="inspector-member-name">${activeStation.displayName}</div>
@@ -530,15 +542,15 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
               <div class="inspector-stats-grid">
                 <div class="inspector-stat-box">
                   <span class="inspector-stat-label">งานในคิว</span>
-                  <span class="inspector-stat-val" style="color:#38bdf8;">${activeStation.memberActive.length} <small style="font-size:0.65rem;font-weight:400;color:#94a3b8;">งาน</small></span>
+                  <span class="inspector-stat-val" style="color:#38bdf8;">${activeStation.memberActive.length} <small style="font-size:0.65rem;color:#94a3b8;">งาน</small></span>
+                </div>
+                <div class="inspector-stat-box" style="${activeStation.memberOverdue.length ? 'border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.08);' : ''}">
+                  <span class="inspector-stat-label" style="${activeStation.memberOverdue.length ? 'color:#f87171;' : ''}">งานเลท</span>
+                  <span class="inspector-stat-val" style="color:${activeStation.memberOverdue.length ? '#ef4444' : '#94a3b8'};">${activeStation.memberOverdue.length} <small style="font-size:0.65rem;color:#94a3b8;">งาน</small></span>
                 </div>
                 <div class="inspector-stat-box">
                   <span class="inspector-stat-label">ส่งงานเสร็จแล้ว</span>
-                  <span class="inspector-stat-val" style="color:#22c55e;">${activeStation.memberCompleted.length} <small style="font-size:0.65rem;font-weight:400;color:#94a3b8;">งาน</small></span>
-                </div>
-                <div class="inspector-stat-box">
-                  <span class="inspector-stat-label">โปรเจคที่ดูแล</span>
-                  <span class="inspector-stat-val" style="color:#fbbf24;">${activeStation.memberProjectsCount} <small style="font-size:0.65rem;font-weight:400;color:#94a3b8;">โปรเจค</small></span>
+                  <span class="inspector-stat-val" style="color:#22c55e;">${activeStation.memberCompleted.length} <small style="font-size:0.65rem;color:#94a3b8;">งาน</small></span>
                 </div>
                 <div class="inspector-stat-box">
                   <span class="inspector-stat-label">On-Time SLA</span>
@@ -547,10 +559,14 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
               </div>
 
               <!-- Current Active Task Card -->
-              <div class="inspector-task-card">
+              <div class="inspector-task-card ${activeStation.currentTask && isTaskOverdue(activeStation.currentTask) ? 'is-overdue' : ''}">
                 <div class="inspector-task-label">
-                  <span>ชิ้นงานที่กำลังทำปัจจุบัน</span>
-                  ${activeStation.currentTask ? `<span class="badge badge-yellow" style="font-size:0.62rem;">${activeStation.currentTask.status}</span>` : ''}
+                  <span>ชิ้นงานปัจจุบัน</span>
+                  ${activeStation.currentTask ? `
+                    <span class="badge ${isTaskOverdue(activeStation.currentTask) ? 'badge-red' : 'badge-yellow'}" style="font-size:0.62rem;">
+                      ${isTaskOverdue(activeStation.currentTask) ? '⚠️ เลทเลยกำหนด' : activeStation.currentTask.status}
+                    </span>
+                  ` : ''}
                 </div>
                 ${activeStation.currentTask ? `
                   <div class="inspector-task-title">
@@ -558,16 +574,11 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
                       ${activeStation.currentTask.title}
                     </a>
                   </div>
-                  <div class="inspector-progress-row">
-                    <span>ความคืบหน้า</span>
-                    <span style="font-weight:700;color:#ffffff;">${activeStation.currentTask.progress || (activeStation.currentTask.status === 'review' ? '85%' : '60%')}</span>
-                  </div>
-                  <div class="inspector-progress-track">
-                    <div class="inspector-progress-bar" style="width: ${activeStation.currentTask.progress || (activeStation.currentTask.status === 'review' ? '85%' : '60%')};"></div>
-                  </div>
-                  <div style="font-size:0.72rem;color:#94a3b8;display:flex;justify-content:space-between;">
+                  <div style="font-size:0.72rem;color:#94a3b8;display:flex;justify-content:space-between;margin-top:2px;">
                     <span>กำหนดส่ง: ${activeStation.currentTask.deadline_at || activeStation.currentTask.deadline || 'เร็วๆ นี้'}</span>
-                    <span style="color:#ffc61a;">${relativeDeadline(activeStation.currentTask.deadline_at || activeStation.currentTask.deadline).label}</span>
+                    <span style="font-weight:700;color:${isTaskOverdue(activeStation.currentTask) ? '#ef4444' : '#ffc61a'};">
+                      ${relativeDeadline(activeStation.currentTask.deadline_at || activeStation.currentTask.deadline).label}
+                    </span>
                   </div>
                 ` : `
                   <div style="font-size:0.82rem;color:#94a3b8;padding:8px 0;">
@@ -579,13 +590,14 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
               <!-- Queue List -->
               <div class="inspector-queue-title">
                 <span>คิวงานอื่นๆ (${activeStation.memberActive.length})</span>
-                <span style="font-size:0.65rem;font-weight:400;color:#94a3b8;">ตามกำหนดเวลา</span>
               </div>
               <div class="inspector-queue-list">
                 ${activeStation.memberActive.slice(1, 4).map(t => `
-                  <a href="task.html?id=${encodeURIComponent(t.id)}" class="inspector-queue-item">
+                  <a href="task.html?id=${encodeURIComponent(t.id)}" class="inspector-queue-item" style="${isTaskOverdue(t) ? 'border-color:rgba(239,68,68,0.4);' : ''}">
                     <span class="inspector-queue-item-title">${t.title}</span>
-                    <span class="badge badge-gray" style="font-size:0.62rem;">${t.status}</span>
+                    <span class="badge ${isTaskOverdue(t) ? 'badge-red' : 'badge-gray'}" style="font-size:0.62rem;">
+                      ${isTaskOverdue(t) ? 'Overdue' : t.status}
+                    </span>
                   </a>
                 `).join("") || `
                   <div style="font-size:0.75rem;color:#64748b;font-style:italic;padding:4px 0;">ไม่มีงานรอคิวเพิ่มเติม</div>
@@ -606,8 +618,8 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           </div>
         </div>
 
-        <!-- 5. Pipeline Status Breakdown (Identical to Classic Overview) -->
-        <div class="overview-bottom-grid" style="grid-template-columns: 1fr; margin-top: 4px;">
+        <!-- 4. Pipeline Status Breakdown -->
+        <div class="overview-bottom-grid" style="grid-template-columns: 1fr; margin-top: 2px;">
           <div class="overview-bottom-card">
             <div class="bottom-card-head">
               <div>
@@ -671,7 +683,6 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       const st = teamStations[idx];
       if (!st || !viewportEl) return;
 
-      // Center station in 1376x768 world
       const targetImgX = (st.station.zoomX / 100) * 1376;
       const targetImgY = (st.station.zoomY / 100) * 768;
 
@@ -699,7 +710,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
     if (viewportEl) {
       viewportEl.addEventListener("mousedown", (e) => {
-        if (e.target.closest(".station-hud-tag") || e.target.closest("button")) return;
+        if (e.target.closest(".char-hud-bubble") || e.target.closest("button")) return;
         isDragging = true;
         dragStartX = e.clientX;
         dragStartY = e.clientY;
@@ -732,15 +743,13 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       }, { passive: false });
     }
 
-    // Initial camera apply
     applyCameraTransform(false);
 
-    // ── Setup Effects Canvas (Dust particles, coffee steam, whiteboard glow, plotter LED) ──
+    // ── Setup Effects Canvas (Dust, coffee steam, screen glow) ──
     const fxCanvas = container.querySelector("#studio-fx-canvas");
     if (fxCanvas) {
       const fxCtx = fxCanvas.getContext("2d");
       
-      // Generate 36 floating dust motes in sunlit windows (right side)
       const dustParticles = Array.from({ length: 36 }, () => ({
         x: 950 + Math.random() * 400,
         y: 80 + Math.random() * 580,
@@ -751,7 +760,6 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         pulseSpeed: 0.02 + Math.random() * 0.03
       }));
 
-      // Generate 12 coffee steam particles in pantry
       const steamParticles = Array.from({ length: 12 }, () => ({
         x: 1195 + Math.random() * 20,
         y: 430 + Math.random() * 25,
@@ -768,7 +776,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         fxCtx.clearRect(0, 0, 1376, 768);
         frameCounter++;
 
-        // 1. Sunlight Shaft Shimmer (top right window down to coffee bar)
+        // 1. Sunlight Shaft Shimmer
         const shimmerAlpha = 0.035 + Math.sin(frameCounter * 0.025) * 0.015;
         fxCtx.save();
         fxCtx.fillStyle = `rgba(255, 235, 175, ${shimmerAlpha})`;
@@ -781,7 +789,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         fxCtx.fill();
         fxCtx.restore();
 
-        // 2. Dust Motes along sunbeam
+        // 2. Dust Motes
         fxCtx.fillStyle = "#ffe6a0";
         dustParticles.forEach(p => {
           p.x += p.vx;
@@ -798,7 +806,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         });
         fxCtx.globalAlpha = 1.0;
 
-        // 3. Coffee Steam Particles in Pantry
+        // 3. Coffee Steam
         fxCtx.fillStyle = "rgba(255, 255, 255, 0.45)";
         steamParticles.forEach(sp => {
           sp.x += sp.vx;
@@ -820,7 +828,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         });
         fxCtx.globalAlpha = 1.0;
 
-        // 4. Whiteboard Dashboard Screen Glow (Top-left wall x: 120, y: 190)
+        // 4. Whiteboard Dashboard Screen Glow
         const screenGlow = 0.08 + Math.sin(frameCounter * 0.05) * 0.04;
         const screenGrad = fxCtx.createRadialGradient(120, 190, 10, 120, 190, 90);
         screenGrad.addColorStop(0, `rgba(56, 189, 248, ${screenGlow})`);
@@ -829,12 +837,6 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         fxCtx.beginPath();
         fxCtx.arc(120, 190, 90, 0, Math.PI * 2);
         fxCtx.fill();
-
-        // 5. Large Plotter Printer Ready LED (Mezzanine x: 865, y: 310)
-        if (frameCounter % 60 < 45) {
-          fxCtx.fillStyle = "#22c55e";
-          fxCtx.fillRect(865, 310, 3, 3);
-        }
 
         animFrameId = requestAnimationFrame(renderFx);
       }
@@ -850,7 +852,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     });
 
     // Time Chips
-    container.querySelectorAll(".dash-filter-bar .dfb-chip").forEach(btn => {
+    container.querySelectorAll(".studio-chip-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         filterState.period = btn.dataset.period;
         drawStudio();
@@ -899,11 +901,11 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       });
     });
 
-    // Hotspot clicks
-    container.querySelectorAll(".station-hotspot").forEach(hotspot => {
-      hotspot.addEventListener("click", (e) => {
+    // Character click
+    container.querySelectorAll(".pixel-character-station").forEach(station => {
+      station.addEventListener("click", (e) => {
         e.stopPropagation();
-        const idx = parseInt(hotspot.dataset.stationIdx, 10);
+        const idx = parseInt(station.dataset.stationIdx, 10);
         focusOnStation(idx, 1.7);
       });
     });
