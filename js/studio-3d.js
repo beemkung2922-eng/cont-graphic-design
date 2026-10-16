@@ -1,5 +1,5 @@
 /* ==========================================================================
-   KKP GRAPHIC STUDIO — RETRO ISOMETRIC WORKSHOP & TELEMETRY ENGINE
+   KKP GRAPHIC STUDIO — COZY ISOMETRIC DESIGN OFFICE & TELEMETRY ENGINE
    100% Real Data Integration · Exact Match with CONT Classic Design System
    ========================================================================== */
 
@@ -94,78 +94,78 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
   // Clean member names: remove any parentheses if present
   const sanitizeName = (raw) => (raw || "Designer").replace(/\s*\(.*?\)/g, "").trim();
 
-  // 2. Exact 6 Workshop Stations (Coordinates in 1024x681 image)
-  const workshopStations = [
+  // 2. Exact 6 Creative Graphic Design Office Stations (Coordinates in 1376x768 image)
+  const officeStations = [
     {
-      stationId: "ST-01",
-      stationTitle: "Command Deck & Server",
-      stationThai: "ศูนย์บัญชาการ & เซิร์ฟเวอร์",
-      desc: "ชั้นลอยควบคุมระบบ ตรวจสอบทรูพุต และเซิร์ฟเวอร์ประมวลผลกราฟิก",
-      xPct: 48.5,
-      yPct: 15.0,
-      zoomX: 48.5,
-      zoomY: 20.0,
-      icon: "💻",
+      stationId: "DESK-01",
+      stationTitle: "Art Director & Lead Desk",
+      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์ & บัญชาการ",
+      desc: "โต๊ะควบคุมกระบวนการผลิตงานกราฟิก หน้ากระดานไวท์บอร์ดและจอสถิติภาพรวม",
+      xPct: 27.5,
+      yPct: 56.5,
+      zoomX: 27.5,
+      zoomY: 58.0,
+      icon: "🎯",
       themeColor: "#ffc61a"
     },
     {
-      stationId: "ST-02",
-      stationTitle: "Hardware & Design Bench",
-      stationThai: "โต๊ะประดิษฐ์และออกแบบกราฟิก",
-      desc: "โต๊ะช่างประดิษฐ์ม็อคอัพ ชิ้นงานแคมเปญ และคีย์วิชวล",
-      xPct: 63.5,
-      yPct: 37.0,
-      zoomX: 63.5,
-      zoomY: 40.0,
-      icon: "🛠️",
+      stationId: "DESK-02",
+      stationTitle: "Senior Graphic Workstation",
+      stationThai: "โต๊ะกราฟิกดีไซเนอร์อาวุโส",
+      desc: "โต๊ะทำงานพร้อมจอคู่ เมาส์ปากกา Wacom และอุปกรณ์จัดทำม็อคอัพ",
+      xPct: 16.0,
+      yPct: 68.0,
+      zoomX: 18.0,
+      zoomY: 70.0,
+      icon: "🖥️",
       themeColor: "#38bdf8"
     },
     {
-      stationId: "ST-03",
-      stationTitle: "NeoGeo Arcade Arena",
-      stationThai: "โซนเกม Arcade & ตู้เครื่องดื่ม",
-      desc: "ตู้เกมย้อนยุค SNK NeoGeo และตู้เครื่องดื่มเย็นสำหรับผ่อนคลาย",
-      xPct: 83.5,
-      yPct: 55.5,
-      zoomX: 80.0,
-      zoomY: 57.0,
-      icon: "🕹️",
+      stationId: "DESK-03",
+      stationTitle: "Digital Illustration Desk",
+      stationThai: "โต๊ะวาดภาพประกอบ & วิชวล",
+      desc: "โต๊ะวาดลายเส้น ดิจิทัลเพ้นต์ติ้ง และจัดทำคีย์วิชวลแคมเปญ",
+      xPct: 29.0,
+      yPct: 80.0,
+      zoomX: 30.0,
+      zoomY: 80.0,
+      icon: "🎨",
       themeColor: "#f43f5e"
     },
     {
-      stationId: "ST-04",
-      stationTitle: "Express Delivery Garage",
-      stationThai: "โรงจอดรถส่งมอบงานด่วน",
-      desc: "โซนยานพาหนะและเครื่องมือ สำหรับเคลียร์งานด่วนและไฟนอลอาร์ตเวิร์ก",
-      xPct: 74.5,
-      yPct: 74.5,
-      zoomX: 72.0,
-      zoomY: 75.0,
-      icon: "🏎️",
+      stationId: "DESK-04",
+      stationTitle: "Branding & Layout Studio",
+      stationThai: "โต๊ะออกแบบแบรนด์ & เลย์เอาต์",
+      desc: "สเตชันออกแบบ CI, Typography, โบรชัวร์ และแบนเนอร์ออนไลน์",
+      xPct: 39.5,
+      yPct: 70.0,
+      zoomX: 40.0,
+      zoomY: 70.0,
+      icon: "📐",
       themeColor: "#fbbf24"
     },
     {
-      stationId: "ST-05",
-      stationTitle: "Brainstorming Lounge",
-      stationThai: "โซฟาคิดงาน & จอ CRT",
-      desc: "มุมโซฟาวินเทจ ทีวีมอนิเตอร์ CRT สำหรับระดมไอเดียคอนเซปต์ใหม่",
-      xPct: 17.5,
-      yPct: 83.0,
-      zoomX: 22.0,
-      zoomY: 80.0,
-      icon: "📺",
+      stationId: "LAB-05",
+      stationTitle: "Print Lab & Large Plotter",
+      stationThai: "ห้องพิมพ์พรูฟ & ปริ้นเตอร์ใหญ่",
+      desc: "โซนตรวจสีพรูฟ เครื่องพิมพ์ขนาดใหญ่ Large-Format และโต๊ะตัดแบบ",
+      xPct: 65.0,
+      yPct: 41.0,
+      zoomX: 65.0,
+      zoomY: 43.0,
+      icon: "🖨️",
       themeColor: "#a855f7"
     },
     {
-      stationId: "ST-06",
-      stationTitle: "Tactical Review Arena",
-      stationThai: "ลานจัดเตรียม & ตรวจงานกลาง",
-      desc: "ลานประลองกลางห้อง พร้อมแท่นตรวจสอบคุณภาพงานและโดรนสำรวจ",
-      xPct: 37.0,
-      yPct: 50.5,
-      zoomX: 38.0,
-      zoomY: 52.0,
-      icon: "🛸",
+      stationId: "CAFE-06",
+      stationTitle: "Creative Lounge & Coffee Bar",
+      stationThai: "มุมคิดงานสร้างสรรค์ & บาร์กาแฟ",
+      desc: "มุมพักผ่อน เติมพลังกาแฟสด ระดมไอเดีย และอ่านหนังสือดีไซน์",
+      xPct: 84.0,
+      yPct: 64.0,
+      zoomX: 82.0,
+      zoomY: 65.0,
+      icon: "☕",
       themeColor: "#10b981"
     }
   ];
@@ -237,7 +237,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
     // Compute Designers Real Telemetry (NO fake tasks! ZERO parentheses in names!)
     const teamStations = designMembers.slice(0, 6).map((m, idx) => {
-      const station = workshopStations[idx] || workshopStations[0];
+      const station = officeStations[idx] || officeStations[0];
       const assigned = filtered.filter(t => t.assignee_id === m.id);
       const memberActive = assigned.filter(t => t.status !== "completed");
       const memberCompleted = assigned.filter(t => t.status === "completed");
@@ -298,15 +298,15 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         <!-- 1. Page Header (Dual View Switcher) -->
         <div class="overview-header">
           <div class="overview-title-group">
-            <h1 class="overview-title">KKP Graphic Studio — Retro Workshop 3D</h1>
-            <p class="overview-subtitle">ห้องสตูดิโอทีมกราฟิก KKP แบบ Interactive Isometric Map เชื่อมต่อข้อมูลจริงแบบเรียลไทม์ 100%</p>
+            <h1 class="overview-title">KKP Graphic Studio — Pixel Office Map</h1>
+            <p class="overview-subtitle">แผนผังห้องทำงานทีมกราฟิก KKP สไตล์ Isometric Pixel Art Map เชื่อมต่อข้อมูลจริงแบบเรียลไทม์ 100%</p>
           </div>
           <div class="overview-header-actions">
             <!-- Dual View Switcher -->
             <div class="view-switcher-pill" style="margin-right: 6px;">
-              <button type="button" class="view-btn is-active is-3d" id="btn-studio-3d" title="มุมมอง 3D Workshop Studio">
+              <button type="button" class="view-btn is-active is-3d" id="btn-studio-3d" title="มุมมอง 3D Pixel Studio">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                <span>3D Workshop</span>
+                <span>3D Office</span>
               </button>
               <button type="button" class="view-btn" id="btn-switch-classic" title="สลับกลับไป Classic Overview">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -412,7 +412,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           </div>
         </div>
 
-        <!-- 4. Main Stage Grid (Left: Retro Isometric Workshop | Right: Member Inspector) -->
+        <!-- 4. Main Stage Grid (Left: Isometric Creative Office Map | Right: Member Inspector) -->
         <div class="studio-stage-grid">
           <!-- Viewport Card -->
           <div class="studio-viewport-card" id="studio-viewport">
@@ -421,7 +421,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
               <div class="studio-topbar-left">
                 <div class="studio-brand-badge">
                   <span class="studio-brand-dot"></span>
-                  <span>KKP RETRO WORKSHOP</span>
+                  <span>KKP CREATIVE STUDIO MAP</span>
                 </div>
                 <!-- Member Quick Jump Pills -->
                 <div class="studio-members-bar">
@@ -449,11 +449,11 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
             <!-- Pannable & Zoomable Stage Viewport -->
             <div class="studio-stage-viewport" id="studio-stage-viewport">
               <div class="studio-scene-world" id="studio-scene-world">
-                <!-- Authentic High-Res Pixel Art Background -->
-                <img class="studio-pixel-art-img" src="assets/isometric-workshop.jpg" alt="KKP Graphic Studio Workshop" />
+                <!-- Authentic High-Res Pixel Art Office Background -->
+                <img class="studio-pixel-art-img" src="assets/isometric-office.jpg" alt="KKP Graphic Studio Office" />
 
-                <!-- Canvas Overlays (Sunbeams, CRT glow, dust motes, server blinkers) -->
-                <canvas class="studio-fx-canvas" id="studio-fx-canvas" width="1024" height="681"></canvas>
+                <!-- Canvas Overlays (Sunbeams, coffee steam, screen glows, dust motes) -->
+                <canvas class="studio-fx-canvas" id="studio-fx-canvas" width="1376" height="768"></canvas>
 
                 <!-- Interactive Hotspots & Floating Tags Layer -->
                 <div class="studio-hotspots-layer" id="studio-hotspots-layer">
@@ -519,7 +519,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
                 <div class="inspector-profile-info">
                   <div class="inspector-member-name">${activeStation.displayName}</div>
                   <div class="inspector-member-role">
-                    <span>${activeStation.member.role === 'supervisor' ? 'Lead / Supervisor' : 'Graphic Designer'}</span>
+                    <span>${activeStation.member.role === 'supervisor' ? 'Lead / Art Director' : 'Graphic Designer'}</span>
                     <span>•</span>
                     <span style="color:#ffc61a;">${activeStation.station.stationThai}</span>
                   </div>
@@ -671,16 +671,13 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       const st = teamStations[idx];
       if (!st || !viewportEl) return;
 
-      const vpW = viewportEl.clientWidth || 800;
-      const vpH = viewportEl.clientHeight || 580;
-
-      // Center station in viewport
-      const targetImgX = (st.station.zoomX / 100) * 1024;
-      const targetImgY = (st.station.zoomY / 100) * 681;
+      // Center station in 1376x768 world
+      const targetImgX = (st.station.zoomX / 100) * 1376;
+      const targetImgY = (st.station.zoomY / 100) * 768;
 
       camZoom = zoomLevel;
-      camPanX = (512 - targetImgX) * camZoom;
-      camPanY = (340.5 - targetImgY) * camZoom;
+      camPanX = (688 - targetImgX) * camZoom;
+      camPanY = (384 - targetImgY) * camZoom;
 
       applyCameraTransform(true);
       drawStudio();
@@ -738,50 +735,60 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     // Initial camera apply
     applyCameraTransform(false);
 
-    // ── Setup Effects Canvas (Dust particles, CRT glow, server blinkers) ──
+    // ── Setup Effects Canvas (Dust particles, coffee steam, whiteboard glow, plotter LED) ──
     const fxCanvas = container.querySelector("#studio-fx-canvas");
     if (fxCanvas) {
       const fxCtx = fxCanvas.getContext("2d");
       
-      // Generate 32 floating dust motes
-      const dustParticles = Array.from({ length: 32 }, () => ({
-        x: 600 + Math.random() * 380,
-        y: 100 + Math.random() * 500,
+      // Generate 36 floating dust motes in sunlit windows (right side)
+      const dustParticles = Array.from({ length: 36 }, () => ({
+        x: 950 + Math.random() * 400,
+        y: 80 + Math.random() * 580,
         vx: (Math.random() - 0.45) * 0.35,
-        vy: 0.15 + Math.random() * 0.45,
+        vy: 0.12 + Math.random() * 0.38,
         size: 1 + Math.random() * 2.2,
         alpha: 0.2 + Math.random() * 0.6,
         pulseSpeed: 0.02 + Math.random() * 0.03
+      }));
+
+      // Generate 12 coffee steam particles in pantry
+      const steamParticles = Array.from({ length: 12 }, () => ({
+        x: 1195 + Math.random() * 20,
+        y: 430 + Math.random() * 25,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: -0.35 - Math.random() * 0.45,
+        size: 2 + Math.random() * 3,
+        alpha: 0.4
       }));
 
       let frameCounter = 0;
 
       function renderFx() {
         if (!isMounted) return;
-        fxCtx.clearRect(0, 0, 1024, 681);
+        fxCtx.clearRect(0, 0, 1376, 768);
         frameCounter++;
 
-        // 1. Sunlight Shaft Subtle Shimmer (top right to center)
-        const shimmerAlpha = 0.04 + Math.sin(frameCounter * 0.03) * 0.02;
+        // 1. Sunlight Shaft Shimmer (top right window down to coffee bar)
+        const shimmerAlpha = 0.035 + Math.sin(frameCounter * 0.025) * 0.015;
         fxCtx.save();
-        fxCtx.fillStyle = `rgba(255, 220, 150, ${shimmerAlpha})`;
+        fxCtx.fillStyle = `rgba(255, 235, 175, ${shimmerAlpha})`;
         fxCtx.beginPath();
-        fxCtx.moveTo(780, 0);
-        fxCtx.lineTo(920, 0);
-        fxCtx.lineTo(760, 681);
-        fxCtx.lineTo(440, 681);
+        fxCtx.moveTo(1100, 40);
+        fxCtx.lineTo(1376, 40);
+        fxCtx.lineTo(1376, 768);
+        fxCtx.lineTo(920, 768);
         fxCtx.closePath();
         fxCtx.fill();
         fxCtx.restore();
 
         // 2. Dust Motes along sunbeam
-        fxCtx.fillStyle = "#ffe4a0";
+        fxCtx.fillStyle = "#ffe6a0";
         dustParticles.forEach(p => {
           p.x += p.vx;
           p.y += p.vy;
-          if (p.y > 650) { p.y = 80; p.x = 600 + Math.random() * 380; }
-          if (p.x < 480) p.x = 980;
-          if (p.x > 1000) p.x = 500;
+          if (p.y > 700) { p.y = 80; p.x = 950 + Math.random() * 400; }
+          if (p.x < 900) p.x = 1350;
+          if (p.x > 1360) p.x = 920;
 
           const currentAlpha = Math.max(0.08, Math.min(0.85, p.alpha + Math.sin(frameCounter * p.pulseSpeed) * 0.3));
           fxCtx.globalAlpha = currentAlpha;
@@ -791,33 +798,42 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         });
         fxCtx.globalAlpha = 1.0;
 
-        // 3. CRT Screen Soft Glow (in Lounge Pit around x: 70, y: 520)
-        const crtGlow = 0.12 + Math.sin(frameCounter * 0.08) * 0.06;
-        const crtGrad = fxCtx.createRadialGradient(80, 520, 4, 80, 520, 45);
-        crtGrad.addColorStop(0, `rgba(56, 189, 248, ${crtGlow})`);
-        crtGrad.addColorStop(1, "rgba(56, 189, 248, 0)");
-        fxCtx.fillStyle = crtGrad;
+        // 3. Coffee Steam Particles in Pantry
+        fxCtx.fillStyle = "rgba(255, 255, 255, 0.45)";
+        steamParticles.forEach(sp => {
+          sp.x += sp.vx;
+          sp.y += sp.vy;
+          sp.size += 0.04;
+          sp.alpha -= 0.007;
+
+          if (sp.alpha <= 0 || sp.y < 380) {
+            sp.x = 1195 + Math.random() * 20;
+            sp.y = 430 + Math.random() * 25;
+            sp.size = 2 + Math.random() * 2;
+            sp.alpha = 0.35 + Math.random() * 0.25;
+          }
+
+          fxCtx.globalAlpha = Math.max(0, sp.alpha);
+          fxCtx.beginPath();
+          fxCtx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+          fxCtx.fill();
+        });
+        fxCtx.globalAlpha = 1.0;
+
+        // 4. Whiteboard Dashboard Screen Glow (Top-left wall x: 120, y: 190)
+        const screenGlow = 0.08 + Math.sin(frameCounter * 0.05) * 0.04;
+        const screenGrad = fxCtx.createRadialGradient(120, 190, 10, 120, 190, 90);
+        screenGrad.addColorStop(0, `rgba(56, 189, 248, ${screenGlow})`);
+        screenGrad.addColorStop(1, "rgba(56, 189, 248, 0)");
+        fxCtx.fillStyle = screenGrad;
         fxCtx.beginPath();
-        fxCtx.arc(80, 520, 45, 0, Math.PI * 2);
+        fxCtx.arc(120, 190, 90, 0, Math.PI * 2);
         fxCtx.fill();
 
-        // 4. Arcade Neon Pulse (in right arcade around x: 840, y: 380)
-        const arcadeColor = (frameCounter % 120 < 40) ? "244, 63, 94" : ((frameCounter % 120 < 80) ? "56, 189, 248" : "251, 191, 36");
-        const arcadeGlow = 0.18 + Math.sin(frameCounter * 0.1) * 0.08;
-        const arcGrad = fxCtx.createRadialGradient(845, 380, 5, 845, 380, 40);
-        arcGrad.addColorStop(0, `rgba(${arcadeColor}, ${arcadeGlow})`);
-        arcGrad.addColorStop(1, `rgba(${arcadeColor}, 0)`);
-        fxCtx.fillStyle = arcGrad;
-        fxCtx.beginPath();
-        fxCtx.arc(845, 380, 40, 0, Math.PI * 2);
-        fxCtx.fill();
-
-        // 5. Server Rack Blinking LEDs (at Mezzanine around x: 590, y: 70)
-        if (frameCounter % 8 === 0) {
-          fxCtx.fillStyle = Math.random() > 0.4 ? "#22c55e" : "#ffc61a";
-          fxCtx.fillRect(602, 60, 3, 3);
-          fxCtx.fillStyle = Math.random() > 0.5 ? "#38bdf8" : "#ef4444";
-          fxCtx.fillRect(606, 68, 3, 3);
+        // 5. Large Plotter Printer Ready LED (Mezzanine x: 865, y: 310)
+        if (frameCounter % 60 < 45) {
+          fxCtx.fillStyle = "#22c55e";
+          fxCtx.fillRect(865, 310, 3, 3);
         }
 
         animFrameId = requestAnimationFrame(renderFx);
