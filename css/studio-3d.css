@@ -486,36 +486,36 @@
 /* Full-Body Character Sprite Container (Positioned in Office Chair) */
 .char-sprite-wrap {
   position: relative;
-  width: 48px;
-  height: 60px;
+  width: 58px;
+  height: 72px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   z-index: 2;
-  transition: transform 0.15s ease;
+  transition: transform 0.18s ease;
 }
 
 .char-shadow {
   position: absolute;
-  bottom: 1px;
+  bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
-  width: 28px;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.42);
+  width: 32px;
+  height: 9px;
+  background: rgba(0, 0, 0, 0.45);
   border-radius: 50%;
-  filter: blur(1px);
+  filter: blur(1.5px);
 }
 
 .char-sprite-img {
   width: auto;
-  height: 56px;
-  max-width: 46px;
+  height: 70px;
+  max-width: 58px;
   object-fit: contain;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  animation: charWorkingIdle 2.8s ease-in-out infinite;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+  animation: charWorkingIdle 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
 }
 
 @keyframes charWorkingIdle {
@@ -525,13 +525,13 @@
 
 .pixel-character-station:hover .char-sprite-wrap,
 .pixel-character-station.is-selected .char-sprite-wrap {
-  transform: translateY(-3px) scale(1.08);
+  transform: translateY(-4px) scale(1.08);
 }
 
 /* Compact Floating Speech Bubble Above Character */
 .char-hud-bubble {
   position: absolute;
-  bottom: 64px;
+  bottom: 76px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(14, 18, 28, 0.94);
