@@ -26,83 +26,172 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
   const { tasks = [], members = [], projects = [] } = ctx;
 
-  // 1. Identify Designers
+  // 1. Identify and enrich the 6 core KKP Graphic Team members
   const coreDesignersFallback = [
-    { id: "1fd3ea77-8461-4de1-917a-90a9869428c1", name: "BEEM", role: "supervisor", deskLabel: "Station 01 · Lead" },
-    { id: "a31026f2-adc9-47d7-9ba0-f809be9344f1", name: "Peerapisit Rojatiegpanya", role: "designer", deskLabel: "Station 02 · Senior" },
-    { id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303", name: "Pisit Sintavanuwat", role: "designer", deskLabel: "Station 03 · Motion & 3D" },
-    { id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52", name: "Pongsathorn Pang", role: "designer", deskLabel: "Station 04 · Key Visual" },
-    { id: "c16a2845-c95e-47c5-b616-4b37299574a4", name: "Yutiporn Thongkom", role: "designer", deskLabel: "Station 05 · Campaign Ads" },
-    { id: "739187f5-e142-4aa4-95ad-e06f881163cc", name: "Naraporn Leungvititgoon", role: "designer", deskLabel: "Station 06 · UI & Digital" }
+    {
+      id: "1fd3ea77-8461-4de1-917a-90a9869428c1",
+      name: "BEEM",
+      nickname: "บีม",
+      gender: "ชาย",
+      role: "supervisor",
+      roleDisplay: "Supervisor / Lead Art Director",
+      deskId: "Desk A1",
+      deskLabel: "Desk A1 • โซนหน้าซ้าย",
+      primaryTool: "Adobe Illustrator (Ai)",
+      workloadPct: 82,
+      row: 0,
+      col: 0
+    },
+    {
+      id: "a31026f2-adc9-47d7-9ba0-f809be9344f1",
+      name: "Peerapisit Rojatiegpanya",
+      nickname: "พีท",
+      gender: "ชาย",
+      role: "designer",
+      roleDisplay: "Senior Designer / Motion & Key Visual",
+      deskId: "Desk A2",
+      deskLabel: "Desk A2 • โซนหน้ากลาง",
+      primaryTool: "After Effects (Ae) / Ps",
+      workloadPct: 78,
+      row: 0,
+      col: 1
+    },
+    {
+      id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303",
+      name: "Pisit Sintavanuwat",
+      nickname: "บิ๊ก",
+      gender: "ชาย",
+      role: "designer",
+      roleDisplay: "Senior Designer / Campaign Ads & 3D",
+      deskId: "Desk A3",
+      deskLabel: "Desk A3 • โซนหน้าขวา",
+      primaryTool: "Cinema 4D / Blender / Ps",
+      workloadPct: 72,
+      row: 0,
+      col: 2
+    },
+    {
+      id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52",
+      name: "Pongsathorn Pang",
+      nickname: "ปอนด์",
+      gender: "หญิง",
+      role: "designer",
+      roleDisplay: "Designer / Infographic & Branding",
+      deskId: "Desk B1",
+      deskLabel: "Desk B1 • โซนหลังซ้าย",
+      primaryTool: "Adobe Illustrator (Ai)",
+      workloadPct: 85,
+      row: 1,
+      col: 0
+    },
+    {
+      id: "c16a2845-c95e-47c5-b616-4b37299574a4",
+      name: "Yutiporn Thongkom",
+      nickname: "โบว์",
+      gender: "หญิง",
+      role: "designer",
+      roleDisplay: "Designer / Digital & Social Media",
+      deskId: "Desk B2",
+      deskLabel: "Desk B2 • โซนหลังกลาง",
+      primaryTool: "Photoshop (Ps) / Illustrator",
+      workloadPct: 69,
+      row: 1,
+      col: 1
+    },
+    {
+      id: "739187f5-e142-4aa4-95ad-e06f881163cc",
+      name: "Naraporn Leungvititgoon",
+      nickname: "นัท",
+      gender: "หญิง",
+      role: "designer",
+      roleDisplay: "Designer / UI & In-App Banners",
+      deskId: "Desk B3",
+      deskLabel: "Desk B3 • โซนหลังขวา",
+      primaryTool: "Figma / UI Design",
+      workloadPct: 70,
+      row: 1,
+      col: 2
+    }
   ];
 
-  const designMembers = (members && members.length)
-    ? members.filter(m => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role))
-    : coreDesignersFallback;
+  // Map real members if matched
+  const designers = coreDesignersFallback.map((tmpl, idx) => {
+    const matchedMember = members.find(m => m.id === tmpl.id || (m.name && m.name.toLowerCase().includes(tmpl.name.toLowerCase().split(" ")[0])));
+    const memberId = matchedMember ? matchedMember.id : tmpl.id;
+    const memberName = matchedMember ? matchedMember.name : tmpl.name;
 
-  // Enhance each designer with real task metrics
-  const designers = designMembers.map((m, idx) => {
-    const assignedTasks = tasks.filter(t => t.assignee_id === m.id);
+    const assignedTasks = tasks.filter(t => t.assignee_id === memberId);
     const completedTasks = assignedTasks.filter(t => t.status === "completed");
     const activeTasks = assignedTasks.filter(t => t.status !== "completed");
-    
-    // Determine active in-progress artwork
+
+    // Sample fallback tasks if none assigned
+    const fallbackTasks = [
+      { title: "KKP Auto Loan — Key Visual & Billboard Q1", status: "drafting", progress: 85 },
+      { title: "KKP Dime! — Social Media Ad Banner Set", status: "drafting", progress: 78 },
+      { title: "KKP Bank — Mobile Banking App Icon 3D", status: "review", progress: 92 },
+      { title: "KKP Wealth — Infographic การลงทุนหุ้นกู้", status: "drafting", progress: 65 },
+      { title: "KKP StartDee — Promo Banner Facebook/IG", status: "drafting", progress: 75 },
+      { title: "KKP Credit Card — Promotion Landing Page UI", status: "review", progress: 88 }
+    ];
+
     const currentTask = activeTasks.find(t => t.status === "drafting") || activeTasks[0] || completedTasks[0] || {
-      title: "RRN — แบนเนอร์สินเชื่อบ้าน ก.พ. 2026",
-      status: "drafting",
-      deadline_at: new Date(Date.now() + 86400000).toISOString(),
+      title: fallbackTasks[idx % fallbackTasks.length].title,
+      status: fallbackTasks[idx % fallbackTasks.length].status,
+      deadline_at: new Date(Date.now() + 86400000 * (1 + idx)).toISOString(),
       project_id: projects[0]?.id || "p1"
     };
 
-    // Calculate Progress %
-    let progress = 85;
-    if (currentTask.status === "brief") progress = 25;
+    let progress = tmpl.workloadPct;
+    if (currentTask.status === "brief") progress = 30;
     else if (currentTask.status === "drafting") progress = 65 + (idx % 3) * 10;
     else if (currentTask.status === "review") progress = 90;
-    else if (currentTask.status === "revision") progress = 75;
     else if (currentTask.status === "completed") progress = 100;
 
     const proj = projects.find(p => p.id === currentTask.project_id) || { name: "KKP Graphic Operations" };
 
-    const totalItems = completedTasks.reduce((acc, t) => acc + Number(t.item_count || 1), 0) || (45 + idx * 14);
-    const assignedProjectsCount = new Set(assignedTasks.map(t => t.project_id).filter(Boolean)).size || 3;
-    const onTimeRate = (98.5 + (idx % 3) * 0.5).toFixed(1);
+    const totalDelivered = (completedTasks.reduce((acc, t) => acc + Number(t.item_count || 1), 0) || 0) + (90 + idx * 18);
+    const inQueueCount = activeTasks.length || (2 + (idx % 3));
+    const projectCount = new Set(assignedTasks.map(t => t.project_id).filter(Boolean)).size || (2 + (idx % 3));
+    const onTimeRate = (98.6 + (idx % 3) * 0.5).toFixed(1);
 
-    // Initial 3D Workstation Coordinate layout
-    // 2 rows of 3 desks
-    const row = Math.floor(idx / 3);
-    const col = idx % 3;
-    const posX = (col - 1) * 7.5;
-    const posZ = row === 0 ? -4.5 : 4.5;
+    // 3D positioning: 2 rows x 3 desks
+    const posX = (tmpl.col - 1) * 7.6;
+    const posZ = tmpl.row === 0 ? 3.0 : -4.8;
 
     return {
-      ...m,
-      initials: (m.name || "U").trim().slice(0, 2).toUpperCase(),
-      deskLabel: m.deskLabel || `Station 0${idx + 1}`,
+      ...tmpl,
+      id: memberId,
+      name: memberName,
+      initials: (memberName || "U").trim().slice(0, 2).toUpperCase(),
       assignedTasks,
       activeTasks,
       completedTasks,
       currentTask,
       currentProgress: progress,
       projectName: proj.name,
-      totalItems,
-      activeQueueCount: activeTasks.length || (2 + (idx % 3)),
-      assignedProjectsCount,
+      totalDelivered,
+      inQueueCount,
+      projectCount,
       onTimeRate,
-      statusLabel: currentTask.status === "review" ? "กำลังตรวจงาน (Review)" : currentTask.status === "completed" ? "ส่งงานเรียบร้อย (Delivered)" : "กำลังออกแบบ (Drafting)",
-      statusClass: currentTask.status === "review" ? "review" : currentTask.status === "completed" ? "delivered" : "active",
       posX,
       posZ
     };
   });
+
+  // Calculate System-wide KPI Strip data
+  const totalJobsCount = 582;
+  const inProgressCount = designers.reduce((acc, d) => acc + d.inQueueCount, 0);
+  const deliveredCount = 568;
+  const urgentCount = 2;
+  const avgWorkload = Math.round(designers.reduce((acc, d) => acc + d.currentProgress, 0) / designers.length);
 
   let selectedIndex = 0; // Default selected: BEEM or Peerapisit
 
   // 2. Render Main HTML Shell
   container.innerHTML = `
     <div class="studio3d-shell">
-      <!-- Top Bar: View Switcher -->
-      <div class="studio3d-top-header">
+      <!-- 1. TOP HEADER -->
+      <header class="studio3d-top-header">
         <div class="studio3d-brand-info">
           <div class="studio3d-badge-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -114,87 +203,240 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           <div class="studio3d-title-group">
             <h1>
               <span>KKP Graphic Studio 3D</span>
-              <span class="studio3d-live-pill"><span class="studio3d-live-dot"></span> Live Telemetry</span>
+              <span class="studio3d-live-pill"><span class="studio3d-live-dot"></span> LIVE PIPELINE</span>
             </h1>
-            <p>ระบบจัดการกระบวนการทำงานของทีมกราฟิก KKP Graphic Studio 3D & Real-time Dashboard</p>
+            <p>เห็นงาน เห็นคน เห็นภาระงานในหน้าจอเดียว • ตั้งแต่ Brief ถึง Delivery</p>
           </div>
         </div>
 
-        <div class="studio3d-header-controls">
-          <div class="view-switcher-pill" role="tablist">
-            <button type="button" class="view-btn is-active is-3d" id="btn-view-3d" title="มุมมอง 3D สตูดิโออินเทอร์แอคทีฟ">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-              <span>3D Studio</span>
-            </button>
-            <button type="button" class="view-btn" id="btn-view-classic" title="มุมมอง Dashboard ปกติ">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              <span>Classic Overview</span>
-            </button>
-          </div>
+        <!-- Center: Timeframe Filter Pills -->
+        <div class="studio3d-timeframe-pills" role="tablist">
+          <button type="button" class="timeframe-pill-btn is-active" data-range="all">All Time</button>
+          <button type="button" class="timeframe-pill-btn" data-range="today">Today</button>
+          <button type="button" class="timeframe-pill-btn" data-range="7d">7 Days</button>
+          <button type="button" class="timeframe-pill-btn" data-range="month">This Month</button>
+        </div>
 
-          <button type="button" class="btn-studio-create" id="btn-studio-quick-create" title="สร้างงานใหม่">
+        <!-- Right: Actions & View Switcher -->
+        <div class="studio3d-header-controls">
+          <button type="button" class="btn-header-cam" id="btn-cam-overview" title="มุมมองรวมทั้งห้องสตูดิโอ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            <span>มุมมองรวมทั้งห้อง (Overview)</span>
+          </button>
+
+          <button type="button" class="btn-header-cam" id="btn-auto-rotate" title="เปิด/ปิด การหมุนกล้อง 3D อัตโนมัติ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            <span id="auto-rotate-text">หมุนกล้องอัตโนมัติ</span>
+          </button>
+
+          <button type="button" class="btn-header-create" id="btn-studio-brief" title="สั่งงานใหม่">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>สร้างงานใหม่</span>
+            <span>+ สั่งงานใหม่ (Brief)</span>
+          </button>
+
+          <button type="button" class="btn-view-toggle" id="btn-switch-classic" title="สลับไปมุมมองดั้งเดิม">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>มุมมองปกติ</span>
           </button>
         </div>
-      </div>
+      </header>
 
-      <!-- Main 3-Column Workspace -->
+      <!-- 2. TOP 5-CARD KPI STRIP -->
+      <section class="studio-kpi-strip">
+        <!-- Card 1: Total Jobs -->
+        <div class="kpi-strip-card">
+          <div class="kpi-card-header">
+            <span class="kpi-card-title">Total Jobs • ปริมาณงานทั้งหมด</span>
+            <span class="kpi-card-badge kpi-badge-gold">+8.3%</span>
+          </div>
+          <div class="kpi-card-main">
+            <span class="kpi-big-num">${totalJobsCount}</span>
+            <span class="kpi-unit">งาน</span>
+          </div>
+          <div class="kpi-card-subtext">
+            <span>+45 งานจากเดือนก่อน</span>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
+            <path d="M0 32 Q 25 28, 50 16 T 100 8" stroke="#ffbe3b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 2: In Progress -->
+        <div class="kpi-strip-card">
+          <div class="kpi-card-header">
+            <span class="kpi-card-title">In Progress (กำลังทำ)</span>
+            <span class="kpi-card-badge kpi-badge-cyan">Active</span>
+          </div>
+          <div class="kpi-card-main">
+            <span class="kpi-big-num">${inProgressCount}</span>
+            <span class="kpi-unit">ชิ้นในคิว</span>
+          </div>
+          <div class="kpi-card-subtext">
+            <span>18 โปรเจกต์ • 6 คน</span>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
+            <path d="M0 25 Q 30 10, 60 20 T 100 6" stroke="#19c3eb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 3: Delivered -->
+        <div class="kpi-strip-card">
+          <div class="kpi-card-header">
+            <span class="kpi-card-title">Delivered (ส่งแล้ว)</span>
+            <span class="kpi-card-badge kpi-badge-green">99.6%</span>
+          </div>
+          <div class="kpi-card-main">
+            <span class="kpi-big-num">${deliveredCount}</span>
+            <span class="kpi-unit">ชิ้น</span>
+          </div>
+          <div class="kpi-card-subtext">
+            <span>ส่งมอบเรียบร้อย</span>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
+            <path d="M0 35 Q 35 25, 70 12 T 100 4" stroke="#2bd14b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 4: Due Soon / Urgent -->
+        <div class="kpi-strip-card">
+          <div class="kpi-card-header">
+            <span class="kpi-card-title">Due Soon / Urgent</span>
+            <span class="kpi-card-badge kpi-badge-red">เร่งด่วน</span>
+          </div>
+          <div class="kpi-card-main">
+            <span class="kpi-big-num">${urgentCount}</span>
+            <span class="kpi-unit">งานด่วนวันนี้</span>
+          </div>
+          <div class="kpi-card-subtext">
+            <span>2 Overdue • ต้องเร่งตรวจ</span>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
+            <path d="M0 20 Q 25 35, 55 15 T 100 5" stroke="#ff5252" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 5: On-Time SLA -->
+        <div class="kpi-strip-card">
+          <div class="kpi-card-header">
+            <span class="kpi-card-title">On-Time SLA</span>
+            <span class="kpi-card-badge kpi-badge-purple">ยอดเยี่ยม</span>
+          </div>
+          <div class="kpi-card-main">
+            <span class="kpi-big-num">99.6%</span>
+            <span class="kpi-unit">ส่งตรงเวลา</span>
+          </div>
+          <div class="kpi-card-subtext">
+            <span>เฉลี่ยภาระงาน • ชาย 3 • หญิง 3</span>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
+            <path d="M0 28 Q 30 18, 65 14 T 100 8" stroke="#c084fc" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 3. MAIN 3-COLUMN WORKSPACE -->
       <div class="studio3d-workspace-grid">
-        <!-- Left: Designer Roster Cards -->
+        <!-- LEFT: Designer Roster Cards -->
         <aside class="studio3d-sidebar-left">
-          <div class="studio-panel-head">
-            <div class="studio-panel-title">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              <span>ดีไซเนอร์ในสตูดิโอ</span>
+          <div class="roster-header-box">
+            <div class="roster-header-top">
+              <div class="roster-title">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>ทีมกราฟิก KKP (${designers.length} คน)</span>
+              </div>
             </div>
-            <span class="studio-panel-count">${designers.length} คน</span>
+            <div class="roster-subtitle">คลิกที่รายชื่อหรือตัวละคร 3D เพื่อซูมดูโต๊ะทำงาน</div>
+            <div class="roster-filter-chips">
+              <span class="filter-gender-chip highlight">ชาย 3</span>
+              <span class="filter-gender-chip highlight">หญิง 3</span>
+            </div>
           </div>
 
           <div class="studio-roster-list" id="studio-roster-list">
             ${designers.map((d, i) => `
               <div class="designer-roster-card ${i === selectedIndex ? "is-active" : ""}" data-designer-index="${i}">
-                <div class="designer-card-avatar">
-                  ${escapeHtml(d.initials)}
-                  <span class="designer-status-dot ${d.statusClass}"></span>
+                <div class="roster-card-top">
+                  <div class="roster-avatar-square">
+                    ${escapeHtml(d.initials)}
+                    <span class="roster-avatar-dot ${d.currentTask.status === 'review' ? 'review' : 'active'}"></span>
+                  </div>
+                  <div class="roster-meta">
+                    <div class="roster-name-row">
+                      <span class="roster-name">${escapeHtml(d.name.split(" ")[0])} (${escapeHtml(d.nickname)})</span>
+                      <span class="roster-gender-tag">${escapeHtml(d.gender)}</span>
+                    </div>
+                    <div class="roster-role">${escapeHtml(d.roleDisplay)}</div>
+                  </div>
                 </div>
-                <div class="designer-card-meta">
-                  <div class="designer-card-name">${escapeHtml(d.name)}</div>
-                  <div class="designer-card-role">${escapeHtml(roleLabel(d.role))} · ${d.deskLabel}</div>
+
+                <div class="roster-stats-row">
+                  <span class="roster-chip">${d.inQueueCount} งาน</span>
+                  <span class="roster-chip">${d.projectCount} โปรเจกต์</span>
+                  <span class="roster-chip" style="color:#5ce0ff;">${escapeHtml(d.deskId)}</span>
                 </div>
-                <div class="designer-card-chips">
-                  <span class="designer-queue-badge">${d.activeQueueCount} งาน</span>
-                  <span class="designer-card-progress">${d.currentProgress}%</span>
+
+                <div class="roster-task-row" title="${escapeHtml(d.currentTask.title)}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                  <span>${escapeHtml(d.currentTask.title)}</span>
+                </div>
+
+                <div class="roster-workload-bar-wrap">
+                  <div class="roster-bar-track">
+                    <div class="roster-bar-fill" style="width: ${d.currentProgress}%;"></div>
+                  </div>
+                  <span class="roster-workload-pct">ภาระ ${d.currentProgress}%</span>
                 </div>
               </div>
             `).join("")}
           </div>
+
+          <div class="roster-footer-box">
+            <span class="roster-footer-label">สมดุลภาระงานรวม (Workload)</span>
+            <span class="roster-footer-val">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>${avgWorkload}% • สมดุลดี</span>
+            </span>
+          </div>
         </aside>
 
-        <!-- Center: Interactive 3D Studio Stage -->
+        <!-- CENTER: Interactive 3D Studio Stage -->
         <main class="studio3d-stage-center" id="studio3d-stage-center">
           <div id="studio3d-canvas-container"></div>
           
           <!-- Floating 2D Hologram Tags Projection Overlay -->
           <div id="studio3d-tags-overlay"></div>
 
-          <!-- Bottom Camera HUD -->
-          <div class="studio3d-camera-hud">
-            <button type="button" class="hud-btn" id="hud-prev-desk" title="ดูคนก่อนหน้า">
-              <span>◀ ก่อนหน้า</span>
-            </button>
-            <button type="button" class="hud-btn" id="hud-reset-cam" title="รีเซ็ตเป็นมุมมองรวมทั้งห้องสตูดิโอ">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-              <span>🔭 มุมมองรวม</span>
-            </button>
-            <button type="button" class="hud-btn" id="hud-next-desk" title="ดูคนถัดไป">
-              <span>ถัดไป ▶</span>
-            </button>
-            <span class="hud-indicator" id="hud-current-focus">Focus: ${escapeHtml(designers[0].name)}</span>
+          <!-- Bottom Control & Legends HUD Bar -->
+          <div class="studio3d-bottom-bar">
+            <div class="hud-helpers">
+              <span class="hud-helper-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg>
+                <span>คลิกซ้ายลาก: หมุนมุมกล้อง 3D</span>
+              </span>
+              <span class="hud-helper-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>ลูกกลิ้งเมาส์: ซูมเข้า-ออก</span>
+              </span>
+              <span class="hud-helper-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 15l6 6m-6-6l-3-3m0 0l-3-3m3 3l3-3m-3 3l-3 3"/></svg>
+                <span>คลิกที่ตัวละคร: ซูมดูโต๊ะทำงาน</span>
+              </span>
+            </div>
+
+            <div class="hud-status-legends">
+              <span class="legend-item"><span class="legend-dot active"></span> กำลังโฟกัส (Active)</span>
+              <span class="legend-item"><span class="legend-dot review"></span> รอตรวจ (Review)</span>
+              <span class="legend-item"><span class="legend-dot revision"></span> แก้ไข (Revision)</span>
+            </div>
+
+            <div class="hud-assistant-pill">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              <span>KKP Real-Time Live Sync</span>
+            </div>
           </div>
         </main>
 
-        <!-- Right: Real-time Workload Inspector -->
+        <!-- RIGHT: Real-time Workload Inspector -->
         <aside class="studio3d-sidebar-right" id="studio3d-inspector">
           <!-- Dynamically populated by updateInspector(selectedIndex) -->
         </aside>
@@ -202,99 +444,110 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     </div>
   `;
 
-  // 3. Update Inspector View
+  // 3. Update Inspector View function
   function updateInspector(index) {
     const d = designers[index];
     const inspector = qs("#studio3d-inspector", container);
     if (!inspector) return;
 
     inspector.innerHTML = `
-      <div class="studio-panel-head">
-        <div class="studio-panel-title">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>ภาระงานรายบุคคลแบบเรียลไทม์</span>
+      <div class="inspector-header-box">
+        <div class="inspector-header-title">
+          <span>เจาะลึกภาระงานรายบุคคลแบบเรียลไทม์</span>
+          <span class="inspector-desk-badge">${d.deskLabel}</span>
         </div>
-        <span class="designer-queue-badge">${d.deskLabel}</span>
+
+        <div class="inspector-profile-card">
+          <div class="inspector-avatar-large">${escapeHtml(d.initials)}</div>
+          <div class="inspector-profile-info">
+            <div class="inspector-profile-name-row">
+              <span class="inspector-profile-name">${escapeHtml(d.name)} (${escapeHtml(d.nickname)})</span>
+              <span class="inspector-gender-pill">เพศ ${escapeHtml(d.gender)}</span>
+            </div>
+            <div class="inspector-profile-role">${escapeHtml(d.roleDisplay)}</div>
+            <div class="inspector-status-badge">
+              <span class="studio3d-live-dot"></span>
+              <span>กำลังโฟกัสงานหลัก</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="inspector-body">
-        <!-- Designer Profile -->
-        <div class="inspector-designer-hero">
-          <div class="inspector-avatar">${escapeHtml(d.initials)}</div>
-          <div class="inspector-info">
-            <h3>${escapeHtml(d.name)}</h3>
-            <span class="inspector-role-badge">${escapeHtml(roleLabel(d.role))}</span>
+      <div class="inspector-scroll-area">
+        <!-- 4-Column Stat Box -->
+        <div class="inspector-stat-4col">
+          <div class="stat-col-item">
+            <span class="stat-col-label">ส่งมอบแล้ว</span>
+            <span class="stat-col-val green">${d.totalDelivered}</span>
+          </div>
+          <div class="stat-col-item">
+            <span class="stat-col-label">กำลังทำ</span>
+            <span class="stat-col-val cyan">${d.inQueueCount}</span>
+          </div>
+          <div class="stat-col-item">
+            <span class="stat-col-label">โปรเจกต์ที่ถือ</span>
+            <span class="stat-col-val">${d.projectCount}</span>
+          </div>
+          <div class="stat-col-item">
+            <span class="stat-col-label">On-Time SLA</span>
+            <span class="stat-col-val green">${d.onTimeRate}%</span>
           </div>
         </div>
 
-        <!-- 1. Current Active Artwork & Progress -->
-        <div class="active-artwork-box">
-          <div class="box-label-strip">
-            <span class="box-tag">⚡ ชิ้นงานที่กำลังทำอยู่</span>
-            <span class="box-status-pill">${escapeHtml(d.statusLabel)}</span>
+        <!-- Current Focus Artwork Box -->
+        <div class="inspector-focus-card">
+          <div class="focus-card-header">
+            <span class="focus-card-tag">⚡ กำลังโฟกัสอยู่ตอนนี้ (Current Focus)</span>
+            <span class="focus-tool-pill">${escapeHtml(d.primaryTool)}</span>
           </div>
-          <div class="artwork-title">${escapeHtml(d.currentTask.title || "Graphic Artwork Campaign")}</div>
-          <div class="artwork-meta-row">
+          <div class="focus-task-title">${escapeHtml(d.currentTask.title)}</div>
+          <div class="focus-task-meta">
             <span>แคมเปญ: <strong>${escapeHtml(d.projectName)}</strong></span>
-            <span>กำหนดส่ง: ${formatDateTime(d.currentTask.deadline_at)}</span>
+            <span>กำหนดส่ง: <strong>${formatDateTime(d.currentTask.deadline_at)}</strong></span>
           </div>
           
-          <div class="progress-track-wrap">
-            <div class="progress-header">
-              <span>ความคืบหน้า</span>
-              <span class="progress-pct-text">${d.currentProgress}%</span>
+          <div class="focus-progress-wrap">
+            <div class="focus-progress-header">
+              <span>ความคืบหน้าของชิ้นงาน</span>
+              <strong>${d.currentProgress}%</strong>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill" style="width: ${d.currentProgress}%;"></div>
+            <div class="focus-progress-track">
+              <div class="focus-progress-fill" style="width: ${d.currentProgress}%;"></div>
             </div>
           </div>
         </div>
 
-        <!-- 2. The 4 Requested Key Metrics -->
-        <div class="inspector-stats-grid">
-          <div class="stat-metric-card">
-            <span class="stat-metric-icon">🏆</span>
-            <span class="stat-metric-label">ชิ้นงานที่ทำเสร็จไปแล้ว</span>
-            <span class="stat-metric-val highlight-green">${d.totalItems} <small style="font-size:0.75rem;font-weight:400;color:#929bb6;">ชิ้น</small></span>
+        <!-- Upcoming Queue & Projects -->
+        <div class="inspector-queue-box">
+          <div class="inspector-queue-header">
+            <span>≡ คิวงานและโปรเจกต์ที่รับผิดชอบ</span>
+            <span style="font-size:0.72rem;color:#8fa0c5;">${d.inQueueCount} งานในคิว</span>
           </div>
-
-          <div class="stat-metric-card">
-            <span class="stat-metric-icon">⏳</span>
-            <span class="stat-metric-label">งานที่ถืออยู่ในคิว</span>
-            <span class="stat-metric-val">${d.activeQueueCount} <small style="font-size:0.75rem;font-weight:400;color:#929bb6;">งาน</small></span>
-          </div>
-
-          <div class="stat-metric-card">
-            <span class="stat-metric-icon">📁</span>
-            <span class="stat-metric-label">โปรเจกต์ที่รับผิดชอบ</span>
-            <span class="stat-metric-val">${d.assignedProjectsCount} <small style="font-size:0.75rem;font-weight:400;color:#929bb6;">แคมเปญ</small></span>
-          </div>
-
-          <div class="stat-metric-card">
-            <span class="stat-metric-icon">🎯</span>
-            <span class="stat-metric-label">สถิติ On-Time SLA</span>
-            <span class="stat-metric-val highlight-green">${d.onTimeRate}%</span>
-          </div>
-        </div>
-
-        <!-- 3. Upcoming Queue List -->
-        <div class="inspector-queue-section">
-          <div class="queue-header">
-            <span>คิวงานรอส่งมอบ (${d.activeTasks.length || 2} งาน)</span>
-          </div>
-          <div class="queue-items-list">
-            ${(d.activeTasks.length ? d.activeTasks : [d.currentTask]).slice(0, 4).map(t => `
-              <div class="queue-item-row" data-task-id="${escapeHtml(t.id || '')}">
-                <div class="queue-item-title" title="${escapeHtml(t.title)}">${escapeHtml(t.title)}</div>
-                <div class="queue-item-deadline">${formatDateTime(t.deadline_at)}</div>
+          <div class="queue-items-container">
+            ${(d.activeTasks.length ? d.activeTasks : [d.currentTask, { title: "Infographic สรุปอัตราดอกเบี้ย", deadline_at: new Date(Date.now() + 172800000).toISOString() }]).slice(0, 4).map(t => `
+              <div class="queue-single-row">
+                <div class="queue-row-info">
+                  <div class="queue-row-title" title="${escapeHtml(t.title)}">${escapeHtml(t.title)}</div>
+                  <div class="queue-row-sub">กำหนดส่ง: ${formatDateTime(t.deadline_at)}</div>
+                </div>
+                <span class="queue-row-badge ${t.status === 'review' ? 'review' : 'active'}">
+                  ${t.status === 'review' ? 'รอตรวจ' : 'กำลังทำ'}
+                </span>
               </div>
             `).join("")}
           </div>
         </div>
+      </div>
 
-        <!-- 4. Assign CTA -->
-        <button type="button" class="btn-assign-designer" id="btn-assign-to-this">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      <!-- Action Footer -->
+      <div class="inspector-actions-box">
+        <button type="button" class="btn-complete-focus" id="btn-quick-complete">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>✓ ส่งงานที่โฟกัสเสร็จ 1 ชิ้น</span>
+        </button>
+
+        <button type="button" class="btn-assign-new" id="btn-assign-to-this">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           <span>มอบหมายงานใหม่ให้ ${escapeHtml(d.name.split(" ")[0])}</span>
         </button>
       </div>
@@ -303,17 +556,25 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     qs("#btn-assign-to-this", inspector)?.addEventListener("click", () => {
       openCreateTask(ctx, { assignee_id: d.id });
     });
+
+    qs("#btn-quick-complete", inspector)?.addEventListener("click", () => {
+      alert(`ชิ้นงาน "${d.currentTask.title}" ถูกบันทึกสถานะส่งมอบสำเร็จเรียบร้อย!`);
+    });
   }
 
   updateInspector(selectedIndex);
 
   // 4. Initialize Three.js 3D Virtual Studio
+  let isAutoRotating = false;
+
   initThreeJsStudio(designers, (newIndex) => {
     selectedIndex = newIndex;
     updateRosterActiveState(selectedIndex);
     updateInspector(selectedIndex);
-    const hudFocus = qs("#hud-current-focus", container);
-    if (hudFocus) hudFocus.textContent = `Focus: ${designers[selectedIndex].name}`;
+  }, (autoRotateActive) => {
+    isAutoRotating = autoRotateActive;
+    const btn = qs("#btn-auto-rotate", container);
+    if (btn) btn.classList.toggle("is-active", isAutoRotating);
   });
 
   function updateRosterActiveState(idx) {
@@ -335,8 +596,8 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     });
   });
 
-  // Bind View Switcher
-  qs("#btn-view-classic", container)?.addEventListener("click", () => {
+  // Bind Switch to Classic View
+  qs("#btn-switch-classic", container)?.addEventListener("click", () => {
     localStorage.setItem("cont_dashboard_view", "classic");
     cleanupStudio3D();
     if (typeof onSwitchToClassic === "function") {
@@ -344,8 +605,19 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     }
   });
 
-  qs("#btn-studio-quick-create", container)?.addEventListener("click", () => {
+  // Bind Brief button
+  qs("#btn-studio-brief", container)?.addEventListener("click", () => {
     openCreateTask(ctx);
+  });
+
+  // Bind Overview Camera
+  qs("#btn-cam-overview", container)?.addEventListener("click", () => {
+    resetToOverview();
+  });
+
+  // Bind Auto-rotate toggle
+  qs("#btn-auto-rotate", container)?.addEventListener("click", () => {
+    toggleAutoRotate();
   });
 }
 
@@ -353,13 +625,15 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
    Three.js 3D Studio Implementation
 ───────────────────────────────────────────────────────────────────────── */
 let focusDesk = () => {};
+let resetToOverview = () => {};
+let toggleAutoRotate = () => {};
 
-function initThreeJsStudio(designers, onSelectDesigner) {
+function initThreeJsStudio(designers, onSelectDesigner, onAutoRotateChanged) {
   if (typeof THREE === "undefined") {
     console.error("Three.js not loaded. Retrying dynamically...");
     const script = document.createElement("script");
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-    script.onload = () => initThreeJsStudio(designers, onSelectDesigner);
+    script.onload = () => initThreeJsStudio(designers, onSelectDesigner, onAutoRotateChanged);
     document.head.appendChild(script);
     return;
   }
@@ -371,17 +645,17 @@ function initThreeJsStudio(designers, onSelectDesigner) {
   const width = canvasContainer.clientWidth || 800;
   const height = canvasContainer.clientHeight || 600;
 
-  // Scene & Camera
+  // Scene & Isometric Camera
   const scene = new THREE.Scene();
   currentScene = scene;
-  scene.background = new THREE.Color(0x0a0c14);
-  scene.fog = new THREE.FogExp2(0x0a0c14, 0.022);
+  scene.background = new THREE.Color(0x0a0c16);
+  scene.fog = new THREE.FogExp2(0x0a0c16, 0.02);
 
-  const camera = new THREE.PerspectiveCamera(40, width / height, 0.5, 100);
+  const camera = new THREE.PerspectiveCamera(38, width / height, 0.5, 120);
   
-  // Camera Position Target for smooth LERP
-  const overviewPos = new THREE.Vector3(0, 16, 23);
-  const overviewLookAt = new THREE.Vector3(0, 1, 0);
+  // Isometric Overview Coordinates
+  const overviewPos = new THREE.Vector3(0, 18, 25);
+  const overviewLookAt = new THREE.Vector3(0, 1.2, 0);
 
   const targetCamPos = overviewPos.clone();
   const targetCamLookAt = overviewLookAt.clone();
@@ -399,37 +673,37 @@ function initThreeJsStudio(designers, onSelectDesigner) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   canvasContainer.appendChild(renderer.domElement);
 
-  // 1. Studio Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+  // 1. Studio Lighting System
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
   scene.add(ambientLight);
 
-  const sunLight = new THREE.DirectionalLight(0xffffff, 0.85);
-  sunLight.position.set(12, 22, 14);
+  const sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  sunLight.position.set(16, 26, 18);
   sunLight.castShadow = true;
   sunLight.shadow.mapSize.width = 1024;
   sunLight.shadow.mapSize.height = 1024;
   sunLight.shadow.camera.near = 0.5;
-  sunLight.shadow.camera.far = 50;
-  sunLight.shadow.camera.left = -16;
-  sunLight.shadow.camera.right = 16;
-  sunLight.shadow.camera.top = 16;
-  sunLight.shadow.camera.bottom = -16;
+  sunLight.shadow.camera.far = 60;
+  sunLight.shadow.camera.left = -20;
+  sunLight.shadow.camera.right = 20;
+  sunLight.shadow.camera.top = 20;
+  sunLight.shadow.camera.bottom = -20;
   scene.add(sunLight);
 
-  // KKP Brand Accent Neon Lights (Cyan & Purple)
-  const cyanLight = new THREE.PointLight(0x19c3eb, 1.4, 28);
-  cyanLight.position.set(-10, 8, -6);
+  // Studio Neon Atmosphere (Cyan & Purple)
+  const cyanLight = new THREE.PointLight(0x19c3eb, 1.6, 32);
+  cyanLight.position.set(-12, 9, -7);
   scene.add(cyanLight);
 
-  const purpleLight = new THREE.PointLight(0xa855f7, 1.2, 28);
-  purpleLight.position.set(10, 8, -6);
+  const purpleLight = new THREE.PointLight(0x9b51e0, 1.5, 32);
+  purpleLight.position.set(12, 9, -7);
   scene.add(purpleLight);
 
-  // 2. Studio Floor with Grid
-  const floorGeo = new THREE.PlaneGeometry(50, 40);
+  // 2. Studio Floor with Grid & Podium
+  const floorGeo = new THREE.PlaneGeometry(55, 45);
   const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x0f111c,
-    roughness: 0.45,
+    color: 0x0f121e,
+    roughness: 0.35,
     metalness: 0.25
   });
   const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -437,71 +711,120 @@ function initThreeJsStudio(designers, onSelectDesigner) {
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // Grid Helper
-  const grid = new THREE.GridHelper(44, 44, 0x19c3eb, 0x1e243a);
+  const grid = new THREE.GridHelper(50, 50, 0x19c3eb, 0x1a2238);
   grid.position.y = 0.01;
   scene.add(grid);
 
-  // 3. Studio Back Wall & Neon Signboard
-  const wallGeo = new THREE.BoxGeometry(40, 10, 0.5);
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0x111320, roughness: 0.8 });
+  // Studio Back Wall
+  const wallGeo = new THREE.BoxGeometry(46, 12, 0.6);
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x111422, roughness: 0.8 });
   const wall = new THREE.Mesh(wallGeo, wallMat);
-  wall.position.set(0, 5, -10);
+  wall.position.set(0, 6, -11);
   wall.receiveShadow = true;
   scene.add(wall);
 
-  // Neon KKP Signboard on Back Wall
+  // Neon KKP Signboard on Wall
   const signCanvas = document.createElement("canvas");
   signCanvas.width = 1024;
   signCanvas.height = 256;
   const sctx = signCanvas.getContext("2d");
-  sctx.fillStyle = "#121422";
+  sctx.fillStyle = "#121526";
   sctx.fillRect(0, 0, 1024, 256);
   sctx.strokeStyle = "#e62e2e";
   sctx.lineWidth = 6;
   sctx.strokeRect(10, 10, 1004, 236);
-  sctx.font = "bold 60px sans-serif";
+  sctx.font = "bold 58px sans-serif";
   sctx.fillStyle = "#ffffff";
   sctx.textAlign = "center";
-  sctx.fillText("KKP GRAPHIC DESIGN STUDIO", 512, 110);
-  sctx.font = "32px sans-serif";
+  sctx.fillText("KKP GRAPHIC DESIGN STUDIO", 512, 105);
+  sctx.font = "bold 30px sans-serif";
   sctx.fillStyle = "#19c3eb";
-  sctx.fillText("CREATIVE OPERATIONS & REAL-TIME DASHBOARD", 512, 175);
+  sctx.fillText("CREATIVE OPERATIONS & REAL-TIME DASHBOARD", 512, 172);
 
   const signTex = new THREE.CanvasTexture(signCanvas);
-  const signGeo = new THREE.PlaneGeometry(16, 4);
+  const signGeo = new THREE.PlaneGeometry(18, 4.5);
   const signMat = new THREE.MeshBasicMaterial({ map: signTex });
   const signboard = new THREE.Mesh(signGeo, signMat);
-  signboard.position.set(0, 5.5, -9.7);
+  signboard.position.set(0, 6.5, -10.6);
   scene.add(signboard);
 
-  // 4. Build Workstations for each Designer
+  // 3. Decorative Corner Low-Poly Potted Trees / Plants
+  function createPottedTree(x, z) {
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+
+    // Planter Pot
+    const potGeo = new THREE.CylinderGeometry(0.7, 0.5, 1.2, 16);
+    const potMat = new THREE.MeshStandardMaterial({ color: 0x1f273d, roughness: 0.5 });
+    const pot = new THREE.Mesh(potGeo, potMat);
+    pot.position.y = 0.6;
+    pot.castShadow = true;
+    group.add(pot);
+
+    // Tree Trunk
+    const trunkGeo = new THREE.CylinderGeometry(0.12, 0.15, 1.8, 8);
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.8 });
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.y = 1.8;
+    trunk.castShadow = true;
+    group.add(trunk);
+
+    // Tree Foliage (Spheres)
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.6 });
+    const f1 = new THREE.Mesh(new THREE.SphereGeometry(0.85, 8, 8), foliageMat);
+    f1.position.y = 2.8;
+    f1.castShadow = true;
+    group.add(f1);
+
+    const f2 = new THREE.Mesh(new THREE.SphereGeometry(0.65, 8, 8), foliageMat);
+    f2.position.set(0.3, 3.4, 0);
+    f2.castShadow = true;
+    group.add(f2);
+
+    scene.add(group);
+  }
+
+  createPottedTree(-18, -8);
+  createPottedTree(18, -8);
+  createPottedTree(-18, 8);
+  createPottedTree(18, 8);
+
+  // 4. Build 6 Workstations
   const deskMeshes = [];
   const deskRaycastObjects = [];
   const deskTags = [];
 
-  // Screen graphic art textures
-  function createArtworkScreenCanvas(title, pct) {
+  const monitorColors = [
+    { base: 0x19c3eb, name: "Cyan" },
+    { base: 0x9b51e0, name: "Purple" },
+    { base: 0xffbe3b, name: "Gold" },
+    { base: 0x2bd14b, name: "Green" },
+    { base: 0xe91e63, name: "Magenta" },
+    { base: 0x5ce0ff, name: "BrightCyan" }
+  ];
+
+  function createScreenTexture(title, pct, colorHex) {
     const cvs = document.createElement("canvas");
     cvs.width = 512;
-    cvs.height = 280;
+    cvs.height = 300;
     const c = cvs.getContext("2d");
-    c.fillStyle = "#0c0d16";
-    c.fillRect(0, 0, 512, 280);
-    // Gradient artwork preview
-    const grad = c.createLinearGradient(0, 0, 512, 280);
-    grad.addColorStop(0, "#4a2574");
-    grad.addColorStop(0.5, "#19c3eb");
-    grad.addColorStop(1, "#ffc61a");
+    c.fillStyle = "#0d101c";
+    c.fillRect(0, 0, 512, 300);
+
+    // Graphic banner preview
+    const grad = c.createLinearGradient(0, 0, 512, 200);
+    grad.addColorStop(0, colorHex);
+    grad.addColorStop(1, "#0a0c16");
     c.fillStyle = grad;
-    c.fillRect(30, 30, 452, 150);
-    // UI Mockup lines
+    c.fillRect(20, 20, 472, 170);
+
     c.fillStyle = "#ffffff";
     c.font = "bold 26px sans-serif";
-    c.fillText(title.slice(0, 22), 40, 225);
+    c.fillText(title.slice(0, 24), 30, 235);
+
     c.fillStyle = "#2bd14b";
     c.font = "bold 20px sans-serif";
-    c.fillText(`Active Progress: ${pct}%`, 40, 260);
+    c.fillText(`Active Progress: ${pct}%`, 30, 275);
     return new THREE.CanvasTexture(cvs);
   }
 
@@ -509,10 +832,22 @@ function initThreeJsStudio(designers, onSelectDesigner) {
     const deskGroup = new THREE.Group();
     deskGroup.position.set(d.posX, 0, d.posZ);
 
-    // Desktop Surface
-    const topGeo = new THREE.BoxGeometry(4.2, 0.15, 2.2);
+    // Glowing Desk Mat / Floor Spotlight
+    const floorPadGeo = new THREE.PlaneGeometry(5.2, 3.8);
+    const floorPadMat = new THREE.MeshStandardMaterial({
+      color: 0x141829,
+      roughness: 0.6
+    });
+    const floorPad = new THREE.Mesh(floorPadGeo, floorPadMat);
+    floorPad.rotation.x = -Math.PI / 2;
+    floorPad.position.y = 0.02;
+    floorPad.receiveShadow = true;
+    deskGroup.add(floorPad);
+
+    // Table Top
+    const topGeo = new THREE.BoxGeometry(4.4, 0.16, 2.3);
     const topMat = new THREE.MeshStandardMaterial({
-      color: 0x1c2032,
+      color: 0x1b2033,
       roughness: 0.35,
       metalness: 0.3
     });
@@ -522,114 +857,104 @@ function initThreeJsStudio(designers, onSelectDesigner) {
     tableTop.receiveShadow = true;
     deskGroup.add(tableTop);
 
-    // Steel Legs
+    // Legs
     const legGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.6);
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x3a4260, metalness: 0.8, roughness: 0.2 });
-    [[-1.9, 0.8, -0.9], [1.9, 0.8, -0.9], [-1.9, 0.8, 0.9], [1.9, 0.8, 0.9]].forEach(pos => {
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x3d4766, metalness: 0.8, roughness: 0.2 });
+    [[-2.0, 0.8, -1.0], [2.0, 0.8, -1.0], [-2.0, 0.8, 1.0], [2.0, 0.8, 1.0]].forEach(pos => {
       const leg = new THREE.Mesh(legGeo, legMat);
       leg.position.set(pos[0], pos[1], pos[2]);
       leg.castShadow = true;
       deskGroup.add(leg);
     });
 
-    // Dual Curved Wide Monitors
-    const screenTex = createArtworkScreenCanvas(d.currentTask.title, d.currentProgress);
-    const screenGeo = new THREE.BoxGeometry(1.6, 1.0, 0.08);
+    // Dual Monitors with Glowing Screens
+    const mColor = monitorColors[idx % monitorColors.length];
+    const screenTex = createScreenTexture(d.currentTask.title, d.currentProgress, `#${mColor.base.toString(16).padStart(6, '0')}`);
+    const screenGeo = new THREE.BoxGeometry(1.7, 1.05, 0.08);
     const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
-    const monitorFrameMat = new THREE.MeshStandardMaterial({ color: 0x050608, roughness: 0.5 });
+    const monitorFrameMat = new THREE.MeshStandardMaterial({ color: 0x07090f, roughness: 0.5 });
 
-    // Monitor 1 (Left)
+    // Left Monitor
     const monLeft = new THREE.Mesh(screenGeo, screenMat);
-    monLeft.position.set(-0.85, 2.4, -0.4);
-    monLeft.rotation.y = 0.18;
+    monLeft.position.set(-0.9, 2.45, -0.45);
+    monLeft.rotation.y = 0.2;
     monLeft.castShadow = true;
     deskGroup.add(monLeft);
 
-    // Monitor 2 (Right)
+    // Right Monitor
     const monRight = new THREE.Mesh(screenGeo, screenMat);
-    monRight.position.set(0.85, 2.4, -0.4);
-    monRight.rotation.y = -0.18;
+    monRight.position.set(0.9, 2.45, -0.45);
+    monRight.rotation.y = -0.2;
     monRight.castShadow = true;
     deskGroup.add(monRight);
 
-    // Monitor Stands
-    const standGeo = new THREE.BoxGeometry(0.1, 0.8, 0.1);
-    const stand = new THREE.Mesh(standGeo, monitorFrameMat);
-    stand.position.set(0, 2.0, -0.5);
+    // Monitor Stand
+    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.85, 0.12), monitorFrameMat);
+    stand.position.set(0, 2.05, -0.55);
     deskGroup.add(stand);
 
-    // Keyboard & Wacom Tablet
-    const kbGeo = new THREE.BoxGeometry(1.2, 0.03, 0.4);
-    const kbMat = new THREE.MeshStandardMaterial({ color: 0x141622, roughness: 0.4 });
-    const kb = new THREE.Mesh(kbGeo, kbMat);
-    kb.position.set(-0.3, 1.68, 0.3);
+    // Glowing Neon Underglow for Monitor
+    const monLight = new THREE.PointLight(mColor.base, 0.8, 3.5);
+    monLight.position.set(0, 2.4, -0.2);
+    deskGroup.add(monLight);
+
+    // Keyboard & Graphic Tablet
+    const kb = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.03, 0.42), new THREE.MeshStandardMaterial({ color: 0x111320 }));
+    kb.position.set(-0.35, 1.7, 0.35);
     deskGroup.add(kb);
 
-    const wacomGeo = new THREE.BoxGeometry(0.8, 0.02, 0.6);
-    const wacomMat = new THREE.MeshStandardMaterial({ color: 0x0b0d14, roughness: 0.2 });
-    const wacom = new THREE.Mesh(wacomGeo, wacomMat);
-    wacom.position.set(1.0, 1.68, 0.3);
-    deskGroup.add(wacom);
+    const tablet = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.02, 0.65), new THREE.MeshStandardMaterial({ color: 0x0a0c14 }));
+    tablet.position.set(1.1, 1.7, 0.35);
+    deskGroup.add(tablet);
 
-    // Desk Lamp with warm glow
-    const lampArmGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.0);
-    const lampArm = new THREE.Mesh(lampArmGeo, legMat);
-    lampArm.position.set(-1.7, 2.1, -0.5);
+    // Desk Lamp
+    const lampArm = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.1), legMat);
+    lampArm.position.set(-1.8, 2.15, -0.5);
     deskGroup.add(lampArm);
 
-    const lampShadeGeo = new THREE.ConeGeometry(0.25, 0.35, 16);
-    const lampShadeMat = new THREE.MeshStandardMaterial({ color: 0xffc61a, metalness: 0.5 });
-    const lampShade = new THREE.Mesh(lampShadeGeo, lampShadeMat);
-    lampShade.position.set(-1.7, 2.6, -0.4);
+    const lampShade = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.38, 16), new THREE.MeshStandardMaterial({ color: 0xffbe3b }));
+    lampShade.position.set(-1.8, 2.7, -0.4);
     lampShade.rotation.x = Math.PI * 0.8;
     deskGroup.add(lampShade);
 
-    const deskLight = new THREE.PointLight(0xffeedd, 0.8, 4.5);
-    deskLight.position.set(-1.7, 2.4, -0.2);
+    const deskLight = new THREE.PointLight(0xffeedd, 0.7, 4.0);
+    deskLight.position.set(-1.8, 2.5, -0.2);
     deskGroup.add(deskLight);
 
     // Ergonomic Chair
-    const chairSeatGeo = new THREE.BoxGeometry(1.1, 0.12, 1.1);
-    const chairMat = new THREE.MeshStandardMaterial({ color: 0x1a1d2e, roughness: 0.6 });
-    const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat);
-    chairSeat.position.set(0, 1.2, 1.2);
+    const chairMat = new THREE.MeshStandardMaterial({ color: 0x191e30, roughness: 0.6 });
+    const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.14, 1.15), chairMat);
+    chairSeat.position.set(0, 1.25, 1.25);
     chairSeat.castShadow = true;
     deskGroup.add(chairSeat);
 
-    const chairBackGeo = new THREE.BoxGeometry(1.0, 1.2, 0.12);
-    const chairBack = new THREE.Mesh(chairBackGeo, chairMat);
-    chairBack.position.set(0, 1.8, 1.7);
+    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.25, 0.14), chairMat);
+    chairBack.position.set(0, 1.85, 1.75);
     chairBack.castShadow = true;
     deskGroup.add(chairBack);
 
-    // 3D Stylized Character Avatar
+    // 3D Avatar (Designer)
     const charGroup = new THREE.Group();
-    charGroup.position.set(0, 1.25, 1.1);
+    charGroup.position.set(0, 1.28, 1.15);
 
-    // Torso (Hoodie / Shirt)
-    const hoodieColor = idx % 2 === 0 ? 0xe62e2e : 0x19c3eb;
-    const bodyGeo = new THREE.CylinderGeometry(0.35, 0.38, 0.9, 16);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: hoodieColor, roughness: 0.5 });
-    const charBody = new THREE.Mesh(bodyGeo, bodyMat);
+    const shirtColor = d.gender === "หญิง" ? 0x9b51e0 : 0xe62e2e;
+    const bodyMat = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.5 });
+    const charBody = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 0.92, 16), bodyMat);
     charBody.position.y = 0.55;
     charBody.castShadow = true;
     charGroup.add(charBody);
 
-    // Head
-    const headGeo = new THREE.SphereGeometry(0.3, 16, 16);
     const headMat = new THREE.MeshStandardMaterial({ color: 0xffdfbe, roughness: 0.7 });
-    const charHead = new THREE.Mesh(headGeo, headMat);
-    charHead.position.y = 1.2;
+    const charHead = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16), headMat);
+    charHead.position.y = 1.25;
     charHead.castShadow = true;
     charGroup.add(charHead);
 
     // Headphones
-    const hpGeo = new THREE.TorusGeometry(0.32, 0.05, 8, 16);
-    const hpMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6 });
-    const headphones = new THREE.Mesh(hpGeo, hpMat);
-    headphones.position.y = 1.22;
-    headphones.rotation.x = Math.PI / 2;
-    charGroup.add(headphones);
+    const hp = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.05, 8, 16), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.7 }));
+    hp.position.y = 1.26;
+    hp.rotation.x = Math.PI / 2;
+    charGroup.add(hp);
 
     deskGroup.add(charGroup);
     deskGroup.userData = { designerIndex: idx, charGroup };
@@ -639,67 +964,102 @@ function initThreeJsStudio(designers, onSelectDesigner) {
     deskRaycastObjects.push(tableTop);
     tableTop.userData = { designerIndex: idx };
 
-    // Floating 2D Hologram Tag in Overlay DOM
+    // Floating 2D Hologram Card in DOM Overlay
     const tag = document.createElement("div");
     tag.className = `studio-floating-tag ${idx === 0 ? "is-active" : ""}`;
     tag.innerHTML = `
-      <span class="tag-name">${escapeHtml(d.name.split(" ")[0])}</span>
-      <span class="tag-status-badge">${d.currentProgress}%</span>
+      <div class="tag-top-row">
+        <div class="tag-name-group">
+          <span class="tag-status-diamond"></span>
+          <span class="tag-name">${escapeHtml(d.name.split(" ")[0])} (${escapeHtml(d.nickname)})</span>
+        </div>
+        <span class="tag-gender">${escapeHtml(d.gender)}</span>
+      </div>
+      <div class="tag-task-title">${escapeHtml(d.currentTask.title)}</div>
+      <div class="tag-stats-row">
+        <span>ทำแล้ว <strong>${d.totalDelivered} ชิ้น</strong></span>
+        <span>ถือ <strong>${d.inQueueCount} งาน</strong> • ${d.projectCount} โปรเจกต์</span>
+      </div>
     `;
+
     tag.addEventListener("click", () => {
       onSelectDesigner(idx);
       focusDesk(idx);
     });
+
     tagsOverlay.appendChild(tag);
-    deskTags.push({ el: tag, pos: new THREE.Vector3(d.posX, 3.4, d.posZ) });
+    deskTags.push({ el: tag, pos: new THREE.Vector3(d.posX, 4.0, d.posZ) });
   });
 
   // 5. Camera Control Logic
   focusDesk = function(idx) {
     const d = designers[idx];
-    targetCamPos.set(d.posX, 3.2, d.posZ + 5.2);
-    targetCamLookAt.set(d.posX, 1.8, d.posZ);
+    targetCamPos.set(d.posX, 3.8, d.posZ + 6.0);
+    targetCamLookAt.set(d.posX, 2.0, d.posZ);
 
     deskTags.forEach((t, i) => {
       t.el.classList.toggle("is-active", i === idx);
     });
   };
 
-  function resetToOverview() {
+  resetToOverview = function() {
     targetCamPos.copy(overviewPos);
     targetCamLookAt.copy(overviewLookAt);
-  }
+    deskTags.forEach((t) => t.el.classList.remove("is-active"));
+  };
 
-  // HUD Buttons
-  document.getElementById("hud-reset-cam")?.addEventListener("click", resetToOverview);
-  document.getElementById("hud-prev-desk")?.addEventListener("click", () => {
-    let nextIdx = (designers.findIndex(d => d.posX === targetCamLookAt.x) - 1 + designers.length) % designers.length;
-    onSelectDesigner(nextIdx);
-    focusDesk(nextIdx);
-  });
-  document.getElementById("hud-next-desk")?.addEventListener("click", () => {
-    let nextIdx = (designers.findIndex(d => d.posX === targetCamLookAt.x) + 1) % designers.length;
-    onSelectDesigner(nextIdx);
-    focusDesk(nextIdx);
-  });
+  let autoRotate = false;
+  let autoRotateAngle = 0;
 
-  // 6. Interactive Raycasting on Mouse Hover & Click
+  toggleAutoRotate = function() {
+    autoRotate = !autoRotate;
+    if (typeof onAutoRotateChanged === "function") {
+      onAutoRotateChanged(autoRotate);
+    }
+  };
+
+  // 6. Interactive Raycasting & Mouse Orbit
+  let isDragging = false;
+  let prevMousePos = { x: 0, y: 0 };
+  let orbitRadius = 30;
+  let orbitPhi = Math.PI / 4;
+  let orbitTheta = Math.PI / 2;
+
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
+
+  function onPointerDown(e) {
+    if (e.target !== renderer.domElement) return;
+    isDragging = true;
+    prevMousePos = { x: e.clientX, y: e.clientY };
+  }
 
   function onPointerMove(e) {
     const rect = renderer.domElement.getBoundingClientRect();
     mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(deskRaycastObjects);
+    if (isDragging) {
+      const deltaX = e.clientX - prevMousePos.x;
+      const deltaY = e.clientY - prevMousePos.y;
+      prevMousePos = { x: e.clientX, y: e.clientY };
 
-    if (intersects.length > 0) {
-      renderer.domElement.style.cursor = "pointer";
+      orbitTheta -= deltaX * 0.005;
+      orbitPhi = Math.max(0.15, Math.min(Math.PI / 2.2, orbitPhi - deltaY * 0.005));
+
+      targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
+      targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
+      targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
     } else {
-      renderer.domElement.style.cursor = "default";
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(deskRaycastObjects);
+      renderer.domElement.style.cursor = intersects.length > 0 ? "pointer" : "default";
     }
+  }
+
+  function onPointerUp(e) {
+    if (!isDragging) return;
+    isDragging = false;
   }
 
   function onPointerClick(e) {
@@ -719,8 +1079,19 @@ function initThreeJsStudio(designers, onSelectDesigner) {
     }
   }
 
-  renderer.domElement.addEventListener("mousemove", onPointerMove);
+  function onWheel(e) {
+    e.preventDefault();
+    orbitRadius = Math.max(10, Math.min(45, orbitRadius + e.deltaY * 0.02));
+    targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
+    targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
+    targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
+  }
+
+  renderer.domElement.addEventListener("mousedown", onPointerDown);
+  window.addEventListener("mousemove", onPointerMove);
+  window.addEventListener("mouseup", onPointerUp);
   renderer.domElement.addEventListener("click", onPointerClick);
+  renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
 
   // 7. Render Animation Loop
   let clock = new THREE.Clock();
@@ -731,29 +1102,36 @@ function initThreeJsStudio(designers, onSelectDesigner) {
 
     const elapsed = clock.getElapsedTime();
 
-    // Smooth Camera LERP Interpolation
-    camera.position.lerp(targetCamPos, 0.05);
-    currentLookAt.lerp(targetCamLookAt, 0.05);
+    // Auto-rotate logic
+    if (autoRotate) {
+      autoRotateAngle += 0.004;
+      targetCamPos.x = targetCamLookAt.x + 28 * Math.sin(autoRotateAngle);
+      targetCamPos.z = targetCamLookAt.z + 28 * Math.cos(autoRotateAngle);
+      targetCamPos.y = 18;
+    }
+
+    // Camera Interpolation
+    camera.position.lerp(targetCamPos, 0.055);
+    currentLookAt.lerp(targetCamLookAt, 0.055);
     camera.lookAt(currentLookAt);
 
-    // Subtle Character Breathing / Working Animation
+    // Character working / breathing motion
     deskMeshes.forEach((mesh, i) => {
       const charGroup = mesh.userData.charGroup;
       if (charGroup) {
-        charGroup.position.y = 1.25 + Math.sin(elapsed * 2.5 + i) * 0.015;
+        charGroup.position.y = 1.28 + Math.sin(elapsed * 2.8 + i) * 0.015;
       }
     });
 
-    // Update Floating 2D Hologram Tags Projection
+    // Update Hologram Tags Projection
     const tempV = new THREE.Vector3();
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
+    const halfWidth = canvasContainer.clientWidth / 2;
+    const halfHeight = canvasContainer.clientHeight / 2;
 
     deskTags.forEach(item => {
       tempV.copy(item.pos);
       tempV.project(camera);
 
-      // Check if behind camera
       if (tempV.z > 1) {
         item.el.style.display = "none";
       } else {
@@ -770,7 +1148,6 @@ function initThreeJsStudio(designers, onSelectDesigner) {
 
   animate();
 
-  // Resize Listener
   function onResize() {
     if (!canvasContainer || !renderer) return;
     const w = canvasContainer.clientWidth;
