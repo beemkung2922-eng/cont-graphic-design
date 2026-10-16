@@ -1,10 +1,10 @@
 /* ==========================================================================
-   KKP GRAPHIC STUDIO 3D — ARCHITECTURAL SHOWROOM & TELEMETRY DASHBOARD
+   KKP GRAPHIC STUDIO — COZY ISOMETRIC PIXEL OFFICE & TELEMETRY DASHBOARD
    Harmonized 100% with CONT Classic Dashboard Design System
    ========================================================================== */
 
 /* ─────────────────────────────────────────────────────────────────────────
-   1. 3D Studio Container & Stage Layout
+   1. Studio Layout Container
 ───────────────────────────────────────────────────────────────────────── */
 .studio-3d-layout {
   display: flex;
@@ -17,14 +17,14 @@
   display: grid;
   grid-template-columns: 1fr 370px;
   gap: 16px;
-  min-height: 580px;
-  height: 620px;
+  min-height: 590px;
+  height: 640px;
 }
 
 @media (max-width: 1200px) {
   .studio-stage-grid {
     grid-template-columns: 1fr 330px;
-    height: 560px;
+    height: 570px;
   }
 }
 
@@ -34,39 +34,46 @@
     height: auto;
   }
   .studio-viewport-card {
-    height: 480px;
+    height: 500px;
   }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   2. 3D Interactive Viewport & Canvas
+   2. Pixel Office Canvas Viewport
 ───────────────────────────────────────────────────────────────────────── */
 .studio-viewport-card {
   position: relative;
-  background: #080a12;
+  background: #141724;
   border: 1px solid var(--line, #283042);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
+  cursor: grab;
 }
 
-#studio3d-canvas-wrapper {
+.studio-viewport-card:active {
+  cursor: grabbing;
+}
+
+#studio-canvas-container {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-#studio3d-canvas-wrapper canvas {
+#studio-canvas-container canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
   width: 100% !important;
   height: 100% !important;
   display: block;
 }
 
-/* 3D Floating Hologram Tags Layer */
-#studio3d-hologram-layer {
+/* Floating Hologram Labels */
+#studio-hologram-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -78,8 +85,8 @@
   position: absolute;
   pointer-events: auto;
   transform: translate(-50%, -100%);
-  background: rgba(14, 18, 28, 0.92);
-  border: 1.5px solid #28334a;
+  background: rgba(18, 22, 34, 0.94);
+  border: 1.5px solid #364462;
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
@@ -87,7 +94,7 @@
   backdrop-filter: blur(8px);
   min-width: 140px;
   max-width: 220px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.65);
   user-select: none;
 }
 
@@ -98,9 +105,9 @@
 }
 
 .hologram-station-tag.is-active {
-  border-color: #19c3eb;
-  background: rgba(14, 24, 42, 0.96);
-  box-shadow: 0 0 20px rgba(25, 195, 235, 0.55), inset 0 0 0 1px rgba(25, 195, 235, 0.35);
+  border-color: #ffc61a;
+  background: rgba(22, 27, 44, 0.98);
+  box-shadow: 0 0 20px rgba(255, 198, 26, 0.4), inset 0 0 0 1px rgba(255, 198, 26, 0.35);
   transform: translate(-50%, -108%) scale(1.05);
 }
 
@@ -124,8 +131,8 @@
 .holo-tag-desk {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #19c3eb;
-  background: rgba(25, 195, 235, 0.12);
+  color: #ffc61a;
+  background: rgba(255, 198, 26, 0.14);
   padding: 1px 5px;
   border-radius: 4px;
 }
@@ -145,7 +152,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: 0.65rem;
-  color: #8594b2;
+  color: #8fa0c4;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 3px;
 }
@@ -154,7 +161,7 @@
   color: #ffffff;
 }
 
-/* Top Viewport HUD Bar (Controls) */
+/* Viewport HUD Overlays */
 .studio-viewport-top-hud {
   position: absolute;
   top: 12px;
@@ -180,7 +187,7 @@
   font-size: 0.72rem;
   font-weight: 700;
   color: #2bd14b;
-  background: rgba(14, 18, 28, 0.88);
+  background: rgba(16, 20, 32, 0.9);
   border: 1px solid rgba(43, 209, 75, 0.35);
   padding: 4px 10px;
   border-radius: 6px;
@@ -217,8 +224,8 @@
   font-size: 0.74rem;
   font-weight: 600;
   color: #c4d0ec;
-  background: rgba(18, 22, 34, 0.88);
-  border: 1px solid #2e374f;
+  background: rgba(18, 22, 34, 0.9);
+  border: 1px solid #364462;
   border-radius: 6px;
   padding: 5px 12px;
   cursor: pointer;
@@ -231,13 +238,12 @@
 }
 
 .btn-viewport-hud:hover, .btn-viewport-hud.is-active {
-  background: rgba(25, 195, 235, 0.16);
+  background: rgba(25, 195, 235, 0.18);
   border-color: #19c3eb;
   color: #5ce0ff;
-  box-shadow: 0 0 10px rgba(25, 195, 235, 0.3);
+  box-shadow: 0 0 10px rgba(25, 195, 235, 0.35);
 }
 
-/* Bottom Viewport HUD (Interaction Hints) */
 .studio-viewport-bottom-hud {
   position: absolute;
   bottom: 12px;
@@ -246,8 +252,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(12, 16, 26, 0.85);
-  border: 1px solid rgba(46, 54, 85, 0.6);
+  background: rgba(14, 18, 30, 0.88);
+  border: 1px solid rgba(54, 68, 98, 0.65);
   border-radius: 8px;
   padding: 6px 12px;
   backdrop-filter: blur(8px);
@@ -355,7 +361,7 @@
   margin-top: 2px;
 }
 
-/* 4-Metric Grid */
+/* 4-Metric Grid (Real Data) */
 .inspector-metric-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
