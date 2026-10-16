@@ -1,23 +1,26 @@
 import { escapeHtml, roleLabel, formatDateTime } from "./formatters.js";
 import { openCreateTask } from "./task-actions.js";
-import { qs, qsa } from "./app.js";
+import { qs, qsa, toast } from "./app.js";
 
 let animationFrameId = null;
-let currentScene = null;
-let currentRenderer = null;
+let tickIntervalId = null;
+let tourIntervalId = null;
 let isMounted = false;
 
 export function cleanupStudio3D() {
+  isMounted = false;
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
   }
-  if (currentRenderer && currentRenderer.domElement && currentRenderer.domElement.parentNode) {
-    currentRenderer.domElement.parentNode.removeChild(currentRenderer.domElement);
+  if (tickIntervalId) {
+    clearInterval(tickIntervalId);
+    tickIntervalId = null;
   }
-  currentScene = null;
-  currentRenderer = null;
-  isMounted = false;
+  if (tourIntervalId) {
+    clearInterval(tourIntervalId);
+    tourIntervalId = null;
+  }
 }
 
 export function renderStudio3D(container, ctx, onSwitchToClassic) {
@@ -26,578 +29,1034 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
   const { tasks = [], members = [], projects = [] } = ctx;
 
-  // 1. Identify and enrich the 6 core KKP Graphic Team members
-  const coreDesignersFallback = [
+  // 1. Identify real team members & build data structures
+  const coreTemplates = [
     {
       id: "1fd3ea77-8461-4de1-917a-90a9869428c1",
       name: "BEEM",
       nickname: "บีม",
       gender: "ชาย",
-      role: "supervisor",
-      roleDisplay: "Supervisor / Lead Art Director",
-      deskId: "Desk A1",
-      deskLabel: "Desk A1 • โซนหน้าซ้าย",
-      primaryTool: "Adobe Illustrator (Ai)",
-      workloadPct: 82,
-      row: 0,
-      col: 0
+      role: "Supervisor / Lead Art Director",
+      desk: "Desk A1",
+      color: "#e8202a",
+      skin: "#f5cba7",
+      hair: "#1f2937",
+      software: "Illustrator / Figma",
+      sla: "99.8%"
     },
     {
       id: "a31026f2-adc9-47d7-9ba0-f809be9344f1",
       name: "Peerapisit Rojatiegpanya",
       nickname: "พีท",
       gender: "ชาย",
-      role: "designer",
-      roleDisplay: "Senior Designer / Motion & Key Visual",
-      deskId: "Desk A2",
-      deskLabel: "Desk A2 • โซนหน้ากลาง",
-      primaryTool: "After Effects (Ae) / Ps",
-      workloadPct: 78,
-      row: 0,
-      col: 1
+      role: "Senior Designer / Motion & 3D",
+      desk: "Desk A2",
+      color: "#19c3eb",
+      skin: "#f5cba7",
+      hair: "#2a324b",
+      software: "After Effects / Ps",
+      sla: "99.5%"
     },
     {
       id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303",
       name: "Pisit Sintavanuwat",
       nickname: "บิ๊ก",
       gender: "ชาย",
-      role: "designer",
-      roleDisplay: "Senior Designer / Campaign Ads & 3D",
-      deskId: "Desk A3",
-      deskLabel: "Desk A3 • โซนหน้าขวา",
-      primaryTool: "Cinema 4D / Blender / Ps",
-      workloadPct: 72,
-      row: 0,
-      col: 2
+      role: "Senior Designer / Campaign Ads",
+      desk: "Desk A3",
+      color: "#3aa0ff",
+      skin: "#f5cba7",
+      hair: "#1a1a24",
+      software: "Cinema 4D / Blender",
+      sla: "99.0%"
     },
     {
       id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52",
       name: "Pongsathorn Pang",
       nickname: "ปอนด์",
       gender: "หญิง",
-      role: "designer",
-      roleDisplay: "Designer / Infographic & Branding",
-      deskId: "Desk B1",
-      deskLabel: "Desk B1 • โซนหลังซ้าย",
-      primaryTool: "Adobe Illustrator (Ai)",
-      workloadPct: 85,
-      row: 1,
-      col: 0
+      role: "Designer / Infographic & Branding",
+      desk: "Desk B1",
+      color: "#a855f7",
+      skin: "#f5cba7",
+      hair: "#382046",
+      software: "Illustrator (Ai)",
+      sla: "98.8%"
     },
     {
       id: "c16a2845-c95e-47c5-b616-4b37299574a4",
       name: "Yutiporn Thongkom",
       nickname: "โบว์",
       gender: "หญิง",
-      role: "designer",
-      roleDisplay: "Designer / Digital & Social Media",
-      deskId: "Desk B2",
-      deskLabel: "Desk B2 • โซนหลังกลาง",
-      primaryTool: "Photoshop (Ps) / Illustrator",
-      workloadPct: 69,
-      row: 1,
-      col: 1
+      role: "Designer / Digital & Social Media",
+      desk: "Desk B2",
+      color: "#ec4899",
+      skin: "#f5cba7",
+      hair: "#4a1e35",
+      software: "Photoshop / Ai",
+      sla: "99.2%"
     },
     {
       id: "739187f5-e142-4aa4-95ad-e06f881163cc",
       name: "Naraporn Leungvititgoon",
       nickname: "นัท",
       gender: "หญิง",
-      role: "designer",
-      roleDisplay: "Designer / UI & In-App Banners",
-      deskId: "Desk B3",
-      deskLabel: "Desk B3 • โซนหลังขวา",
-      primaryTool: "Figma / UI Design",
-      workloadPct: 70,
-      row: 1,
-      col: 2
+      role: "Designer / UI & In-App Banners",
+      desk: "Desk B3",
+      color: "#10b981",
+      skin: "#f5cba7",
+      hair: "#1e3a2f",
+      software: "Figma / UI Design",
+      sla: "99.4%"
     }
   ];
 
-  // Map real members if matched
-  const designers = coreDesignersFallback.map((tmpl, idx) => {
-    const matchedMember = members.find(m => m.id === tmpl.id || (m.name && m.name.toLowerCase().includes(tmpl.name.toLowerCase().split(" ")[0])));
-    const memberId = matchedMember ? matchedMember.id : tmpl.id;
-    const memberName = matchedMember ? matchedMember.name : tmpl.name;
+  // Map real members from context
+  const TM = coreTemplates.map((tmpl, idx) => {
+    const matched = members.find(m => m.id === tmpl.id || (m.name && m.name.toLowerCase().includes(tmpl.name.toLowerCase().split(" ")[0])));
+    const memberId = matched ? matched.id : tmpl.id;
+    const memberName = matched ? matched.name : tmpl.name;
 
     const assignedTasks = tasks.filter(t => t.assignee_id === memberId);
     const completedTasks = assignedTasks.filter(t => t.status === "completed");
     const activeTasks = assignedTasks.filter(t => t.status !== "completed");
 
-    // Sample fallback tasks if none assigned
-    const fallbackTasks = [
-      { title: "KKP Auto Loan — Key Visual & Billboard Q1", status: "drafting", progress: 85 },
-      { title: "KKP Dime! — Social Media Ad Banner Set", status: "drafting", progress: 78 },
-      { title: "KKP Bank — Mobile Banking App Icon 3D", status: "review", progress: 92 },
-      { title: "KKP Wealth — Infographic การลงทุนหุ้นกู้", status: "drafting", progress: 65 },
-      { title: "KKP StartDee — Promo Banner Facebook/IG", status: "drafting", progress: 75 },
-      { title: "KKP Credit Card — Promotion Landing Page UI", status: "review", progress: 88 }
-    ];
+    // Build categories tally
+    const cat = {};
+    completedTasks.forEach(t => {
+      const c = t.category || "Social Banner";
+      cat[c] = (cat[c] || 0) + 1;
+    });
+    if (!Object.keys(cat).length) {
+      cat["Key Visual"] = 14 + idx * 3;
+      cat["Social Banner"] = 28 + idx * 5;
+      cat["Infographic"] = 12 + idx * 2;
+    }
 
-    const currentTask = activeTasks.find(t => t.status === "drafting") || activeTasks[0] || completedTasks[0] || {
-      title: fallbackTasks[idx % fallbackTasks.length].title,
-      status: fallbackTasks[idx % fallbackTasks.length].status,
-      deadline_at: new Date(Date.now() + 86400000 * (1 + idx)).toISOString(),
-      project_id: projects[0]?.id || "p1"
-    };
+    // Convert real active tasks to studio tasks
+    const tk = activeTasks.map(t => {
+      const pr = t.status === "review" ? 92 : t.status === "drafting" ? 70 : 35;
+      const u = t.priority === "urgent" || t.priority === "high";
+      const p = projects.find(proj => proj.id === t.project_id)?.name || "KKP Creative Pipeline";
+      return {
+        id: t.id,
+        t: t.title,
+        p,
+        c: t.category || "Key Visual",
+        pr,
+        d: formatDateTime(t.deadline_at),
+        u: u ? 1 : 0
+      };
+    });
 
-    let progress = tmpl.workloadPct;
-    if (currentTask.status === "brief") progress = 30;
-    else if (currentTask.status === "drafting") progress = 65 + (idx % 3) * 10;
-    else if (currentTask.status === "review") progress = 90;
-    else if (currentTask.status === "completed") progress = 100;
+    // Provide default fallback tasks if empty
+    if (!tk.length) {
+      const fallbackList = [
+        { t: "KKP Auto Loan — Key Visual & Billboard Q1", p: "Auto Loan Campaign", c: "Key Visual", pr: 82, d: "วันนี้ 18:00", u: 1 },
+        { t: "KKP Dime! — Social Media Ad Banner Set", p: "Dime! Growth", c: "Social Banner", pr: 75, d: "พรุ่งนี้ 12:00", u: 0 },
+        { t: "KKP Bank — Mobile Banking App Icon 3D", p: "App Design System", c: "Motion / Video", pr: 92, d: "พรุ่งนี้ 16:00", u: 0 },
+        { t: "KKP Wealth — Infographic การลงทุนหุ้นกู้", p: "Wealth Management", c: "Infographic", pr: 65, d: "2 วันข้างหน้า", u: 0 },
+        { t: "KKP StartDee — Promo Banner Facebook/IG", p: "StartDee Promo", c: "Social Banner", pr: 78, d: "พรุ่งนี้ 14:00", u: 0 },
+        { t: "KKP Credit Card — Promotion Landing Page UI", p: "Credit Card Q1", c: "UI / Web Banner", pr: 88, d: "วันนี้ 19:00", u: 1 }
+      ];
+      tk.push(fallbackList[idx % fallbackList.length]);
+      tk.push({ t: `ชิ้นงานรองแคมเปญ 0${idx + 1}`, p: "General Design", c: "Social Banner", pr: 45, d: "สัปดาห์นี้", u: 0 });
+    }
 
-    const proj = projects.find(p => p.id === currentTask.project_id) || { name: "KKP Graphic Operations" };
-
-    const totalDelivered = (completedTasks.reduce((acc, t) => acc + Number(t.item_count || 1), 0) || 0) + (90 + idx * 18);
-    const inQueueCount = activeTasks.length || (2 + (idx % 3));
-    const projectCount = new Set(assignedTasks.map(t => t.project_id).filter(Boolean)).size || (2 + (idx % 3));
-    const onTimeRate = (98.6 + (idx % 3) * 0.5).toFixed(1);
-
-    // 3D positioning: 2 rows x 3 desks
-    const posX = (tmpl.col - 1) * 7.6;
-    const posZ = tmpl.row === 0 ? 3.0 : -4.8;
+    const dn = completedTasks.length ? completedTasks.length + 80 + idx * 12 : (95 + idx * 18);
+    const pj = new Set(assignedTasks.map(t => t.project_id).filter(Boolean)).size || (3 + (idx % 2));
+    const ld = Math.min(95, Math.max(45, 65 + tk.length * 6 + (idx % 3) * 5));
 
     return {
-      ...tmpl,
       id: memberId,
-      name: memberName,
-      initials: (memberName || "U").trim().slice(0, 2).toUpperCase(),
-      assignedTasks,
-      activeTasks,
-      completedTasks,
-      currentTask,
-      currentProgress: progress,
-      projectName: proj.name,
-      totalDelivered,
-      inQueueCount,
-      projectCount,
-      onTimeRate,
-      posX,
-      posZ
+      n: memberName.split(" ")[0],
+      fullName: memberName,
+      nickname: tmpl.nickname,
+      g: tmpl.gender,
+      r: tmpl.role,
+      desk: tmpl.desk,
+      c: tmpl.color,
+      sk: tmpl.skin,
+      h: tmpl.hair,
+      sw: tmpl.software,
+      sla: tmpl.sla,
+      ld,
+      dn,
+      pj,
+      cat,
+      tk
     };
   });
 
-  // Calculate System-wide KPI Strip data
-  const totalJobsCount = 582;
-  const inProgressCount = designers.reduce((acc, d) => acc + d.inQueueCount, 0);
-  const deliveredCount = 568;
-  const urgentCount = 2;
-  const avgWorkload = Math.round(designers.reduce((acc, d) => acc + d.currentProgress, 0) / designers.length);
-
-  let selectedIndex = 0; // Default selected: BEEM or Peerapisit
-
-  // 2. Render Main HTML Shell
+  // 2. Render Main Studio Shell HTML
   container.innerHTML = `
-    <div class="studio3d-shell">
-      <!-- 1. TOP HEADER -->
-      <header class="studio3d-top-header">
-        <div class="studio3d-brand-info">
-          <div class="studio3d-badge-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-              <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-          </div>
-          <div class="studio3d-title-group">
-            <h1>
-              <span>KKP Graphic Studio 3D</span>
-              <span class="studio3d-live-pill"><span class="studio3d-live-dot"></span> LIVE PIPELINE</span>
-            </h1>
-            <p>เห็นงาน เห็นคน เห็นภาระงานในหน้าจอเดียว • ตั้งแต่ Brief ถึง Delivery</p>
-          </div>
+    <div class="studio-wrapper">
+      <!-- Top Bar: Title & View Switcher -->
+      <nav class="studio-top-nav">
+        <div class="studio-brand">
+          <i class="studio-brand-icon"></i>
+          <span>KKP Pixel Studio 3D</span>
+          <span class="studio-live-badge">Live Pipeline</span>
         </div>
 
-        <!-- Center: Timeframe Filter Pills -->
-        <div class="studio3d-timeframe-pills" role="tablist">
-          <button type="button" class="timeframe-pill-btn is-active" data-range="all">All Time</button>
-          <button type="button" class="timeframe-pill-btn" data-range="today">Today</button>
-          <button type="button" class="timeframe-pill-btn" data-range="7d">7 Days</button>
-          <button type="button" class="timeframe-pill-btn" data-range="month">This Month</button>
-        </div>
-
-        <!-- Right: Actions & View Switcher -->
-        <div class="studio3d-header-controls">
-          <button type="button" class="btn-header-cam" id="btn-cam-overview" title="มุมมองรวมทั้งห้องสตูดิโอ">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-            <span>มุมมองรวมทั้งห้อง (Overview)</span>
+        <!-- Center: Dual View Switcher -->
+        <div class="studio-view-switcher" role="tablist">
+          <button type="button" class="switcher-btn is-active" id="btn-studio-3d-active" title="มุมมอง Isometric 3D Studio">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <span>3D Studio</span>
           </button>
-
-          <button type="button" class="btn-header-cam" id="btn-auto-rotate" title="เปิด/ปิด การหมุนกล้อง 3D อัตโนมัติ">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
-            <span id="auto-rotate-text">หมุนกล้องอัตโนมัติ</span>
-          </button>
-
-          <button type="button" class="btn-header-create" id="btn-studio-brief" title="สั่งงานใหม่">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>+ สั่งงานใหม่ (Brief)</span>
-          </button>
-
-          <button type="button" class="btn-view-toggle" id="btn-switch-classic" title="สลับไปมุมมองดั้งเดิม">
+          <button type="button" class="switcher-btn" id="btn-switch-classic" title="สลับไปมุมมอง Classic Dashboard">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            <span>มุมมองปกติ</span>
+            <span>Classic Overview</span>
           </button>
         </div>
-      </header>
 
-      <!-- 2. TOP 5-CARD KPI STRIP -->
-      <section class="studio-kpi-strip">
-        <!-- Card 1: Total Jobs -->
-        <div class="kpi-strip-card">
-          <div class="kpi-card-header">
-            <span class="kpi-card-title">Total Jobs • ปริมาณงานทั้งหมด</span>
-            <span class="kpi-card-badge kpi-badge-gold">+8.3%</span>
-          </div>
-          <div class="kpi-card-main">
-            <span class="kpi-big-num">${totalJobsCount}</span>
-            <span class="kpi-unit">งาน</span>
-          </div>
-          <div class="kpi-card-subtext">
-            <span>+45 งานจากเดือนก่อน</span>
-          </div>
-          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
-            <path d="M0 32 Q 25 28, 50 16 T 100 8" stroke="#ffbe3b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          </svg>
+        <!-- Actions -->
+        <div class="studio-actions-group">
+          <span id="studio-clk" style="font-family:var(--studio-mono);font-size:11px;color:var(--studio-mu)"></span>
+          <button class="studio-btn" id="studio-rs" title="มุมมองรวมทั้งสตูดิโอ">⌂ ภาพรวม</button>
+          <button class="studio-btn" id="studio-tour" title="วนดูโต๊ะทำงานแต่ละคนอัตโนมัติ">⟳ ทัวร์ทีม</button>
+          <button class="studio-btn is-main" id="studio-nb">＋ สั่งงานใหม่</button>
         </div>
+      </nav>
 
-        <!-- Card 2: In Progress -->
-        <div class="kpi-strip-card">
-          <div class="kpi-card-header">
-            <span class="kpi-card-title">In Progress (กำลังทำ)</span>
-            <span class="kpi-card-badge kpi-badge-cyan">Active</span>
-          </div>
-          <div class="kpi-card-main">
-            <span class="kpi-big-num">${inProgressCount}</span>
-            <span class="kpi-unit">ชิ้นในคิว</span>
-          </div>
-          <div class="kpi-card-subtext">
-            <span>18 โปรเจกต์ • 6 คน</span>
-          </div>
-          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
-            <path d="M0 25 Q 30 10, 60 20 T 100 6" stroke="#19c3eb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <!-- Card 3: Delivered -->
-        <div class="kpi-strip-card">
-          <div class="kpi-card-header">
-            <span class="kpi-card-title">Delivered (ส่งแล้ว)</span>
-            <span class="kpi-card-badge kpi-badge-green">99.6%</span>
-          </div>
-          <div class="kpi-card-main">
-            <span class="kpi-big-num">${deliveredCount}</span>
-            <span class="kpi-unit">ชิ้น</span>
-          </div>
-          <div class="kpi-card-subtext">
-            <span>ส่งมอบเรียบร้อย</span>
-          </div>
-          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
-            <path d="M0 35 Q 35 25, 70 12 T 100 4" stroke="#2bd14b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <!-- Card 4: Due Soon / Urgent -->
-        <div class="kpi-strip-card">
-          <div class="kpi-card-header">
-            <span class="kpi-card-title">Due Soon / Urgent</span>
-            <span class="kpi-card-badge kpi-badge-red">เร่งด่วน</span>
-          </div>
-          <div class="kpi-card-main">
-            <span class="kpi-big-num">${urgentCount}</span>
-            <span class="kpi-unit">งานด่วนวันนี้</span>
-          </div>
-          <div class="kpi-card-subtext">
-            <span>2 Overdue • ต้องเร่งตรวจ</span>
-          </div>
-          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
-            <path d="M0 20 Q 25 35, 55 15 T 100 5" stroke="#ff5252" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <!-- Card 5: On-Time SLA -->
-        <div class="kpi-strip-card">
-          <div class="kpi-card-header">
-            <span class="kpi-card-title">On-Time SLA</span>
-            <span class="kpi-card-badge kpi-badge-purple">ยอดเยี่ยม</span>
-          </div>
-          <div class="kpi-card-main">
-            <span class="kpi-big-num">99.6%</span>
-            <span class="kpi-unit">ส่งตรงเวลา</span>
-          </div>
-          <div class="kpi-card-subtext">
-            <span>เฉลี่ยภาระงาน • ชาย 3 • หญิง 3</span>
-          </div>
-          <svg class="kpi-sparkline" viewBox="0 0 100 40" fill="none">
-            <path d="M0 28 Q 30 18, 65 14 T 100 8" stroke="#c084fc" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </section>
-
-      <!-- 3. MAIN 3-COLUMN WORKSPACE -->
-      <div class="studio3d-workspace-grid">
-        <!-- LEFT: Designer Roster Cards -->
-        <aside class="studio3d-sidebar-left">
-          <div class="roster-header-box">
-            <div class="roster-header-top">
-              <div class="roster-title">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <span>ทีมกราฟิก KKP (${designers.length} คน)</span>
-              </div>
-            </div>
-            <div class="roster-subtitle">คลิกที่รายชื่อหรือตัวละคร 3D เพื่อซูมดูโต๊ะทำงาน</div>
-            <div class="roster-filter-chips">
-              <span class="filter-gender-chip highlight">ชาย 3</span>
-              <span class="filter-gender-chip highlight">หญิง 3</span>
-            </div>
-          </div>
-
-          <div class="studio-roster-list" id="studio-roster-list">
-            ${designers.map((d, i) => `
-              <div class="designer-roster-card ${i === selectedIndex ? "is-active" : ""}" data-designer-index="${i}">
-                <div class="roster-card-top">
-                  <div class="roster-avatar-square">
-                    ${escapeHtml(d.initials)}
-                    <span class="roster-avatar-dot ${d.currentTask.status === 'review' ? 'review' : 'active'}"></span>
-                  </div>
-                  <div class="roster-meta">
-                    <div class="roster-name-row">
-                      <span class="roster-name">${escapeHtml(d.name.split(" ")[0])} (${escapeHtml(d.nickname)})</span>
-                      <span class="roster-gender-tag">${escapeHtml(d.gender)}</span>
-                    </div>
-                    <div class="roster-role">${escapeHtml(d.roleDisplay)}</div>
-                  </div>
-                </div>
-
-                <div class="roster-stats-row">
-                  <span class="roster-chip">${d.inQueueCount} งาน</span>
-                  <span class="roster-chip">${d.projectCount} โปรเจกต์</span>
-                  <span class="roster-chip" style="color:#5ce0ff;">${escapeHtml(d.deskId)}</span>
-                </div>
-
-                <div class="roster-task-row" title="${escapeHtml(d.currentTask.title)}">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                  <span>${escapeHtml(d.currentTask.title)}</span>
-                </div>
-
-                <div class="roster-workload-bar-wrap">
-                  <div class="roster-bar-track">
-                    <div class="roster-bar-fill" style="width: ${d.currentProgress}%;"></div>
-                  </div>
-                  <span class="roster-workload-pct">ภาระ ${d.currentProgress}%</span>
-                </div>
-              </div>
-            `).join("")}
-          </div>
-
-          <div class="roster-footer-box">
-            <span class="roster-footer-label">สมดุลภาระงานรวม (Workload)</span>
-            <span class="roster-footer-val">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>${avgWorkload}% • สมดุลดี</span>
-            </span>
-          </div>
-        </aside>
-
-        <!-- CENTER: Interactive 3D Studio Stage -->
-        <main class="studio3d-stage-center" id="studio3d-stage-center">
-          <div id="studio3d-canvas-container"></div>
+      <!-- Main Studio Grid -->
+      <div id="studio-app">
+        <!-- Isometric Canvas Viewport -->
+        <div id="studio-map">
+          <canvas id="studio-cv"></canvas>
+          <div id="studio-cards"></div>
           
-          <!-- Floating 2D Hologram Tags Projection Overlay -->
-          <div id="studio3d-tags-overlay"></div>
-
-          <!-- Bottom Control & Legends HUD Bar -->
-          <div class="studio3d-bottom-bar">
-            <div class="hud-helpers">
-              <span class="hud-helper-item">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg>
-                <span>คลิกซ้ายลาก: หมุนมุมกล้อง 3D</span>
-              </span>
-              <span class="hud-helper-item">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <span>ลูกกลิ้งเมาส์: ซูมเข้า-ออก</span>
-              </span>
-              <span class="hud-helper-item">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 15l6 6m-6-6l-3-3m0 0l-3-3m3 3l3-3m-3 3l-3 3"/></svg>
-                <span>คลิกที่ตัวละคร: ซูมดูโต๊ะทำงาน</span>
-              </span>
-            </div>
-
-            <div class="hud-status-legends">
-              <span class="legend-item"><span class="legend-dot active"></span> กำลังโฟกัส (Active)</span>
-              <span class="legend-item"><span class="legend-dot review"></span> รอตรวจ (Review)</span>
-              <span class="legend-item"><span class="legend-dot revision"></span> แก้ไข (Revision)</span>
-            </div>
-
-            <div class="hud-assistant-pill">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-              <span>KKP Real-Time Live Sync</span>
-            </div>
+          <div id="studio-hud">
+            <div id="studio-kpis"></div>
           </div>
-        </main>
 
-        <!-- RIGHT: Real-time Workload Inspector -->
-        <aside class="studio3d-sidebar-right" id="studio3d-inspector">
-          <!-- Dynamically populated by updateInspector(selectedIndex) -->
+          <!-- Average Workload Ring Gauge -->
+          <div id="studio-ring">
+            <div class="studio-rg" id="studio-rg"><b style="font-family:var(--studio-px);font-size:7px;">LOAD</b></div>
+            <span>ภาระงานทีมเฉลี่ย<br><b id="studio-lv" style="color:var(--studio-tx);font-size:12px"></b></span>
+          </div>
+        </div>
+
+        <!-- Right Sidebar Panels -->
+        <aside id="studio-side">
+          <div class="studio-pn">
+            <h3>ภาระงานรายคน <small>Team Workload</small></h3>
+            <div id="studio-rank"></div>
+          </div>
+          <div class="studio-pn" style="flex:1">
+            <h3>ผู้ถือครองงาน <small>Inspector</small></h3>
+            <div id="studio-insp"></div>
+          </div>
+          <div class="studio-pn">
+            <h3>ประเภทงานที่ส่งมอบ <small>Category</small></h3>
+            <div id="studio-cats"></div>
+          </div>
         </aside>
+
+        <!-- Bottom Row: Analytics & Charts -->
+        <div id="studio-bot">
+          <div class="studio-pn">
+            <h3>ข้อมูลโต๊ะทำงาน <small>Workstation Info</small></h3>
+            <div id="studio-pi"></div>
+          </div>
+          <div class="studio-pn">
+            <h3>แนวโน้มงาน <small>Demand trend</small>
+              <span class="studio-lg">
+                <span><i style="background:#19c3eb"></i>ส่งมอบ</span>
+                <span><i style="background:#ffc61a"></i>เข้าคิว</span>
+              </span>
+            </h3>
+            <canvas class="studio-ch" id="studio-c1"></canvas>
+          </div>
+          <div class="studio-pn">
+            <h3>เส้นสถานะงาน <small>Operating curve</small>
+              <span class="studio-lg">
+                <span><i style="background:#e8202a"></i>ด่วน</span>
+                <span><i style="background:#ffc61a"></i>รอตรวจ</span>
+                <span><i style="background:#3aa0ff"></i>ทำอยู่</span>
+              </span>
+            </h3>
+            <canvas class="studio-ch" id="studio-c2"></canvas>
+          </div>
+          <div class="studio-pn">
+            <h3>ส่งมอบรายเดือน <small>Monthly delivery</small></h3>
+            <canvas class="studio-ch" id="studio-c3"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Brief Modal -->
+      <div id="studio-md">
+        <form class="studio-pn" id="studio-brief-form">
+          <h3 style="font-size:13px;">สร้างงานใหม่เข้า Pipeline</h3>
+          <input id="studio-f1" required placeholder="ชื่อชิ้นงาน (Artwork Title)">
+          <input id="studio-f2" required placeholder="ชื่อแคมเปญ / โครงการ">
+          <select id="studio-f3"></select>
+          <select id="studio-f4">
+            <option>Key Visual</option>
+            <option>Social Banner</option>
+            <option>Infographic</option>
+            <option>Motion / Video</option>
+            <option>UI / Web Banner</option>
+            <option>Presentation</option>
+          </select>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;color:var(--studio-mu)">
+            <input type="checkbox" id="studio-f5"> งานด่วนพิเศษ (Urgent SLA)
+          </label>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+            <button type="button" class="studio-btn" id="studio-cancel-brief">ยกเลิก</button>
+            <button type="submit" class="studio-btn is-main">มอบหมายทันที</button>
+          </div>
+        </form>
       </div>
     </div>
   `;
 
-  // 3. Update Inspector View function
-  function updateInspector(index) {
-    const d = designers[index];
-    const inspector = qs("#studio3d-inspector", container);
-    if (!inspector) return;
+  // 3. Pixel Isometric Engine Implementation
+  const $ = s => qs(s, container);
+  const R = (a, b) => a + Math.random() * (b - a);
+  const E = s => escapeHtml(s);
+  const TL = "#19c3eb";
+  const PXF = "'Press Start 2P', monospace";
 
-    inspector.innerHTML = `
-      <div class="inspector-header-box">
-        <div class="inspector-header-title">
-          <span>เจาะลึกภาระงานรายบุคคลแบบเรียลไทม์</span>
-          <span class="inspector-desk-badge">${d.deskLabel}</span>
-        </div>
+  // Workstation Grid Placement (2 rows of 3)
+  const PO = [[1.2, 1.2], [5.4, 1.2], [9.6, 1.2], [1.2, 6.0], [5.4, 6.0], [9.6, 6.0]];
+  const PL = [[0.3, 0.3], [13.4, 0.3], [0.3, 9.4], [13.4, 9.4]];
 
-        <div class="inspector-profile-card">
-          <div class="inspector-avatar-large">${escapeHtml(d.initials)}</div>
-          <div class="inspector-profile-info">
-            <div class="inspector-profile-name-row">
-              <span class="inspector-profile-name">${escapeHtml(d.name)} (${escapeHtml(d.nickname)})</span>
-              <span class="inspector-gender-pill">เพศ ${escapeHtml(d.gender)}</span>
-            </div>
-            <div class="inspector-profile-role">${escapeHtml(d.roleDisplay)}</div>
-            <div class="inspector-status-badge">
-              <span class="studio3d-live-dot"></span>
-              <span>กำลังโฟกัสงานหลัก</span>
-            </div>
-          </div>
-        </div>
-      </div>
+  let sel = 0;
+  let hv = -1;
+  let PS = 3;
+  let W = 0;
+  let H = 0;
+  let lt = 0;
+  let pk = [];
+  let hist = { d: [], i: [], u: [], r: [], a: [] };
+  const cam = { x: 32, y: 66, tx: 32, ty: 66 };
+  const MON = [48, 55, 62, 58, 67, 72, 85, 78, 88, 92, 95, 104];
+  let live = 92;
 
-      <div class="inspector-scroll-area">
-        <!-- 4-Column Stat Box -->
-        <div class="inspector-stat-4col">
-          <div class="stat-col-item">
-            <span class="stat-col-label">ส่งมอบแล้ว</span>
-            <span class="stat-col-val green">${d.totalDelivered}</span>
-          </div>
-          <div class="stat-col-item">
-            <span class="stat-col-label">กำลังทำ</span>
-            <span class="stat-col-val cyan">${d.inQueueCount}</span>
-          </div>
-          <div class="stat-col-item">
-            <span class="stat-col-label">โปรเจกต์ที่ถือ</span>
-            <span class="stat-col-val">${d.projectCount}</span>
-          </div>
-          <div class="stat-col-item">
-            <span class="stat-col-label">On-Time SLA</span>
-            <span class="stat-col-val green">${d.onTimeRate}%</span>
-          </div>
-        </div>
+  for (let i = 0; i < 24; i++) {
+    for (const k in hist) hist[k].push(0);
+  }
 
-        <!-- Current Focus Artwork Box -->
-        <div class="inspector-focus-card">
-          <div class="focus-card-header">
-            <span class="focus-card-tag">⚡ กำลังโฟกัสอยู่ตอนนี้ (Current Focus)</span>
-            <span class="focus-tool-pill">${escapeHtml(d.primaryTool)}</span>
-          </div>
-          <div class="focus-task-title">${escapeHtml(d.currentTask.title)}</div>
-          <div class="focus-task-meta">
-            <span>แคมเปญ: <strong>${escapeHtml(d.projectName)}</strong></span>
-            <span>กำหนดส่ง: <strong>${formatDateTime(d.currentTask.deadline_at)}</strong></span>
-          </div>
-          
-          <div class="focus-progress-wrap">
-            <div class="focus-progress-header">
-              <span>ความคืบหน้าของชิ้นงาน</span>
-              <strong>${d.currentProgress}%</strong>
-            </div>
-            <div class="focus-progress-track">
-              <div class="focus-progress-fill" style="width: ${d.currentProgress}%;"></div>
-            </div>
-          </div>
-        </div>
+  const cv = $("#studio-cv");
+  if (!cv) return;
+  const g = cv.getContext("2d");
 
-        <!-- Upcoming Queue & Projects -->
-        <div class="inspector-queue-box">
-          <div class="inspector-queue-header">
-            <span>≡ คิวงานและโปรเจกต์ที่รับผิดชอบ</span>
-            <span style="font-size:0.72rem;color:#8fa0c5;">${d.inQueueCount} งานในคิว</span>
-          </div>
-          <div class="queue-items-container">
-            ${(d.activeTasks.length ? d.activeTasks : [d.currentTask, { title: "Infographic สรุปอัตราดอกเบี้ย", deadline_at: new Date(Date.now() + 172800000).toISOString() }]).slice(0, 4).map(t => `
-              <div class="queue-single-row">
-                <div class="queue-row-info">
-                  <div class="queue-row-title" title="${escapeHtml(t.title)}">${escapeHtml(t.title)}</div>
-                  <div class="queue-row-sub">กำหนดส่ง: ${formatDateTime(t.deadline_at)}</div>
-                </div>
-                <span class="queue-row-badge ${t.status === 'review' ? 'review' : 'active'}">
-                  ${t.status === 'review' ? 'รอตรวจ' : 'กำลังทำ'}
-                </span>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      </div>
+  function size() {
+    const mapEl = $("#studio-map");
+    if (!mapEl) return;
+    const r = mapEl.getBoundingClientRect();
+    W = Math.ceil(r.width / PS);
+    H = Math.ceil(r.height / PS);
+    cv.width = W;
+    cv.height = H;
+    cv.style.width = W * PS + "px";
+    cv.style.height = H * PS + "px";
+    g.imageSmoothingEnabled = false;
+  }
 
-      <!-- Action Footer -->
-      <div class="inspector-actions-box">
-        <button type="button" class="btn-complete-focus" id="btn-quick-complete">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>✓ ส่งงานที่โฟกัสเสร็จ 1 ชิ้น</span>
-        </button>
+  const P = (x, y, z = 0) => [
+    Math.round(W / 2 - cam.x + (x - y) * 16),
+    Math.round(H / 2 - cam.y + (x + y) * 8 - z)
+  ];
+  const P0 = (x, y) => [(x - y) * 16, (x + y) * 8];
 
-        <button type="button" class="btn-assign-new" id="btn-assign-to-this">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          <span>มอบหมายงานใหม่ให้ ${escapeHtml(d.name.split(" ")[0])}</span>
-        </button>
-      </div>
-    `;
+  function poly(a, f, s) {
+    g.beginPath();
+    a.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.closePath();
+    if (f) { g.fillStyle = f; g.fill(); }
+    if (s) { g.strokeStyle = s; g.lineWidth = 1; g.stroke(); }
+  }
 
-    qs("#btn-assign-to-this", inspector)?.addEventListener("click", () => {
-      openCreateTask(ctx, { assignee_id: d.id });
-    });
+  function box(x, y, w, h, ht, z, c, s) {
+    const A = P(x, y, z + ht);
+    const B = P(x + w, y, z + ht);
+    const C = P(x + w, y + h, z + ht);
+    const D = P(x, y + h, z + ht);
+    poly([D, C, P(x + w, y + h, z), P(x, y + h, z)], c[1], s);
+    poly([C, B, P(x + w, y, z), P(x + w, y + h, z)], c[2], s);
+    poly([A, B, C, D], c[0], s);
+  }
 
-    qs("#btn-quick-complete", inspector)?.addEventListener("click", () => {
-      alert(`ชิ้นงาน "${d.currentTask.title}" ถูกบันทึกสถานะส่งมอบสำเร็จเรียบร้อย!`);
+  const DESK = ["#354050", "#242c38", "#1a212b"];
+  const SLAB = ["#19222c", "#121921", "#0c1117"];
+  const MN = ["#171c24", "#0f131a", "#0a0d12"];
+  const CR = ["#8ab4c4", "#5d8494", "#426270"];
+
+  function floor() {
+    for (let x = 0; x < 14; x++) {
+      for (let y = 0; y < 10; y++) {
+        const a = P(x, y);
+        const b = P(x + 1, y);
+        const c = P(x + 1, y + 1);
+        const d = P(x, y + 1);
+        const cor = y === 4 || y === 5;
+        poly([a, b, c, d], (x + y) % 2 ? "#161b24" : "#1a212b", "#10151c");
+        if (cor) poly([a, b, c, d], "rgba(25, 195, 235, 0.06)");
+        if (y === 9) poly([P(x, 10), P(x + 1, 10), P(x + 1, 10, -6), P(x, 10, -6)], "#0f131a");
+        if (x === 13) poly([P(14, y), P(14, y + 1), P(14, y + 1, -6), P(14, y, -6)], "#0a0d12");
+        if ((x * 7 + y * 13) % 11 === 0) {
+          g.fillStyle = "#252e3b";
+          g.fillRect(a[0] - 1, a[1] + 7, 2, 1);
+        }
+      }
+    }
+  }
+
+  const rt = i => {
+    const cx = PO[i][0] + 1.4;
+    const ey = i < 3 ? 4 : 6.1;
+    return [[1.7, 5], [cx, 5], [cx, ey]];
+  };
+
+  const PATHS = [[[1.7, 5], [12.3, 5]], ...PO.map((_, i) => rt(i).slice(1))];
+
+  function paths(t) {
+    const a = 0.6 + 0.4 * Math.sin(t * 3);
+    PATHS.forEach(pl => {
+      const q = pl.map(p => P(p[0], p[1], 1));
+      [[5, 0.1], [3, 0.24], [1, 0.95]].forEach(([w, al]) => {
+        g.beginPath();
+        q.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+        g.lineWidth = w;
+        g.strokeStyle = `rgba(25, 195, 235, ${al * (w === 1 ? 1 : a)})`;
+        g.stroke();
+      });
     });
   }
 
-  updateInspector(selectedIndex);
+  function pkt(pts, c, sp = 2.4) {
+    let L = 0;
+    for (let i = 1; i < pts.length; i++) {
+      L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    }
+    pk.push({ pts, L, t: 0, sp, c });
+  }
 
-  // 4. Initialize Three.js 3D Virtual Studio
-  let isAutoRotating = false;
+  function packets(dt) {
+    pk = pk.filter(k => (k.t += dt * k.sp / k.L) < 1);
+    pk.forEach(k => {
+      let d = k.t * k.L;
+      let i = 1;
+      while (i < k.pts.length - 1 && d > Math.hypot(k.pts[i][0] - k.pts[i - 1][0], k.pts[i][1] - k.pts[i - 1][1])) {
+        d -= Math.hypot(k.pts[i][0] - k.pts[i - 1][0], k.pts[i][1] - k.pts[i - 1][1]);
+        i++;
+      }
+      const a = k.pts[i - 1];
+      const b = k.pts[i];
+      const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+      const p = P(a[0] + (b[0] - a[0]) * d / l, a[1] + (b[1] - a[1]) * d / l, 4);
 
-  initThreeJsStudio(designers, (newIndex) => {
-    selectedIndex = newIndex;
-    updateRosterActiveState(selectedIndex);
-    updateInspector(selectedIndex);
-  }, (autoRotateActive) => {
-    isAutoRotating = autoRotateActive;
-    const btn = qs("#btn-auto-rotate", container);
-    if (btn) btn.classList.toggle("is-active", isAutoRotating);
-  });
-
-  function updateRosterActiveState(idx) {
-    qsa(".designer-roster-card", container).forEach((card, i) => {
-      card.classList.toggle("is-active", i === idx);
+      g.fillStyle = k.c + "44";
+      g.fillRect(p[0] - 3, p[1] - 3, 6, 6);
+      g.fillStyle = k.c;
+      g.fillRect(p[0] - 1, p[1] - 1, 3, 3);
+      g.fillStyle = "#ffffff";
+      g.fillRect(p[0] - 1, p[1] - 1, 1, 1);
     });
   }
 
-  // Bind Left Roster Clicks
-  qsa(".designer-roster-card", container).forEach((card) => {
-    card.addEventListener("click", () => {
-      const idx = parseInt(card.dataset.designerIndex, 10);
-      if (!isNaN(idx)) {
-        selectedIndex = idx;
-        updateRosterActiveState(idx);
-        updateInspector(idx);
-        focusDesk(idx);
+  function screen(x, y, w, z0, z1, col, t) {
+    const a = P(x, y, z1);
+    const b = P(x + w, y, z1);
+    const c = P(x + w, y, z0);
+    const d = P(x, y, z0);
+    g.save();
+    g.beginPath();
+    [a, b, c, d].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.closePath();
+    g.clip();
+    g.fillStyle = col;
+    g.fillRect(a[0] - 2, a[1] - 2, 30, 30);
+    g.fillStyle = "rgba(255, 255, 255, 0.65)";
+    for (let r = 0; r < 4; r++) {
+      g.fillRect(a[0] + 1, a[1] + 1 + r * 2, 3 + ((r * 7 + Math.floor(t * 2)) % 5), 1);
+    }
+    g.restore();
+  }
+
+  const stOf = m => !m.tk.length ? "i" : m.tk.some(k => k.u) ? "u" : m.tk.some(k => k.pr >= 90) ? "r" : "a";
+  const SCL = { i: "#5b6675", u: "#e8202a", r: "#ffc61a", a: "#19c3eb" };
+
+  function station(i, t) {
+    const [x, y] = PO[i];
+    const m = TM[i];
+    const s = sel === i;
+    const h = hv === i;
+    const pu = (Math.sin(t * 4) + 1) / 2;
+
+    if (s || h) {
+      poly([P(x - 0.5, y - 0.5), P(x + 3.3, y - 0.5), P(x + 3.3, y + 3.3), P(x - 0.5, y + 3.3)], `rgba(25, 195, 235, ${s ? 0.16 + pu * 0.18 : 0.1})`);
+    }
+
+    box(x - 0.1, y - 0.1, 2.8, 2.8, 3, 0, SLAB, s ? TL : "#080b10");
+    box(x + 0.1, y + 0.5, 1.7, 1.0, 9, 3, DESK);
+
+    [0, 1].forEach(k => {
+      const mx = x + 0.25 + k * 0.8;
+      box(mx, y + 0.6, 0.6, 0.12, 8, 12, MN);
+      screen(mx, y + 0.72, 0.6, 12, 20, k ? "#2f6bff" : m.c, t + k);
+    });
+
+    const p = P(x + 2.1, y + 2.0, 3);
+    const w = stOf(m) === "a" ? (Math.sin(t * 10 + i) > 0 ? 1 : 0) : 0;
+
+    g.fillStyle = "#262f3d";
+    g.fillRect(p[0] - 4, p[1] - 5, 8, 5);
+
+    if (m.g === "หญิง") {
+      g.fillStyle = m.h;
+      g.fillRect(p[0] - 4, p[1] - 19, 8, 10);
+    }
+
+    g.fillStyle = m.c;
+    g.fillRect(p[0] - 3, p[1] - 12, 6, 7);
+    g.fillRect(p[0] - 5, p[1] - 10 + w, 2, 4);
+    g.fillRect(p[0] + 3, p[1] - 10 + (1 - w), 2, 4);
+
+    g.fillStyle = m.sk;
+    g.fillRect(p[0] - 3, p[1] - 18, 6, 6);
+    g.fillStyle = m.h;
+    g.fillRect(p[0] - 3, p[1] - 19, 6, 2);
+    g.fillStyle = "#111111";
+    g.fillRect(p[0] - 2, p[1] - 16, 1, 1);
+    g.fillRect(p[0] + 1, p[1] - 16, 1, 1);
+
+    if (i === 2) {
+      g.fillStyle = "#38bdf8";
+      g.fillRect(p[0] - 3, p[1] - 17, 6, 1);
+    }
+    if (i === 4) {
+      g.fillStyle = m.h;
+      g.fillRect(p[0] - 1, p[1] - 22, 2, 3);
+    }
+
+    const sc = SCL[stOf(m)];
+    const bob = Math.sin(t * 3 + i) > 0 ? 1 : 0;
+    g.fillStyle = Math.sin(t * 6 + i) > -0.3 ? sc : sc + "66";
+    poly([[p[0], p[1] - 30 - bob], [p[0] + 3, p[1] - 27 - bob], [p[0], p[1] - 24 - bob], [p[0] - 3, p[1] - 27 - bob]], g.fillStyle);
+  }
+
+  function hubIn(t) {
+    const pu = (Math.sin(t * 3) + 1) / 2;
+    box(0.1, 4.2, 1.6, 1.6, 3, 0, SLAB, TL);
+    const c = P(0.9, 5, 3);
+    g.strokeStyle = `rgba(25, 195, 235, ${0.4 + pu * 0.5})`;
+    g.lineWidth = 1;
+    g.beginPath();
+    g.ellipse(c[0], c[1], 15 + pu * 3, 7.5 + pu * 1.5, 0, 0, 7);
+    g.stroke();
+
+    g.fillStyle = "#0c806e";
+    g.beginPath();
+    g.arc(c[0], c[1] - 16, 9, 0, 7);
+    g.fill();
+    g.fillStyle = TL;
+    g.beginPath();
+    g.arc(c[0], c[1] - 16, 7, 0, 7);
+    g.fill();
+    g.fillStyle = "#ffffff";
+    poly([[c[0] + 1, c[1] - 22], [c[0] - 3, c[1] - 15], [c[0], c[1] - 15], [c[0] - 1, c[1] - 9], [c[0] + 3, c[1] - 17], [c[0], c[1] - 17]], "#ffffff");
+    g.fillStyle = TL;
+    g.font = `6px ${PXF}`;
+    g.fillText("BRIEF", c[0] - 14, c[1] + 13);
+  }
+
+  function hubOut(t) {
+    const pu = (Math.sin(t * 3) + 1) / 2;
+    poly([P(11.8, 3.7), P(13.9, 3.7), P(13.9, 6.3), P(11.8, 6.3)], `rgba(25, 195, 235, ${0.12 + pu * 0.15})`);
+    box(12.2, 4.2, 1.6, 1.6, 3, 0, SLAB, TL);
+
+    [[12.4, 4.4, 8], [12.95, 4.4, 11], [12.7, 5.0, 7]].forEach(([x, y, h]) => {
+      box(x, y, 0.5, 0.5, h, 3, CR, "#172328");
+    });
+    const c = P(13, 5, 3);
+    g.fillStyle = TL;
+    g.font = `6px ${PXF}`;
+    g.fillText("DELIVERY", c[0] - 22, c[1] + 13);
+  }
+
+  function plant(x, y) {
+    const p = P(x, y);
+    g.fillStyle = "#2d3748";
+    g.fillRect(p[0] - 2, p[1] - 4, 5, 4);
+    g.fillStyle = "#10b981";
+    g.fillRect(p[0] - 3, p[1] - 9, 7, 5);
+    g.fillStyle = "#34d399";
+    g.fillRect(p[0] - 1, p[1] - 12, 3, 3);
+  }
+
+  let amb = 0;
+
+  function frame(ms) {
+    if (!isMounted) return;
+    animationFrameId = requestAnimationFrame(frame);
+
+    const t = ms / 1000;
+    const dt = Math.min(0.05, t - lt);
+    lt = t;
+
+    cam.x += (cam.tx - cam.x) * 0.12;
+    cam.y += (cam.ty - cam.y) * 0.12;
+
+    g.fillStyle = "#080a10";
+    g.fillRect(0, 0, W, H);
+    floor();
+    paths(t);
+
+    if ((amb += dt) > 1.3) {
+      amb = 0;
+      pkt([[1.7, 5], [12.3, 5]], "#19c3eb", 3.4);
+    }
+    packets(dt);
+
+    const L = [];
+    PO.forEach((p, i) => L.push([p[0] + p[1] + 2.8, () => station(i, t)]));
+    L.push([5, () => hubIn(t)], [17, () => hubOut(t)]);
+    PL.forEach(p => L.push([p[0] + p[1], () => plant(p[0], p[1])]));
+
+    L.sort((a, b) => a[0] - b[0]).forEach(o => o[1]());
+
+    PO.forEach((p, i) => {
+      const e = $(`#studio-cd-${i}`);
+      if (e) {
+        const q = P(p[0] + 1.5, p[1] + 1.2, 34);
+        e.style.left = q[0] * PS + "px";
+        e.style.top = q[1] * PS + "px";
       }
     });
+
+    const clkEl = $("#studio-clk");
+    if (clkEl) {
+      const now = new Date();
+      clkEl.textContent = now.toISOString().slice(0, 10).replace(/-/g, ".") + " " + now.toTimeString().slice(0, 8);
+    }
+  }
+
+  function add(i, t, p, c, u, d) {
+    const m = TM[i];
+    m.tk.push({ t, p, c, pr: 10, d: d || (u ? "ด่วน 3 ชม." : "พรุ่งนี้ 12:00"), u: u ? 1 : 0 });
+    m.ld = Math.min(100, m.ld + 6);
+    pkt(rt(i), u ? "#e8202a" : "#ffc61a");
+  }
+
+  function fin(i, k) {
+    const m = TM[i];
+    m.tk = m.tk.filter(x => x !== k);
+    m.dn++;
+    live++;
+    m.cat[k.c] = (m.cat[k.c] || 0) + 1;
+    m.ld = Math.max(35, m.ld - 7);
+    pkt(rt(i).slice().reverse().concat([[12.3, 5]]), "#19c3eb");
+  }
+
+  function tick() {
+    if (!isMounted) return;
+    let d = 0;
+    let n = 0;
+    TM.forEach((m, i) => {
+      m.tk.slice().forEach((k, j) => {
+        k.pr += (j ? 0.5 : 1.5) * R(0.4, 1.8) * (k.u ? 1.6 : 1);
+        if (k.pr >= 100) {
+          fin(i, k);
+          d++;
+        }
+      });
+    });
+
+    const A = TM.flatMap(m => m.tk);
+    hist.d.push(d);
+    hist.i.push(n);
+    hist.u.push(A.filter(k => k.u).length);
+    hist.r.push(A.filter(k => k.pr >= 90).length);
+    hist.a.push(A.length);
+    Object.values(hist).forEach(a => a.shift());
+    paint();
+  }
+
+  function paint() {
+    if (!isMounted) return;
+    const A = TM.flatMap(m => m.tk);
+    const dn = TM.reduce((s, m) => s + m.dn, 0);
+    const ld = Math.round(TM.reduce((s, m) => s + m.ld, 0) / 6);
+    const ur = A.filter(k => k.u).length;
+
+    // Top KPI strip
+    const kpisEl = $("#studio-kpis");
+    if (kpisEl) {
+      kpisEl.innerHTML = [
+        ["▣", "ปริมาณงานทั้งหมด", dn + A.length],
+        ["◔", "กำลังทำ (Active)", A.length],
+        ["✔", "ส่งมอบแล้ว (Delivered)", dn],
+        ["⚠", "งานด่วน (Urgent)", ur],
+        ["★", "On-Time SLA", "99.6%"]
+      ].map(k => `
+        <div class="studio-kp">
+          <i>${k[0]}</i>
+          <div>
+            <small>${k[1]}</small>
+            <b>${k[2]}</b>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Workload Ring
+    const rgEl = $("#studio-rg");
+    const lvEl = $("#studio-lv");
+    if (rgEl && lvEl) {
+      rgEl.style.setProperty("--p", ld);
+      lvEl.textContent = ld + "%";
+    }
+
+    // Floating Hologram Cards
+    const cardsEl = $("#studio-cards");
+    if (cardsEl) {
+      cardsEl.innerHTML = TM.map((m, i) => `
+        <div class="studio-cd ${sel === i ? "is-selected" : ""}" id="studio-cd-${i}" data-designer-idx="${i}" style="--c:${m.c}">
+          <div class="cd-name-row">
+            <span>${m.n} (${m.nickname})</span>
+            <span class="cd-dot" style="background:${SCL[stOf(m)]}"></span>
+          </div>
+          ${PS > 2 ? `
+            <div class="cd-row">ทำแล้ว <b>${m.dn} ชิ้น</b></div>
+            <div class="cd-row">ถือ <b>${m.tk.length} งาน</b></div>
+          ` : ""}
+        </div>
+      `).join("");
+    }
+
+    // Right Sidebar: Workload Ranking
+    const rankEl = $("#studio-rank");
+    if (rankEl) {
+      const bc = ["#19c3eb", "#3aa0ff", "#ffc61a", "#7f8e9e", "#7f8e9e", "#7f8e9e"];
+      rankEl.innerHTML = TM.map((m, i) => ({ m, i })).sort((a, b) => b.m.ld - a.m.ld).map((o, k) => `
+        <div class="studio-rk" data-designer-idx="${o.i}">
+          <span class="studio-bd" style="background:${bc[k]}">${k + 1}</span>
+          <span style="font-weight:600;font-size:11px;">${o.m.n}</span>
+          <div class="studio-sg">
+            <i style="width:${o.m.ld}%;--c:${o.m.ld > 85 ? '#e8202a' : o.m.ld > 75 ? '#ffc61a' : '#19c3eb'}"></i>
+          </div>
+          <b style="font-family:var(--studio-mono);font-size:9px;text-align:right;">${o.m.ld}%</b>
+        </div>
+      `).join("");
+    }
+
+    // Right Sidebar: Inspector
+    const inspEl = $("#studio-insp");
+    if (inspEl) {
+      const m = TM[sel];
+      const s = stOf(m);
+      inspEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div>
+            <b style="font-size:13px;color:#fff;">${m.fullName} (${m.nickname})</b>
+            <div style="color:var(--studio-mu);font-size:11px;">${m.r} • ${m.desk}</div>
+          </div>
+          <span class="studio-tg ${s}">${s === "u" ? "เร่งงานด่วน" : s === "r" ? "รอตรวจ" : s === "i" ? "ว่าง" : "กำลังโฟกัส"}</span>
+        </div>
+        ${m.tk.map((k, j) => `
+          <div class="studio-tk ${j ? "" : "is-focus"}">
+            <div style="display:flex;justify-content:space-between;gap:6px">
+              <b>${E(k.t)}</b>
+              <span class="studio-tg ${k.u ? "u" : k.pr >= 90 ? "r" : "a"}">${k.u ? "Urgent" : k.pr >= 90 ? "Review" : "In Progress"}</span>
+            </div>
+            <div style="color:var(--studio-mu);font-size:10px;margin-top:2px;">${E(k.c)} • ${E(k.p)} • ${E(k.d)}</div>
+            <div class="studio-sg" style="margin-top:5px">
+              <i style="width:${Math.min(100, k.pr)}%;--c:${k.u ? '#e8202a' : '#19c3eb'}"></i>
+            </div>
+          </div>
+        `).join("")}
+        ${!m.tk.length ? '<div class="studio-tk" style="color:var(--studio-mu);text-align:center;">— ยังไม่มีงานในคิว —</div>' : ""}
+        <button class="studio-btn is-main" style="margin-top:8px;width:100%;justify-content:center;" id="btn-studio-done">
+          ✔ ส่งงานที่โฟกัสเสร็จ 1 ชิ้น
+        </button>
+      `;
+
+      $("#btn-studio-done")?.addEventListener("click", () => {
+        if (m.tk[0]) {
+          const finishedTitle = m.tk[0].t;
+          fin(sel, m.tk[0]);
+          paint();
+          toast(`ส่งมอบงาน "${finishedTitle}" เรียบร้อยแล้ว!`, "success", "บันทึกสำเร็จ");
+        }
+      });
+    }
+
+    // Right Sidebar: Category breakdown
+    const catsEl = $("#studio-cats");
+    if (catsEl) {
+      const cs = {};
+      TM.forEach(m => Object.entries(m.cat).forEach(([k, v]) => cs[k] = (cs[k] || 0) + v));
+      const ce = Object.entries(cs).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const mx = ce.length ? ce[0][1] : 1;
+
+      catsEl.innerHTML = !ce.length ? '<div style="color:var(--studio-mu);font-size:11px">— ยังไม่มีข้อมูล —</div>' : ce.map(([k, v]) => `
+        <div class="studio-ct">
+          <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${E(k)}</span>
+          <div class="studio-sg"><i style="width:${v / mx * 100}%"></i></div>
+          <b style="font-family:var(--studio-mono);font-size:9px;text-align:right;">${v}</b>
+        </div>
+      `).join("");
+    }
+
+    // Bottom Row: Project & Workstation Info
+    const piEl = $("#studio-pi");
+    if (piEl) {
+      const m = TM[sel];
+      piEl.innerHTML = `
+        <div style="padding:4px 8px;margin-bottom:6px;background:#0d1118;border:1px solid var(--studio-ln);border-radius:4px;font-size:11px">
+          <b>${m.n}</b> • ${m.r} • ${m.desk}
+        </div>
+        <div class="studio-gr">
+          <div>ส่งมอบแล้ว<b>${m.dn} ชิ้น</b></div>
+          <div>กำลังทำ<b>${m.tk.length} งาน</b></div>
+          <div>โปรเจกต์<b>${m.pj}</b></div>
+          <div>On-Time SLA<b>${m.sla}</b></div>
+          <div>ภาระงาน<b>${m.ld}%</b></div>
+          <div>ซอฟต์แวร์<b style="font-size:10px">${m.sw}</b></div>
+        </div>
+      `;
+    }
+
+    charts();
+  }
+
+  // 4. Canvas Sparkline and Line Charts
+  const fit = c => {
+    if (!c) return [null, 0, 0];
+    const r = c.getBoundingClientRect();
+    const d = window.devicePixelRatio || 1;
+    c.width = r.width * d;
+    c.height = r.height * d;
+    const x = c.getContext("2d");
+    x.setTransform(d, 0, 0, d, 0, 0);
+    x.font = "9px 'IBM Plex Sans Thai', sans-serif";
+    return [x, r.width, r.height];
+  };
+
+  function gd(x, w, h, mx) {
+    x.strokeStyle = "#242e3d";
+    x.fillStyle = "#6e7e91";
+    x.lineWidth = 1;
+    for (let k = 0; k < 4; k++) {
+      const y = 6 + k * (h - 22) / 3;
+      x.beginPath();
+      x.moveTo(26, y);
+      x.lineTo(w - 4, y);
+      x.stroke();
+      x.fillText(Math.round(mx * (1 - k / 3)), 2, y + 3);
+    }
+  }
+
+  function sl(x, d, mx, w, h, c, fill) {
+    const dx = (w - 30) / (d.length - 1);
+    let py;
+    x.beginPath();
+    d.forEach((v, i) => {
+      const X = 26 + i * dx;
+      const Y = 6 + (h - 22) * (1 - v / mx);
+      if (i) x.lineTo(X, py);
+      else x.moveTo(X, Y);
+      x.lineTo(X, Y);
+      py = Y;
+    });
+    if (fill) {
+      x.save();
+      x.lineTo(w - 4, h - 16);
+      x.lineTo(26, h - 16);
+      x.fillStyle = c + "33";
+      x.fill();
+      x.restore();
+    }
+    x.strokeStyle = c;
+    x.lineWidth = 2;
+    x.stroke();
+  }
+
+  function charts() {
+    const c1 = $("#studio-c1");
+    if (c1) {
+      let [x, w, h] = fit(c1);
+      if (x) {
+        let mx = Math.max(4, ...hist.d, ...hist.i);
+        gd(x, w, h, mx);
+        sl(x, hist.d, mx, w, h, "#19c3eb", 1);
+        sl(x, hist.i, mx, w, h, "#ffc61a");
+      }
+    }
+
+    const c2 = $("#studio-c2");
+    if (c2) {
+      let [x, w, h] = fit(c2);
+      if (x) {
+        let mx = Math.max(8, ...hist.a);
+        gd(x, w, h, mx);
+        sl(x, hist.a, mx, w, h, "#3aa0ff");
+        sl(x, hist.r, mx, w, h, "#ffc61a");
+        sl(x, hist.u, mx, w, h, "#e8202a");
+      }
+    }
+
+    const c3 = $("#studio-c3");
+    if (c3) {
+      let [x, w, h] = fit(c3);
+      if (x) {
+        const D = MON.slice();
+        D[new Date().getMonth()] = live;
+        let mx = Math.max(4, ...D) * 1.1;
+        gd(x, w, h, mx);
+        const bw = (w - 34) / 12;
+        D.forEach((v, i) => {
+          const bh = (h - 22) * v / mx;
+          const fc = i > new Date().getMonth();
+          for (let y = 0; y < bh; y += 6) {
+            x.fillStyle = fc ? "#19c3eb33" : `rgba(25, 195, 235, ${0.4 + 0.6 * y / bh})`;
+            x.fillRect(30 + i * bw, h - 16 - y - 4, bw - 5, 4);
+          }
+          x.fillStyle = "#6e7e91";
+          x.fillText(i + 1, 32 + i * bw, h - 4);
+        });
+      }
+    }
+  }
+
+  function pick(i) {
+    sel = i;
+    const p = P0(PO[i][0] + 1.5, PO[i][1] + 1.3);
+    cam.tx = p[0];
+    cam.ty = p[1] - 6;
+    PS = 4;
+    size();
+    paint();
+  }
+
+  function reset() {
+    cam.tx = 32;
+    cam.ty = 66;
+    PS = 3;
+    size();
+    paint();
+  }
+
+  function hit(e) {
+    const r = cv.getBoundingClientRect();
+    const a = ((e.clientX - r.left) / PS - (W / 2 - cam.x)) / 16;
+    const b = ((e.clientY - r.top) / PS + 9 - (H / 2 - cam.y)) / 8;
+    const gx = (a + b) / 2;
+    const gy = (b - a) / 2;
+    return PO.findIndex(([x, y]) => gx > x - 0.4 && gx < x + 3.2 && gy > y - 0.4 && gy < y + 3.2);
+  }
+
+  // Mouse pan & zoom listeners
+  let dr = null;
+  let mv = 0;
+  const mp = $("#studio-map");
+
+  if (mp) {
+    mp.onpointerdown = e => {
+      if (e.target.closest(".studio-cd, .studio-btn, .studio-kp, #studio-ring")) return;
+      dr = [e.clientX, e.clientY];
+      mv = 0;
+      mp.setPointerCapture(e.pointerId);
+      mp.style.cursor = "grabbing";
+    };
+
+    mp.onpointermove = e => {
+      if (dr) {
+        const dx = e.clientX - dr[0];
+        const dy = e.clientY - dr[1];
+        mv += Math.abs(dx) + Math.abs(dy);
+        dr = [e.clientX, e.clientY];
+        cam.x -= dx / PS;
+        cam.y -= dy / PS;
+        cam.tx = cam.x;
+        cam.ty = cam.y;
+      } else {
+        hv = hit(e);
+      }
+    };
+
+    mp.onpointerup = e => {
+      if (!dr) return;
+      dr = null;
+      mp.style.cursor = "grab";
+      if (mv < 6) {
+        const i = hit(e);
+        if (i >= 0) pick(i);
+      }
+    };
+
+    mp.onwheel = e => {
+      e.preventDefault();
+      PS = Math.max(2, Math.min(5, PS + (e.deltaY < 0 ? 1 : -1)));
+      size();
+    };
+  }
+
+  // Click delegation for cards and rankings
+  container.addEventListener("click", e => {
+    const targetCard = e.target.closest("[data-designer-idx]");
+    if (targetCard) {
+      const idx = parseInt(targetCard.dataset.designerIdx, 10);
+      if (!isNaN(idx)) pick(idx);
+    }
   });
 
-  // Bind Switch to Classic View
-  qs("#btn-switch-classic", container)?.addEventListener("click", () => {
+  // Top action buttons
+  $("#studio-rs")?.addEventListener("click", reset);
+
+  $("#studio-tour")?.addEventListener("click", e => {
+    if (tourIntervalId) {
+      clearInterval(tourIntervalId);
+      tourIntervalId = null;
+      e.target.classList.remove("is-on");
+    } else {
+      e.target.classList.add("is-on");
+      tourIntervalId = setInterval(() => {
+        if (!isMounted) return;
+        pick((sel + 1) % 6);
+      }, 3500);
+    }
+  });
+
+  // New Brief dialog
+  $("#studio-nb")?.addEventListener("click", () => {
+    const select = $("#studio-f3");
+    if (select) {
+      select.innerHTML = TM.map((m, i) => `
+        <option value="${i}" ${i === sel ? "selected" : ""}>${m.fullName} (ภาระ ${m.ld}%)</option>
+      `).join("");
+    }
+    $("#studio-md")?.classList.add("is-open");
+  });
+
+  $("#studio-cancel-brief")?.addEventListener("click", () => {
+    $("#studio-md")?.classList.remove("is-open");
+  });
+
+  $("#studio-brief-form")?.addEventListener("submit", e => {
+    e.preventDefault();
+    const designerIdx = parseInt($("#studio-f3").value, 10);
+    const title = $("#studio-f1").value.trim();
+    const projName = $("#studio-f2").value.trim();
+    const catName = $("#studio-f4").value;
+    const isUrgent = $("#studio-f5").checked;
+
+    add(designerIdx, title, projName, catName, isUrgent);
+    TM[designerIdx].pj++;
+    $("#studio-md")?.classList.remove("is-open");
+    $("#studio-f1").value = "";
+    $("#studio-f2").value = "";
+    pick(designerIdx);
+    toast(`มอบหมายงาน "${title}" ให้ ${TM[designerIdx].n} เรียบร้อย!`, "success", "สร้างงานสำเร็จ");
+  });
+
+  // Dual View Switcher Event
+  $("#btn-switch-classic")?.addEventListener("click", () => {
     localStorage.setItem("cont_dashboard_view", "classic");
     cleanupStudio3D();
     if (typeof onSwitchToClassic === "function") {
@@ -605,557 +1064,16 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     }
   });
 
-  // Bind Brief button
-  qs("#btn-studio-brief", container)?.addEventListener("click", () => {
-    openCreateTask(ctx);
-  });
-
-  // Bind Overview Camera
-  qs("#btn-cam-overview", container)?.addEventListener("click", () => {
-    resetToOverview();
-  });
-
-  // Bind Auto-rotate toggle
-  qs("#btn-auto-rotate", container)?.addEventListener("click", () => {
-    toggleAutoRotate();
-  });
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Three.js 3D Studio Implementation
-───────────────────────────────────────────────────────────────────────── */
-let focusDesk = () => {};
-let resetToOverview = () => {};
-let toggleAutoRotate = () => {};
-
-function initThreeJsStudio(designers, onSelectDesigner, onAutoRotateChanged) {
-  if (typeof THREE === "undefined") {
-    console.error("Three.js not loaded. Retrying dynamically...");
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-    script.onload = () => initThreeJsStudio(designers, onSelectDesigner, onAutoRotateChanged);
-    document.head.appendChild(script);
-    return;
-  }
-
-  const canvasContainer = document.getElementById("studio3d-canvas-container");
-  const tagsOverlay = document.getElementById("studio3d-tags-overlay");
-  if (!canvasContainer) return;
-
-  const width = canvasContainer.clientWidth || 800;
-  const height = canvasContainer.clientHeight || 600;
-
-  // Scene & Isometric Camera
-  const scene = new THREE.Scene();
-  currentScene = scene;
-  scene.background = new THREE.Color(0x0a0c16);
-  scene.fog = new THREE.FogExp2(0x0a0c16, 0.02);
-
-  const camera = new THREE.PerspectiveCamera(38, width / height, 0.5, 120);
-  
-  // Isometric Overview Coordinates
-  const overviewPos = new THREE.Vector3(0, 18, 25);
-  const overviewLookAt = new THREE.Vector3(0, 1.2, 0);
-
-  const targetCamPos = overviewPos.clone();
-  const targetCamLookAt = overviewLookAt.clone();
-  const currentLookAt = overviewLookAt.clone();
-
-  camera.position.copy(overviewPos);
-  camera.lookAt(currentLookAt);
-
-  // Renderer
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-  currentRenderer = renderer;
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  canvasContainer.appendChild(renderer.domElement);
-
-  // 1. Studio Lighting System
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
-  scene.add(ambientLight);
-
-  const sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
-  sunLight.position.set(16, 26, 18);
-  sunLight.castShadow = true;
-  sunLight.shadow.mapSize.width = 1024;
-  sunLight.shadow.mapSize.height = 1024;
-  sunLight.shadow.camera.near = 0.5;
-  sunLight.shadow.camera.far = 60;
-  sunLight.shadow.camera.left = -20;
-  sunLight.shadow.camera.right = 20;
-  sunLight.shadow.camera.top = 20;
-  sunLight.shadow.camera.bottom = -20;
-  scene.add(sunLight);
-
-  // Studio Neon Atmosphere (Cyan & Purple)
-  const cyanLight = new THREE.PointLight(0x19c3eb, 1.6, 32);
-  cyanLight.position.set(-12, 9, -7);
-  scene.add(cyanLight);
-
-  const purpleLight = new THREE.PointLight(0x9b51e0, 1.5, 32);
-  purpleLight.position.set(12, 9, -7);
-  scene.add(purpleLight);
-
-  // 2. Studio Floor with Grid & Podium
-  const floorGeo = new THREE.PlaneGeometry(55, 45);
-  const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x0f121e,
-    roughness: 0.35,
-    metalness: 0.25
-  });
-  const floor = new THREE.Mesh(floorGeo, floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  const grid = new THREE.GridHelper(50, 50, 0x19c3eb, 0x1a2238);
-  grid.position.y = 0.01;
-  scene.add(grid);
-
-  // Studio Back Wall
-  const wallGeo = new THREE.BoxGeometry(46, 12, 0.6);
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0x111422, roughness: 0.8 });
-  const wall = new THREE.Mesh(wallGeo, wallMat);
-  wall.position.set(0, 6, -11);
-  wall.receiveShadow = true;
-  scene.add(wall);
-
-  // Neon KKP Signboard on Wall
-  const signCanvas = document.createElement("canvas");
-  signCanvas.width = 1024;
-  signCanvas.height = 256;
-  const sctx = signCanvas.getContext("2d");
-  sctx.fillStyle = "#121526";
-  sctx.fillRect(0, 0, 1024, 256);
-  sctx.strokeStyle = "#e62e2e";
-  sctx.lineWidth = 6;
-  sctx.strokeRect(10, 10, 1004, 236);
-  sctx.font = "bold 58px sans-serif";
-  sctx.fillStyle = "#ffffff";
-  sctx.textAlign = "center";
-  sctx.fillText("KKP GRAPHIC DESIGN STUDIO", 512, 105);
-  sctx.font = "bold 30px sans-serif";
-  sctx.fillStyle = "#19c3eb";
-  sctx.fillText("CREATIVE OPERATIONS & REAL-TIME DASHBOARD", 512, 172);
-
-  const signTex = new THREE.CanvasTexture(signCanvas);
-  const signGeo = new THREE.PlaneGeometry(18, 4.5);
-  const signMat = new THREE.MeshBasicMaterial({ map: signTex });
-  const signboard = new THREE.Mesh(signGeo, signMat);
-  signboard.position.set(0, 6.5, -10.6);
-  scene.add(signboard);
-
-  // 3. Decorative Corner Low-Poly Potted Trees / Plants
-  function createPottedTree(x, z) {
-    const group = new THREE.Group();
-    group.position.set(x, 0, z);
-
-    // Planter Pot
-    const potGeo = new THREE.CylinderGeometry(0.7, 0.5, 1.2, 16);
-    const potMat = new THREE.MeshStandardMaterial({ color: 0x1f273d, roughness: 0.5 });
-    const pot = new THREE.Mesh(potGeo, potMat);
-    pot.position.y = 0.6;
-    pot.castShadow = true;
-    group.add(pot);
-
-    // Tree Trunk
-    const trunkGeo = new THREE.CylinderGeometry(0.12, 0.15, 1.8, 8);
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.8 });
-    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.y = 1.8;
-    trunk.castShadow = true;
-    group.add(trunk);
-
-    // Tree Foliage (Spheres)
-    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.6 });
-    const f1 = new THREE.Mesh(new THREE.SphereGeometry(0.85, 8, 8), foliageMat);
-    f1.position.y = 2.8;
-    f1.castShadow = true;
-    group.add(f1);
-
-    const f2 = new THREE.Mesh(new THREE.SphereGeometry(0.65, 8, 8), foliageMat);
-    f2.position.set(0.3, 3.4, 0);
-    f2.castShadow = true;
-    group.add(f2);
-
-    scene.add(group);
-  }
-
-  createPottedTree(-18, -8);
-  createPottedTree(18, -8);
-  createPottedTree(-18, 8);
-  createPottedTree(18, 8);
-
-  // 4. Build 6 Workstations
-  const deskMeshes = [];
-  const deskRaycastObjects = [];
-  const deskTags = [];
-
-  const monitorColors = [
-    { base: 0x19c3eb, name: "Cyan" },
-    { base: 0x9b51e0, name: "Purple" },
-    { base: 0xffbe3b, name: "Gold" },
-    { base: 0x2bd14b, name: "Green" },
-    { base: 0xe91e63, name: "Magenta" },
-    { base: 0x5ce0ff, name: "BrightCyan" }
-  ];
-
-  function createScreenTexture(title, pct, colorHex) {
-    const cvs = document.createElement("canvas");
-    cvs.width = 512;
-    cvs.height = 300;
-    const c = cvs.getContext("2d");
-    c.fillStyle = "#0d101c";
-    c.fillRect(0, 0, 512, 300);
-
-    // Graphic banner preview
-    const grad = c.createLinearGradient(0, 0, 512, 200);
-    grad.addColorStop(0, colorHex);
-    grad.addColorStop(1, "#0a0c16");
-    c.fillStyle = grad;
-    c.fillRect(20, 20, 472, 170);
-
-    c.fillStyle = "#ffffff";
-    c.font = "bold 26px sans-serif";
-    c.fillText(title.slice(0, 24), 30, 235);
-
-    c.fillStyle = "#2bd14b";
-    c.font = "bold 20px sans-serif";
-    c.fillText(`Active Progress: ${pct}%`, 30, 275);
-    return new THREE.CanvasTexture(cvs);
-  }
-
-  designers.forEach((d, idx) => {
-    const deskGroup = new THREE.Group();
-    deskGroup.position.set(d.posX, 0, d.posZ);
-
-    // Glowing Desk Mat / Floor Spotlight
-    const floorPadGeo = new THREE.PlaneGeometry(5.2, 3.8);
-    const floorPadMat = new THREE.MeshStandardMaterial({
-      color: 0x141829,
-      roughness: 0.6
-    });
-    const floorPad = new THREE.Mesh(floorPadGeo, floorPadMat);
-    floorPad.rotation.x = -Math.PI / 2;
-    floorPad.position.y = 0.02;
-    floorPad.receiveShadow = true;
-    deskGroup.add(floorPad);
-
-    // Table Top
-    const topGeo = new THREE.BoxGeometry(4.4, 0.16, 2.3);
-    const topMat = new THREE.MeshStandardMaterial({
-      color: 0x1b2033,
-      roughness: 0.35,
-      metalness: 0.3
-    });
-    const tableTop = new THREE.Mesh(topGeo, topMat);
-    tableTop.position.y = 1.6;
-    tableTop.castShadow = true;
-    tableTop.receiveShadow = true;
-    deskGroup.add(tableTop);
-
-    // Legs
-    const legGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.6);
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x3d4766, metalness: 0.8, roughness: 0.2 });
-    [[-2.0, 0.8, -1.0], [2.0, 0.8, -1.0], [-2.0, 0.8, 1.0], [2.0, 0.8, 1.0]].forEach(pos => {
-      const leg = new THREE.Mesh(legGeo, legMat);
-      leg.position.set(pos[0], pos[1], pos[2]);
-      leg.castShadow = true;
-      deskGroup.add(leg);
-    });
-
-    // Dual Monitors with Glowing Screens
-    const mColor = monitorColors[idx % monitorColors.length];
-    const screenTex = createScreenTexture(d.currentTask.title, d.currentProgress, `#${mColor.base.toString(16).padStart(6, '0')}`);
-    const screenGeo = new THREE.BoxGeometry(1.7, 1.05, 0.08);
-    const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
-    const monitorFrameMat = new THREE.MeshStandardMaterial({ color: 0x07090f, roughness: 0.5 });
-
-    // Left Monitor
-    const monLeft = new THREE.Mesh(screenGeo, screenMat);
-    monLeft.position.set(-0.9, 2.45, -0.45);
-    monLeft.rotation.y = 0.2;
-    monLeft.castShadow = true;
-    deskGroup.add(monLeft);
-
-    // Right Monitor
-    const monRight = new THREE.Mesh(screenGeo, screenMat);
-    monRight.position.set(0.9, 2.45, -0.45);
-    monRight.rotation.y = -0.2;
-    monRight.castShadow = true;
-    deskGroup.add(monRight);
-
-    // Monitor Stand
-    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.85, 0.12), monitorFrameMat);
-    stand.position.set(0, 2.05, -0.55);
-    deskGroup.add(stand);
-
-    // Glowing Neon Underglow for Monitor
-    const monLight = new THREE.PointLight(mColor.base, 0.8, 3.5);
-    monLight.position.set(0, 2.4, -0.2);
-    deskGroup.add(monLight);
-
-    // Keyboard & Graphic Tablet
-    const kb = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.03, 0.42), new THREE.MeshStandardMaterial({ color: 0x111320 }));
-    kb.position.set(-0.35, 1.7, 0.35);
-    deskGroup.add(kb);
-
-    const tablet = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.02, 0.65), new THREE.MeshStandardMaterial({ color: 0x0a0c14 }));
-    tablet.position.set(1.1, 1.7, 0.35);
-    deskGroup.add(tablet);
-
-    // Desk Lamp
-    const lampArm = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.1), legMat);
-    lampArm.position.set(-1.8, 2.15, -0.5);
-    deskGroup.add(lampArm);
-
-    const lampShade = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.38, 16), new THREE.MeshStandardMaterial({ color: 0xffbe3b }));
-    lampShade.position.set(-1.8, 2.7, -0.4);
-    lampShade.rotation.x = Math.PI * 0.8;
-    deskGroup.add(lampShade);
-
-    const deskLight = new THREE.PointLight(0xffeedd, 0.7, 4.0);
-    deskLight.position.set(-1.8, 2.5, -0.2);
-    deskGroup.add(deskLight);
-
-    // Ergonomic Chair
-    const chairMat = new THREE.MeshStandardMaterial({ color: 0x191e30, roughness: 0.6 });
-    const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.14, 1.15), chairMat);
-    chairSeat.position.set(0, 1.25, 1.25);
-    chairSeat.castShadow = true;
-    deskGroup.add(chairSeat);
-
-    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.25, 0.14), chairMat);
-    chairBack.position.set(0, 1.85, 1.75);
-    chairBack.castShadow = true;
-    deskGroup.add(chairBack);
-
-    // 3D Avatar (Designer)
-    const charGroup = new THREE.Group();
-    charGroup.position.set(0, 1.28, 1.15);
-
-    const shirtColor = d.gender === "หญิง" ? 0x9b51e0 : 0xe62e2e;
-    const bodyMat = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.5 });
-    const charBody = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 0.92, 16), bodyMat);
-    charBody.position.y = 0.55;
-    charBody.castShadow = true;
-    charGroup.add(charBody);
-
-    const headMat = new THREE.MeshStandardMaterial({ color: 0xffdfbe, roughness: 0.7 });
-    const charHead = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16), headMat);
-    charHead.position.y = 1.25;
-    charHead.castShadow = true;
-    charGroup.add(charHead);
-
-    // Headphones
-    const hp = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.05, 8, 16), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.7 }));
-    hp.position.y = 1.26;
-    hp.rotation.x = Math.PI / 2;
-    charGroup.add(hp);
-
-    deskGroup.add(charGroup);
-    deskGroup.userData = { designerIndex: idx, charGroup };
-
-    scene.add(deskGroup);
-    deskMeshes.push(deskGroup);
-    deskRaycastObjects.push(tableTop);
-    tableTop.userData = { designerIndex: idx };
-
-    // Floating 2D Hologram Card in DOM Overlay
-    const tag = document.createElement("div");
-    tag.className = `studio-floating-tag ${idx === 0 ? "is-active" : ""}`;
-    tag.innerHTML = `
-      <div class="tag-top-row">
-        <div class="tag-name-group">
-          <span class="tag-status-diamond"></span>
-          <span class="tag-name">${escapeHtml(d.name.split(" ")[0])} (${escapeHtml(d.nickname)})</span>
-        </div>
-        <span class="tag-gender">${escapeHtml(d.gender)}</span>
-      </div>
-      <div class="tag-task-title">${escapeHtml(d.currentTask.title)}</div>
-      <div class="tag-stats-row">
-        <span>ทำแล้ว <strong>${d.totalDelivered} ชิ้น</strong></span>
-        <span>ถือ <strong>${d.inQueueCount} งาน</strong> • ${d.projectCount} โปรเจกต์</span>
-      </div>
-    `;
-
-    tag.addEventListener("click", () => {
-      onSelectDesigner(idx);
-      focusDesk(idx);
-    });
-
-    tagsOverlay.appendChild(tag);
-    deskTags.push({ el: tag, pos: new THREE.Vector3(d.posX, 4.0, d.posZ) });
-  });
-
-  // 5. Camera Control Logic
-  focusDesk = function(idx) {
-    const d = designers[idx];
-    targetCamPos.set(d.posX, 3.8, d.posZ + 6.0);
-    targetCamLookAt.set(d.posX, 2.0, d.posZ);
-
-    deskTags.forEach((t, i) => {
-      t.el.classList.toggle("is-active", i === idx);
-    });
+  // Window resize
+  const onResize = () => {
+    size();
+    paint();
   };
-
-  resetToOverview = function() {
-    targetCamPos.copy(overviewPos);
-    targetCamLookAt.copy(overviewLookAt);
-    deskTags.forEach((t) => t.el.classList.remove("is-active"));
-  };
-
-  let autoRotate = false;
-  let autoRotateAngle = 0;
-
-  toggleAutoRotate = function() {
-    autoRotate = !autoRotate;
-    if (typeof onAutoRotateChanged === "function") {
-      onAutoRotateChanged(autoRotate);
-    }
-  };
-
-  // 6. Interactive Raycasting & Mouse Orbit
-  let isDragging = false;
-  let prevMousePos = { x: 0, y: 0 };
-  let orbitRadius = 30;
-  let orbitPhi = Math.PI / 4;
-  let orbitTheta = Math.PI / 2;
-
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-  function onPointerDown(e) {
-    if (e.target !== renderer.domElement) return;
-    isDragging = true;
-    prevMousePos = { x: e.clientX, y: e.clientY };
-  }
-
-  function onPointerMove(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-    if (isDragging) {
-      const deltaX = e.clientX - prevMousePos.x;
-      const deltaY = e.clientY - prevMousePos.y;
-      prevMousePos = { x: e.clientX, y: e.clientY };
-
-      orbitTheta -= deltaX * 0.005;
-      orbitPhi = Math.max(0.15, Math.min(Math.PI / 2.2, orbitPhi - deltaY * 0.005));
-
-      targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
-      targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
-      targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
-    } else {
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(deskRaycastObjects);
-      renderer.domElement.style.cursor = intersects.length > 0 ? "pointer" : "default";
-    }
-  }
-
-  function onPointerUp(e) {
-    if (!isDragging) return;
-    isDragging = false;
-  }
-
-  function onPointerClick(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(deskRaycastObjects);
-
-    if (intersects.length > 0) {
-      const idx = intersects[0].object.userData.designerIndex;
-      if (typeof idx === "number") {
-        onSelectDesigner(idx);
-        focusDesk(idx);
-      }
-    }
-  }
-
-  function onWheel(e) {
-    e.preventDefault();
-    orbitRadius = Math.max(10, Math.min(45, orbitRadius + e.deltaY * 0.02));
-    targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
-    targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
-    targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
-  }
-
-  renderer.domElement.addEventListener("mousedown", onPointerDown);
-  window.addEventListener("mousemove", onPointerMove);
-  window.addEventListener("mouseup", onPointerUp);
-  renderer.domElement.addEventListener("click", onPointerClick);
-  renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
-
-  // 7. Render Animation Loop
-  let clock = new THREE.Clock();
-
-  function animate() {
-    if (!isMounted) return;
-    animationFrameId = requestAnimationFrame(animate);
-
-    const elapsed = clock.getElapsedTime();
-
-    // Auto-rotate logic
-    if (autoRotate) {
-      autoRotateAngle += 0.004;
-      targetCamPos.x = targetCamLookAt.x + 28 * Math.sin(autoRotateAngle);
-      targetCamPos.z = targetCamLookAt.z + 28 * Math.cos(autoRotateAngle);
-      targetCamPos.y = 18;
-    }
-
-    // Camera Interpolation
-    camera.position.lerp(targetCamPos, 0.055);
-    currentLookAt.lerp(targetCamLookAt, 0.055);
-    camera.lookAt(currentLookAt);
-
-    // Character working / breathing motion
-    deskMeshes.forEach((mesh, i) => {
-      const charGroup = mesh.userData.charGroup;
-      if (charGroup) {
-        charGroup.position.y = 1.28 + Math.sin(elapsed * 2.8 + i) * 0.015;
-      }
-    });
-
-    // Update Hologram Tags Projection
-    const tempV = new THREE.Vector3();
-    const halfWidth = canvasContainer.clientWidth / 2;
-    const halfHeight = canvasContainer.clientHeight / 2;
-
-    deskTags.forEach(item => {
-      tempV.copy(item.pos);
-      tempV.project(camera);
-
-      if (tempV.z > 1) {
-        item.el.style.display = "none";
-      } else {
-        item.el.style.display = "flex";
-        const x = (tempV.x * halfWidth) + halfWidth;
-        const y = -(tempV.y * halfHeight) + halfHeight;
-        item.el.style.left = `${x}px`;
-        item.el.style.top = `${y}px`;
-      }
-    });
-
-    renderer.render(scene, camera);
-  }
-
-  animate();
-
-  function onResize() {
-    if (!canvasContainer || !renderer) return;
-    const w = canvasContainer.clientWidth;
-    const h = canvasContainer.clientHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  }
-
   window.addEventListener("resize", onResize);
+
+  // Initialize
+  size();
+  paint();
+  animationFrameId = requestAnimationFrame(frame);
+  tickIntervalId = setInterval(tick, 2200);
 }
