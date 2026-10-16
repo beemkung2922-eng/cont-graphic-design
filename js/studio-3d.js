@@ -5,8 +5,6 @@ import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { filterTasksByTimeRange, getTaskDate, calculateTeamAnalytics } from "./analytics.js";
 
 let animationFrameId = null;
-let currentScene = null;
-let currentRenderer = null;
 let isMounted = false;
 let tourIntervalId = null;
 
@@ -20,11 +18,6 @@ export function cleanupStudio3D() {
     clearInterval(tourIntervalId);
     tourIntervalId = null;
   }
-  if (currentRenderer && currentRenderer.domElement && currentRenderer.domElement.parentNode) {
-    currentRenderer.domElement.parentNode.removeChild(currentRenderer.domElement);
-  }
-  currentScene = null;
-  currentRenderer = null;
 }
 
 /* ── Smooth SVG Sparkline Generator (Matching Classic Bento Grid) ── */
@@ -86,29 +79,31 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
   // 1. Core Designers Identification (Using Real Members only, Full names, NO parentheses!)
   const fallbackDesigners = [
-    { id: "1fd3ea77-8461-4de1-917a-90a9869428c1", name: "BEEM", role: "supervisor" },
-    { id: "a31026f2-adc9-47d7-9ba0-f809be9344f1", name: "Peerapisit Rojatiegpanya", role: "designer" },
-    { id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303", name: "Pisit Sintavanuwat", role: "designer" },
-    { id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52", name: "Pongsathorn Pang", role: "designer" },
-    { id: "c16a2845-c95e-47c5-b616-4b37299574a4", name: "Yutiporn Thongkom", role: "designer" },
-    { id: "739187f5-e142-4aa4-95ad-e06f881163cc", name: "Naraporn Leungvititgoon", role: "designer" }
+    { id: "1fd3ea77-8461-4de1-917a-90a9869428c1", name: "BEEM", role: "supervisor", hair: "#e8202a", clothes: "#1f2937", gender: "ชาย" },
+    { id: "a31026f2-adc9-47d7-9ba0-f809be9344f1", name: "Peerapisit Rojatiegpanya", role: "designer", hair: "#38bdf8", clothes: "#1e3a5f", gender: "ชาย" },
+    { id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303", name: "Pisit Sintavanuwat", role: "designer", hair: "#f59e0b", clothes: "#451a03", gender: "ชาย" },
+    { id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52", name: "Pongsathorn Pang", role: "designer", hair: "#ec4899", clothes: "#831843", gender: "หญิง" },
+    { id: "c16a2845-c95e-47c5-b616-4b37299574a4", name: "Yutiporn Thongkom", role: "designer", hair: "#a855f7", clothes: "#581c87", gender: "หญิง" },
+    { id: "739187f5-e142-4aa4-95ad-e06f881163cc", name: "Naraporn Leungvititgoon", role: "designer", hair: "#10b981", clothes: "#064e3b", gender: "หญิง" }
   ];
 
   const designMembers = (members && members.length)
     ? members.filter(m => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role))
     : fallbackDesigners;
 
+  // Cozy Office Room Coordinates (Matching Image 1: media_1792138423370.png)
+  // Desks arranged in center and side pods
   const deskZones = [
-    { deskId: "Desk A1", label: "Desk A1 • โซนหน้าซ้าย", row: 0, col: 0, posX: -7.5, posZ: 3.5 },
-    { deskId: "Desk A2", label: "Desk A2 • โซนหน้ากลาง", row: 0, col: 1, posX: 0, posZ: 3.5 },
-    { deskId: "Desk A3", label: "Desk A3 • โซนหน้าขวา", row: 0, col: 2, posX: 7.5, posZ: 3.5 },
-    { deskId: "Desk B1", label: "Desk B1 • โซนหลังซ้าย", row: 1, col: 0, posX: -7.5, posZ: -4.5 },
-    { deskId: "Desk B2", label: "Desk B2 • โซนหลังกลาง", row: 1, col: 1, posX: 0, posZ: -4.5 },
-    { deskId: "Desk B3", label: "Desk B3 • โซนหลังขวา", row: 1, col: 2, posX: 7.5, posZ: -4.5 }
+    { deskId: "Desk A1", label: "Desk A1 • โต๊ะหัวหน้าทีม", wx: 0, wy: -48, facing: "down" },
+    { deskId: "Desk A2", label: "Desk A2 • โต๊ะกลางซ้าย", wx: -62, wy: -10, facing: "right" },
+    { deskId: "Desk A3", label: "Desk A3 • โต๊ะกลางขวา", wx: 62, wy: -10, facing: "left" },
+    { deskId: "Desk B1", label: "Desk B1 • โต๊ะริมซ้าย", wx: -110, wy: 25, facing: "right" },
+    { deskId: "Desk B2", label: "Desk B2 • โต๊ะริมขวา", wx: 110, wy: 25, facing: "left" },
+    { deskId: "Desk B3", label: "Desk B3 • โต๊ะหน้าขวา", wx: 38, wy: 65, facing: "up" }
   ];
 
   const drawStudio = () => {
-    // 2. Real Filtered Data Computation (EXACT MATCH to Classic Overview!)
+    // 2. Real Filtered Data Computation (100% MATCH to Classic Overview!)
     const filtered = filterTasksByTimeRange(tasks, filterState);
     const active = filtered.filter(t => t.status !== "completed");
     const dueSoon = filtered.filter(t => t.status !== "completed" && relativeDeadline(t.deadline_at || t.deadline).className);
@@ -127,7 +122,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     const reviewPct = Math.max(1, Math.round((reviewCount / totalCount) * 100));
     const completedPct = Math.max(1, 100 - briefPct - draftingPct - reviewPct);
 
-    // Compute Designers Real Telemetry
+    // Compute Designers Real Telemetry (NO fake tasks! NO parentheses!)
     const teamStations = designMembers.slice(0, 6).map((m, idx) => {
       const zone = deskZones[idx] || deskZones[0];
       const assigned = filtered.filter(t => t.assignee_id === m.id);
@@ -135,7 +130,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       const memberCompleted = assigned.filter(t => t.status === "completed");
       const memberProjectsCount = new Set(assigned.map(t => t.project_id).filter(Boolean)).size;
 
-      // Real current task (NO fake tasks!)
+      // Real current task
       const currentTask = memberActive[0] || null;
 
       // Real SLA for this member
@@ -143,13 +138,19 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         ? ((memberCompleted.length / assigned.length) * 100).toFixed(1)
         : "100.0";
 
+      const fb = fallbackDesigners[idx] || fallbackDesigners[0];
+
       return {
         ...m,
         cleanName: m.name.replace(/\s*\(.*?\)\s*/g, "").trim(), // Strip any accidental parentheses
         deskId: zone.deskId,
         deskLabel: zone.label,
-        posX: zone.posX,
-        posZ: zone.posZ,
+        wx: zone.wx,
+        wy: zone.wy,
+        facing: zone.facing,
+        hairColor: fb.hair,
+        clothesColor: fb.clothes,
+        gender: fb.gender,
         assigned,
         activeTasks: memberActive,
         completedTasks: memberCompleted,
@@ -192,9 +193,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           <div class="overview-title-group">
             <h1 class="overview-title">
               <span>Overview</span>
-              <span class="studio3d-live-pill" style="font-size:0.7rem;color:#2bd14b;background:rgba(43,209,75,0.12);border:1px solid rgba(43,209,75,0.35);padding:2px 8px;border-radius:12px;margin-left:8px;font-weight:700;">
-                <span class="studio3d-live-dot" style="display:inline-block;width:6px;height:6px;background:#2bd14b;border-radius:50%;margin-right:4px;"></span>
-                3D Interactive Showroom
+              <span class="studio3d-live-pill" style="font-size:0.7rem;color:#ffc61a;background:rgba(255,198,26,0.12);border:1px solid rgba(255,198,26,0.35);padding:2px 8px;border-radius:12px;margin-left:8px;font-weight:700;">
+                <span class="studio3d-live-dot" style="display:inline-block;width:6px;height:6px;background:#ffc61a;border-radius:50%;margin-right:4px;"></span>
+                Cozy Pixel Studio
               </span>
             </h1>
             <p class="overview-subtitle">ภาพรวมงานดีไซน์ สถิติการผลิต และสถานะงานทั้งหมดใน Pipeline</p>
@@ -203,9 +204,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           <div class="overview-header-actions">
             <!-- Dual View Switcher -->
             <div class="view-switcher-pill" style="margin-right: 6px;">
-              <button type="button" class="view-btn is-active is-3d" id="btn-studio-3d" title="มุมมอง 3D สตูดิโออินเทอร์แอคทีฟ">
+              <button type="button" class="view-btn is-active is-3d" id="btn-studio-3d" title="มุมมอง 3D Office Studio">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                <span>3D Studio</span>
+                <span>3D Office</span>
               </button>
               <button type="button" class="view-btn is-active" id="btn-switch-classic" title="สลับไปมุมมอง Classic Overview">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -306,19 +307,21 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           </div>
         </div>
 
-        <!-- 4. Center 3D Showroom Viewport + Workstation Inspector Grid -->
+        <!-- 4. Center Cozy Pixel Office Viewport + Workstation Inspector Grid -->
         <div class="studio-stage-grid">
-          <!-- Left: 3D Viewport Card -->
-          <div class="studio-viewport-card">
-            <div id="studio3d-canvas-wrapper"></div>
-            <div id="studio3d-hologram-layer"></div>
+          <!-- Left: Cozy Pixel Office Viewport -->
+          <div class="studio-viewport-card" id="studio-viewport-box">
+            <div id="studio-canvas-container">
+              <canvas id="studio-pixel-canvas"></canvas>
+            </div>
+            <div id="studio-hologram-layer"></div>
 
             <!-- Top Viewport HUD -->
             <div class="studio-viewport-top-hud">
               <div class="viewport-hud-left">
                 <span class="viewport-hud-badge">
                   <span class="viewport-hud-dot"></span>
-                  <span>LIVE SHOWROOM TELEMETRY</span>
+                  <span>KKP CREATIVE STUDIO</span>
                 </span>
               </div>
               <div class="viewport-hud-controls">
@@ -336,11 +339,11 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
             <!-- Bottom Viewport Interaction Hints -->
             <div class="studio-viewport-bottom-hud">
               <div class="hud-hint-items">
-                <span class="hud-hint-item">🖱️ คลิกซ้ายลาก: หมุนมุมกล้อง</span>
+                <span class="hud-hint-item">🖱️ คลิกซ้ายลาก: แพนมุมกล้อง</span>
                 <span class="hud-hint-item">🔍 ลูกกลิ้งเมาส์: ซูมเข้า-ออก</span>
-                <span class="hud-hint-item">👆 คลิกที่โหนด/บูธ: ซูมดูโต๊ะทำงาน</span>
+                <span class="hud-hint-item">👆 คลิกที่โต๊ะ/ดีไซเนอร์: เจาะลึกภาระงาน</span>
               </div>
-              <span id="studio-current-focus-hint" style="color:#5ce0ff;font-weight:600;">
+              <span id="studio-current-focus-hint" style="color:#ffc61a;font-weight:600;">
                 Focus: ${escapeHtml(teamStations[selectedMemberIndex]?.cleanName || "")}
               </span>
             </div>
@@ -496,7 +499,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         </div>
 
         <button type="button" class="btn-assign-to-member" id="btn-assign-designer">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           <span>มอบหมายงานใหม่ให้ ${escapeHtml(m.cleanName)}</span>
         </button>
       `;
@@ -511,8 +514,8 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
     updateInspector(selectedMemberIndex);
 
-    // 5. Initialize Three.js 3D Architectural Showroom Scene
-    initThreeJsShowroom(teamStations, (newIndex) => {
+    // 5. Initialize Cozy Isometric Pixel Office Canvas Engine
+    initCozyPixelOffice(teamStations, (newIndex) => {
       updateInspector(newIndex);
     });
 
@@ -550,309 +553,40 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Three.js Architectural 3D Showroom Implementation
-   (Inspired by User's Reference Image: media_1792137585985.png)
+   Cozy Isometric Pixel Office Canvas Engine
+   (Inspired by User's Reference Image: media_1792138423370.png)
 ───────────────────────────────────────────────────────────────────────── */
-function initThreeJsShowroom(teamStations, onSelectStation) {
-  if (typeof THREE === "undefined") {
-    console.error("Three.js not loaded. Retrying dynamically...");
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-    script.onload = () => initThreeJsShowroom(teamStations, onSelectStation);
-    document.head.appendChild(script);
-    return;
+function initCozyPixelOffice(teamStations, onSelectStation) {
+  const canvas = document.getElementById("studio-pixel-canvas");
+  const container = document.getElementById("studio-viewport-box");
+  const hologramLayer = document.getElementById("studio-hologram-layer");
+  if (!canvas || !container) return;
+
+  const ctx2d = canvas.getContext("2d");
+
+  let W = 0;
+  let H = 0;
+  let scale = 2.4; // Pixel crisp scale
+
+  // Camera coordinates
+  const cam = { x: 0, y: 0, tx: 0, ty: 0 };
+
+  function resize() {
+    const rect = container.getBoundingClientRect();
+    W = Math.round(rect.width);
+    H = Math.round(rect.height);
+    canvas.width = W;
+    canvas.height = H;
+    ctx2d.imageSmoothingEnabled = false;
   }
 
-  const canvasContainer = document.getElementById("studio3d-canvas-wrapper");
-  const hologramLayer = document.getElementById("studio3d-hologram-layer");
-  if (!canvasContainer) return;
+  resize();
 
-  const width = canvasContainer.clientWidth || 800;
-  const height = canvasContainer.clientHeight || 560;
-
-  // Scene & Isometric Camera
-  const scene = new THREE.Scene();
-  currentScene = scene;
-  scene.background = new THREE.Color(0x080a12);
-  scene.fog = new THREE.FogExp2(0x080a12, 0.016);
-
-  const camera = new THREE.PerspectiveCamera(36, width / height, 0.5, 120);
-
-  // Overview isometric camera coordinates
-  const overviewPos = new THREE.Vector3(0, 22, 28);
-  const overviewLookAt = new THREE.Vector3(0, 1.2, 0);
-
-  const targetCamPos = overviewPos.clone();
-  const targetCamLookAt = overviewLookAt.clone();
-  const currentLookAt = overviewLookAt.clone();
-
-  camera.position.copy(overviewPos);
-  camera.lookAt(currentLookAt);
-
-  // Renderer
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-  currentRenderer = renderer;
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  canvasContainer.appendChild(renderer.domElement);
-
-  // 1. Lighting System (Modern Showroom Lighting)
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-  scene.add(ambientLight);
-
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.95);
-  dirLight.position.set(18, 30, 20);
-  dirLight.castShadow = true;
-  dirLight.shadow.mapSize.width = 1024;
-  dirLight.shadow.mapSize.height = 1024;
-  dirLight.shadow.camera.near = 0.5;
-  dirLight.shadow.camera.far = 70;
-  dirLight.shadow.camera.left = -22;
-  dirLight.shadow.camera.right = 22;
-  dirLight.shadow.camera.top = 22;
-  dirLight.shadow.camera.bottom = -22;
-  scene.add(dirLight);
-
-  // Accent Neon Cyber Lights (Cyan & Royal Blue)
-  const cyanAccent = new THREE.PointLight(0x19c3eb, 1.8, 36);
-  cyanAccent.position.set(-14, 10, -8);
-  scene.add(cyanAccent);
-
-  const blueAccent = new THREE.PointLight(0x2f6bff, 1.6, 36);
-  blueAccent.position.set(14, 10, -8);
-  scene.add(blueAccent);
-
-  // 2. Elevated Showroom Platform & Neon Floor Border (Matching Image!)
-  const podiumGeo = new THREE.BoxGeometry(40, 0.8, 28);
-  const podiumMat = new THREE.MeshStandardMaterial({
-    color: 0x111522,
-    roughness: 0.35,
-    metalness: 0.2
-  });
-  const podium = new THREE.Mesh(podiumGeo, podiumMat);
-  podium.position.y = -0.4;
-  podium.receiveShadow = true;
-  scene.add(podium);
-
-  // Neon glowing perimeter border
-  const borderGeo = new THREE.EdgesGeometry(podiumGeo);
-  const borderMat = new THREE.LineBasicMaterial({ color: 0x19c3eb, linewidth: 2 });
-  const borderLine = new THREE.LineSegments(borderGeo, borderMat);
-  borderLine.position.y = -0.4;
-  scene.add(borderLine);
-
-  // Floor Grid Helper
-  const grid = new THREE.GridHelper(38, 38, 0x19c3eb, 0x1b2336);
-  grid.position.y = 0.02;
-  scene.add(grid);
-
-  // Directional Central Floor Pathway
-  const pathGeo = new THREE.PlaneGeometry(3.6, 26);
-  const pathMat = new THREE.MeshStandardMaterial({
-    color: 0x141a2a,
-    roughness: 0.5
-  });
-  const path = new THREE.Mesh(pathGeo, pathMat);
-  path.rotation.x = -Math.PI / 2;
-  path.position.set(0, 0.03, -0.5);
-  path.receiveShadow = true;
-  scene.add(path);
-
-  // Showroom Back Glass Wall
-  const backWallGeo = new THREE.BoxGeometry(38, 8, 0.4);
-  const backWallMat = new THREE.MeshStandardMaterial({
-    color: 0x0f1320,
-    roughness: 0.8
-  });
-  const backWall = new THREE.Mesh(backWallGeo, backWallMat);
-  backWall.position.set(0, 4, -13.6);
-  backWall.receiveShadow = true;
-  scene.add(backWall);
-
-  // Studio Header Neon Signboard on Back Wall
-  const signCanvas = document.createElement("canvas");
-  signCanvas.width = 1024;
-  signCanvas.height = 256;
-  const sctx = signCanvas.getContext("2d");
-  sctx.fillStyle = "#121728";
-  sctx.fillRect(0, 0, 1024, 256);
-  sctx.strokeStyle = "#e8202a";
-  sctx.lineWidth = 6;
-  sctx.strokeRect(8, 8, 1008, 240);
-  sctx.font = "bold 56px sans-serif";
-  sctx.fillStyle = "#ffffff";
-  sctx.textAlign = "center";
-  sctx.fillText("KKP GRAPHIC DESIGN STUDIO", 512, 105);
-  sctx.font = "bold 28px sans-serif";
-  sctx.fillStyle = "#19c3eb";
-  sctx.fillText("CREATIVE OPERATIONS & LIVE TELEMETRY", 512, 175);
-
-  const signTex = new THREE.CanvasTexture(signCanvas);
-  const signGeo = new THREE.PlaneGeometry(16, 4);
-  const signMat = new THREE.MeshBasicMaterial({ map: signTex });
-  const signboard = new THREE.Mesh(signGeo, signMat);
-  signboard.position.set(0, 4.5, -13.3);
-  scene.add(signboard);
-
-  // 3. Build the 6 Glass Booths & Workstations (Matching Image!)
-  const raycastObjects = [];
-  const boothHolograms = [];
-  const hotspotPulses = [];
-
-  const glassMat = new THREE.MeshStandardMaterial({
-    color: 0x223652,
-    transparent: true,
-    opacity: 0.32,
-    roughness: 0.1,
-    metalness: 0.3
-  });
-
-  const boothTrimMat = new THREE.LineBasicMaterial({ color: 0x5ce0ff });
-
-  teamStations.forEach((st, idx) => {
-    const boothGroup = new THREE.Group();
-    boothGroup.position.set(st.posX, 0, st.posZ);
-
-    // Glass Partition Booth Enclosure (Matching the Showroom Booths in Image!)
-    const bWidth = 6.4;
-    const bDepth = 5.6;
-    const bHeight = 4.2;
-
-    // Glass side wall
-    const sideWallGeo = new THREE.BoxGeometry(0.08, bHeight, bDepth);
-    const sideWall = new THREE.Mesh(sideWallGeo, glassMat);
-    sideWall.position.set(idx % 3 === 0 ? -bWidth / 2 : bWidth / 2, bHeight / 2, 0);
-    boothGroup.add(sideWall);
-
-    // Booth Wireframe outline
-    const frameBox = new THREE.BoxGeometry(bWidth, bHeight, bDepth);
-    const frameEdges = new THREE.EdgesGeometry(frameBox);
-    const frameWire = new THREE.LineSegments(frameEdges, boothTrimMat);
-    frameWire.position.y = bHeight / 2;
-    boothGroup.add(frameWire);
-
-    // Floor Base Pad for Workstation
-    const pad = new THREE.Mesh(
-      new THREE.PlaneGeometry(bWidth - 0.4, bDepth - 0.4),
-      new THREE.MeshStandardMaterial({ color: 0x161c2c, roughness: 0.6 })
-    );
-    pad.rotation.x = -Math.PI / 2;
-    pad.position.y = 0.04;
-    pad.receiveShadow = true;
-    boothGroup.add(pad);
-
-    // Modern Executive Desk
-    const deskTop = new THREE.Mesh(
-      new THREE.BoxGeometry(3.8, 0.14, 2.0),
-      new THREE.MeshStandardMaterial({ color: 0x1f2638, roughness: 0.35, metalness: 0.3 })
-    );
-    deskTop.position.set(0, 1.5, -0.2);
-    deskTop.castShadow = true;
-    deskTop.receiveShadow = true;
-    deskTop.userData = { stationIndex: idx };
-    boothGroup.add(deskTop);
-    raycastObjects.push(deskTop);
-
-    // Steel Desk Legs
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x3d4964, metalness: 0.8, roughness: 0.2 });
-    [[-1.7, 0.75, -0.8], [1.7, 0.75, -0.8], [-1.7, 0.75, 0.8], [1.7, 0.75, 0.8]].forEach(pos => {
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5), legMat);
-      leg.position.set(pos[0], pos[1], pos[2] - 0.2);
-      leg.castShadow = true;
-      boothGroup.add(leg);
-    });
-
-    // Dual Monitors with Artwork Texture
-    const cvs = document.createElement("canvas");
-    cvs.width = 512;
-    cvs.height = 280;
-    const c = cvs.getContext("2d");
-    c.fillStyle = "#0c0f1a";
-    c.fillRect(0, 0, 512, 280);
-    c.fillStyle = "#162238";
-    c.fillRect(15, 15, 482, 170);
-    c.fillStyle = "#19c3eb";
-    c.font = "bold 24px sans-serif";
-    c.fillText(st.cleanName.slice(0, 20), 25, 225);
-    c.fillStyle = "#2bd14b";
-    c.font = "20px sans-serif";
-    c.fillText(`Active: ${st.inQueueCount} | Done: ${st.completedCount}`, 25, 260);
-
-    const monTex = new THREE.CanvasTexture(cvs);
-    const monGeo = new THREE.BoxGeometry(1.5, 0.95, 0.06);
-    const monMat = new THREE.MeshBasicMaterial({ map: monTex });
-
-    const mon1 = new THREE.Mesh(monGeo, monMat);
-    mon1.position.set(-0.8, 2.25, -0.6);
-    mon1.rotation.y = 0.16;
-    boothGroup.add(mon1);
-
-    const mon2 = new THREE.Mesh(monGeo, monMat);
-    mon2.position.set(0.8, 2.25, -0.6);
-    mon2.rotation.y = -0.16;
-    boothGroup.add(mon2);
-
-    // Ergonomic Chair
-    const chairMat = new THREE.MeshStandardMaterial({ color: 0x181e30, roughness: 0.6 });
-    const chair = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.12, 1.0), chairMat);
-    chair.position.set(0, 1.15, 0.9);
-    chair.castShadow = true;
-    boothGroup.add(chair);
-
-    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.1), chairMat);
-    chairBack.position.set(0, 1.7, 1.35);
-    chairBack.castShadow = true;
-    boothGroup.add(chairBack);
-
-    // Floor Hotspot Node Marker (Matching 01, 02... circular rings in Image!)
-    const ringGeo = new THREE.RingGeometry(0.65, 0.85, 32);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x19c3eb,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.85
-    });
-    const hotspotRing = new THREE.Mesh(ringGeo, ringMat);
-    hotspotRing.rotation.x = -Math.PI / 2;
-    hotspotRing.position.set(0, 0.06, 1.9);
-    boothGroup.add(hotspotRing);
-    hotspotPulses.push(hotspotRing);
-
-    // Beacon Number Canvas Disc (01, 02, etc.)
-    const discCvs = document.createElement("canvas");
-    discCvs.width = 128;
-    discCvs.height = 128;
-    const dctx = discCvs.getContext("2d");
-    dctx.fillStyle = "#090d16";
-    dctx.beginPath();
-    dctx.arc(64, 64, 60, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.lineWidth = 6;
-    dctx.strokeStyle = "#19c3eb";
-    dctx.stroke();
-    dctx.fillStyle = "#ffffff";
-    dctx.font = "bold 52px sans-serif";
-    dctx.textAlign = "center";
-    dctx.textBaseline = "middle";
-    dctx.fillText(`0${idx + 1}`, 64, 64);
-
-    const discTex = new THREE.CanvasTexture(discCvs);
-    const discMesh = new THREE.Mesh(
-      new THREE.CircleGeometry(0.55, 32),
-      new THREE.MeshBasicMaterial({ map: discTex, side: THREE.DoubleSide })
-    );
-    discMesh.rotation.x = -Math.PI / 2;
-    discMesh.position.set(0, 0.07, 1.9);
-    discMesh.userData = { stationIndex: idx };
-    boothGroup.add(discMesh);
-    raycastObjects.push(discMesh);
-
-    scene.add(boothGroup);
-
-    // Floating Hologram Tag (DOM projection)
-    if (hologramLayer) {
+  // Floating tags DOM elements
+  const hologramTags = [];
+  if (hologramLayer) {
+    hologramLayer.innerHTML = "";
+    teamStations.forEach((st, idx) => {
       const tag = document.createElement("div");
       tag.className = `hologram-station-tag ${idx === 0 ? "is-active" : ""}`;
       tag.innerHTML = `
@@ -868,34 +602,32 @@ function initThreeJsShowroom(teamStations, onSelectStation) {
       `;
 
       tag.addEventListener("click", () => {
-        focusStation(idx);
+        focusDesk(idx);
         onSelectStation(idx);
       });
 
       hologramLayer.appendChild(tag);
-      boothHolograms.push({ el: tag, pos: new THREE.Vector3(st.posX, 3.8, st.posZ) });
-    }
-  });
+      hologramTags.push({ el: tag, wx: st.wx, wy: st.wy });
+    });
+  }
 
-  // 4. Smooth Camera Focus Logic
-  function focusStation(idx) {
+  function focusDesk(idx) {
     const st = teamStations[idx];
     if (!st) return;
-    targetCamPos.set(st.posX, 4.2, st.posZ + 6.2);
-    targetCamLookAt.set(st.posX, 1.8, st.posZ);
+    cam.tx = st.wx;
+    cam.ty = st.wy - 20;
 
-    boothHolograms.forEach((h, i) => {
+    hologramTags.forEach((h, i) => {
       h.el.classList.toggle("is-active", i === idx);
     });
   }
 
   function resetOverview() {
-    targetCamPos.copy(overviewPos);
-    targetCamLookAt.copy(overviewLookAt);
-    boothHolograms.forEach(h => h.el.classList.remove("is-active"));
+    cam.tx = 0;
+    cam.ty = 0;
+    hologramTags.forEach(h => h.el.classList.remove("is-active"));
   }
 
-  // HUD Controls
   document.getElementById("hud-cam-overview")?.addEventListener("click", resetOverview);
 
   let isTouring = false;
@@ -908,10 +640,10 @@ function initThreeJsShowroom(teamStations, onSelectStation) {
       tourIntervalId = setInterval(() => {
         if (!isMounted) return;
         tourIdx = (tourIdx + 1) % teamStations.length;
-        focusStation(tourIdx);
+        focusDesk(tourIdx);
         onSelectStation(tourIdx);
       }, 4000);
-      focusStation(tourIdx);
+      focusDesk(tourIdx);
       onSelectStation(tourIdx);
     } else {
       clearInterval(tourIntervalId);
@@ -920,136 +652,343 @@ function initThreeJsShowroom(teamStations, onSelectStation) {
     }
   });
 
-  // 5. Mouse Orbit & Raycast Interaction
+  // Mouse pan & zoom listeners
   let isDragging = false;
-  let prevMouse = { x: 0, y: 0 };
-  let orbitRadius = 35;
-  let orbitTheta = Math.PI / 2;
-  let orbitPhi = Math.PI / 3.8;
+  let startX = 0;
+  let startY = 0;
 
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-  function onPointerDown(e) {
-    if (e.target !== renderer.domElement) return;
+  container.addEventListener("mousedown", (e) => {
+    if (e.target.closest(".hologram-station-tag, .btn-viewport-hud, button")) return;
     isDragging = true;
-    prevMouse = { x: e.clientX, y: e.clientY };
-  }
+    startX = e.clientX;
+    startY = e.clientY;
+  });
 
-  function onPointerMove(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  window.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    startX = e.clientX;
+    startY = e.clientY;
+    cam.x -= dx / scale;
+    cam.y -= dy / scale;
+    cam.tx = cam.x;
+    cam.ty = cam.y;
+  });
 
-    if (isDragging) {
-      const dx = e.clientX - prevMouse.x;
-      const dy = e.clientY - prevMouse.y;
-      prevMouse = { x: e.clientX, y: e.clientY };
-
-      orbitTheta -= dx * 0.005;
-      orbitPhi = Math.max(0.18, Math.min(Math.PI / 2.3, orbitPhi - dy * 0.005));
-
-      targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
-      targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
-      targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
-    } else {
-      raycaster.setFromCamera(mouse, camera);
-      const hits = raycaster.intersectObjects(raycastObjects);
-      renderer.domElement.style.cursor = hits.length > 0 ? "pointer" : "default";
-    }
-  }
-
-  function onPointerUp() {
+  window.addEventListener("mouseup", () => {
     isDragging = false;
-  }
+  });
 
-  function onPointerClick(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  container.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    scale = Math.max(1.6, Math.min(3.8, scale + (e.deltaY < 0 ? 0.2 : -0.2)));
+  }, { passive: false });
 
-    raycaster.setFromCamera(mouse, camera);
-    const hits = raycaster.intersectObjects(raycastObjects);
+  // Click on canvas to hit-test desks
+  container.addEventListener("click", (e) => {
+    if (e.target.closest(".hologram-station-tag, .btn-viewport-hud, button")) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.clientX - rect.left - W / 2) / scale + cam.x;
+    const cy = (e.clientY - rect.top - H / 2) / scale + cam.y;
 
-    if (hits.length > 0) {
-      const idx = hits[0].object.userData.stationIndex;
-      if (typeof idx === "number") {
-        focusStation(idx);
-        onSelectStation(idx);
+    const hitIdx = teamStations.findIndex(st => Math.hypot(st.wx - cx, st.wy - cy) < 42);
+    if (hitIdx >= 0) {
+      focusDesk(hitIdx);
+      onSelectStation(hitIdx);
+    }
+  });
+
+  // Render loop
+  let startTime = performance.now();
+
+  function renderLoop(now) {
+    if (!isMounted) return;
+    animationFrameId = requestAnimationFrame(renderLoop);
+
+    const elapsed = (now - startTime) / 1000;
+
+    // Smooth camera LERP
+    cam.x += (cam.tx - cam.x) * 0.12;
+    cam.y += (cam.ty - cam.y) * 0.12;
+
+    ctx2d.save();
+    ctx2d.clearRect(0, 0, W, H);
+
+    // Coordinate transform
+    ctx2d.translate(W / 2, H / 2);
+    ctx2d.scale(scale, scale);
+    ctx2d.translate(-cam.x, -cam.y);
+
+    // ─────────────────────────────────────────────────────────────────
+    // 1. Draw Room Background & Architecture (Matching Image 1!)
+    // ─────────────────────────────────────────────────────────────────
+    const roomW = 380;
+    const roomH = 320;
+
+    // Wall (Slate Dark Blue)
+    ctx2d.fillStyle = "#202538";
+    ctx2d.fillRect(-roomW / 2, -roomH / 2, roomW, 110);
+
+    // Floor Carpet (Deep Indigo Navy)
+    ctx2d.fillStyle = "#161928";
+    ctx2d.fillRect(-roomW / 2, -roomH / 2 + 110, roomW, roomH - 110);
+
+    // Floor Grid / Tiles subtle texture
+    ctx2d.strokeStyle = "#1b1f32";
+    ctx2d.lineWidth = 1;
+    for (let x = -roomW / 2; x <= roomW / 2; x += 32) {
+      ctx2d.beginPath();
+      ctx2d.moveTo(x, -roomH / 2 + 110);
+      ctx2d.lineTo(x, roomH / 2);
+      ctx2d.stroke();
+    }
+    for (let y = -roomH / 2 + 110; y <= roomH / 2; y += 32) {
+      ctx2d.beginPath();
+      ctx2d.moveTo(-roomW / 2, y);
+      ctx2d.lineTo(roomW / 2, y);
+      ctx2d.stroke();
+    }
+
+    // Baseboard trim
+    ctx2d.fillStyle = "#111420";
+    ctx2d.fillRect(-roomW / 2, -roomH / 2 + 104, roomW, 6);
+
+    // ── Windows on Back Wall (Matching Image 1!) ──
+    const winW = 120;
+    const winH = 68;
+    ctx2d.fillStyle = "#0c1322";
+    ctx2d.fillRect(-winW / 2, -roomH / 2 + 20, winW, winH);
+
+    // Window Glass Sky gradient
+    const skyGrad = ctx2d.createLinearGradient(0, -roomH / 2 + 20, 0, -roomH / 2 + 20 + winH);
+    skyGrad.addColorStop(0, "#385b74");
+    skyGrad.addColorStop(1, "#54889c");
+    ctx2d.fillStyle = skyGrad;
+    ctx2d.fillRect(-winW / 2 + 3, -roomH / 2 + 23, winW - 6, winH - 6);
+
+    // Window frames
+    ctx2d.strokeStyle = "#161c28";
+    ctx2d.lineWidth = 3;
+    ctx2d.strokeRect(-winW / 2 + 3, -roomH / 2 + 23, winW - 6, winH - 6);
+    ctx2d.beginPath();
+    ctx2d.moveTo(0, -roomH / 2 + 23);
+    ctx2d.lineTo(0, -roomH / 2 + 23 + winH - 6);
+    ctx2d.moveTo(-winW / 2 + 3, -roomH / 2 + 23 + winH / 2);
+    ctx2d.lineTo(winW / 2 - 3, -roomH / 2 + 23 + winH / 2);
+    ctx2d.stroke();
+
+    // ── Master Wall Monitor on Upper Left (Matching Image 1!) ──
+    ctx2d.fillStyle = "#101420";
+    ctx2d.fillRect(-170, -roomH / 2 + 16, 68, 44);
+    ctx2d.fillStyle = "#182c48";
+    ctx2d.fillRect(-168, -roomH / 2 + 18, 64, 40);
+
+    // Glowing telemetry on monitor
+    ctx2d.fillStyle = "#5ce0ff";
+    ctx2d.fillRect(-162, -roomH / 2 + 26, 24, 14);
+    ctx2d.fillStyle = "#2bd14b";
+    ctx2d.fillRect(-134, -roomH / 2 + 26, 26, 6);
+    ctx2d.fillStyle = "#ffc61a";
+    ctx2d.fillRect(-134, -roomH / 2 + 34, 18, 4);
+
+    // ── Kanban Task Board on Back Wall (Matching Image 1!) ──
+    const kbX = 68;
+    const kbY = -roomH / 2 + 22;
+    ctx2d.fillStyle = "#161c2b";
+    ctx2d.fillRect(kbX, kbY, 82, 54);
+    ctx2d.fillStyle = "#e8eef6";
+    ctx2d.fillRect(kbX + 2, kbY + 2, 78, 50);
+
+    // Kanban Sticky Notes (Real Pipeline Tasks representation!)
+    const stickyColors = ["#ff5d73", "#ffc61a", "#19c3eb", "#2bd14b", "#a855f7"];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 5; c++) {
+        const sc = stickyColors[(r * 5 + c) % stickyColors.length];
+        ctx2d.fillStyle = sc;
+        ctx2d.fillRect(kbX + 6 + c * 14, kbY + 8 + r * 13, 10, 9);
       }
     }
-  }
 
-  function onWheel(e) {
-    e.preventDefault();
-    orbitRadius = Math.max(14, Math.min(50, orbitRadius + e.deltaY * 0.02));
-    targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
-    targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
-    targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
-  }
+    // ── Bookshelf on Upper Right (Matching Image 1!) ──
+    const bsX = 158;
+    const bsY = -roomH / 2 + 45;
+    ctx2d.fillStyle = "#a66838";
+    ctx2d.fillRect(bsX, bsY, 32, 60);
+    ctx2d.fillStyle = "#8a5229";
+    ctx2d.fillRect(bsX + 2, bsY + 2, 28, 56);
 
-  renderer.domElement.addEventListener("mousedown", onPointerDown);
-  window.addEventListener("mousemove", onPointerMove);
-  window.addEventListener("mouseup", onPointerUp);
-  renderer.domElement.addEventListener("click", onPointerClick);
-  renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
+    // Book rows
+    const bookColors = ["#e8202a", "#19c3eb", "#2bd14b", "#ffc61a", "#e2e8f8"];
+    for (let b = 0; b < 6; b++) {
+      ctx2d.fillStyle = bookColors[b % bookColors.length];
+      ctx2d.fillRect(bsX + 4 + b * 4, bsY + 12, 3, 20);
+    }
+    // Cactus pot on bookshelf
+    ctx2d.fillStyle = "#d97736";
+    ctx2d.fillRect(bsX + 10, bsY - 10, 10, 10);
+    ctx2d.fillStyle = "#22c55e";
+    ctx2d.fillRect(bsX + 12, bsY - 18, 6, 9);
 
-  // 6. Animation Loop
-  let clock = new THREE.Clock();
+    // ─────────────────────────────────────────────────────────────────
+    // 2. Draw Furniture & Warm Wooden Desks (Matching Image 1!)
+    // ─────────────────────────────────────────────────────────────────
+    function drawWoodenDesk(x, y, w, h) {
+      // Warm Oak Wood Tabletop
+      ctx2d.fillStyle = "#875224"; // Side shadow
+      ctx2d.fillRect(x - w / 2, y - h / 2 + 4, w, h);
+      ctx2d.fillStyle = "#cf9456"; // Top surface
+      ctx2d.fillRect(x - w / 2, y - h / 2, w, h);
+      ctx2d.fillStyle = "#e2ab6e"; // Highlight bevel
+      ctx2d.fillRect(x - w / 2, y - h / 2, w, 2);
 
-  function animate() {
-    if (!isMounted) return;
-    animationFrameId = requestAnimationFrame(animate);
-
-    const elapsed = clock.getElapsedTime();
-
-    // Camera LERP
-    camera.position.lerp(targetCamPos, 0.055);
-    currentLookAt.lerp(targetCamLookAt, 0.055);
-    camera.lookAt(currentLookAt);
-
-    // Pulse Hotspot Rings
-    hotspotPulses.forEach((ring, i) => {
-      const s = 1.0 + Math.sin(elapsed * 3.0 + i) * 0.08;
-      ring.scale.set(s, s, s);
-    });
-
-    // Project Hologram Tags to 2D Screen Space
-    if (hologramLayer && canvasContainer) {
-      const tempV = new THREE.Vector3();
-      const halfW = canvasContainer.clientWidth / 2;
-      const halfH = canvasContainer.clientHeight / 2;
-
-      boothHolograms.forEach(item => {
-        tempV.copy(item.pos);
-        tempV.project(camera);
-
-        if (tempV.z > 1) {
-          item.el.style.display = "none";
-        } else {
-          item.el.style.display = "block";
-          const x = (tempV.x * halfW) + halfW;
-          const y = -(tempV.y * halfH) + halfH;
-          item.el.style.left = `${x}px`;
-          item.el.style.top = `${y}px`;
-        }
-      });
+      // Steel Table Legs
+      ctx2d.fillStyle = "#1e2434";
+      ctx2d.fillRect(x - w / 2 + 4, y + h / 2, 3, 10);
+      ctx2d.fillRect(x + w / 2 - 7, y + h / 2, 3, 10);
     }
 
-    renderer.render(scene, camera);
+    // Upper cluster table (Desk A1 & middle)
+    drawWoodenDesk(0, -44, 150, 42);
+
+    // Lower cluster table (Desk B3 & front workstations)
+    drawWoodenDesk(0, 68, 150, 42);
+
+    // Side left desk
+    drawWoodenDesk(-125, 20, 40, 110);
+
+    // Side right desk
+    drawWoodenDesk(125, 20, 40, 110);
+
+    // ─────────────────────────────────────────────────────────────────
+    // 3. Draw 6 Workstations with Cute Characters & Equipment
+    // ─────────────────────────────────────────────────────────────────
+    teamStations.forEach((st, idx) => {
+      const isSelected = selectedMemberIndex === idx;
+
+      // Warm desk lamp illumination cone
+      ctx2d.save();
+      const lampGrad = ctx2d.createRadialGradient(st.wx, st.wy, 6, st.wx, st.wy, 42);
+      lampGrad.addColorStop(0, "rgba(255, 235, 170, 0.22)");
+      lampGrad.addColorStop(1, "rgba(255, 235, 170, 0)");
+      ctx2d.fillStyle = lampGrad;
+      ctx2d.beginPath();
+      ctx2d.arc(st.wx, st.wy, 42, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.restore();
+
+      // Selection Halo
+      if (isSelected) {
+        ctx2d.strokeStyle = "#ffc61a";
+        ctx2d.lineWidth = 2;
+        ctx2d.strokeRect(st.wx - 26, st.wy - 26, 52, 52);
+      }
+
+      // Office Swivel Chair
+      ctx2d.fillStyle = "#1b2131";
+      ctx2d.beginPath();
+      ctx2d.arc(st.wx, st.wy + 4, 12, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.fillStyle = "#131724";
+      ctx2d.fillRect(st.wx - 9, st.wy + 8, 18, 5);
+
+      // Computer Monitor Setup
+      const monOffY = st.facing === "down" ? 14 : -14;
+      ctx2d.fillStyle = "#101420";
+      ctx2d.fillRect(st.wx - 14, st.wy + monOffY - 4, 28, 5);
+      // Screen with creative artwork glow
+      ctx2d.fillStyle = isSelected ? "#5ce0ff" : "#19c3eb";
+      ctx2d.fillRect(st.wx - 13, st.wy + monOffY - 3, 26, 3);
+
+      // Keyboard & accessories
+      ctx2d.fillStyle = "#1e2536";
+      ctx2d.fillRect(st.wx - 8, st.wy + (st.facing === "down" ? 7 : -7), 16, 3);
+      // Coffee mug
+      ctx2d.fillStyle = "#ff5d73";
+      ctx2d.fillRect(st.wx + 13, st.wy - 2, 4, 5);
+
+      // Character Sprite (Cute stylized top-down isometric avatar)
+      const bob = Math.sin(elapsed * 3.5 + idx) * 0.8;
+      const typeSwing = Math.sin(elapsed * 7.5 + idx) * 1.5;
+
+      // Torso / Clothes
+      ctx2d.fillStyle = st.clothesColor || "#2b344a";
+      ctx2d.beginPath();
+      ctx2d.ellipse(st.wx, st.wy + bob, 9, 7, 0, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Arms typing
+      ctx2d.fillStyle = "#ffd4b2"; // skin tone
+      ctx2d.fillRect(st.wx - 8 + typeSwing, st.wy + 2 + bob, 3, 4);
+      ctx2d.fillRect(st.wx + 5 - typeSwing, st.wy + 2 + bob, 3, 4);
+
+      // Cute Head & Hair
+      ctx2d.fillStyle = st.hairColor || "#e8202a";
+      ctx2d.beginPath();
+      ctx2d.arc(st.wx, st.wy - 5 + bob, 8.5, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Hair bang / highlights
+      ctx2d.fillStyle = "rgba(255, 255, 255, 0.25)";
+      ctx2d.beginPath();
+      ctx2d.arc(st.wx - 2, st.wy - 8 + bob, 3, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Real Status Diamond / Pill above head
+      const statusColor = st.activeTasks.some(t => t.priority === "urgent") ? "#ff4757" : st.activeTasks.length ? "#2bd14b" : "#7f8e9e";
+      ctx2d.fillStyle = statusColor;
+      ctx2d.beginPath();
+      ctx2d.arc(st.wx, st.wy - 18 + bob, 3, 0, Math.PI * 2);
+      ctx2d.fill();
+    });
+
+    // ─────────────────────────────────────────────────────────────────
+    // 4. Lush Indoor Office Plants in Corners (Matching Image 1!)
+    // ─────────────────────────────────────────────────────────────────
+    function drawOfficePlant(px, py) {
+      // Pot
+      ctx2d.fillStyle = "#944e26";
+      ctx2d.fillRect(px - 10, py, 20, 16);
+      ctx2d.fillStyle = "#b46436";
+      ctx2d.fillRect(px - 12, py - 2, 24, 4);
+
+      // Layered Monstera Leaves
+      const leafColors = ["#15803d", "#16a34a", "#22c55e", "#4ade80"];
+      for (let l = 0; l < 7; l++) {
+        const ang = (l / 7) * Math.PI * 2;
+        const lx = px + Math.cos(ang) * 12;
+        const ly = py - 8 + Math.sin(ang) * 8;
+        ctx2d.fillStyle = leafColors[l % leafColors.length];
+        ctx2d.beginPath();
+        ctx2d.ellipse(lx, ly, 8, 5, ang, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+    }
+
+    // Bottom Left Plant
+    drawOfficePlant(-145, 120);
+
+    // Bottom Right Plant
+    drawOfficePlant(145, 120);
+
+    ctx2d.restore();
+
+    // ─────────────────────────────────────────────────────────────────
+    // 5. Update 2D Screen-space Projection for Floating Tags
+    // ─────────────────────────────────────────────────────────────────
+    hologramTags.forEach(tag => {
+      // Transform world coord (wx, wy) to screen coord
+      const screenX = W / 2 + (tag.wx - cam.x) * scale;
+      const screenY = H / 2 + (tag.wy - 26 - cam.y) * scale;
+
+      tag.el.style.left = `${screenX}px`;
+      tag.el.style.top = `${screenY}px`;
+    });
   }
 
-  animate();
+  animationFrameId = requestAnimationFrame(renderLoop);
 
-  // Resize handler
-  function onResize() {
-    if (!canvasContainer || !renderer) return;
-    const w = canvasContainer.clientWidth;
-    const h = canvasContainer.clientHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  }
-
-  window.addEventListener("resize", onResize);
+  window.addEventListener("resize", () => {
+    resize();
+  });
 }
