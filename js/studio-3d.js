@@ -76,26 +76,29 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
   let selectedStationIndex = 0;
   let isAutoTouring = false;
+  let inspectorTab = "current"; // Options: "current", "queue", "overdue", "completed"
 
-  // 1. Core Designers Identification (Strictly Full names, ZERO parentheses!)
+  // 1. Core Designers Identification (Include ALL real members, Full names, ZERO parentheses!)
   const fallbackDesigners = [
     { id: "1fd3ea77-8461-4de1-917a-90a9869428c1", name: "BEEM", role: "supervisor" },
+    { id: "739187f5-e142-4aa4-95ad-e06f881163cc", name: "Naraporn Leungvititgoon", role: "designer" },
     { id: "a31026f2-adc9-47d7-9ba0-f809be9344f1", name: "Peerapisit Rojatiegpanya", role: "designer" },
     { id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303", name: "Pisit Sintavanuwat", role: "designer" },
     { id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52", name: "Pongsathorn Pang", role: "designer" },
-    { id: "c16a2845-c95e-47c5-b616-4b37299574a4", name: "Yutiporn Thongkom", role: "designer" },
-    { id: "739187f5-e142-4aa4-95ad-e06f881163cc", name: "Naraporn Leungvititgoon", role: "designer" }
+    { id: "b21849f1-9c8a-4c22-b512-32a874b21901", name: "Porntipa Jaitong", role: "designer" },
+    { id: "c16a2845-c95e-47c5-b616-4b37299574a4", name: "Yutiporn Thongkom", role: "designer" }
   ];
 
+  // Include ALL active design/creative members without cutting anyone off
   const designMembers = (members && members.length)
-    ? members.filter(m => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role))
+    ? members.filter(m => m.is_active !== false)
     : fallbackDesigners;
 
   // Sanitize name: remove any parentheses
   const sanitizeName = (raw) => (raw || "Designer").replace(/\s*\(.*?\)/g, "").trim();
 
-  // 2. Exact 6 Creative Office Workstations with Character Sprites
-  const officeStations = [
+  // 2. Exact Workstations in the Office (Supports up to 9 distinct stations)
+  const workstationTemplates = [
     {
       stationId: "DESK-01",
       stationTitle: "Art Director Desk",
@@ -103,8 +106,6 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       sprite: "assets/char-1.png",
       xPct: 27.5,
       yPct: 59.0,
-      zoomX: 27.5,
-      zoomY: 60.0,
       icon: "🎯"
     },
     {
@@ -114,8 +115,6 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       sprite: "assets/char-2.png",
       xPct: 15.5,
       yPct: 71.0,
-      zoomX: 17.0,
-      zoomY: 72.0,
       icon: "🖥️"
     },
     {
@@ -125,8 +124,6 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       sprite: "assets/char-3.png",
       xPct: 28.5,
       yPct: 83.0,
-      zoomX: 29.5,
-      zoomY: 83.0,
       icon: "🎨"
     },
     {
@@ -136,31 +133,52 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       sprite: "assets/char-4.png",
       xPct: 39.5,
       yPct: 73.0,
-      zoomX: 40.0,
-      zoomY: 73.0,
       icon: "📐"
     },
     {
-      stationId: "LAB-05",
+      stationId: "DESK-05",
+      stationTitle: "Graphic Review Desk",
+      stationThai: "โต๊ะตรวจงานและประเมินแบบ",
+      sprite: "assets/char-5.png",
+      xPct: 52.5,
+      yPct: 84.5,
+      icon: "📋"
+    },
+    {
+      stationId: "LAB-06",
       stationTitle: "Print Lab & Plotter",
       stationThai: "ห้องพิมพ์พรูฟ & พล็อตเตอร์ใหญ่",
-      sprite: "assets/char-5.png",
+      sprite: "assets/char-6.png",
       xPct: 65.0,
       yPct: 43.5,
-      zoomX: 65.0,
-      zoomY: 45.0,
       icon: "🖨️"
     },
     {
-      stationId: "CAFE-06",
-      stationTitle: "Lounge & Coffee Bar",
-      stationThai: "มุมคิดงานสร้างสรรค์ & บาร์กาแฟ",
-      sprite: "assets/char-6.png",
-      xPct: 84.0,
-      yPct: 66.5,
-      zoomX: 82.5,
-      zoomY: 67.0,
+      stationId: "CAFE-07",
+      stationTitle: "Coffee Lounge Table",
+      stationThai: "โต๊ะนั่งคิดงานริมหน้าต่าง",
+      sprite: "assets/char-7.png",
+      xPct: 82.5,
+      yPct: 72.0,
       icon: "☕"
+    },
+    {
+      stationId: "LIB-08",
+      stationTitle: "Mezzanine Library",
+      stationThai: "โซฟามุมอ่านหนังสือชั้นลอย",
+      sprite: "assets/char-8.png",
+      xPct: 53.0,
+      yPct: 22.0,
+      icon: "🛋️"
+    },
+    {
+      stationId: "BAR-09",
+      stationTitle: "Espresso Bar",
+      stationThai: "เคาน์เตอร์บาร์กาแฟสด",
+      sprite: "assets/char-9.png",
+      xPct: 88.0,
+      yPct: 57.0,
+      icon: "🧃"
     }
   ];
 
@@ -211,7 +229,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     return { label: `อีก ${days} วัน`, className: "" };
   }
 
-  // Camera State
+  // Camera State (Kept steady on overview; no auto-zoom on click!)
   let camZoom = 1.0;
   let camPanX = 0;
   let camPanY = 0;
@@ -244,9 +262,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     const reviewPct = Math.max(1, Math.round((reviewCount / baseTotal) * 100));
     const completedPct = Math.max(1, 100 - briefPct - draftingPct - reviewPct);
 
-    // Compute Designers Real Telemetry
-    const teamStations = designMembers.slice(0, 6).map((m, idx) => {
-      const station = officeStations[idx] || officeStations[0];
+    // Compute Designers Real Telemetry (ALL members included!)
+    const teamStations = designMembers.map((m, idx) => {
+      const template = workstationTemplates[idx % workstationTemplates.length];
       const assigned = filtered.filter(t => t.assignee_id === m.id);
       const memberActive = assigned.filter(t => t.status !== "completed");
       const memberCompleted = assigned.filter(t => t.status === "completed");
@@ -272,7 +290,10 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       return {
         member: m,
         displayName: sanitizeName(m.name),
-        station,
+        station: {
+          ...template,
+          stationId: `DESK-0${idx + 1}`
+        },
         assigned,
         memberActive,
         memberCompleted,
@@ -304,6 +325,102 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
     const sparkOverdue = [2, 1, 3, 2, 1, 0, overdueCount];
     const sparkActive = [10, 12, 14, 11, 15, 13, activeCount || 5];
     const sparkReview = [4, 5, 3, 6, 4, 3, reviewCount];
+
+    // Render Dynamic Inspector Tasks View based on inspectorTab
+    let dynamicTasksSectionHtml = "";
+    if (inspectorTab === "queue") {
+      dynamicTasksSectionHtml = `
+        <div class="inspector-task-section">
+          <div class="inspector-section-header">
+            <span>งานในคิวทั้งหมด (${activeStation.memberActive.length})</span>
+            <span style="color:#38bdf8;">Queue List</span>
+          </div>
+          <div class="inspector-task-list">
+            ${activeStation.memberActive.map(t => `
+              <a href="task.html?id=${encodeURIComponent(t.id)}" class="inspector-task-item ${isTaskOverdue(t) ? 'is-overdue' : ''}">
+                <span class="inspector-task-item-title">${t.title}</span>
+                <span class="badge ${isTaskOverdue(t) ? 'badge-red' : 'badge-cyan'}" style="font-size:0.62rem;">
+                  ${isTaskOverdue(t) ? 'Overdue' : t.status}
+                </span>
+              </a>
+            `).join("") || `<div style="font-size:0.75rem;color:#64748b;font-style:italic;padding:8px 0;">ไม่มีงานในคิวขณะนี้</div>`}
+          </div>
+        </div>
+      `;
+    } else if (inspectorTab === "overdue") {
+      dynamicTasksSectionHtml = `
+        <div class="inspector-task-section">
+          <div class="inspector-section-header">
+            <span style="color:#ef4444;">งานเลทเลยกำหนด (${activeStation.memberOverdue.length})</span>
+            <span class="badge badge-red" style="font-size:0.62rem;">Action Required</span>
+          </div>
+          <div class="inspector-task-list">
+            ${activeStation.memberOverdue.map(t => `
+              <a href="task.html?id=${encodeURIComponent(t.id)}" class="inspector-task-item is-overdue">
+                <span class="inspector-task-item-title" style="color:#fca5a5;">${t.title}</span>
+                <span style="color:#ef4444;font-size:0.65rem;font-weight:700;">
+                  ${relativeDeadline(t.deadline_at || t.deadline).label}
+                </span>
+              </a>
+            `).join("") || `<div style="font-size:0.75rem;color:#22c55e;font-style:italic;padding:8px 0;">🎉 ยอดเยี่ยม! ไม่มีงานเลทคั่งค้าง</div>`}
+          </div>
+        </div>
+      `;
+    } else if (inspectorTab === "completed") {
+      dynamicTasksSectionHtml = `
+        <div class="inspector-task-section">
+          <div class="inspector-section-header">
+            <span style="color:#22c55e;">งานที่เคยทำเสร็จแล้ว (${activeStation.memberCompleted.length})</span>
+            <span style="color:#22c55e;">Delivered History</span>
+          </div>
+          <div class="inspector-task-list">
+            ${activeStation.memberCompleted.slice(0, 8).map(t => `
+              <a href="task.html?id=${encodeURIComponent(t.id)}" class="inspector-task-item">
+                <span class="inspector-task-item-title">${t.title}</span>
+                <span class="badge badge-green" style="font-size:0.62rem;">Delivered</span>
+              </a>
+            `).join("") || `<div style="font-size:0.75rem;color:#64748b;font-style:italic;padding:8px 0;">ยังไม่มีประวัติงานส่งมอบในช่วงนี้</div>`}
+          </div>
+        </div>
+      `;
+    } else {
+      // Default: "current" (ชิ้นงานปัจจุบัน)
+      dynamicTasksSectionHtml = `
+        <div class="inspector-task-section">
+          <div class="inspector-section-header">
+            <span>ชิ้นงานปัจจุบัน (Active Spotlight)</span>
+            <span style="color:#ffc61a;">Current Job</span>
+          </div>
+          <div class="inspector-task-card ${activeStation.currentTask && isTaskOverdue(activeStation.currentTask) ? 'is-overdue' : ''}">
+            <div class="inspector-task-label">
+              <span>ชิ้นงานที่กำลังทำ</span>
+              ${activeStation.currentTask ? `
+                <span class="badge ${isTaskOverdue(activeStation.currentTask) ? 'badge-red' : 'badge-yellow'}" style="font-size:0.62rem;">
+                  ${isTaskOverdue(activeStation.currentTask) ? '⚠️ เลทเลยกำหนด' : activeStation.currentTask.status}
+                </span>
+              ` : ''}
+            </div>
+            ${activeStation.currentTask ? `
+              <div class="inspector-task-title">
+                <a href="task.html?id=${encodeURIComponent(activeStation.currentTask.id)}" title="คลิกเพื่อดูรายละเอียดงาน">
+                  ${activeStation.currentTask.title}
+                </a>
+              </div>
+              <div style="font-size:0.72rem;color:#94a3b8;display:flex;justify-content:space-between;margin-top:2px;">
+                <span>กำหนดส่ง: ${activeStation.currentTask.deadline_at || activeStation.currentTask.deadline || 'เร็วๆ นี้'}</span>
+                <span style="font-weight:700;color:${isTaskOverdue(activeStation.currentTask) ? '#ef4444' : '#ffc61a'};">
+                  ${relativeDeadline(activeStation.currentTask.deadline_at || activeStation.currentTask.deadline).label}
+                </span>
+              </div>
+            ` : `
+              <div style="font-size:0.82rem;color:#94a3b8;padding:8px 0;">
+                ไม่มีงานค้างในคิว (พร้อมรับงานใหม่ทันที)
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }
 
     // Render Full HTML Markup
     container.innerHTML = `
@@ -432,9 +549,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
               <div class="studio-topbar-left">
                 <div class="studio-brand-badge">
                   <span class="studio-brand-dot"></span>
-                  <span>STUDIO DESKS</span>
+                  <span>STUDIO DESKS (${teamStations.length})</span>
                 </div>
-                <!-- Member Quick Jump Pills -->
+                <!-- Member Quick Jump Pills (Click to select - NO zoom) -->
                 <div class="studio-members-bar">
                   ${teamStations.map((s, idx) => `
                     <button type="button" class="studio-member-pill ${idx === selectedStationIndex ? 'is-active' : ''}" data-station-idx="${idx}">
@@ -450,10 +567,6 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
                 <button type="button" class="studio-btn-ctrl" id="btn-camera-overview" title="รีเซ็ตมุมมองภาพรวม">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
                   <span>มุมมองรวม</span>
-                </button>
-                <button type="button" class="studio-btn-ctrl ${isAutoTouring ? 'is-active' : ''}" id="btn-camera-tour" title="โหมดหมุนเวียนทัวร์อัตโนมัติ">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                  <span>ทัวร์สตูดิโอ</span>
                 </button>
               </div>
             </div>
@@ -487,13 +600,13 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
                           <div class="char-task-title" title="${taskTitle}">${taskTitle}</div>
                         </div>
 
-                        <!-- Cute Pixel Art Character Sitting at Desk -->
+                        <!-- Full-Body Pixel Art Character Sitting in Office Chair -->
                         <div class="char-sprite-wrap">
                           <div class="char-shadow"></div>
                           <img class="char-sprite-img" src="${s.station.sprite}" alt="${s.displayName}" />
                         </div>
 
-                        <!-- Floor Selection Ring -->
+                        <!-- Floor Contact / Selection Ring -->
                         <div class="char-floor-ring"></div>
 
                       </div>
@@ -510,7 +623,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
             </div>
           </div>
 
-          <!-- Member Inspector Card (Right Column) -->
+          <!-- Member Inspector Card (Right Column with Interactive Category Boxes) -->
           <div class="studio-inspector-card">
             <div class="inspector-header">
               <div class="inspector-station-badge">
@@ -538,78 +651,54 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
                 </div>
               </div>
 
-              <!-- 4-KPI Mini Bento -->
+              <!-- 4 Interactive Category Stat Boxes (Click to switch tasks list below!) -->
               <div class="inspector-stats-grid">
-                <div class="inspector-stat-box">
-                  <span class="inspector-stat-label">งานในคิว</span>
+                <!-- Box 1: งานในคิว -->
+                <div class="inspector-stat-box ${inspectorTab === 'queue' ? 'is-active' : ''}" data-tab="queue" title="คลิกเพื่อดูงานในคิวทั้งหมด">
+                  <div class="inspector-stat-label">
+                    <span>งานในคิว</span>
+                    <span style="font-size:0.6rem;">👉 ดูคิว</span>
+                  </div>
                   <span class="inspector-stat-val" style="color:#38bdf8;">${activeStation.memberActive.length} <small style="font-size:0.65rem;color:#94a3b8;">งาน</small></span>
                 </div>
-                <div class="inspector-stat-box" style="${activeStation.memberOverdue.length ? 'border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.08);' : ''}">
-                  <span class="inspector-stat-label" style="${activeStation.memberOverdue.length ? 'color:#f87171;' : ''}">งานเลท</span>
+
+                <!-- Box 2: งานเลท -->
+                <div class="inspector-stat-box box-overdue ${inspectorTab === 'overdue' ? 'is-active' : ''}" data-tab="overdue" style="${activeStation.memberOverdue.length ? 'border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.08);' : ''}" title="คลิกเพื่อดูรายการงานเลท">
+                  <div class="inspector-stat-label">
+                    <span style="${activeStation.memberOverdue.length ? 'color:#f87171;' : ''}">งานเลท</span>
+                    ${activeStation.memberOverdue.length ? `<span style="color:#ef4444;font-size:0.6rem;font-weight:700;">⚠️ เตือน</span>` : ''}
+                  </div>
                   <span class="inspector-stat-val" style="color:${activeStation.memberOverdue.length ? '#ef4444' : '#94a3b8'};">${activeStation.memberOverdue.length} <small style="font-size:0.65rem;color:#94a3b8;">งาน</small></span>
                 </div>
-                <div class="inspector-stat-box">
-                  <span class="inspector-stat-label">ส่งงานเสร็จแล้ว</span>
+
+                <!-- Box 3: ส่งงานเสร็จแล้ว -->
+                <div class="inspector-stat-box ${inspectorTab === 'completed' ? 'is-active' : ''}" data-tab="completed" title="คลิกเพื่อดูประวัติงานที่ทำเสร็จแล้ว">
+                  <div class="inspector-stat-label">
+                    <span>ส่งงานเสร็จแล้ว</span>
+                    <span style="font-size:0.6rem;">👉 ดูประวัติ</span>
+                  </div>
                   <span class="inspector-stat-val" style="color:#22c55e;">${activeStation.memberCompleted.length} <small style="font-size:0.65rem;color:#94a3b8;">งาน</small></span>
                 </div>
-                <div class="inspector-stat-box">
-                  <span class="inspector-stat-label">On-Time SLA</span>
-                  <span class="inspector-stat-val" style="color:#a855f7;">${activeStation.memberSla}%</span>
+
+                <!-- Box 4: ชิ้นงานปัจจุบัน -->
+                <div class="inspector-stat-box ${inspectorTab === 'current' ? 'is-active' : ''}" data-tab="current" title="คลิกเพื่อดูชิ้นงานปัจจุบัน">
+                  <div class="inspector-stat-label">
+                    <span>ชิ้นงานปัจจุบัน</span>
+                    <span style="font-size:0.6rem;">👉 ดูงานนี้</span>
+                  </div>
+                  <span class="inspector-stat-val" style="color:#fbbf24;">${activeStation.currentTask ? '1' : '0'} <small style="font-size:0.65rem;color:#94a3b8;">งาน</small></span>
                 </div>
               </div>
 
-              <!-- Current Active Task Card -->
-              <div class="inspector-task-card ${activeStation.currentTask && isTaskOverdue(activeStation.currentTask) ? 'is-overdue' : ''}">
-                <div class="inspector-task-label">
-                  <span>ชิ้นงานปัจจุบัน</span>
-                  ${activeStation.currentTask ? `
-                    <span class="badge ${isTaskOverdue(activeStation.currentTask) ? 'badge-red' : 'badge-yellow'}" style="font-size:0.62rem;">
-                      ${isTaskOverdue(activeStation.currentTask) ? '⚠️ เลทเลยกำหนด' : activeStation.currentTask.status}
-                    </span>
-                  ` : ''}
-                </div>
-                ${activeStation.currentTask ? `
-                  <div class="inspector-task-title">
-                    <a href="task.html?id=${encodeURIComponent(activeStation.currentTask.id)}" title="คลิกเพื่อดูรายละเอียดงาน">
-                      ${activeStation.currentTask.title}
-                    </a>
-                  </div>
-                  <div style="font-size:0.72rem;color:#94a3b8;display:flex;justify-content:space-between;margin-top:2px;">
-                    <span>กำหนดส่ง: ${activeStation.currentTask.deadline_at || activeStation.currentTask.deadline || 'เร็วๆ นี้'}</span>
-                    <span style="font-weight:700;color:${isTaskOverdue(activeStation.currentTask) ? '#ef4444' : '#ffc61a'};">
-                      ${relativeDeadline(activeStation.currentTask.deadline_at || activeStation.currentTask.deadline).label}
-                    </span>
-                  </div>
-                ` : `
-                  <div style="font-size:0.82rem;color:#94a3b8;padding:8px 0;">
-                    ไม่มีงานค้างในคิว (พร้อมรับงานใหม่ทันที)
-                  </div>
-                `}
-              </div>
-
-              <!-- Queue List -->
-              <div class="inspector-queue-title">
-                <span>คิวงานอื่นๆ (${activeStation.memberActive.length})</span>
-              </div>
-              <div class="inspector-queue-list">
-                ${activeStation.memberActive.slice(1, 4).map(t => `
-                  <a href="task.html?id=${encodeURIComponent(t.id)}" class="inspector-queue-item" style="${isTaskOverdue(t) ? 'border-color:rgba(239,68,68,0.4);' : ''}">
-                    <span class="inspector-queue-item-title">${t.title}</span>
-                    <span class="badge ${isTaskOverdue(t) ? 'badge-red' : 'badge-gray'}" style="font-size:0.62rem;">
-                      ${isTaskOverdue(t) ? 'Overdue' : t.status}
-                    </span>
-                  </a>
-                `).join("") || `
-                  <div style="font-size:0.75rem;color:#64748b;font-style:italic;padding:4px 0;">ไม่มีงานรอคิวเพิ่มเติม</div>
-                `}
-              </div>
+              <!-- Dynamic Tasks Section (Switches on clicking the 4 boxes above!) -->
+              ${dynamicTasksSectionHtml}
 
             </div>
 
             <!-- Footer Actions -->
             <div class="inspector-footer">
               <a href="tasks.html?assignee=${encodeURIComponent(activeStation.member.id)}" class="inspector-btn-action btn-dark">
-                <span>ดูงานทั้งหมดในคิว</span>
+                <span>เปิดดูในหน้ารายการงาน</span>
               </a>
               <button type="button" class="inspector-btn-action btn-accent" id="btn-inspector-assign">
                 <span>+ มอบหมายงานใหม่</span>
@@ -664,7 +753,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       </div>
     `;
 
-    // ── Setup Camera Transforms & Focusing ──
+    // ── Setup Camera Transforms ──
     const worldEl = container.querySelector("#studio-scene-world");
     const viewportEl = container.querySelector("#studio-stage-viewport");
 
@@ -678,19 +767,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       worldEl.style.transform = `translate(calc(-50% + ${camPanX}px), calc(-50% + ${camPanY}px)) scale(${camZoom})`;
     }
 
-    function focusOnStation(idx, zoomLevel = 1.65) {
+    // Select station WITHOUT zooming the camera (as explicitly requested: "ไม่อยากให้ซูมเข้าไปให้คลิกเฉยๆ")
+    function selectStationWithoutZoom(idx) {
       selectedStationIndex = idx;
-      const st = teamStations[idx];
-      if (!st || !viewportEl) return;
-
-      const targetImgX = (st.station.zoomX / 100) * 1376;
-      const targetImgY = (st.station.zoomY / 100) * 768;
-
-      camZoom = zoomLevel;
-      camPanX = (688 - targetImgX) * camZoom;
-      camPanY = (384 - targetImgY) * camZoom;
-
-      applyCameraTransform(true);
       drawStudio();
     }
 
@@ -710,7 +789,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
     if (viewportEl) {
       viewportEl.addEventListener("mousedown", (e) => {
-        if (e.target.closest(".char-hud-bubble") || e.target.closest("button")) return;
+        if (e.target.closest(".char-hud-bubble") || e.target.closest("button") || e.target.closest(".pixel-character-station")) return;
         isDragging = true;
         dragStartX = e.clientX;
         dragStartY = e.clientY;
@@ -823,7 +902,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
           fxCtx.globalAlpha = Math.max(0, sp.alpha);
           fxCtx.beginPath();
-          fxCtx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+          fxCtx.arc(sp.x, p.y, sp.size, 0, Math.PI * 2);
           fxCtx.fill();
         });
         fxCtx.globalAlpha = 1.0;
@@ -874,39 +953,31 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       applyCameraTransform(true);
     });
 
-    // Auto Tour Toggle
-    container.querySelector("#btn-camera-tour")?.addEventListener("click", () => {
-      isAutoTouring = !isAutoTouring;
-      if (isAutoTouring) {
-        let currentIdx = selectedStationIndex;
-        autoTourTimer = setInterval(() => {
-          if (!isMounted) return;
-          currentIdx = (currentIdx + 1) % teamStations.length;
-          focusOnStation(currentIdx, 1.6);
-        }, 4200);
-      } else {
-        if (autoTourTimer) {
-          clearInterval(autoTourTimer);
-          autoTourTimer = null;
-        }
-      }
-      drawStudio();
-    });
-
-    // Quick Jump Member Pills
+    // Quick Jump Member Pills (Click WITHOUT Zoom)
     container.querySelectorAll(".studio-member-pill").forEach(pill => {
       pill.addEventListener("click", () => {
         const idx = parseInt(pill.dataset.stationIdx, 10);
-        focusOnStation(idx, 1.7);
+        selectStationWithoutZoom(idx);
       });
     });
 
-    // Character click
+    // Character click (Click WITHOUT Zoom)
     container.querySelectorAll(".pixel-character-station").forEach(station => {
       station.addEventListener("click", (e) => {
         e.stopPropagation();
         const idx = parseInt(station.dataset.stationIdx, 10);
-        focusOnStation(idx, 1.7);
+        selectStationWithoutZoom(idx);
+      });
+    });
+
+    // Interactive Inspector 4 Stat Boxes (Switch task view dynamically)
+    container.querySelectorAll(".inspector-stat-box").forEach(box => {
+      box.addEventListener("click", () => {
+        const tab = box.dataset.tab;
+        if (tab) {
+          inspectorTab = tab;
+          drawStudio();
+        }
       });
     });
 
