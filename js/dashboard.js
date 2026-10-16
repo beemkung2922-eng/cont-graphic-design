@@ -5,7 +5,7 @@ import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isRequester, isViewer, canCreateTask } from "./auth.js";
 import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
-import { renderStudio3D, cleanupStudio3D } from "./studio-3d.js?v=20261016-16";
+import { renderStudio3D, cleanupStudio3D } from "./studio-3d.js?v=20261016-17";
 
 /* ─────────────────────────────────────────────────────────────────────────
    Brand Tokens & Status Mappings
