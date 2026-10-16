@@ -458,16 +458,17 @@
 }
 
 /* Floor Selection / Contact Ring */
+/* Floor Selection / Contact Ring */
 .char-floor-ring {
   position: absolute;
   bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 38px;
-  height: 16px;
+  width: 54px;
+  height: 22px;
   border-radius: 50%;
   background: radial-gradient(ellipse at center, rgba(255, 198, 26, 0.35) 0%, transparent 70%);
-  border: 1.5px dashed rgba(255, 198, 26, 0.45);
+  border: 1.5px dashed rgba(255, 198, 26, 0.5);
   transition: all 0.2s ease;
   pointer-events: none;
   z-index: 1;
@@ -475,57 +476,29 @@
 
 .pixel-character-station:hover .char-floor-ring,
 .pixel-character-station.is-selected .char-floor-ring {
-  width: 52px;
-  height: 22px;
-  background: radial-gradient(ellipse at center, rgba(255, 198, 26, 0.55) 0%, transparent 75%);
+  width: 72px;
+  height: 28px;
+  background: radial-gradient(ellipse at center, rgba(255, 198, 26, 0.65) 0%, transparent 75%);
   border-color: #ffc61a;
   border-style: solid;
-  box-shadow: 0 0 12px rgba(255, 198, 26, 0.6);
+  box-shadow: 0 0 16px rgba(255, 198, 26, 0.8), inset 0 0 8px rgba(255, 198, 26, 0.3);
 }
 
-/* Full-Body Character Sprite Container (Positioned in Office Chair) */
-.char-sprite-wrap {
+/* Interactive Hitbox over the character in the artwork */
+.char-hitbox {
   position: relative;
   width: 58px;
   height: 72px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  cursor: pointer;
   z-index: 2;
-  transition: transform 0.18s ease;
+  border-radius: 12px;
+  transition: all 0.2s ease;
 }
 
-.char-shadow {
-  position: absolute;
-  bottom: 0px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 32px;
-  height: 9px;
-  background: rgba(0, 0, 0, 0.45);
-  border-radius: 50%;
-  filter: blur(1.5px);
-}
-
-.char-sprite-img {
-  width: auto;
-  height: 70px;
-  max-width: 58px;
-  object-fit: contain;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  animation: charWorkingIdle 3s ease-in-out infinite;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
-}
-
-@keyframes charWorkingIdle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
-}
-
-.pixel-character-station:hover .char-sprite-wrap,
-.pixel-character-station.is-selected .char-sprite-wrap {
-  transform: translateY(-4px) scale(1.08);
+.pixel-character-station:hover .char-hitbox,
+.pixel-character-station.is-selected .char-hitbox {
+  background: rgba(255, 198, 26, 0.08);
+  box-shadow: 0 0 16px rgba(255, 198, 26, 0.3);
 }
 
 /* Compact Floating Speech Bubble Above Character */
