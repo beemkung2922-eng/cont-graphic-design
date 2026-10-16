@@ -623,5 +623,6 @@ const pageModules = {
 };
 
 if (currentPage && pageModules[currentPage]) {
-  import(`./${pageModules[currentPage]}.js?v=20261016-01`).then(({ render }) => boot(render));
+  try { localStorage.removeItem("cont_dashboard_view"); } catch (e) {}
+  import(`./${pageModules[currentPage]}.js?v=20261016-04`).then(({ render }) => boot(render));
 }
