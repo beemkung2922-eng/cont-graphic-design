@@ -1,11 +1,14 @@
-import { escapeHtml, roleLabel, formatDateTime } from "./formatters.js";
-import { openCreateTask } from "./task-actions.js";
+import { taskCard, interactiveEmptyState, formatDate, relativeDeadline, avatar, escapeHtml, roleLabel, memberFor, projectFor } from "./formatters.js";
+import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, qsa, toast } from "./app.js";
+import { openCreateTask, bindTaskCards } from "./task-actions.js";
+import { filterTasksByTimeRange, getTaskDate, calculateTeamAnalytics } from "./analytics.js";
 
 let animationFrameId = null;
-let tickIntervalId = null;
-let tourIntervalId = null;
+let currentScene = null;
+let currentRenderer = null;
 let isMounted = false;
+let tourIntervalId = null;
 
 export function cleanupStudio3D() {
   isMounted = false;
@@ -13,1067 +16,1040 @@ export function cleanupStudio3D() {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
   }
-  if (tickIntervalId) {
-    clearInterval(tickIntervalId);
-    tickIntervalId = null;
-  }
   if (tourIntervalId) {
     clearInterval(tourIntervalId);
     tourIntervalId = null;
   }
+  if (currentRenderer && currentRenderer.domElement && currentRenderer.domElement.parentNode) {
+    currentRenderer.domElement.parentNode.removeChild(currentRenderer.domElement);
+  }
+  currentScene = null;
+  currentRenderer = null;
+}
+
+/* ── Smooth SVG Sparkline Generator (Matching Classic Bento Grid) ── */
+function renderSparklineSvg(points, color = "#ffc61a", height = 36, width = 130) {
+  if (!points || points.length < 2) return "";
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const range = max === min ? 1 : max - min;
+  const step = width / (points.length - 1);
+  const coords = points.map((p, i) => [
+    i * step,
+    height - ((p - min) / range) * (height - 8) - 4
+  ]);
+
+  let pathD = `M ${coords[0][0]} ${coords[0][1]}`;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const [x0, y0] = coords[i];
+    const [x1, y1] = coords[i + 1];
+    const mx = (x0 + x1) / 2;
+    pathD += ` C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`;
+  }
+
+  const fillD = `${pathD} L ${coords[coords.length - 1][0]} ${height} L 0 ${height} Z`;
+  const gradId = `spark-grad-${Math.random().toString(36).slice(2, 8)}`;
+
+  return `
+    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" style="width:100%;height:${height}px;display:block;">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+      <path d="${fillD}" fill="url(#${gradId})"/>
+      <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  `;
 }
 
 export function renderStudio3D(container, ctx, onSwitchToClassic) {
   cleanupStudio3D();
   isMounted = true;
 
-  const { tasks = [], members = [], projects = [] } = ctx;
+  const { tasks = [], members = [], projects = [], subtasks = [] } = ctx;
 
-  // 1. Identify real team members & build data structures
-  const coreTemplates = [
-    {
-      id: "1fd3ea77-8461-4de1-917a-90a9869428c1",
-      name: "BEEM",
-      nickname: "บีม",
-      gender: "ชาย",
-      role: "Supervisor / Lead Art Director",
-      desk: "Desk A1",
-      color: "#e8202a",
-      skin: "#f5cba7",
-      hair: "#1f2937",
-      software: "Illustrator / Figma",
-      sla: "99.8%"
-    },
-    {
-      id: "a31026f2-adc9-47d7-9ba0-f809be9344f1",
-      name: "Peerapisit Rojatiegpanya",
-      nickname: "พีท",
-      gender: "ชาย",
-      role: "Senior Designer / Motion & 3D",
-      desk: "Desk A2",
-      color: "#19c3eb",
-      skin: "#f5cba7",
-      hair: "#2a324b",
-      software: "After Effects / Ps",
-      sla: "99.5%"
-    },
-    {
-      id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303",
-      name: "Pisit Sintavanuwat",
-      nickname: "บิ๊ก",
-      gender: "ชาย",
-      role: "Senior Designer / Campaign Ads",
-      desk: "Desk A3",
-      color: "#3aa0ff",
-      skin: "#f5cba7",
-      hair: "#1a1a24",
-      software: "Cinema 4D / Blender",
-      sla: "99.0%"
-    },
-    {
-      id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52",
-      name: "Pongsathorn Pang",
-      nickname: "ปอนด์",
-      gender: "หญิง",
-      role: "Designer / Infographic & Branding",
-      desk: "Desk B1",
-      color: "#a855f7",
-      skin: "#f5cba7",
-      hair: "#382046",
-      software: "Illustrator (Ai)",
-      sla: "98.8%"
-    },
-    {
-      id: "c16a2845-c95e-47c5-b616-4b37299574a4",
-      name: "Yutiporn Thongkom",
-      nickname: "โบว์",
-      gender: "หญิง",
-      role: "Designer / Digital & Social Media",
-      desk: "Desk B2",
-      color: "#ec4899",
-      skin: "#f5cba7",
-      hair: "#4a1e35",
-      software: "Photoshop / Ai",
-      sla: "99.2%"
-    },
-    {
-      id: "739187f5-e142-4aa4-95ad-e06f881163cc",
-      name: "Naraporn Leungvititgoon",
-      nickname: "นัท",
-      gender: "หญิง",
-      role: "Designer / UI & In-App Banners",
-      desk: "Desk B3",
-      color: "#10b981",
-      skin: "#f5cba7",
-      hair: "#1e3a2f",
-      software: "Figma / UI Design",
-      sla: "99.4%"
-    }
+  const filterState = {
+    period: "all",
+    year: "all",
+    month: "all",
+    specificDay: "",
+    startDate: "",
+    endDate: "",
+    dateField: "created_at",
+    memberId: "all",
+    status: "all",
+  };
+
+  let selectedMemberIndex = 0;
+
+  // 1. Core Designers Identification (Using Real Members only, Full names, NO parentheses!)
+  const fallbackDesigners = [
+    { id: "1fd3ea77-8461-4de1-917a-90a9869428c1", name: "BEEM", role: "supervisor" },
+    { id: "a31026f2-adc9-47d7-9ba0-f809be9344f1", name: "Peerapisit Rojatiegpanya", role: "designer" },
+    { id: "617af97c-0c1e-4842-91d9-f9ecbc0fa303", name: "Pisit Sintavanuwat", role: "designer" },
+    { id: "9135d1e4-ba13-4cf7-adcf-9e05d33c5e52", name: "Pongsathorn Pang", role: "designer" },
+    { id: "c16a2845-c95e-47c5-b616-4b37299574a4", name: "Yutiporn Thongkom", role: "designer" },
+    { id: "739187f5-e142-4aa4-95ad-e06f881163cc", name: "Naraporn Leungvititgoon", role: "designer" }
   ];
 
-  // Map real members from context
-  const TM = coreTemplates.map((tmpl, idx) => {
-    const matched = members.find(m => m.id === tmpl.id || (m.name && m.name.toLowerCase().includes(tmpl.name.toLowerCase().split(" ")[0])));
-    const memberId = matched ? matched.id : tmpl.id;
-    const memberName = matched ? matched.name : tmpl.name;
+  const designMembers = (members && members.length)
+    ? members.filter(m => m.is_active !== false && ["designer", "supervisor", "admin"].includes(m.role))
+    : fallbackDesigners;
 
-    const assignedTasks = tasks.filter(t => t.assignee_id === memberId);
-    const completedTasks = assignedTasks.filter(t => t.status === "completed");
-    const activeTasks = assignedTasks.filter(t => t.status !== "completed");
+  const deskZones = [
+    { deskId: "Desk A1", label: "Desk A1 • โซนหน้าซ้าย", row: 0, col: 0, posX: -7.5, posZ: 3.5 },
+    { deskId: "Desk A2", label: "Desk A2 • โซนหน้ากลาง", row: 0, col: 1, posX: 0, posZ: 3.5 },
+    { deskId: "Desk A3", label: "Desk A3 • โซนหน้าขวา", row: 0, col: 2, posX: 7.5, posZ: 3.5 },
+    { deskId: "Desk B1", label: "Desk B1 • โซนหลังซ้าย", row: 1, col: 0, posX: -7.5, posZ: -4.5 },
+    { deskId: "Desk B2", label: "Desk B2 • โซนหลังกลาง", row: 1, col: 1, posX: 0, posZ: -4.5 },
+    { deskId: "Desk B3", label: "Desk B3 • โซนหลังขวา", row: 1, col: 2, posX: 7.5, posZ: -4.5 }
+  ];
 
-    // Build categories tally
-    const cat = {};
-    completedTasks.forEach(t => {
-      const c = t.category || "Social Banner";
-      cat[c] = (cat[c] || 0) + 1;
-    });
-    if (!Object.keys(cat).length) {
-      cat["Key Visual"] = 14 + idx * 3;
-      cat["Social Banner"] = 28 + idx * 5;
-      cat["Infographic"] = 12 + idx * 2;
-    }
+  const drawStudio = () => {
+    // 2. Real Filtered Data Computation (EXACT MATCH to Classic Overview!)
+    const filtered = filterTasksByTimeRange(tasks, filterState);
+    const active = filtered.filter(t => t.status !== "completed");
+    const dueSoon = filtered.filter(t => t.status !== "completed" && relativeDeadline(t.deadline_at || t.deadline).className);
+    const review = filtered.filter(t => t.status === "review" || t.status === "revision");
+    const completed = filtered.filter(t => t.status === "completed");
+    const onTimeRate = filtered.length ? ((completed.length / filtered.length) * 100).toFixed(1) : "100.0";
 
-    // Convert real active tasks to studio tasks
-    const tk = activeTasks.map(t => {
-      const pr = t.status === "review" ? 92 : t.status === "drafting" ? 70 : 35;
-      const u = t.priority === "urgent" || t.priority === "high";
-      const p = projects.find(proj => proj.id === t.project_id)?.name || "KKP Creative Pipeline";
+    const briefCount = filtered.filter(t => t.status === "brief").length;
+    const draftingCount = filtered.filter(t => t.status === "drafting").length;
+    const reviewCount = review.length;
+    const completedCount = completed.length;
+    const totalCount = filtered.length || 1;
+
+    const briefPct = Math.max(1, Math.round((briefCount / totalCount) * 100));
+    const draftingPct = Math.max(1, Math.round((draftingCount / totalCount) * 100));
+    const reviewPct = Math.max(1, Math.round((reviewCount / totalCount) * 100));
+    const completedPct = Math.max(1, 100 - briefPct - draftingPct - reviewPct);
+
+    // Compute Designers Real Telemetry
+    const teamStations = designMembers.slice(0, 6).map((m, idx) => {
+      const zone = deskZones[idx] || deskZones[0];
+      const assigned = filtered.filter(t => t.assignee_id === m.id);
+      const memberActive = assigned.filter(t => t.status !== "completed");
+      const memberCompleted = assigned.filter(t => t.status === "completed");
+      const memberProjectsCount = new Set(assigned.map(t => t.project_id).filter(Boolean)).size;
+
+      // Real current task (NO fake tasks!)
+      const currentTask = memberActive[0] || null;
+
+      // Real SLA for this member
+      const memberSla = assigned.length
+        ? ((memberCompleted.length / assigned.length) * 100).toFixed(1)
+        : "100.0";
+
       return {
-        id: t.id,
-        t: t.title,
-        p,
-        c: t.category || "Key Visual",
-        pr,
-        d: formatDateTime(t.deadline_at),
-        u: u ? 1 : 0
+        ...m,
+        cleanName: m.name.replace(/\s*\(.*?\)\s*/g, "").trim(), // Strip any accidental parentheses
+        deskId: zone.deskId,
+        deskLabel: zone.label,
+        posX: zone.posX,
+        posZ: zone.posZ,
+        assigned,
+        activeTasks: memberActive,
+        completedTasks: memberCompleted,
+        currentTask,
+        inQueueCount: memberActive.length,
+        completedCount: memberCompleted.length,
+        projectCount: memberProjectsCount,
+        sla: memberSla
       };
     });
 
-    // Provide default fallback tasks if empty
-    if (!tk.length) {
-      const fallbackList = [
-        { t: "KKP Auto Loan — Key Visual & Billboard Q1", p: "Auto Loan Campaign", c: "Key Visual", pr: 82, d: "วันนี้ 18:00", u: 1 },
-        { t: "KKP Dime! — Social Media Ad Banner Set", p: "Dime! Growth", c: "Social Banner", pr: 75, d: "พรุ่งนี้ 12:00", u: 0 },
-        { t: "KKP Bank — Mobile Banking App Icon 3D", p: "App Design System", c: "Motion / Video", pr: 92, d: "พรุ่งนี้ 16:00", u: 0 },
-        { t: "KKP Wealth — Infographic การลงทุนหุ้นกู้", p: "Wealth Management", c: "Infographic", pr: 65, d: "2 วันข้างหน้า", u: 0 },
-        { t: "KKP StartDee — Promo Banner Facebook/IG", p: "StartDee Promo", c: "Social Banner", pr: 78, d: "พรุ่งนี้ 14:00", u: 0 },
-        { t: "KKP Credit Card — Promotion Landing Page UI", p: "Credit Card Q1", c: "UI / Web Banner", pr: 88, d: "วันนี้ 19:00", u: 1 }
-      ];
-      tk.push(fallbackList[idx % fallbackList.length]);
-      tk.push({ t: `ชิ้นงานรองแคมเปญ 0${idx + 1}`, p: "General Design", c: "Social Banner", pr: 45, d: "สัปดาห์นี้", u: 0 });
-    }
+    // Sparkline data
+    const sparkTotal = [Math.max(1, filtered.length - 8), Math.max(2, filtered.length - 4), Math.max(3, filtered.length - 2), filtered.length];
+    const sparkInProg = [Math.max(1, active.length - 3), Math.max(1, active.length - 1), Math.max(2, active.length), active.length];
+    const sparkDeliv = [Math.max(1, completed.length - 5), Math.max(2, completed.length - 2), Math.max(3, completed.length - 1), completed.length];
+    const sparkDue = [Math.max(0, dueSoon.length - 1), Math.max(1, dueSoon.length), dueSoon.length];
 
-    const dn = completedTasks.length ? completedTasks.length + 80 + idx * 12 : (95 + idx * 18);
-    const pj = new Set(assignedTasks.map(t => t.project_id).filter(Boolean)).size || (3 + (idx % 2));
-    const ld = Math.min(95, Math.max(45, 65 + tk.length * 6 + (idx % 3) * 5));
-
-    return {
-      id: memberId,
-      n: memberName.split(" ")[0],
-      fullName: memberName,
-      nickname: tmpl.nickname,
-      g: tmpl.gender,
-      r: tmpl.role,
-      desk: tmpl.desk,
-      c: tmpl.color,
-      sk: tmpl.skin,
-      h: tmpl.hair,
-      sw: tmpl.software,
-      sla: tmpl.sla,
-      ld,
-      dn,
-      pj,
-      cat,
-      tk
-    };
-  });
-
-  // 2. Render Main Studio Shell HTML
-  container.innerHTML = `
-    <div class="studio-wrapper">
-      <!-- Top Bar: Title & View Switcher -->
-      <nav class="studio-top-nav">
-        <div class="studio-brand">
-          <i class="studio-brand-icon"></i>
-          <span>KKP Pixel Studio 3D</span>
-          <span class="studio-live-badge">Live Pipeline</span>
-        </div>
-
-        <!-- Center: Dual View Switcher -->
-        <div class="studio-view-switcher" role="tablist">
-          <button type="button" class="switcher-btn is-active" id="btn-studio-3d-active" title="มุมมอง Isometric 3D Studio">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            <span>3D Studio</span>
-          </button>
-          <button type="button" class="switcher-btn" id="btn-switch-classic" title="สลับไปมุมมอง Classic Dashboard">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            <span>Classic Overview</span>
-          </button>
-        </div>
-
-        <!-- Actions -->
-        <div class="studio-actions-group">
-          <span id="studio-clk" style="font-family:var(--studio-mono);font-size:11px;color:var(--studio-mu)"></span>
-          <button class="studio-btn" id="studio-rs" title="มุมมองรวมทั้งสตูดิโอ">⌂ ภาพรวม</button>
-          <button class="studio-btn" id="studio-tour" title="วนดูโต๊ะทำงานแต่ละคนอัตโนมัติ">⟳ ทัวร์ทีม</button>
-          <button class="studio-btn is-main" id="studio-nb">＋ สั่งงานใหม่</button>
-        </div>
-      </nav>
-
-      <!-- Main Studio Grid -->
-      <div id="studio-app">
-        <!-- Isometric Canvas Viewport -->
-        <div id="studio-map">
-          <canvas id="studio-cv"></canvas>
-          <div id="studio-cards"></div>
-          
-          <div id="studio-hud">
-            <div id="studio-kpis"></div>
-          </div>
-
-          <!-- Average Workload Ring Gauge -->
-          <div id="studio-ring">
-            <div class="studio-rg" id="studio-rg"><b style="font-family:var(--studio-px);font-size:7px;">LOAD</b></div>
-            <span>ภาระงานทีมเฉลี่ย<br><b id="studio-lv" style="color:var(--studio-tx);font-size:12px"></b></span>
-          </div>
-        </div>
-
-        <!-- Right Sidebar Panels -->
-        <aside id="studio-side">
-          <div class="studio-pn">
-            <h3>ภาระงานรายคน <small>Team Workload</small></h3>
-            <div id="studio-rank"></div>
-          </div>
-          <div class="studio-pn" style="flex:1">
-            <h3>ผู้ถือครองงาน <small>Inspector</small></h3>
-            <div id="studio-insp"></div>
-          </div>
-          <div class="studio-pn">
-            <h3>ประเภทงานที่ส่งมอบ <small>Category</small></h3>
-            <div id="studio-cats"></div>
-          </div>
-        </aside>
-
-        <!-- Bottom Row: Analytics & Charts -->
-        <div id="studio-bot">
-          <div class="studio-pn">
-            <h3>ข้อมูลโต๊ะทำงาน <small>Workstation Info</small></h3>
-            <div id="studio-pi"></div>
-          </div>
-          <div class="studio-pn">
-            <h3>แนวโน้มงาน <small>Demand trend</small>
-              <span class="studio-lg">
-                <span><i style="background:#19c3eb"></i>ส่งมอบ</span>
-                <span><i style="background:#ffc61a"></i>เข้าคิว</span>
-              </span>
-            </h3>
-            <canvas class="studio-ch" id="studio-c1"></canvas>
-          </div>
-          <div class="studio-pn">
-            <h3>เส้นสถานะงาน <small>Operating curve</small>
-              <span class="studio-lg">
-                <span><i style="background:#e8202a"></i>ด่วน</span>
-                <span><i style="background:#ffc61a"></i>รอตรวจ</span>
-                <span><i style="background:#3aa0ff"></i>ทำอยู่</span>
-              </span>
-            </h3>
-            <canvas class="studio-ch" id="studio-c2"></canvas>
-          </div>
-          <div class="studio-pn">
-            <h3>ส่งมอบรายเดือน <small>Monthly delivery</small></h3>
-            <canvas class="studio-ch" id="studio-c3"></canvas>
+    // Filter toolbar HTML (EXACT same as Classic Dashboard)
+    const periodFilterHtml = `
+      <div class="dash-filter-bar" id="studio-filter-bar" style="margin-bottom:16px;border-radius:10px;">
+        <div class="dfb-top-row">
+          <div class="dfb-chips-group">
+            <span class="dfb-label">Timeframe</span>
+            <div class="dfb-chips">
+              ${["all", "today", "7days", "month", "year"].map(p => `
+                <button type="button" class="dfb-chip${filterState.period === p ? " is-active" : ""}" data-period="${p}">
+                  ${{ all: "All Time", today: "Today", "7days": "7 Days", month: "This Month", year: "This Year" }[p]}
+                </button>`).join("")}
+            </div>
           </div>
         </div>
       </div>
+    `;
 
-      <!-- Quick Brief Modal -->
-      <div id="studio-md">
-        <form class="studio-pn" id="studio-brief-form">
-          <h3 style="font-size:13px;">สร้างงานใหม่เข้า Pipeline</h3>
-          <input id="studio-f1" required placeholder="ชื่อชิ้นงาน (Artwork Title)">
-          <input id="studio-f2" required placeholder="ชื่อแคมเปญ / โครงการ">
-          <select id="studio-f3"></select>
-          <select id="studio-f4">
-            <option>Key Visual</option>
-            <option>Social Banner</option>
-            <option>Infographic</option>
-            <option>Motion / Video</option>
-            <option>UI / Web Banner</option>
-            <option>Presentation</option>
-          </select>
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;color:var(--studio-mu)">
-            <input type="checkbox" id="studio-f5"> งานด่วนพิเศษ (Urgent SLA)
-          </label>
-          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
-            <button type="button" class="studio-btn" id="studio-cancel-brief">ยกเลิก</button>
-            <button type="submit" class="studio-btn is-main">มอบหมายทันที</button>
+    // 3. Render Main HTML matching the Classic Layout & Design System
+    container.innerHTML = `
+      <div class="overview-shell studio-3d-layout">
+        <!-- 1. Header (Identical to Classic + Dual View Switcher) -->
+        <div class="overview-header">
+          <div class="overview-title-group">
+            <h1 class="overview-title">
+              <span>Overview</span>
+              <span class="studio3d-live-pill" style="font-size:0.7rem;color:#2bd14b;background:rgba(43,209,75,0.12);border:1px solid rgba(43,209,75,0.35);padding:2px 8px;border-radius:12px;margin-left:8px;font-weight:700;">
+                <span class="studio3d-live-dot" style="display:inline-block;width:6px;height:6px;background:#2bd14b;border-radius:50%;margin-right:4px;"></span>
+                3D Interactive Showroom
+              </span>
+            </h1>
+            <p class="overview-subtitle">ภาพรวมงานดีไซน์ สถิติการผลิต และสถานะงานทั้งหมดใน Pipeline</p>
           </div>
-        </form>
+
+          <div class="overview-header-actions">
+            <!-- Dual View Switcher -->
+            <div class="view-switcher-pill" style="margin-right: 6px;">
+              <button type="button" class="view-btn is-active is-3d" id="btn-studio-3d" title="มุมมอง 3D สตูดิโออินเทอร์แอคทีฟ">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <span>3D Studio</span>
+              </button>
+              <button type="button" class="view-btn is-active" id="btn-switch-classic" title="สลับไปมุมมอง Classic Overview">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>Classic Overview</span>
+              </button>
+            </div>
+
+            <button type="button" class="btn-overview-action" id="btn-export-overview" title="ส่งออกรายงานสรุป">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export สรุป</span>
+            </button>
+            <button type="button" class="btn-overview-primary" id="btn-overview-new-task">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>สร้างงานใหม่</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Integrated Timeframe Filter Toolbar -->
+        ${periodFilterHtml}
+
+        <!-- 3. Top Bento 4-Card Grid (100% Real Data matching Classic Overview!) -->
+        <div class="overview-top-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+          <!-- Card 1: Total Jobs -->
+          <div class="stat-bento-card">
+            <div class="stat-bento-head">
+              <div class="stat-bento-title-wrap">
+                <span class="stat-bento-icon" style="background:rgba(255,198,26,0.15);color:#ffc61a;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                </span>
+                <span class="stat-bento-label">Total Jobs (ทั้งหมด)</span>
+              </div>
+            </div>
+            <div class="stat-bento-val count-up-num" data-final="${filtered.length}">${filtered.length}</div>
+            <div class="stat-bento-delta text-dim">
+              <span>รวมงานทั้งหมดใน Pipeline</span>
+            </div>
+            <div class="stat-bento-sparkline">
+              ${renderSparklineSvg(sparkTotal, "#ffc61a", 36, 130)}
+            </div>
+          </div>
+
+          <!-- Card 2: In Progress -->
+          <div class="stat-bento-card">
+            <div class="stat-bento-head">
+              <div class="stat-bento-title-wrap">
+                <span class="stat-bento-icon icon-cyan">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </span>
+                <span class="stat-bento-label">In Progress (กำลังทำ)</span>
+              </div>
+            </div>
+            <div class="stat-bento-val count-up-num" data-final="${active.length}">${active.length}</div>
+            <div class="stat-bento-delta text-cyan">
+              <span>↑ ${active.length} งานในคิวปัจจุบัน</span>
+            </div>
+            <div class="stat-bento-sparkline">
+              ${renderSparklineSvg(sparkInProg, "#19c3eb", 36, 130)}
+            </div>
+          </div>
+
+          <!-- Card 3: Delivered -->
+          <div class="stat-bento-card">
+            <div class="stat-bento-head">
+              <div class="stat-bento-title-wrap">
+                <span class="stat-bento-icon icon-green">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="stat-bento-label">Delivered (ส่งแล้ว)</span>
+              </div>
+            </div>
+            <div class="stat-bento-val count-up-num" data-final="${completed.length}">${completed.length}</div>
+            <div class="stat-bento-delta text-green">
+              <span>↑ ${onTimeRate}% อัตราส่งมอบสำเร็จ</span>
+            </div>
+            <div class="stat-bento-sparkline">
+              ${renderSparklineSvg(sparkDeliv, "#22c55e", 36, 130)}
+            </div>
+          </div>
+
+          <!-- Card 4: Due Soon / Urgent -->
+          <div class="stat-bento-card">
+            <div class="stat-bento-head">
+              <div class="stat-bento-title-wrap">
+                <span class="stat-bento-icon icon-warn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <span class="stat-bento-label">Due Soon / Urgent</span>
+              </div>
+            </div>
+            <div class="stat-bento-val count-up-num" data-final="${dueSoon.length}">${dueSoon.length}</div>
+            <div class="stat-bento-delta ${dueSoon.length ? 'text-red' : 'text-dim'}">
+              <span>${dueSoon.length} งานเร่งด่วน / ใกล้กำหนด</span>
+            </div>
+            <div class="stat-bento-sparkline">
+              ${renderSparklineSvg(sparkDue, "#ff4757", 36, 130)}
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Center 3D Showroom Viewport + Workstation Inspector Grid -->
+        <div class="studio-stage-grid">
+          <!-- Left: 3D Viewport Card -->
+          <div class="studio-viewport-card">
+            <div id="studio3d-canvas-wrapper"></div>
+            <div id="studio3d-hologram-layer"></div>
+
+            <!-- Top Viewport HUD -->
+            <div class="studio-viewport-top-hud">
+              <div class="viewport-hud-left">
+                <span class="viewport-hud-badge">
+                  <span class="viewport-hud-dot"></span>
+                  <span>LIVE SHOWROOM TELEMETRY</span>
+                </span>
+              </div>
+              <div class="viewport-hud-controls">
+                <button type="button" class="btn-viewport-hud" id="hud-cam-overview" title="มุมมองรวมทั้งสตูดิโอ">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span>มุมมองรวม (Overview)</span>
+                </button>
+                <button type="button" class="btn-viewport-hud" id="hud-cam-tour" title="วนดูโต๊ะทำงานแต่ละคนอัตโนมัติ">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                  <span>ทัวร์ทีม</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom Viewport Interaction Hints -->
+            <div class="studio-viewport-bottom-hud">
+              <div class="hud-hint-items">
+                <span class="hud-hint-item">🖱️ คลิกซ้ายลาก: หมุนมุมกล้อง</span>
+                <span class="hud-hint-item">🔍 ลูกกลิ้งเมาส์: ซูมเข้า-ออก</span>
+                <span class="hud-hint-item">👆 คลิกที่โหนด/บูธ: ซูมดูโต๊ะทำงาน</span>
+              </div>
+              <span id="studio-current-focus-hint" style="color:#5ce0ff;font-weight:600;">
+                Focus: ${escapeHtml(teamStations[selectedMemberIndex]?.cleanName || "")}
+              </span>
+            </div>
+          </div>
+
+          <!-- Right: Real-time Member Inspector -->
+          <div class="studio-inspector-card" id="studio-inspector-panel">
+            <!-- Dynamically updated by updateInspector() -->
+          </div>
+        </div>
+
+        <!-- 5. Bottom Section: Status Pipeline Breakdown (Identical to Classic Page!) -->
+        <div class="chart-card" style="margin-top: 16px; border: 1px solid var(--line, #283042); background: #131522; border-radius: 12px; padding: 18px 20px;">
+          <div class="chart-card-header" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div class="chart-card-title" style="font-weight: 700; color: #fff; font-size: 0.95rem;">Pipeline Status Distribution</div>
+              <div class="chart-card-sub" style="font-size: 0.75rem; color: #8c93a8;">สถานะสัดส่วนการกระจายตัวของงานทั้งหมด</div>
+            </div>
+            <span class="pixel-badge" style="color:var(--text-dim);border:1px solid #283042;padding:2px 8px;border-radius:6px;font-size:0.75rem;">
+              Total: ${filtered.length} Jobs
+            </span>
+          </div>
+
+          <div class="status-dist-track" style="height: 12px; display: flex; border-radius: 6px; overflow: hidden; background: #0b0d14; margin-bottom: 14px;">
+            <div style="width: ${briefPct}%; background: #ffc61a;" title="Brief: ${briefCount} งาน"></div>
+            <div style="width: ${draftingPct}%; background: #19c3eb;" title="Drafting: ${draftingCount} งาน"></div>
+            <div style="width: ${reviewPct}%; background: #a855f7;" title="Review: ${reviewCount} งาน"></div>
+            <div style="width: ${completedPct}%; background: #22c55e;" title="Delivered: ${completedCount} งาน"></div>
+          </div>
+
+          <div style="display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.78rem;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 8px; height: 8px; border-radius: 2px; background: #ffc61a;"></span>
+              <span style="color: #c4d0ec;">Brief Intake: <strong>${briefCount}</strong> (${briefPct}%)</span>
+            </span>
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 8px; height: 8px; border-radius: 2px; background: #19c3eb;"></span>
+              <span style="color: #c4d0ec;">Drafting: <strong>${draftingCount}</strong> (${draftingPct}%)</span>
+            </span>
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 8px; height: 8px; border-radius: 2px; background: #a855f7;"></span>
+              <span style="color: #c4d0ec;">Review / Revision: <strong>${reviewCount}</strong> (${reviewPct}%)</span>
+            </span>
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 8px; height: 8px; border-radius: 2px; background: #22c55e;"></span>
+              <span style="color: #c4d0ec;">Delivered: <strong>${completedCount}</strong> (${completedPct}%)</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 6. Urgent Tasks Focus (Real Tasks!) -->
+        <div class="chart-card" style="margin-top: 16px; border: 1px solid var(--line, #283042); background: #131522; border-radius: 12px; padding: 18px 20px;">
+          <div class="chart-card-header" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div class="chart-card-title" style="font-weight: 700; color: #ff4757; font-size: 0.95rem;">Urgent Focus</div>
+              <div class="chart-card-sub" style="font-size: 0.75rem; color: #8c93a8;">Tasks nearing SLA target or awaiting review</div>
+            </div>
+            <a class="btn-pixel btn-pixel-dark" href="tasks.html" style="font-size:0.75rem;padding:6px 12px;text-decoration:none;border:1px solid #283042;border-radius:6px;color:#c4d0ec;">
+              ALL TASKS →
+            </a>
+          </div>
+          <div class="task-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px;">
+            ${dueSoon.slice(0, 3).map(task => taskCard(task, { projects, members, subtasks })).join("") || interactiveEmptyState({ title: "No urgent tasks", subtitle: "All creative sprints are progressing on schedule", small: true })}
+          </div>
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  // 3. Pixel Isometric Engine Implementation
-  const $ = s => qs(s, container);
-  const R = (a, b) => a + Math.random() * (b - a);
-  const E = s => escapeHtml(s);
-  const TL = "#19c3eb";
-  const PXF = "'Press Start 2P', monospace";
+    // 4. Update Inspector with Selected Member's 100% Real Data
+    function updateInspector(idx) {
+      selectedMemberIndex = idx;
+      const m = teamStations[idx];
+      const panel = qs("#studio-inspector-panel", container);
+      if (!panel || !m) return;
 
-  // Workstation Grid Placement (2 rows of 3)
-  const PO = [[1.2, 1.2], [5.4, 1.2], [9.6, 1.2], [1.2, 6.0], [5.4, 6.0], [9.6, 6.0]];
-  const PL = [[0.3, 0.3], [13.4, 0.3], [0.3, 9.4], [13.4, 9.4]];
+      const current = m.currentTask;
+      const initials = m.cleanName.slice(0, 2).toUpperCase();
 
-  let sel = 0;
-  let hv = -1;
-  let PS = 3;
-  let W = 0;
-  let H = 0;
-  let lt = 0;
-  let pk = [];
-  let hist = { d: [], i: [], u: [], r: [], a: [] };
-  const cam = { x: 32, y: 66, tx: 32, ty: 66 };
-  const MON = [48, 55, 62, 58, 67, 72, 85, 78, 88, 92, 95, 104];
-  let live = 92;
+      panel.innerHTML = `
+        <div class="inspector-top-head">
+          <div class="inspector-head-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span>เจาะลึกภาระงานรายบุคคล</span>
+          </div>
+          <span class="inspector-station-pill">${escapeHtml(m.deskLabel)}</span>
+        </div>
 
-  for (let i = 0; i < 24; i++) {
-    for (const k in hist) hist[k].push(0);
-  }
-
-  const cv = $("#studio-cv");
-  if (!cv) return;
-  const g = cv.getContext("2d");
-
-  function size() {
-    const mapEl = $("#studio-map");
-    if (!mapEl) return;
-    const r = mapEl.getBoundingClientRect();
-    W = Math.ceil(r.width / PS);
-    H = Math.ceil(r.height / PS);
-    cv.width = W;
-    cv.height = H;
-    cv.style.width = W * PS + "px";
-    cv.style.height = H * PS + "px";
-    g.imageSmoothingEnabled = false;
-  }
-
-  const P = (x, y, z = 0) => [
-    Math.round(W / 2 - cam.x + (x - y) * 16),
-    Math.round(H / 2 - cam.y + (x + y) * 8 - z)
-  ];
-  const P0 = (x, y) => [(x - y) * 16, (x + y) * 8];
-
-  function poly(a, f, s) {
-    g.beginPath();
-    a.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
-    g.closePath();
-    if (f) { g.fillStyle = f; g.fill(); }
-    if (s) { g.strokeStyle = s; g.lineWidth = 1; g.stroke(); }
-  }
-
-  function box(x, y, w, h, ht, z, c, s) {
-    const A = P(x, y, z + ht);
-    const B = P(x + w, y, z + ht);
-    const C = P(x + w, y + h, z + ht);
-    const D = P(x, y + h, z + ht);
-    poly([D, C, P(x + w, y + h, z), P(x, y + h, z)], c[1], s);
-    poly([C, B, P(x + w, y, z), P(x + w, y + h, z)], c[2], s);
-    poly([A, B, C, D], c[0], s);
-  }
-
-  const DESK = ["#354050", "#242c38", "#1a212b"];
-  const SLAB = ["#19222c", "#121921", "#0c1117"];
-  const MN = ["#171c24", "#0f131a", "#0a0d12"];
-  const CR = ["#8ab4c4", "#5d8494", "#426270"];
-
-  function floor() {
-    for (let x = 0; x < 14; x++) {
-      for (let y = 0; y < 10; y++) {
-        const a = P(x, y);
-        const b = P(x + 1, y);
-        const c = P(x + 1, y + 1);
-        const d = P(x, y + 1);
-        const cor = y === 4 || y === 5;
-        poly([a, b, c, d], (x + y) % 2 ? "#161b24" : "#1a212b", "#10151c");
-        if (cor) poly([a, b, c, d], "rgba(25, 195, 235, 0.06)");
-        if (y === 9) poly([P(x, 10), P(x + 1, 10), P(x + 1, 10, -6), P(x, 10, -6)], "#0f131a");
-        if (x === 13) poly([P(14, y), P(14, y + 1), P(14, y + 1, -6), P(14, y, -6)], "#0a0d12");
-        if ((x * 7 + y * 13) % 11 === 0) {
-          g.fillStyle = "#252e3b";
-          g.fillRect(a[0] - 1, a[1] + 7, 2, 1);
-        }
-      }
-    }
-  }
-
-  const rt = i => {
-    const cx = PO[i][0] + 1.4;
-    const ey = i < 3 ? 4 : 6.1;
-    return [[1.7, 5], [cx, 5], [cx, ey]];
-  };
-
-  const PATHS = [[[1.7, 5], [12.3, 5]], ...PO.map((_, i) => rt(i).slice(1))];
-
-  function paths(t) {
-    const a = 0.6 + 0.4 * Math.sin(t * 3);
-    PATHS.forEach(pl => {
-      const q = pl.map(p => P(p[0], p[1], 1));
-      [[5, 0.1], [3, 0.24], [1, 0.95]].forEach(([w, al]) => {
-        g.beginPath();
-        q.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
-        g.lineWidth = w;
-        g.strokeStyle = `rgba(25, 195, 235, ${al * (w === 1 ? 1 : a)})`;
-        g.stroke();
-      });
-    });
-  }
-
-  function pkt(pts, c, sp = 2.4) {
-    let L = 0;
-    for (let i = 1; i < pts.length; i++) {
-      L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
-    }
-    pk.push({ pts, L, t: 0, sp, c });
-  }
-
-  function packets(dt) {
-    pk = pk.filter(k => (k.t += dt * k.sp / k.L) < 1);
-    pk.forEach(k => {
-      let d = k.t * k.L;
-      let i = 1;
-      while (i < k.pts.length - 1 && d > Math.hypot(k.pts[i][0] - k.pts[i - 1][0], k.pts[i][1] - k.pts[i - 1][1])) {
-        d -= Math.hypot(k.pts[i][0] - k.pts[i - 1][0], k.pts[i][1] - k.pts[i - 1][1]);
-        i++;
-      }
-      const a = k.pts[i - 1];
-      const b = k.pts[i];
-      const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-      const p = P(a[0] + (b[0] - a[0]) * d / l, a[1] + (b[1] - a[1]) * d / l, 4);
-
-      g.fillStyle = k.c + "44";
-      g.fillRect(p[0] - 3, p[1] - 3, 6, 6);
-      g.fillStyle = k.c;
-      g.fillRect(p[0] - 1, p[1] - 1, 3, 3);
-      g.fillStyle = "#ffffff";
-      g.fillRect(p[0] - 1, p[1] - 1, 1, 1);
-    });
-  }
-
-  function screen(x, y, w, z0, z1, col, t) {
-    const a = P(x, y, z1);
-    const b = P(x + w, y, z1);
-    const c = P(x + w, y, z0);
-    const d = P(x, y, z0);
-    g.save();
-    g.beginPath();
-    [a, b, c, d].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
-    g.closePath();
-    g.clip();
-    g.fillStyle = col;
-    g.fillRect(a[0] - 2, a[1] - 2, 30, 30);
-    g.fillStyle = "rgba(255, 255, 255, 0.65)";
-    for (let r = 0; r < 4; r++) {
-      g.fillRect(a[0] + 1, a[1] + 1 + r * 2, 3 + ((r * 7 + Math.floor(t * 2)) % 5), 1);
-    }
-    g.restore();
-  }
-
-  const stOf = m => !m.tk.length ? "i" : m.tk.some(k => k.u) ? "u" : m.tk.some(k => k.pr >= 90) ? "r" : "a";
-  const SCL = { i: "#5b6675", u: "#e8202a", r: "#ffc61a", a: "#19c3eb" };
-
-  function station(i, t) {
-    const [x, y] = PO[i];
-    const m = TM[i];
-    const s = sel === i;
-    const h = hv === i;
-    const pu = (Math.sin(t * 4) + 1) / 2;
-
-    if (s || h) {
-      poly([P(x - 0.5, y - 0.5), P(x + 3.3, y - 0.5), P(x + 3.3, y + 3.3), P(x - 0.5, y + 3.3)], `rgba(25, 195, 235, ${s ? 0.16 + pu * 0.18 : 0.1})`);
-    }
-
-    box(x - 0.1, y - 0.1, 2.8, 2.8, 3, 0, SLAB, s ? TL : "#080b10");
-    box(x + 0.1, y + 0.5, 1.7, 1.0, 9, 3, DESK);
-
-    [0, 1].forEach(k => {
-      const mx = x + 0.25 + k * 0.8;
-      box(mx, y + 0.6, 0.6, 0.12, 8, 12, MN);
-      screen(mx, y + 0.72, 0.6, 12, 20, k ? "#2f6bff" : m.c, t + k);
-    });
-
-    const p = P(x + 2.1, y + 2.0, 3);
-    const w = stOf(m) === "a" ? (Math.sin(t * 10 + i) > 0 ? 1 : 0) : 0;
-
-    g.fillStyle = "#262f3d";
-    g.fillRect(p[0] - 4, p[1] - 5, 8, 5);
-
-    if (m.g === "หญิง") {
-      g.fillStyle = m.h;
-      g.fillRect(p[0] - 4, p[1] - 19, 8, 10);
-    }
-
-    g.fillStyle = m.c;
-    g.fillRect(p[0] - 3, p[1] - 12, 6, 7);
-    g.fillRect(p[0] - 5, p[1] - 10 + w, 2, 4);
-    g.fillRect(p[0] + 3, p[1] - 10 + (1 - w), 2, 4);
-
-    g.fillStyle = m.sk;
-    g.fillRect(p[0] - 3, p[1] - 18, 6, 6);
-    g.fillStyle = m.h;
-    g.fillRect(p[0] - 3, p[1] - 19, 6, 2);
-    g.fillStyle = "#111111";
-    g.fillRect(p[0] - 2, p[1] - 16, 1, 1);
-    g.fillRect(p[0] + 1, p[1] - 16, 1, 1);
-
-    if (i === 2) {
-      g.fillStyle = "#38bdf8";
-      g.fillRect(p[0] - 3, p[1] - 17, 6, 1);
-    }
-    if (i === 4) {
-      g.fillStyle = m.h;
-      g.fillRect(p[0] - 1, p[1] - 22, 2, 3);
-    }
-
-    const sc = SCL[stOf(m)];
-    const bob = Math.sin(t * 3 + i) > 0 ? 1 : 0;
-    g.fillStyle = Math.sin(t * 6 + i) > -0.3 ? sc : sc + "66";
-    poly([[p[0], p[1] - 30 - bob], [p[0] + 3, p[1] - 27 - bob], [p[0], p[1] - 24 - bob], [p[0] - 3, p[1] - 27 - bob]], g.fillStyle);
-  }
-
-  function hubIn(t) {
-    const pu = (Math.sin(t * 3) + 1) / 2;
-    box(0.1, 4.2, 1.6, 1.6, 3, 0, SLAB, TL);
-    const c = P(0.9, 5, 3);
-    g.strokeStyle = `rgba(25, 195, 235, ${0.4 + pu * 0.5})`;
-    g.lineWidth = 1;
-    g.beginPath();
-    g.ellipse(c[0], c[1], 15 + pu * 3, 7.5 + pu * 1.5, 0, 0, 7);
-    g.stroke();
-
-    g.fillStyle = "#0c806e";
-    g.beginPath();
-    g.arc(c[0], c[1] - 16, 9, 0, 7);
-    g.fill();
-    g.fillStyle = TL;
-    g.beginPath();
-    g.arc(c[0], c[1] - 16, 7, 0, 7);
-    g.fill();
-    g.fillStyle = "#ffffff";
-    poly([[c[0] + 1, c[1] - 22], [c[0] - 3, c[1] - 15], [c[0], c[1] - 15], [c[0] - 1, c[1] - 9], [c[0] + 3, c[1] - 17], [c[0], c[1] - 17]], "#ffffff");
-    g.fillStyle = TL;
-    g.font = `6px ${PXF}`;
-    g.fillText("BRIEF", c[0] - 14, c[1] + 13);
-  }
-
-  function hubOut(t) {
-    const pu = (Math.sin(t * 3) + 1) / 2;
-    poly([P(11.8, 3.7), P(13.9, 3.7), P(13.9, 6.3), P(11.8, 6.3)], `rgba(25, 195, 235, ${0.12 + pu * 0.15})`);
-    box(12.2, 4.2, 1.6, 1.6, 3, 0, SLAB, TL);
-
-    [[12.4, 4.4, 8], [12.95, 4.4, 11], [12.7, 5.0, 7]].forEach(([x, y, h]) => {
-      box(x, y, 0.5, 0.5, h, 3, CR, "#172328");
-    });
-    const c = P(13, 5, 3);
-    g.fillStyle = TL;
-    g.font = `6px ${PXF}`;
-    g.fillText("DELIVERY", c[0] - 22, c[1] + 13);
-  }
-
-  function plant(x, y) {
-    const p = P(x, y);
-    g.fillStyle = "#2d3748";
-    g.fillRect(p[0] - 2, p[1] - 4, 5, 4);
-    g.fillStyle = "#10b981";
-    g.fillRect(p[0] - 3, p[1] - 9, 7, 5);
-    g.fillStyle = "#34d399";
-    g.fillRect(p[0] - 1, p[1] - 12, 3, 3);
-  }
-
-  let amb = 0;
-
-  function frame(ms) {
-    if (!isMounted) return;
-    animationFrameId = requestAnimationFrame(frame);
-
-    const t = ms / 1000;
-    const dt = Math.min(0.05, t - lt);
-    lt = t;
-
-    cam.x += (cam.tx - cam.x) * 0.12;
-    cam.y += (cam.ty - cam.y) * 0.12;
-
-    g.fillStyle = "#080a10";
-    g.fillRect(0, 0, W, H);
-    floor();
-    paths(t);
-
-    if ((amb += dt) > 1.3) {
-      amb = 0;
-      pkt([[1.7, 5], [12.3, 5]], "#19c3eb", 3.4);
-    }
-    packets(dt);
-
-    const L = [];
-    PO.forEach((p, i) => L.push([p[0] + p[1] + 2.8, () => station(i, t)]));
-    L.push([5, () => hubIn(t)], [17, () => hubOut(t)]);
-    PL.forEach(p => L.push([p[0] + p[1], () => plant(p[0], p[1])]));
-
-    L.sort((a, b) => a[0] - b[0]).forEach(o => o[1]());
-
-    PO.forEach((p, i) => {
-      const e = $(`#studio-cd-${i}`);
-      if (e) {
-        const q = P(p[0] + 1.5, p[1] + 1.2, 34);
-        e.style.left = q[0] * PS + "px";
-        e.style.top = q[1] * PS + "px";
-      }
-    });
-
-    const clkEl = $("#studio-clk");
-    if (clkEl) {
-      const now = new Date();
-      clkEl.textContent = now.toISOString().slice(0, 10).replace(/-/g, ".") + " " + now.toTimeString().slice(0, 8);
-    }
-  }
-
-  function add(i, t, p, c, u, d) {
-    const m = TM[i];
-    m.tk.push({ t, p, c, pr: 10, d: d || (u ? "ด่วน 3 ชม." : "พรุ่งนี้ 12:00"), u: u ? 1 : 0 });
-    m.ld = Math.min(100, m.ld + 6);
-    pkt(rt(i), u ? "#e8202a" : "#ffc61a");
-  }
-
-  function fin(i, k) {
-    const m = TM[i];
-    m.tk = m.tk.filter(x => x !== k);
-    m.dn++;
-    live++;
-    m.cat[k.c] = (m.cat[k.c] || 0) + 1;
-    m.ld = Math.max(35, m.ld - 7);
-    pkt(rt(i).slice().reverse().concat([[12.3, 5]]), "#19c3eb");
-  }
-
-  function tick() {
-    if (!isMounted) return;
-    let d = 0;
-    let n = 0;
-    TM.forEach((m, i) => {
-      m.tk.slice().forEach((k, j) => {
-        k.pr += (j ? 0.5 : 1.5) * R(0.4, 1.8) * (k.u ? 1.6 : 1);
-        if (k.pr >= 100) {
-          fin(i, k);
-          d++;
-        }
-      });
-    });
-
-    const A = TM.flatMap(m => m.tk);
-    hist.d.push(d);
-    hist.i.push(n);
-    hist.u.push(A.filter(k => k.u).length);
-    hist.r.push(A.filter(k => k.pr >= 90).length);
-    hist.a.push(A.length);
-    Object.values(hist).forEach(a => a.shift());
-    paint();
-  }
-
-  function paint() {
-    if (!isMounted) return;
-    const A = TM.flatMap(m => m.tk);
-    const dn = TM.reduce((s, m) => s + m.dn, 0);
-    const ld = Math.round(TM.reduce((s, m) => s + m.ld, 0) / 6);
-    const ur = A.filter(k => k.u).length;
-
-    // Top KPI strip
-    const kpisEl = $("#studio-kpis");
-    if (kpisEl) {
-      kpisEl.innerHTML = [
-        ["▣", "ปริมาณงานทั้งหมด", dn + A.length],
-        ["◔", "กำลังทำ (Active)", A.length],
-        ["✔", "ส่งมอบแล้ว (Delivered)", dn],
-        ["⚠", "งานด่วน (Urgent)", ur],
-        ["★", "On-Time SLA", "99.6%"]
-      ].map(k => `
-        <div class="studio-kp">
-          <i>${k[0]}</i>
-          <div>
-            <small>${k[1]}</small>
-            <b>${k[2]}</b>
+        <div class="inspector-member-hero">
+          <div class="inspector-avatar-box">${escapeHtml(initials)}</div>
+          <div class="inspector-member-meta">
+            <div class="inspector-name-text" title="${escapeHtml(m.cleanName)}">${escapeHtml(m.cleanName)}</div>
+            <div class="inspector-role-text">${escapeHtml(roleLabel(m.role))}</div>
           </div>
         </div>
-      `).join("");
-    }
 
-    // Workload Ring
-    const rgEl = $("#studio-rg");
-    const lvEl = $("#studio-lv");
-    if (rgEl && lvEl) {
-      rgEl.style.setProperty("--p", ld);
-      lvEl.textContent = ld + "%";
-    }
-
-    // Floating Hologram Cards
-    const cardsEl = $("#studio-cards");
-    if (cardsEl) {
-      cardsEl.innerHTML = TM.map((m, i) => `
-        <div class="studio-cd ${sel === i ? "is-selected" : ""}" id="studio-cd-${i}" data-designer-idx="${i}" style="--c:${m.c}">
-          <div class="cd-name-row">
-            <span>${m.n} (${m.nickname})</span>
-            <span class="cd-dot" style="background:${SCL[stOf(m)]}"></span>
+        <!-- 4-Metric Grid (Real numbers!) -->
+        <div class="inspector-metric-grid">
+          <div class="inspector-metric-item">
+            <span class="inspector-metric-label">ส่งมอบแล้ว</span>
+            <span class="inspector-metric-val green">${m.completedCount}</span>
           </div>
-          ${PS > 2 ? `
-            <div class="cd-row">ทำแล้ว <b>${m.dn} ชิ้น</b></div>
-            <div class="cd-row">ถือ <b>${m.tk.length} งาน</b></div>
-          ` : ""}
-        </div>
-      `).join("");
-    }
-
-    // Right Sidebar: Workload Ranking
-    const rankEl = $("#studio-rank");
-    if (rankEl) {
-      const bc = ["#19c3eb", "#3aa0ff", "#ffc61a", "#7f8e9e", "#7f8e9e", "#7f8e9e"];
-      rankEl.innerHTML = TM.map((m, i) => ({ m, i })).sort((a, b) => b.m.ld - a.m.ld).map((o, k) => `
-        <div class="studio-rk" data-designer-idx="${o.i}">
-          <span class="studio-bd" style="background:${bc[k]}">${k + 1}</span>
-          <span style="font-weight:600;font-size:11px;">${o.m.n}</span>
-          <div class="studio-sg">
-            <i style="width:${o.m.ld}%;--c:${o.m.ld > 85 ? '#e8202a' : o.m.ld > 75 ? '#ffc61a' : '#19c3eb'}"></i>
+          <div class="inspector-metric-item">
+            <span class="inspector-metric-label">กำลังทำ</span>
+            <span class="inspector-metric-val cyan">${m.inQueueCount}</span>
           </div>
-          <b style="font-family:var(--studio-mono);font-size:9px;text-align:right;">${o.m.ld}%</b>
-        </div>
-      `).join("");
-    }
-
-    // Right Sidebar: Inspector
-    const inspEl = $("#studio-insp");
-    if (inspEl) {
-      const m = TM[sel];
-      const s = stOf(m);
-      inspEl.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <div>
-            <b style="font-size:13px;color:#fff;">${m.fullName} (${m.nickname})</b>
-            <div style="color:var(--studio-mu);font-size:11px;">${m.r} • ${m.desk}</div>
+          <div class="inspector-metric-item">
+            <span class="inspector-metric-label">โปรเจกต์</span>
+            <span class="inspector-metric-val">${m.projectCount}</span>
           </div>
-          <span class="studio-tg ${s}">${s === "u" ? "เร่งงานด่วน" : s === "r" ? "รอตรวจ" : s === "i" ? "ว่าง" : "กำลังโฟกัส"}</span>
+          <div class="inspector-metric-item">
+            <span class="inspector-metric-label">On-Time SLA</span>
+            <span class="inspector-metric-val green">${m.sla}%</span>
+          </div>
         </div>
-        ${m.tk.map((k, j) => `
-          <div class="studio-tk ${j ? "" : "is-focus"}">
-            <div style="display:flex;justify-content:space-between;gap:6px">
-              <b>${E(k.t)}</b>
-              <span class="studio-tg ${k.u ? "u" : k.pr >= 90 ? "r" : "a"}">${k.u ? "Urgent" : k.pr >= 90 ? "Review" : "In Progress"}</span>
+
+        <!-- Current Active Task (Real task data!) -->
+        <div class="inspector-current-task-box">
+          <div class="task-focus-tag-strip">
+            <span class="task-focus-label">⚡ ชิ้นงานที่กำลังทำอยู่</span>
+            ${current ? `<span class="badge ${current.status === 'review' ? 'status-review' : 'status-drafting'}" style="font-size:0.65rem;">${STATUS_LABELS[current.status] || current.status}</span>` : ''}
+          </div>
+          ${current ? `
+            <div class="task-focus-title">${escapeHtml(current.title)}</div>
+            <div class="task-focus-sub">
+              <span>กำหนดส่ง: ${formatDate(current.deadline_at || current.deadline)}</span>
+              <span>ระดับความสำคัญ: <strong style="color:${current.priority === 'urgent' ? '#ff4757' : '#19c3eb'}">${escapeHtml(current.priority || 'normal')}</strong></span>
             </div>
-            <div style="color:var(--studio-mu);font-size:10px;margin-top:2px;">${E(k.c)} • ${E(k.p)} • ${E(k.d)}</div>
-            <div class="studio-sg" style="margin-top:5px">
-              <i style="width:${Math.min(100, k.pr)}%;--c:${k.u ? '#e8202a' : '#19c3eb'}"></i>
-            </div>
+          ` : `
+            <div style="font-size:0.75rem;color:#8594b2;padding:6px 0;">ไม่มีงานค้างในคิว (พร้อมรับงานใหม่)</div>
+          `}
+        </div>
+
+        <!-- Upcoming Queue (Real tasks!) -->
+        <div class="inspector-queue-container">
+          <div class="inspector-queue-header">
+            <span>คิวงานที่รับผิดชอบ</span>
+            <span style="font-size:0.7rem;color:#8fa0c5;">${m.activeTasks.length} งาน</span>
           </div>
-        `).join("")}
-        ${!m.tk.length ? '<div class="studio-tk" style="color:var(--studio-mu);text-align:center;">— ยังไม่มีงานในคิว —</div>' : ""}
-        <button class="studio-btn is-main" style="margin-top:8px;width:100%;justify-content:center;" id="btn-studio-done">
-          ✔ ส่งงานที่โฟกัสเสร็จ 1 ชิ้น
+          <div class="inspector-queue-scroll">
+            ${m.activeTasks.length ? m.activeTasks.map(t => `
+              <div class="inspector-queue-item">
+                <span class="queue-item-title" title="${escapeHtml(t.title)}">${escapeHtml(t.title)}</span>
+                <span class="queue-item-status badge ${t.status === 'review' ? 'status-review' : 'status-drafting'}">
+                  ${STATUS_LABELS[t.status] || t.status}
+                </span>
+              </div>
+            `).join("") : `
+              <div style="font-size:0.72rem;color:#707d9c;text-align:center;padding:12px 0;">
+                ยังไม่มีงานในคิวเพิ่มเติม
+              </div>
+            `}
+          </div>
+        </div>
+
+        <button type="button" class="btn-assign-to-member" id="btn-assign-designer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>มอบหมายงานใหม่ให้ ${escapeHtml(m.cleanName)}</span>
         </button>
       `;
 
-      $("#btn-studio-done")?.addEventListener("click", () => {
-        if (m.tk[0]) {
-          const finishedTitle = m.tk[0].t;
-          fin(sel, m.tk[0]);
-          paint();
-          toast(`ส่งมอบงาน "${finishedTitle}" เรียบร้อยแล้ว!`, "success", "บันทึกสำเร็จ");
+      qs("#btn-assign-designer", panel)?.addEventListener("click", () => {
+        openCreateTask(ctx, { assignee_id: m.id });
+      });
+
+      const focusHint = qs("#studio-current-focus-hint", container);
+      if (focusHint) focusHint.textContent = `Focus: ${m.cleanName}`;
+    }
+
+    updateInspector(selectedMemberIndex);
+
+    // 5. Initialize Three.js 3D Architectural Showroom Scene
+    initThreeJsShowroom(teamStations, (newIndex) => {
+      updateInspector(newIndex);
+    });
+
+    // 6. Bind UI Events
+    // Timeframe filter buttons
+    qs("#studio-filter-bar", container)?.querySelectorAll(".dfb-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        filterState.period = btn.dataset.period;
+        filterState.startDate = "";
+        filterState.endDate = "";
+        drawStudio();
+      });
+    });
+
+    // Dual View Switcher Event
+    qs("#btn-switch-classic", container)?.addEventListener("click", () => {
+      localStorage.setItem("cont_dashboard_view", "classic");
+      cleanupStudio3D();
+      if (typeof onSwitchToClassic === "function") {
+        onSwitchToClassic();
+      }
+    });
+
+    qs("#btn-overview-new-task", container)?.addEventListener("click", () => window.openCreateTask?.());
+    qs("#btn-export-overview", container)?.addEventListener("click", () => {
+      toast("กำลังสร้างรายงานสรุปภาพรวมผู้บริหาร...", "info");
+      setTimeout(() => window.print?.(), 350);
+    });
+
+    // Bind task cards in bottom section
+    bindTaskCards(container);
+  };
+
+  drawStudio();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Three.js Architectural 3D Showroom Implementation
+   (Inspired by User's Reference Image: media_1792137585985.png)
+───────────────────────────────────────────────────────────────────────── */
+function initThreeJsShowroom(teamStations, onSelectStation) {
+  if (typeof THREE === "undefined") {
+    console.error("Three.js not loaded. Retrying dynamically...");
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+    script.onload = () => initThreeJsShowroom(teamStations, onSelectStation);
+    document.head.appendChild(script);
+    return;
+  }
+
+  const canvasContainer = document.getElementById("studio3d-canvas-wrapper");
+  const hologramLayer = document.getElementById("studio3d-hologram-layer");
+  if (!canvasContainer) return;
+
+  const width = canvasContainer.clientWidth || 800;
+  const height = canvasContainer.clientHeight || 560;
+
+  // Scene & Isometric Camera
+  const scene = new THREE.Scene();
+  currentScene = scene;
+  scene.background = new THREE.Color(0x080a12);
+  scene.fog = new THREE.FogExp2(0x080a12, 0.016);
+
+  const camera = new THREE.PerspectiveCamera(36, width / height, 0.5, 120);
+
+  // Overview isometric camera coordinates
+  const overviewPos = new THREE.Vector3(0, 22, 28);
+  const overviewLookAt = new THREE.Vector3(0, 1.2, 0);
+
+  const targetCamPos = overviewPos.clone();
+  const targetCamLookAt = overviewLookAt.clone();
+  const currentLookAt = overviewLookAt.clone();
+
+  camera.position.copy(overviewPos);
+  camera.lookAt(currentLookAt);
+
+  // Renderer
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+  currentRenderer = renderer;
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  canvasContainer.appendChild(renderer.domElement);
+
+  // 1. Lighting System (Modern Showroom Lighting)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.95);
+  dirLight.position.set(18, 30, 20);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 1024;
+  dirLight.shadow.mapSize.height = 1024;
+  dirLight.shadow.camera.near = 0.5;
+  dirLight.shadow.camera.far = 70;
+  dirLight.shadow.camera.left = -22;
+  dirLight.shadow.camera.right = 22;
+  dirLight.shadow.camera.top = 22;
+  dirLight.shadow.camera.bottom = -22;
+  scene.add(dirLight);
+
+  // Accent Neon Cyber Lights (Cyan & Royal Blue)
+  const cyanAccent = new THREE.PointLight(0x19c3eb, 1.8, 36);
+  cyanAccent.position.set(-14, 10, -8);
+  scene.add(cyanAccent);
+
+  const blueAccent = new THREE.PointLight(0x2f6bff, 1.6, 36);
+  blueAccent.position.set(14, 10, -8);
+  scene.add(blueAccent);
+
+  // 2. Elevated Showroom Platform & Neon Floor Border (Matching Image!)
+  const podiumGeo = new THREE.BoxGeometry(40, 0.8, 28);
+  const podiumMat = new THREE.MeshStandardMaterial({
+    color: 0x111522,
+    roughness: 0.35,
+    metalness: 0.2
+  });
+  const podium = new THREE.Mesh(podiumGeo, podiumMat);
+  podium.position.y = -0.4;
+  podium.receiveShadow = true;
+  scene.add(podium);
+
+  // Neon glowing perimeter border
+  const borderGeo = new THREE.EdgesGeometry(podiumGeo);
+  const borderMat = new THREE.LineBasicMaterial({ color: 0x19c3eb, linewidth: 2 });
+  const borderLine = new THREE.LineSegments(borderGeo, borderMat);
+  borderLine.position.y = -0.4;
+  scene.add(borderLine);
+
+  // Floor Grid Helper
+  const grid = new THREE.GridHelper(38, 38, 0x19c3eb, 0x1b2336);
+  grid.position.y = 0.02;
+  scene.add(grid);
+
+  // Directional Central Floor Pathway
+  const pathGeo = new THREE.PlaneGeometry(3.6, 26);
+  const pathMat = new THREE.MeshStandardMaterial({
+    color: 0x141a2a,
+    roughness: 0.5
+  });
+  const path = new THREE.Mesh(pathGeo, pathMat);
+  path.rotation.x = -Math.PI / 2;
+  path.position.set(0, 0.03, -0.5);
+  path.receiveShadow = true;
+  scene.add(path);
+
+  // Showroom Back Glass Wall
+  const backWallGeo = new THREE.BoxGeometry(38, 8, 0.4);
+  const backWallMat = new THREE.MeshStandardMaterial({
+    color: 0x0f1320,
+    roughness: 0.8
+  });
+  const backWall = new THREE.Mesh(backWallGeo, backWallMat);
+  backWall.position.set(0, 4, -13.6);
+  backWall.receiveShadow = true;
+  scene.add(backWall);
+
+  // Studio Header Neon Signboard on Back Wall
+  const signCanvas = document.createElement("canvas");
+  signCanvas.width = 1024;
+  signCanvas.height = 256;
+  const sctx = signCanvas.getContext("2d");
+  sctx.fillStyle = "#121728";
+  sctx.fillRect(0, 0, 1024, 256);
+  sctx.strokeStyle = "#e8202a";
+  sctx.lineWidth = 6;
+  sctx.strokeRect(8, 8, 1008, 240);
+  sctx.font = "bold 56px sans-serif";
+  sctx.fillStyle = "#ffffff";
+  sctx.textAlign = "center";
+  sctx.fillText("KKP GRAPHIC DESIGN STUDIO", 512, 105);
+  sctx.font = "bold 28px sans-serif";
+  sctx.fillStyle = "#19c3eb";
+  sctx.fillText("CREATIVE OPERATIONS & LIVE TELEMETRY", 512, 175);
+
+  const signTex = new THREE.CanvasTexture(signCanvas);
+  const signGeo = new THREE.PlaneGeometry(16, 4);
+  const signMat = new THREE.MeshBasicMaterial({ map: signTex });
+  const signboard = new THREE.Mesh(signGeo, signMat);
+  signboard.position.set(0, 4.5, -13.3);
+  scene.add(signboard);
+
+  // 3. Build the 6 Glass Booths & Workstations (Matching Image!)
+  const raycastObjects = [];
+  const boothHolograms = [];
+  const hotspotPulses = [];
+
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x223652,
+    transparent: true,
+    opacity: 0.32,
+    roughness: 0.1,
+    metalness: 0.3
+  });
+
+  const boothTrimMat = new THREE.LineBasicMaterial({ color: 0x5ce0ff });
+
+  teamStations.forEach((st, idx) => {
+    const boothGroup = new THREE.Group();
+    boothGroup.position.set(st.posX, 0, st.posZ);
+
+    // Glass Partition Booth Enclosure (Matching the Showroom Booths in Image!)
+    const bWidth = 6.4;
+    const bDepth = 5.6;
+    const bHeight = 4.2;
+
+    // Glass side wall
+    const sideWallGeo = new THREE.BoxGeometry(0.08, bHeight, bDepth);
+    const sideWall = new THREE.Mesh(sideWallGeo, glassMat);
+    sideWall.position.set(idx % 3 === 0 ? -bWidth / 2 : bWidth / 2, bHeight / 2, 0);
+    boothGroup.add(sideWall);
+
+    // Booth Wireframe outline
+    const frameBox = new THREE.BoxGeometry(bWidth, bHeight, bDepth);
+    const frameEdges = new THREE.EdgesGeometry(frameBox);
+    const frameWire = new THREE.LineSegments(frameEdges, boothTrimMat);
+    frameWire.position.y = bHeight / 2;
+    boothGroup.add(frameWire);
+
+    // Floor Base Pad for Workstation
+    const pad = new THREE.Mesh(
+      new THREE.PlaneGeometry(bWidth - 0.4, bDepth - 0.4),
+      new THREE.MeshStandardMaterial({ color: 0x161c2c, roughness: 0.6 })
+    );
+    pad.rotation.x = -Math.PI / 2;
+    pad.position.y = 0.04;
+    pad.receiveShadow = true;
+    boothGroup.add(pad);
+
+    // Modern Executive Desk
+    const deskTop = new THREE.Mesh(
+      new THREE.BoxGeometry(3.8, 0.14, 2.0),
+      new THREE.MeshStandardMaterial({ color: 0x1f2638, roughness: 0.35, metalness: 0.3 })
+    );
+    deskTop.position.set(0, 1.5, -0.2);
+    deskTop.castShadow = true;
+    deskTop.receiveShadow = true;
+    deskTop.userData = { stationIndex: idx };
+    boothGroup.add(deskTop);
+    raycastObjects.push(deskTop);
+
+    // Steel Desk Legs
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x3d4964, metalness: 0.8, roughness: 0.2 });
+    [[-1.7, 0.75, -0.8], [1.7, 0.75, -0.8], [-1.7, 0.75, 0.8], [1.7, 0.75, 0.8]].forEach(pos => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5), legMat);
+      leg.position.set(pos[0], pos[1], pos[2] - 0.2);
+      leg.castShadow = true;
+      boothGroup.add(leg);
+    });
+
+    // Dual Monitors with Artwork Texture
+    const cvs = document.createElement("canvas");
+    cvs.width = 512;
+    cvs.height = 280;
+    const c = cvs.getContext("2d");
+    c.fillStyle = "#0c0f1a";
+    c.fillRect(0, 0, 512, 280);
+    c.fillStyle = "#162238";
+    c.fillRect(15, 15, 482, 170);
+    c.fillStyle = "#19c3eb";
+    c.font = "bold 24px sans-serif";
+    c.fillText(st.cleanName.slice(0, 20), 25, 225);
+    c.fillStyle = "#2bd14b";
+    c.font = "20px sans-serif";
+    c.fillText(`Active: ${st.inQueueCount} | Done: ${st.completedCount}`, 25, 260);
+
+    const monTex = new THREE.CanvasTexture(cvs);
+    const monGeo = new THREE.BoxGeometry(1.5, 0.95, 0.06);
+    const monMat = new THREE.MeshBasicMaterial({ map: monTex });
+
+    const mon1 = new THREE.Mesh(monGeo, monMat);
+    mon1.position.set(-0.8, 2.25, -0.6);
+    mon1.rotation.y = 0.16;
+    boothGroup.add(mon1);
+
+    const mon2 = new THREE.Mesh(monGeo, monMat);
+    mon2.position.set(0.8, 2.25, -0.6);
+    mon2.rotation.y = -0.16;
+    boothGroup.add(mon2);
+
+    // Ergonomic Chair
+    const chairMat = new THREE.MeshStandardMaterial({ color: 0x181e30, roughness: 0.6 });
+    const chair = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.12, 1.0), chairMat);
+    chair.position.set(0, 1.15, 0.9);
+    chair.castShadow = true;
+    boothGroup.add(chair);
+
+    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.1), chairMat);
+    chairBack.position.set(0, 1.7, 1.35);
+    chairBack.castShadow = true;
+    boothGroup.add(chairBack);
+
+    // Floor Hotspot Node Marker (Matching 01, 02... circular rings in Image!)
+    const ringGeo = new THREE.RingGeometry(0.65, 0.85, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0x19c3eb,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.85
+    });
+    const hotspotRing = new THREE.Mesh(ringGeo, ringMat);
+    hotspotRing.rotation.x = -Math.PI / 2;
+    hotspotRing.position.set(0, 0.06, 1.9);
+    boothGroup.add(hotspotRing);
+    hotspotPulses.push(hotspotRing);
+
+    // Beacon Number Canvas Disc (01, 02, etc.)
+    const discCvs = document.createElement("canvas");
+    discCvs.width = 128;
+    discCvs.height = 128;
+    const dctx = discCvs.getContext("2d");
+    dctx.fillStyle = "#090d16";
+    dctx.beginPath();
+    dctx.arc(64, 64, 60, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.lineWidth = 6;
+    dctx.strokeStyle = "#19c3eb";
+    dctx.stroke();
+    dctx.fillStyle = "#ffffff";
+    dctx.font = "bold 52px sans-serif";
+    dctx.textAlign = "center";
+    dctx.textBaseline = "middle";
+    dctx.fillText(`0${idx + 1}`, 64, 64);
+
+    const discTex = new THREE.CanvasTexture(discCvs);
+    const discMesh = new THREE.Mesh(
+      new THREE.CircleGeometry(0.55, 32),
+      new THREE.MeshBasicMaterial({ map: discTex, side: THREE.DoubleSide })
+    );
+    discMesh.rotation.x = -Math.PI / 2;
+    discMesh.position.set(0, 0.07, 1.9);
+    discMesh.userData = { stationIndex: idx };
+    boothGroup.add(discMesh);
+    raycastObjects.push(discMesh);
+
+    scene.add(boothGroup);
+
+    // Floating Hologram Tag (DOM projection)
+    if (hologramLayer) {
+      const tag = document.createElement("div");
+      tag.className = `hologram-station-tag ${idx === 0 ? "is-active" : ""}`;
+      tag.innerHTML = `
+        <div class="holo-tag-header">
+          <span class="holo-tag-name">${escapeHtml(st.cleanName)}</span>
+          <span class="holo-tag-desk">${st.deskId}</span>
+        </div>
+        <div class="holo-tag-task">${escapeHtml(st.currentTask ? st.currentTask.title : "พร้อมรับงานใหม่")}</div>
+        <div class="holo-tag-metrics">
+          <span>ส่งแล้ว <strong>${st.completedCount}</strong></span>
+          <span>ในคิว <strong>${st.inQueueCount}</strong></span>
+        </div>
+      `;
+
+      tag.addEventListener("click", () => {
+        focusStation(idx);
+        onSelectStation(idx);
+      });
+
+      hologramLayer.appendChild(tag);
+      boothHolograms.push({ el: tag, pos: new THREE.Vector3(st.posX, 3.8, st.posZ) });
+    }
+  });
+
+  // 4. Smooth Camera Focus Logic
+  function focusStation(idx) {
+    const st = teamStations[idx];
+    if (!st) return;
+    targetCamPos.set(st.posX, 4.2, st.posZ + 6.2);
+    targetCamLookAt.set(st.posX, 1.8, st.posZ);
+
+    boothHolograms.forEach((h, i) => {
+      h.el.classList.toggle("is-active", i === idx);
+    });
+  }
+
+  function resetOverview() {
+    targetCamPos.copy(overviewPos);
+    targetCamLookAt.copy(overviewLookAt);
+    boothHolograms.forEach(h => h.el.classList.remove("is-active"));
+  }
+
+  // HUD Controls
+  document.getElementById("hud-cam-overview")?.addEventListener("click", resetOverview);
+
+  let isTouring = false;
+  let tourIdx = 0;
+  document.getElementById("hud-cam-tour")?.addEventListener("click", (e) => {
+    isTouring = !isTouring;
+    e.currentTarget?.classList.toggle("is-active", isTouring);
+
+    if (isTouring) {
+      tourIntervalId = setInterval(() => {
+        if (!isMounted) return;
+        tourIdx = (tourIdx + 1) % teamStations.length;
+        focusStation(tourIdx);
+        onSelectStation(tourIdx);
+      }, 4000);
+      focusStation(tourIdx);
+      onSelectStation(tourIdx);
+    } else {
+      clearInterval(tourIntervalId);
+      tourIntervalId = null;
+      resetOverview();
+    }
+  });
+
+  // 5. Mouse Orbit & Raycast Interaction
+  let isDragging = false;
+  let prevMouse = { x: 0, y: 0 };
+  let orbitRadius = 35;
+  let orbitTheta = Math.PI / 2;
+  let orbitPhi = Math.PI / 3.8;
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function onPointerDown(e) {
+    if (e.target !== renderer.domElement) return;
+    isDragging = true;
+    prevMouse = { x: e.clientX, y: e.clientY };
+  }
+
+  function onPointerMove(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+    if (isDragging) {
+      const dx = e.clientX - prevMouse.x;
+      const dy = e.clientY - prevMouse.y;
+      prevMouse = { x: e.clientX, y: e.clientY };
+
+      orbitTheta -= dx * 0.005;
+      orbitPhi = Math.max(0.18, Math.min(Math.PI / 2.3, orbitPhi - dy * 0.005));
+
+      targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
+      targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
+      targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
+    } else {
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(raycastObjects);
+      renderer.domElement.style.cursor = hits.length > 0 ? "pointer" : "default";
+    }
+  }
+
+  function onPointerUp() {
+    isDragging = false;
+  }
+
+  function onPointerClick(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(raycastObjects);
+
+    if (hits.length > 0) {
+      const idx = hits[0].object.userData.stationIndex;
+      if (typeof idx === "number") {
+        focusStation(idx);
+        onSelectStation(idx);
+      }
+    }
+  }
+
+  function onWheel(e) {
+    e.preventDefault();
+    orbitRadius = Math.max(14, Math.min(50, orbitRadius + e.deltaY * 0.02));
+    targetCamPos.x = targetCamLookAt.x + orbitRadius * Math.sin(orbitPhi) * Math.sin(orbitTheta);
+    targetCamPos.y = targetCamLookAt.y + orbitRadius * Math.cos(orbitPhi);
+    targetCamPos.z = targetCamLookAt.z + orbitRadius * Math.sin(orbitPhi) * Math.cos(orbitTheta);
+  }
+
+  renderer.domElement.addEventListener("mousedown", onPointerDown);
+  window.addEventListener("mousemove", onPointerMove);
+  window.addEventListener("mouseup", onPointerUp);
+  renderer.domElement.addEventListener("click", onPointerClick);
+  renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
+
+  // 6. Animation Loop
+  let clock = new THREE.Clock();
+
+  function animate() {
+    if (!isMounted) return;
+    animationFrameId = requestAnimationFrame(animate);
+
+    const elapsed = clock.getElapsedTime();
+
+    // Camera LERP
+    camera.position.lerp(targetCamPos, 0.055);
+    currentLookAt.lerp(targetCamLookAt, 0.055);
+    camera.lookAt(currentLookAt);
+
+    // Pulse Hotspot Rings
+    hotspotPulses.forEach((ring, i) => {
+      const s = 1.0 + Math.sin(elapsed * 3.0 + i) * 0.08;
+      ring.scale.set(s, s, s);
+    });
+
+    // Project Hologram Tags to 2D Screen Space
+    if (hologramLayer && canvasContainer) {
+      const tempV = new THREE.Vector3();
+      const halfW = canvasContainer.clientWidth / 2;
+      const halfH = canvasContainer.clientHeight / 2;
+
+      boothHolograms.forEach(item => {
+        tempV.copy(item.pos);
+        tempV.project(camera);
+
+        if (tempV.z > 1) {
+          item.el.style.display = "none";
+        } else {
+          item.el.style.display = "block";
+          const x = (tempV.x * halfW) + halfW;
+          const y = -(tempV.y * halfH) + halfH;
+          item.el.style.left = `${x}px`;
+          item.el.style.top = `${y}px`;
         }
       });
     }
 
-    // Right Sidebar: Category breakdown
-    const catsEl = $("#studio-cats");
-    if (catsEl) {
-      const cs = {};
-      TM.forEach(m => Object.entries(m.cat).forEach(([k, v]) => cs[k] = (cs[k] || 0) + v));
-      const ce = Object.entries(cs).sort((a, b) => b[1] - a[1]).slice(0, 5);
-      const mx = ce.length ? ce[0][1] : 1;
-
-      catsEl.innerHTML = !ce.length ? '<div style="color:var(--studio-mu);font-size:11px">— ยังไม่มีข้อมูล —</div>' : ce.map(([k, v]) => `
-        <div class="studio-ct">
-          <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${E(k)}</span>
-          <div class="studio-sg"><i style="width:${v / mx * 100}%"></i></div>
-          <b style="font-family:var(--studio-mono);font-size:9px;text-align:right;">${v}</b>
-        </div>
-      `).join("");
-    }
-
-    // Bottom Row: Project & Workstation Info
-    const piEl = $("#studio-pi");
-    if (piEl) {
-      const m = TM[sel];
-      piEl.innerHTML = `
-        <div style="padding:4px 8px;margin-bottom:6px;background:#0d1118;border:1px solid var(--studio-ln);border-radius:4px;font-size:11px">
-          <b>${m.n}</b> • ${m.r} • ${m.desk}
-        </div>
-        <div class="studio-gr">
-          <div>ส่งมอบแล้ว<b>${m.dn} ชิ้น</b></div>
-          <div>กำลังทำ<b>${m.tk.length} งาน</b></div>
-          <div>โปรเจกต์<b>${m.pj}</b></div>
-          <div>On-Time SLA<b>${m.sla}</b></div>
-          <div>ภาระงาน<b>${m.ld}%</b></div>
-          <div>ซอฟต์แวร์<b style="font-size:10px">${m.sw}</b></div>
-        </div>
-      `;
-    }
-
-    charts();
+    renderer.render(scene, camera);
   }
 
-  // 4. Canvas Sparkline and Line Charts
-  const fit = c => {
-    if (!c) return [null, 0, 0];
-    const r = c.getBoundingClientRect();
-    const d = window.devicePixelRatio || 1;
-    c.width = r.width * d;
-    c.height = r.height * d;
-    const x = c.getContext("2d");
-    x.setTransform(d, 0, 0, d, 0, 0);
-    x.font = "9px 'IBM Plex Sans Thai', sans-serif";
-    return [x, r.width, r.height];
-  };
+  animate();
 
-  function gd(x, w, h, mx) {
-    x.strokeStyle = "#242e3d";
-    x.fillStyle = "#6e7e91";
-    x.lineWidth = 1;
-    for (let k = 0; k < 4; k++) {
-      const y = 6 + k * (h - 22) / 3;
-      x.beginPath();
-      x.moveTo(26, y);
-      x.lineTo(w - 4, y);
-      x.stroke();
-      x.fillText(Math.round(mx * (1 - k / 3)), 2, y + 3);
-    }
+  // Resize handler
+  function onResize() {
+    if (!canvasContainer || !renderer) return;
+    const w = canvasContainer.clientWidth;
+    const h = canvasContainer.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
   }
 
-  function sl(x, d, mx, w, h, c, fill) {
-    const dx = (w - 30) / (d.length - 1);
-    let py;
-    x.beginPath();
-    d.forEach((v, i) => {
-      const X = 26 + i * dx;
-      const Y = 6 + (h - 22) * (1 - v / mx);
-      if (i) x.lineTo(X, py);
-      else x.moveTo(X, Y);
-      x.lineTo(X, Y);
-      py = Y;
-    });
-    if (fill) {
-      x.save();
-      x.lineTo(w - 4, h - 16);
-      x.lineTo(26, h - 16);
-      x.fillStyle = c + "33";
-      x.fill();
-      x.restore();
-    }
-    x.strokeStyle = c;
-    x.lineWidth = 2;
-    x.stroke();
-  }
-
-  function charts() {
-    const c1 = $("#studio-c1");
-    if (c1) {
-      let [x, w, h] = fit(c1);
-      if (x) {
-        let mx = Math.max(4, ...hist.d, ...hist.i);
-        gd(x, w, h, mx);
-        sl(x, hist.d, mx, w, h, "#19c3eb", 1);
-        sl(x, hist.i, mx, w, h, "#ffc61a");
-      }
-    }
-
-    const c2 = $("#studio-c2");
-    if (c2) {
-      let [x, w, h] = fit(c2);
-      if (x) {
-        let mx = Math.max(8, ...hist.a);
-        gd(x, w, h, mx);
-        sl(x, hist.a, mx, w, h, "#3aa0ff");
-        sl(x, hist.r, mx, w, h, "#ffc61a");
-        sl(x, hist.u, mx, w, h, "#e8202a");
-      }
-    }
-
-    const c3 = $("#studio-c3");
-    if (c3) {
-      let [x, w, h] = fit(c3);
-      if (x) {
-        const D = MON.slice();
-        D[new Date().getMonth()] = live;
-        let mx = Math.max(4, ...D) * 1.1;
-        gd(x, w, h, mx);
-        const bw = (w - 34) / 12;
-        D.forEach((v, i) => {
-          const bh = (h - 22) * v / mx;
-          const fc = i > new Date().getMonth();
-          for (let y = 0; y < bh; y += 6) {
-            x.fillStyle = fc ? "#19c3eb33" : `rgba(25, 195, 235, ${0.4 + 0.6 * y / bh})`;
-            x.fillRect(30 + i * bw, h - 16 - y - 4, bw - 5, 4);
-          }
-          x.fillStyle = "#6e7e91";
-          x.fillText(i + 1, 32 + i * bw, h - 4);
-        });
-      }
-    }
-  }
-
-  function pick(i) {
-    sel = i;
-    const p = P0(PO[i][0] + 1.5, PO[i][1] + 1.3);
-    cam.tx = p[0];
-    cam.ty = p[1] - 6;
-    PS = 4;
-    size();
-    paint();
-  }
-
-  function reset() {
-    cam.tx = 32;
-    cam.ty = 66;
-    PS = 3;
-    size();
-    paint();
-  }
-
-  function hit(e) {
-    const r = cv.getBoundingClientRect();
-    const a = ((e.clientX - r.left) / PS - (W / 2 - cam.x)) / 16;
-    const b = ((e.clientY - r.top) / PS + 9 - (H / 2 - cam.y)) / 8;
-    const gx = (a + b) / 2;
-    const gy = (b - a) / 2;
-    return PO.findIndex(([x, y]) => gx > x - 0.4 && gx < x + 3.2 && gy > y - 0.4 && gy < y + 3.2);
-  }
-
-  // Mouse pan & zoom listeners
-  let dr = null;
-  let mv = 0;
-  const mp = $("#studio-map");
-
-  if (mp) {
-    mp.onpointerdown = e => {
-      if (e.target.closest(".studio-cd, .studio-btn, .studio-kp, #studio-ring")) return;
-      dr = [e.clientX, e.clientY];
-      mv = 0;
-      mp.setPointerCapture(e.pointerId);
-      mp.style.cursor = "grabbing";
-    };
-
-    mp.onpointermove = e => {
-      if (dr) {
-        const dx = e.clientX - dr[0];
-        const dy = e.clientY - dr[1];
-        mv += Math.abs(dx) + Math.abs(dy);
-        dr = [e.clientX, e.clientY];
-        cam.x -= dx / PS;
-        cam.y -= dy / PS;
-        cam.tx = cam.x;
-        cam.ty = cam.y;
-      } else {
-        hv = hit(e);
-      }
-    };
-
-    mp.onpointerup = e => {
-      if (!dr) return;
-      dr = null;
-      mp.style.cursor = "grab";
-      if (mv < 6) {
-        const i = hit(e);
-        if (i >= 0) pick(i);
-      }
-    };
-
-    mp.onwheel = e => {
-      e.preventDefault();
-      PS = Math.max(2, Math.min(5, PS + (e.deltaY < 0 ? 1 : -1)));
-      size();
-    };
-  }
-
-  // Click delegation for cards and rankings
-  container.addEventListener("click", e => {
-    const targetCard = e.target.closest("[data-designer-idx]");
-    if (targetCard) {
-      const idx = parseInt(targetCard.dataset.designerIdx, 10);
-      if (!isNaN(idx)) pick(idx);
-    }
-  });
-
-  // Top action buttons
-  $("#studio-rs")?.addEventListener("click", reset);
-
-  $("#studio-tour")?.addEventListener("click", e => {
-    if (tourIntervalId) {
-      clearInterval(tourIntervalId);
-      tourIntervalId = null;
-      e.target.classList.remove("is-on");
-    } else {
-      e.target.classList.add("is-on");
-      tourIntervalId = setInterval(() => {
-        if (!isMounted) return;
-        pick((sel + 1) % 6);
-      }, 3500);
-    }
-  });
-
-  // New Brief dialog
-  $("#studio-nb")?.addEventListener("click", () => {
-    const select = $("#studio-f3");
-    if (select) {
-      select.innerHTML = TM.map((m, i) => `
-        <option value="${i}" ${i === sel ? "selected" : ""}>${m.fullName} (ภาระ ${m.ld}%)</option>
-      `).join("");
-    }
-    $("#studio-md")?.classList.add("is-open");
-  });
-
-  $("#studio-cancel-brief")?.addEventListener("click", () => {
-    $("#studio-md")?.classList.remove("is-open");
-  });
-
-  $("#studio-brief-form")?.addEventListener("submit", e => {
-    e.preventDefault();
-    const designerIdx = parseInt($("#studio-f3").value, 10);
-    const title = $("#studio-f1").value.trim();
-    const projName = $("#studio-f2").value.trim();
-    const catName = $("#studio-f4").value;
-    const isUrgent = $("#studio-f5").checked;
-
-    add(designerIdx, title, projName, catName, isUrgent);
-    TM[designerIdx].pj++;
-    $("#studio-md")?.classList.remove("is-open");
-    $("#studio-f1").value = "";
-    $("#studio-f2").value = "";
-    pick(designerIdx);
-    toast(`มอบหมายงาน "${title}" ให้ ${TM[designerIdx].n} เรียบร้อย!`, "success", "สร้างงานสำเร็จ");
-  });
-
-  // Dual View Switcher Event
-  $("#btn-switch-classic")?.addEventListener("click", () => {
-    localStorage.setItem("cont_dashboard_view", "classic");
-    cleanupStudio3D();
-    if (typeof onSwitchToClassic === "function") {
-      onSwitchToClassic();
-    }
-  });
-
-  // Window resize
-  const onResize = () => {
-    size();
-    paint();
-  };
   window.addEventListener("resize", onResize);
-
-  // Initialize
-  size();
-  paint();
-  animationFrameId = requestAnimationFrame(frame);
-  tickIntervalId = setInterval(tick, 2200);
 }
