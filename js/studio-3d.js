@@ -902,7 +902,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
           fxCtx.globalAlpha = Math.max(0, sp.alpha);
           fxCtx.beginPath();
-          fxCtx.arc(sp.x, p.y, sp.size, 0, Math.PI * 2);
+          fxCtx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
           fxCtx.fill();
         });
         fxCtx.globalAlpha = 1.0;
