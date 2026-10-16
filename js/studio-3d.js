@@ -97,87 +97,87 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
   // Sanitize name: remove any parentheses
   const sanitizeName = (raw) => (raw || "Designer").replace(/\s*\(.*?\)/g, "").trim();
 
-  // 2. Exact Workstations in the Office (Supports up to 9 distinct stations)
+  // 2. Exact Workstations in the Pixel Bay Creative Studio Office
   const workstationTemplates = [
     {
       stationId: "DESK-01",
-      stationTitle: "Art Director Desk",
-      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์",
+      stationTitle: "Art Director Master Station",
+      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์ (หน้าจอวิเคราะห์งานหลัก)",
       sprite: "assets/char-1.png",
-      xPct: 27.5,
-      yPct: 59.0,
+      xPct: 49.1,
+      yPct: 56.5,
       icon: "🎯"
     },
     {
       stationId: "DESK-02",
-      stationTitle: "Senior Designer Desk",
-      stationThai: "โต๊ะกราฟิกดีไซเนอร์อาวุโส",
+      stationTitle: "Senior Designer Workstation",
+      stationThai: "โต๊ะกราฟิกดีไซเนอร์อาวุโส (หลังพาร์ทิชันโคมไฟ)",
       sprite: "assets/char-2.png",
-      xPct: 15.5,
-      yPct: 71.0,
+      xPct: 26.7,
+      yPct: 74.5,
       icon: "🖥️"
     },
     {
       stationId: "DESK-03",
-      stationTitle: "Illustration Desk",
-      stationThai: "โต๊ะวาดภาพประกอบ & วิชวล",
+      stationTitle: "Visual & 3D Pod",
+      stationThai: "โต๊ะวิชวลและโมเดล 3D (จอมอนิเตอร์คู่)",
       sprite: "assets/char-3.png",
-      xPct: 28.5,
-      yPct: 83.0,
+      xPct: 36.0,
+      yPct: 76.5,
       icon: "🎨"
     },
     {
       stationId: "DESK-04",
-      stationTitle: "Branding Studio Desk",
-      stationThai: "โต๊ะออกแบบแบรนด์ & เลย์เอาต์",
+      stationTitle: "Illustration & Layout Pod",
+      stationThai: "โต๊ะวาดภาพและเลย์เอาต์ (แท็บเล็ต Cintiq)",
       sprite: "assets/char-4.png",
-      xPct: 39.5,
-      yPct: 73.0,
+      xPct: 47.6,
+      yPct: 82.0,
       icon: "📐"
     },
     {
-      stationId: "DESK-05",
-      stationTitle: "Graphic Review Desk",
-      stationThai: "โต๊ะตรวจงานและประเมินแบบ",
+      stationId: "BALCONY-05",
+      stationTitle: "Ocean Terrace Lounge",
+      stationThai: "โต๊ะคิดงานริมระเบียงกระจกวิวทะเล",
       sprite: "assets/char-5.png",
-      xPct: 52.5,
-      yPct: 84.5,
-      icon: "📋"
-    },
-    {
-      stationId: "LAB-06",
-      stationTitle: "Print Lab & Plotter",
-      stationThai: "ห้องพิมพ์พรูฟ & พล็อตเตอร์ใหญ่",
-      sprite: "assets/char-6.png",
-      xPct: 65.0,
-      yPct: 43.5,
-      icon: "🖨️"
-    },
-    {
-      stationId: "CAFE-07",
-      stationTitle: "Coffee Lounge Table",
-      stationThai: "โต๊ะนั่งคิดงานริมหน้าต่าง",
-      sprite: "assets/char-7.png",
-      xPct: 82.5,
-      yPct: 72.0,
+      xPct: 24.3,
+      yPct: 44.0,
       icon: "☕"
     },
     {
-      stationId: "LIB-08",
-      stationTitle: "Mezzanine Library",
-      stationThai: "โซฟามุมอ่านหนังสือชั้นลอย",
+      stationId: "DESK-06",
+      stationTitle: "Graphic Review & Bookshelf",
+      stationThai: "โต๊ะตรวจงานและประเมินแบบ (ริมตู้หนังสือ)",
+      sprite: "assets/char-6.png",
+      xPct: 54.5,
+      yPct: 54.5,
+      icon: "📋"
+    },
+    {
+      stationId: "DESK-07",
+      stationTitle: "Brand Identity Studio",
+      stationThai: "โต๊ะออกแบบแบรนด์และคอนเซปต์",
+      sprite: "assets/char-7.png",
+      xPct: 64.7,
+      yPct: 77.0,
+      icon: "💡"
+    },
+    {
+      stationId: "DESK-08",
+      stationTitle: "Creative Corner Desk",
+      stationThai: "โต๊ะครีเอทีฟมุมหน้าต่าง (ใกล้ต้นไม้)",
       sprite: "assets/char-8.png",
-      xPct: 53.0,
-      yPct: 22.0,
+      xPct: 15.5,
+      yPct: 85.0,
       icon: "🛋️"
     },
     {
-      stationId: "BAR-09",
-      stationTitle: "Espresso Bar",
-      stationThai: "เคาน์เตอร์บาร์กาแฟสด",
+      stationId: "CAFE-09",
+      stationTitle: "Seaside Espresso Balcony",
+      stationThai: "บาร์กาแฟระเบียงวิวสะพานแขวน",
       sprite: "assets/char-9.png",
-      xPct: 88.0,
-      yPct: 57.0,
+      xPct: 15.0,
+      yPct: 54.0,
       icon: "🧃"
     }
   ];
@@ -840,8 +840,8 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       }));
 
       const steamParticles = Array.from({ length: 12 }, () => ({
-        x: 1195 + Math.random() * 20,
-        y: 430 + Math.random() * 25,
+        x: 335 + Math.random() * 15,
+        y: 345 + Math.random() * 15,
         vx: (Math.random() - 0.5) * 0.2,
         vy: -0.35 - Math.random() * 0.45,
         size: 2 + Math.random() * 3,
@@ -855,15 +855,15 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         fxCtx.clearRect(0, 0, 1376, 768);
         frameCounter++;
 
-        // 1. Sunlight Shaft Shimmer
+        // 1. Sunlight Shaft Shimmer (Streaming in from the ocean bay glass windows on the left)
         const shimmerAlpha = 0.035 + Math.sin(frameCounter * 0.025) * 0.015;
         fxCtx.save();
         fxCtx.fillStyle = `rgba(255, 235, 175, ${shimmerAlpha})`;
         fxCtx.beginPath();
-        fxCtx.moveTo(1100, 40);
-        fxCtx.lineTo(1376, 40);
-        fxCtx.lineTo(1376, 768);
-        fxCtx.lineTo(920, 768);
+        fxCtx.moveTo(0, 0);
+        fxCtx.lineTo(550, 0);
+        fxCtx.lineTo(950, 768);
+        fxCtx.lineTo(150, 768);
         fxCtx.closePath();
         fxCtx.fill();
         fxCtx.restore();
@@ -873,9 +873,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         dustParticles.forEach(p => {
           p.x += p.vx;
           p.y += p.vy;
-          if (p.y > 700) { p.y = 80; p.x = 950 + Math.random() * 400; }
-          if (p.x < 900) p.x = 1350;
-          if (p.x > 1360) p.x = 920;
+          if (p.y > 700) { p.y = 80; p.x = 200 + Math.random() * 600; }
+          if (p.x < 100) p.x = 800;
+          if (p.x > 850) p.x = 150;
 
           const currentAlpha = Math.max(0.08, Math.min(0.85, p.alpha + Math.sin(frameCounter * p.pulseSpeed) * 0.3));
           fxCtx.globalAlpha = currentAlpha;
@@ -885,7 +885,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         });
         fxCtx.globalAlpha = 1.0;
 
-        // 3. Coffee Steam
+        // 3. Coffee Steam (From terrace coffee table)
         fxCtx.fillStyle = "rgba(255, 255, 255, 0.45)";
         steamParticles.forEach(sp => {
           sp.x += sp.vx;
@@ -893,9 +893,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           sp.size += 0.04;
           sp.alpha -= 0.007;
 
-          if (sp.alpha <= 0 || sp.y < 380) {
-            sp.x = 1195 + Math.random() * 20;
-            sp.y = 430 + Math.random() * 25;
+          if (sp.alpha <= 0 || sp.y < 280) {
+            sp.x = 335 + Math.random() * 15;
+            sp.y = 345 + Math.random() * 15;
             sp.size = 2 + Math.random() * 2;
             sp.alpha = 0.35 + Math.random() * 0.25;
           }
