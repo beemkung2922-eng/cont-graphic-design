@@ -97,88 +97,63 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
   // Sanitize name: remove any parentheses
   const sanitizeName = (raw) => (raw || "Designer").replace(/\s*\(.*?\)/g, "").trim();
 
-  // 2. Exact Workstations in the Pixel Bay Creative Studio Office
+  // 2. Exact Workstations in the Pixel Bay Creative Studio (7 Dedicated Team Workstations)
   const workstationTemplates = [
     {
-      stationId: "DESK-01",
-      stationTitle: "Art Director Master Station",
-      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์ (หน้าจอวิเคราะห์งานหลัก)",
-      sprite: "assets/char-1.png",
-      xPct: 49.1,
-      yPct: 56.5,
+      stationId: "HEAD-01",
+      stationTitle: "Team Head Master Station",
+      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์ (หน้าจอมอนิเตอร์หลัก)",
+      xPct: 60.5,
+      yPct: 46.5,
       icon: "🎯"
     },
     {
       stationId: "DESK-02",
-      stationTitle: "Senior Designer Workstation",
-      stationThai: "โต๊ะกราฟิกดีไซเนอร์อาวุโส (หลังพาร์ทิชันโคมไฟ)",
-      sprite: "assets/char-2.png",
-      xPct: 26.7,
-      yPct: 74.5,
+      stationTitle: "Graphic & Layout Desk",
+      stationThai: "โต๊ะดีไซน์เนอร์ฝั่งซ้าย (หลังโคมไฟ)",
+      xPct: 33.5,
+      yPct: 53.0,
       icon: "🖥️"
     },
     {
       stationId: "DESK-03",
       stationTitle: "Visual & 3D Pod",
-      stationThai: "โต๊ะวิชวลและโมเดล 3D (จอมอนิเตอร์คู่)",
-      sprite: "assets/char-3.png",
-      xPct: 36.0,
-      yPct: 76.5,
+      stationThai: "โต๊ะกราฟิกและโมเดล 3D (จอมอนิเตอร์คู่)",
+      xPct: 43.5,
+      yPct: 64.0,
       icon: "🎨"
     },
     {
       stationId: "DESK-04",
-      stationTitle: "Illustration & Layout Pod",
-      stationThai: "โต๊ะวาดภาพและเลย์เอาต์ (แท็บเล็ต Cintiq)",
-      sprite: "assets/char-4.png",
-      xPct: 47.6,
-      yPct: 82.0,
+      stationTitle: "Mobile & Brand Review",
+      stationThai: "โต๊ะดีไซน์เนอร์ตรวจแบบ (เสื้อเชิ้ตขาว)",
+      xPct: 76.5,
+      yPct: 59.0,
       icon: "📐"
     },
     {
       stationId: "BALCONY-05",
-      stationTitle: "Ocean Terrace Lounge",
+      stationTitle: "Ocean Terrace Balcony Lounge",
       stationThai: "โต๊ะคิดงานริมระเบียงกระจกวิวทะเล",
-      sprite: "assets/char-5.png",
-      xPct: 24.3,
-      yPct: 44.0,
+      xPct: 37.5,
+      yPct: 22.0,
       icon: "☕"
     },
     {
       stationId: "DESK-06",
-      stationTitle: "Graphic Review & Bookshelf",
-      stationThai: "โต๊ะตรวจงานและประเมินแบบ (ริมตู้หนังสือ)",
-      sprite: "assets/char-6.png",
-      xPct: 54.5,
-      yPct: 54.5,
-      icon: "📋"
+      stationTitle: "Cintiq Illustration Pod",
+      stationThai: "โต๊ะวาดภาพประกอบ Cintiq (หูฟัง)",
+      xPct: 60.5,
+      yPct: 74.0,
+      icon: "🖌️"
     },
     {
       stationId: "DESK-07",
-      stationTitle: "Brand Identity Studio",
-      stationThai: "โต๊ะออกแบบแบรนด์และคอนเซปต์",
-      sprite: "assets/char-7.png",
-      xPct: 64.7,
-      yPct: 77.0,
+      stationTitle: "Window Creative Desk",
+      stationThai: "โต๊ะครีเอทีฟเสื้อส้มริมหน้าต่าง",
+      xPct: 13.5,
+      yPct: 64.0,
       icon: "💡"
-    },
-    {
-      stationId: "DESK-08",
-      stationTitle: "Creative Corner Desk",
-      stationThai: "โต๊ะครีเอทีฟมุมหน้าต่าง (ใกล้ต้นไม้)",
-      sprite: "assets/char-8.png",
-      xPct: 15.5,
-      yPct: 85.0,
-      icon: "🛋️"
-    },
-    {
-      stationId: "CAFE-09",
-      stationTitle: "Seaside Espresso Balcony",
-      stationThai: "บาร์กาแฟระเบียงวิวสะพานแขวน",
-      sprite: "assets/char-9.png",
-      xPct: 15.0,
-      yPct: 54.0,
-      icon: "🧃"
     }
   ];
 
@@ -600,11 +575,8 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
                           <div class="char-task-title" title="${taskTitle}">${taskTitle}</div>
                         </div>
 
-                        <!-- Full-Body Pixel Art Character Sitting in Office Chair -->
-                        <div class="char-sprite-wrap">
-                          <div class="char-shadow"></div>
-                          <img class="char-sprite-img" src="${s.station.sprite}" alt="${s.displayName}" />
-                        </div>
+                        <!-- Interactive Character Hitbox (Directly targeting the character in the artwork) -->
+                        <div class="char-hitbox" title="${s.displayName}"></div>
 
                         <!-- Floor Contact / Selection Ring -->
                         <div class="char-floor-ring"></div>
