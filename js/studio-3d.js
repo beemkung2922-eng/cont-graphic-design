@@ -97,63 +97,63 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
   // Sanitize name: remove any parentheses
   const sanitizeName = (raw) => (raw || "Designer").replace(/\s*\(.*?\)/g, "").trim();
 
-  // 2. Exact Workstations in the Modern Pixel Office (7 Dedicated Team Workstations)
+  // 2. Exact Workstations in the Pixel Bay Creative Studio (7 Dedicated Team Workstations)
   const workstationTemplates = [
     {
       stationId: "HEAD-01",
-      stationTitle: "Team Head • Telemetry Whiteboard",
-      stationThai: "หัวหน้าฝ่ายศิลป์ (หน้ากระดานสรุปผลงาน)",
-      xPct: 61.5,
-      yPct: 35.0,
+      stationTitle: "Team Head Master Station",
+      stationThai: "โต๊ะหัวหน้าฝ่ายศิลป์ (หน้าจอมอนิเตอร์หลัก)",
+      xPct: 60.5,
+      yPct: 46.5,
       icon: "🎯"
     },
     {
       stationId: "DESK-02",
-      stationTitle: "Window Skyline Counter",
-      stationThai: "โต๊ะดีไซเนอร์ริมกระจกชมวิวเมือง",
-      xPct: 24.9,
-      yPct: 45.2,
-      icon: "🏙️"
-    },
-    {
-      stationId: "DESK-03",
-      stationTitle: "Graphic & UI Pod",
-      stationThai: "โต๊ะกราฟิก & UI จอมอนิเตอร์คู่ (ฮู้ดเขียว)",
-      xPct: 14.6,
-      yPct: 73.3,
+      stationTitle: "Graphic & Layout Desk",
+      stationThai: "โต๊ะดีไซน์เนอร์ฝั่งซ้าย (หลังโคมไฟ)",
+      xPct: 33.5,
+      yPct: 53.0,
       icon: "🖥️"
     },
     {
-      stationId: "DESK-04",
-      stationTitle: "Senior Visual & Review",
-      stationThai: "โต๊ะวิชวลดีไซน์เนอร์ตรวจงาน (เสื้อครีม)",
-      xPct: 57.1,
-      yPct: 61.0,
-      icon: "📐"
-    },
-    {
-      stationId: "LOUNGE-05",
-      stationTitle: "Sofa Creative Lounge",
-      stationThai: "โซฟามุมคิดงานพร้อมแล็ปท็อป",
-      xPct: 43.0,
-      yPct: 34.2,
-      icon: "🛋️"
-    },
-    {
-      stationId: "DESK-06",
-      stationTitle: "Illustration & Tablet Desk",
-      stationThai: "โต๊ะวาดภาพประกอบและแท็บเล็ตดิจิทัล",
-      xPct: 25.4,
-      yPct: 78.8,
+      stationId: "DESK-03",
+      stationTitle: "Visual & 3D Pod",
+      stationThai: "โต๊ะกราฟิกและโมเดล 3D (จอมอนิเตอร์คู่)",
+      xPct: 43.5,
+      yPct: 64.0,
       icon: "🎨"
     },
     {
-      stationId: "CORNER-07",
-      stationTitle: "Beanbag Quiet Corner",
-      stationThai: "เบาะบีนแบ็คมุมอ่านหนังสือและโคมไฟ",
-      xPct: 82.5,
-      yPct: 89.7,
+      stationId: "DESK-04",
+      stationTitle: "Mobile & Brand Review",
+      stationThai: "โต๊ะดีไซน์เนอร์ตรวจแบบ (เสื้อเชิ้ตขาว)",
+      xPct: 76.5,
+      yPct: 59.0,
+      icon: "📐"
+    },
+    {
+      stationId: "BALCONY-05",
+      stationTitle: "Ocean Terrace Balcony Lounge",
+      stationThai: "โต๊ะคิดงานริมระเบียงกระจกวิวทะเล",
+      xPct: 37.5,
+      yPct: 22.0,
       icon: "☕"
+    },
+    {
+      stationId: "DESK-06",
+      stationTitle: "Cintiq Illustration Pod",
+      stationThai: "โต๊ะวาดภาพประกอบ Cintiq (หูฟัง)",
+      xPct: 60.5,
+      yPct: 74.0,
+      icon: "🖌️"
+    },
+    {
+      stationId: "DESK-07",
+      stationTitle: "Window Creative Desk",
+      stationThai: "โต๊ะครีเอทีฟเสื้อส้มริมหน้าต่าง",
+      xPct: 13.5,
+      yPct: 64.0,
+      icon: "💡"
     }
   ];
 
@@ -440,7 +440,82 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           </div>
         </div>
 
-        <!-- 2. Main Stage Grid (Left: Pixel Office Viewport with Whiteboard Telemetry & Characters | Right: Inspector) -->
+        <!-- 2. Top 4 Bento KPI Cards (1. งานทั้งหมด, 2. งานเลท, 3. งานกำลังทำ(ตรงเวลา), 4. รอตรวจ/แก้ไข) -->
+        <div class="studio-kpi-grid">
+          <!-- Card 1: งานทั้งหมด -->
+          <div class="kpi-bento-card">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-yellow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </span>
+                <span class="kpi-card-label">งานทั้งหมด</span>
+              </div>
+              <span class="kpi-card-badge badge-yellow">Total</span>
+            </div>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num">${totalCount}</span>
+              <span class="kpi-card-unit">ชิ้น</span>
+            </div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkTotal, "#ffc61a")}</div>
+          </div>
+
+          <!-- Card 2: งานเลท (Overdue Tasks) -->
+          <div class="kpi-bento-card card-overdue">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-red">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </span>
+                <span class="kpi-card-label" style="color:#f87171;">งานเลท (เลยกำหนด)</span>
+              </div>
+              <span class="kpi-card-badge badge-red">⚠️ Overdue</span>
+            </div>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num" style="color:#ef4444;">${overdueCount}</span>
+              <span class="kpi-card-unit" style="color:#fca5a5;">งาน</span>
+            </div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkOverdue, "#ef4444")}</div>
+          </div>
+
+          <!-- Card 3: งานที่กำลังทำ (Active On-Schedule) -->
+          <div class="kpi-bento-card">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-cyan">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
+                </span>
+                <span class="kpi-card-label">งานที่กำลังทำ</span>
+              </div>
+              <span class="kpi-card-badge badge-cyan">In Progress</span>
+            </div>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num">${activeCount}</span>
+              <span class="kpi-card-unit">ชิ้น</span>
+            </div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkActive, "#19c3eb")}</div>
+          </div>
+
+          <!-- Card 4: รอตรวจ/แก้ไข (In Review / Revision) -->
+          <div class="kpi-bento-card">
+            <div class="kpi-card-head">
+              <div class="kpi-card-title-wrap">
+                <span class="kpi-card-icon icon-purple">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                </span>
+                <span class="kpi-card-label">รอตรวจ/แก้ไข</span>
+              </div>
+              <span class="kpi-card-badge badge-purple">Review</span>
+            </div>
+            <div class="kpi-card-val-row">
+              <span class="kpi-card-num">${reviewCount}</span>
+              <span class="kpi-card-unit">ชิ้น</span>
+            </div>
+            <div class="kpi-card-sparkline">${renderSparklineSvg(sparkReview, "#c084fc")}</div>
+          </div>
+        </div>
+
+        <!-- 3. Main Stage Grid (Left: Pixel Office Viewport with Characters | Right: Inspector) -->
         <div class="studio-stage-grid">
           <!-- Viewport Card -->
           <div class="studio-viewport-card" id="studio-viewport">
@@ -478,72 +553,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
                 <img class="studio-pixel-art-img" src="assets/isometric-office.jpg" alt="KKP Graphic Studio Office" />
 
                 <!-- Canvas Overlays (Sunlight dust, coffee steam, screen glows) -->
-                <canvas class="studio-fx-canvas" id="studio-fx-canvas" width="1024" height="819"></canvas>
-
-                <!-- Real-Time Whiteboard Telemetry Board (Projected directly on Wall Whiteboard) -->
-                <div class="whiteboard-telemetry-board" id="whiteboard-telemetry">
-                  <div class="wb-head">
-                    <div class="wb-title">
-                      <span class="wb-pulse-dot"></span>
-                      <span>KKP LIVE TELEMETRY</span>
-                    </div>
-                    <span class="wb-date-label">${filterState.period === 'all' ? 'ทั้งหมด' : (filterState.period === 'today' ? 'วันนี้' : (filterState.period === '7days' ? '7 วัน' : (filterState.period === 'month' ? 'เดือนนี้' : 'ปีนี้')))}</span>
-                  </div>
-
-                  <div class="wb-grid">
-                    <!-- Card 1: งานทั้งหมด -->
-                    <div class="wb-card card-yellow" title="งานทั้งหมด: ${totalCount} ชิ้น">
-                      <div class="wb-card-row">
-                        <span class="wb-card-title">งานทั้งหมด</span>
-                        <span class="wb-badge badge-yellow">Total</span>
-                      </div>
-                      <div class="wb-val-row">
-                        <span class="wb-val val-yellow">${totalCount}</span>
-                        <span class="wb-unit">ชิ้น</span>
-                      </div>
-                      <div class="wb-spark">${renderSparklineSvg(sparkTotal, "#ffc61a", 16, 75)}</div>
-                    </div>
-
-                    <!-- Card 2: งานเลท -->
-                    <div class="wb-card card-red ${overdueCount > 0 ? 'is-warning' : ''}" title="งานเลท: ${overdueCount} งาน">
-                      <div class="wb-card-row">
-                        <span class="wb-card-title">งานเลท</span>
-                        <span class="wb-badge badge-red">${overdueCount > 0 ? '⚠️ Overdue' : 'OK'}</span>
-                      </div>
-                      <div class="wb-val-row">
-                        <span class="wb-val val-red">${overdueCount}</span>
-                        <span class="wb-unit">งาน</span>
-                      </div>
-                      <div class="wb-spark">${renderSparklineSvg(sparkOverdue, "#ef4444", 16, 75)}</div>
-                    </div>
-
-                    <!-- Card 3: กำลังทำ -->
-                    <div class="wb-card card-cyan" title="กำลังทำ: ${activeCount} ชิ้น">
-                      <div class="wb-card-row">
-                        <span class="wb-card-title">กำลังทำ</span>
-                        <span class="wb-badge badge-cyan">Active</span>
-                      </div>
-                      <div class="wb-val-row">
-                        <span class="wb-val val-cyan">${activeCount}</span>
-                        <span class="wb-unit">ชิ้น</span>
-                      </div>
-                      <div class="wb-spark">${renderSparklineSvg(sparkActive, "#19c3eb", 16, 75)}</div>
-                    </div>
-
-                    <!-- Card 4: รอตรวจ -->
-                    <div class="wb-card card-purple" title="รอตรวจ/แก้ไข: ${reviewCount} ชิ้น">
-                      <div class="wb-card-row">
-                        <span class="wb-card-title">รอตรวจ</span>
-                        <span class="wb-badge badge-purple">Review</span>
-                      </div>
-                      <div class="wb-val-row">
-                        <span class="wb-val val-purple">${reviewCount}</span>
-                        <span class="wb-unit">ชิ้น</span>
-                      </div>
-                      <div class="wb-spark">${renderSparklineSvg(sparkReview, "#c084fc", 16, 75)}</div>
-                    </div>
-                  </div>
-                </div>
+                <canvas class="studio-fx-canvas" id="studio-fx-canvas" width="1376" height="768"></canvas>
 
                 <!-- Interactive Characters & Compact Bubbles Layer -->
                 <div class="studio-hotspots-layer" id="studio-hotspots-layer">
@@ -802,8 +812,8 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
       }));
 
       const steamParticles = Array.from({ length: 12 }, () => ({
-        x: 805 + Math.random() * 10,
-        y: 360 + Math.random() * 10,
+        x: 335 + Math.random() * 15,
+        y: 345 + Math.random() * 15,
         vx: (Math.random() - 0.5) * 0.2,
         vy: -0.35 - Math.random() * 0.45,
         size: 2 + Math.random() * 3,
@@ -814,18 +824,18 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
 
       function renderFx() {
         if (!isMounted) return;
-        fxCtx.clearRect(0, 0, 1024, 819);
+        fxCtx.clearRect(0, 0, 1376, 768);
         frameCounter++;
 
-        // 1. Sunlight Shaft Shimmer (Streaming in from the high-rise glass windows on the left)
+        // 1. Sunlight Shaft Shimmer (Streaming in from the ocean bay glass windows on the left)
         const shimmerAlpha = 0.035 + Math.sin(frameCounter * 0.025) * 0.015;
         fxCtx.save();
         fxCtx.fillStyle = `rgba(255, 235, 175, ${shimmerAlpha})`;
         fxCtx.beginPath();
         fxCtx.moveTo(0, 0);
-        fxCtx.lineTo(380, 0);
-        fxCtx.lineTo(580, 819);
-        fxCtx.lineTo(100, 819);
+        fxCtx.lineTo(550, 0);
+        fxCtx.lineTo(950, 768);
+        fxCtx.lineTo(150, 768);
         fxCtx.closePath();
         fxCtx.fill();
         fxCtx.restore();
@@ -835,9 +845,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         dustParticles.forEach(p => {
           p.x += p.vx;
           p.y += p.vy;
-          if (p.y > 750) { p.y = 80; p.x = 100 + Math.random() * 500; }
-          if (p.x < 50) p.x = 650;
-          if (p.x > 700) p.x = 100;
+          if (p.y > 700) { p.y = 80; p.x = 200 + Math.random() * 600; }
+          if (p.x < 100) p.x = 800;
+          if (p.x > 850) p.x = 150;
 
           const currentAlpha = Math.max(0.08, Math.min(0.85, p.alpha + Math.sin(frameCounter * p.pulseSpeed) * 0.3));
           fxCtx.globalAlpha = currentAlpha;
@@ -847,7 +857,7 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
         });
         fxCtx.globalAlpha = 1.0;
 
-        // 3. Coffee Steam (From office coffee machine pantry)
+        // 3. Coffee Steam (From terrace coffee table)
         fxCtx.fillStyle = "rgba(255, 255, 255, 0.45)";
         steamParticles.forEach(sp => {
           sp.x += sp.vx;
@@ -855,9 +865,9 @@ export function renderStudio3D(container, ctx, onSwitchToClassic) {
           sp.size += 0.04;
           sp.alpha -= 0.007;
 
-          if (sp.alpha <= 0 || sp.y < 300) {
-            sp.x = 805 + Math.random() * 10;
-            sp.y = 360 + Math.random() * 10;
+          if (sp.alpha <= 0 || sp.y < 280) {
+            sp.x = 335 + Math.random() * 15;
+            sp.y = 345 + Math.random() * 15;
             sp.size = 2 + Math.random() * 2;
             sp.alpha = 0.35 + Math.random() * 0.25;
           }
