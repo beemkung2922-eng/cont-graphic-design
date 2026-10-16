@@ -5,6 +5,7 @@ import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isRequester, isViewer, canCreateTask } from "./auth.js";
 import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
+import { renderStudio3D, cleanupStudio3D } from "./studio-3d.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
    Brand Tokens & Status Mappings
@@ -144,6 +145,8 @@ export async function render(ctx) {
   window.openCreateTask = () => openCreateTask(ctx);
   const isReq = isRequester(ctx.member);
   const canCreate = canCreateTask(ctx.member);
+
+  let currentView = localStorage.getItem("cont_dashboard_view") || "3d";
 
   const filterState = {
     period: "all",
@@ -411,6 +414,18 @@ export async function render(ctx) {
             <p class="overview-subtitle">ภาพรวมงานดีไซน์ สถิติการผลิต และสถานะงานทั้งหมดใน Pipeline</p>
           </div>
           <div class="overview-header-actions">
+            <!-- Dual View Switcher -->
+            <div class="view-switcher-pill" style="margin-right: 6px;">
+              <button type="button" class="view-btn is-active is-3d" id="btn-switch-to-3d" title="สลับไปมุมมอง KKP 3D Graphic Studio">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>3D Studio</span>
+              </button>
+              <button type="button" class="view-btn is-active" id="btn-stay-classic" title="มุมมอง Classic Overview">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>Classic Overview</span>
+              </button>
+            </div>
+
             <button type="button" class="btn-overview-action" id="btn-export-overview" title="ส่งออกรายงานสรุป">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Export สรุป</span>
@@ -674,6 +689,11 @@ export async function render(ctx) {
 
     /* ─────────── Event Bindings ─────────── */
     // Top action buttons
+    qs("#btn-switch-to-3d")?.addEventListener("click", () => {
+      currentView = "3d";
+      localStorage.setItem("cont_dashboard_view", "3d");
+      renderActiveView();
+    });
     qs("#btn-overview-new-task")?.addEventListener("click", () => window.openCreateTask?.());
     qs("#btn-export-overview")?.addEventListener("click", () => {
       toast("กำลังสร้างรายงานสรุปภาพรวมผู้บริหาร...", "info");
@@ -841,7 +861,21 @@ export async function render(ctx) {
     }, 0);
   };
 
-  draw();
+  const renderActiveView = () => {
+    if (currentView === "3d") {
+      cleanupStudio3D();
+      renderStudio3D(qs("#page-content"), ctx, () => {
+        currentView = "classic";
+        localStorage.setItem("cont_dashboard_view", "classic");
+        renderActiveView();
+      });
+    } else {
+      cleanupStudio3D();
+      draw();
+    }
+  };
+
+  renderActiveView();
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
