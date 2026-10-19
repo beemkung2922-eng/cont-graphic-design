@@ -288,7 +288,7 @@ export const auth = {
           body: JSON.stringify({
             name: formattedName || "Corporate Member",
             email: email.toLowerCase(),
-            role: isCoreDesigner ? "designer" : "requester",
+            role: isCoreDesigner ? "designer" : "viewer",
             auth_user_id: session.user.id,
             capacity_points: isCoreDesigner ? 10 : 0,
             is_active: true,
