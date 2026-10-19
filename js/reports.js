@@ -101,6 +101,7 @@ export async function render(ctx) {
   };
 
   let heatmapWeekOffset = 0;
+  let reportsBottomTab = "heatmap"; // "heatmap" | "members"
 
   const draw = () => {
     const allTasks = ctx.tasks || [];
@@ -372,14 +373,34 @@ export async function render(ctx) {
           </div>
         </div>
 
-        <!-- 4. Bottom Row: When requests arrive Heatmap -->
-        <div class="heatmap-card">
-          <div class="reports-card-head" style="margin-bottom:12px;">
+        <!-- 4. Combined Bottom Card: Demand Intake Heatmap & Deep-Dive Member Overview -->
+        <div class="heatmap-card reports-combined-card">
+          <div class="reports-card-head" style="margin-bottom:14px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
             <div>
-              <h3 class="reports-card-title">ช่วงเวลาที่เปิดบรีฟเข้ามาในระบบ (Demand Intake Heatmap)</h3>
-              <p class="reports-card-sub">ความหนาแน่นของการเปิดบรีฟงานแยกตามช่วงเวลาและวันในสัปดาห์ (รอบ 12 สัปดาห์)</p>
+              <h3 class="reports-card-title">
+                ${reportsBottomTab === "heatmap" ? "ช่วงเวลาที่เปิดบรีฟเข้ามาในระบบ (Demand Intake Heatmap)" : "เจาะลึกภาระงานรายคน (Team Members Overview)"}
+              </h3>
+              <p class="reports-card-sub">
+                ${reportsBottomTab === "heatmap" ? "ความหนาแน่นของการเปิดบรีฟงานแยกตามช่วงเวลาและวันในสัปดาห์ (รอบ 12 สัปดาห์)" : "แตะเลือกดีไซเนอร์เพื่อดูรายละเอียดงานและ KPI ประจำบุคคล"}
+              </p>
             </div>
-            <div class="heatmap-legend-wrap">
+
+            <!-- Segmented Subtab Switcher -->
+            <div class="reports-subtab-switcher">
+              <button type="button" class="reports-subtab-btn ${reportsBottomTab === "heatmap" ? "is-active" : ""}" id="tab-btn-heatmap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>ช่วงเวลาเปิดบรีฟ</span>
+              </button>
+              <button type="button" class="reports-subtab-btn ${reportsBottomTab === "members" ? "is-active" : ""}" id="tab-btn-members">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>เจาะลึกภาระงานรายคน</span>
+                ${filterState.memberId !== "all" ? `<span class="chip" style="font-size:0.65rem;padding:1px 5px;background:#38bdf8;color:#000;">1 คน</span>` : `<span class="chip" style="font-size:0.65rem;padding:1px 5px;background:#242c40;">${analytics.memberStats.length}</span>`}
+              </button>
+            </div>
+          </div>
+
+          ${reportsBottomTab === "heatmap" ? `
+            <div class="heatmap-legend-wrap" style="margin-bottom:12px;">
               <span>ระดับความหนาแน่น:</span>
               <div class="heatmap-legend-items">
                 <span class="heatmap-legend-item"><span class="heatmap-legend-dot lvl-0"></span> ว่าง (0)</span>
@@ -389,35 +410,36 @@ export async function render(ctx) {
                 <span class="heatmap-legend-item"><span class="heatmap-legend-dot lvl-4"></span> สูงสุด (7+)</span>
               </div>
             </div>
-          </div>
-          <div class="heatmap-scroll-wrap">
-            <table class="heatmap-grid-table">
-              <thead>
-                <tr>
-                  <th style="width:50px;"></th>
-                  ${hourLabels.map((h) => `<th>${h}</th>`).join("")}
-                </tr>
-              </thead>
-              <tbody>
-                ${heatmapRowsHtml}
-              </tbody>
-            </table>
-          </div>
+            <div class="heatmap-scroll-wrap">
+              <table class="heatmap-grid-table">
+                <thead>
+                  <tr>
+                    <th class="th-day-col" style="width:44px;"></th>
+                    ${hourLabels.map((h) => `<th>${h}</th>`).join("")}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${heatmapRowsHtml}
+                </tbody>
+              </table>
+            </div>
+          ` : `
+            <div class="reports-member-view-slot" style="margin-top:10px;">
+              ${renderMemberComparisonHtml({
+                memberStats: analytics.memberStats,
+                teamTotals: analytics.teamTotals,
+                selectedMemberId: filterState.memberId,
+                selectedStatus: filterState.status,
+                projects,
+                filteredTasks: tasks,
+                allTasks,
+                members,
+                weekOffset: heatmapWeekOffset,
+                showProjectBreakdown: false,
+              })}
+            </div>
+          `}
         </div>
-
-        <!-- 5. Designer Capacity & Workload Deep-Dive (No duplicate Project Explorer) -->
-        ${renderMemberComparisonHtml({
-          memberStats: analytics.memberStats,
-          teamTotals: analytics.teamTotals,
-          selectedMemberId: filterState.memberId,
-          selectedStatus: filterState.status,
-          projects,
-          filteredTasks: tasks,
-          allTasks,
-          members,
-          weekOffset: heatmapWeekOffset,
-          showProjectBreakdown: false,
-        })}
       </div>
     `;
 
@@ -445,9 +467,20 @@ export async function render(ctx) {
       onChange: () => draw(),
     });
 
+    // Subtab Switcher Handlers
+    qs("#tab-btn-heatmap")?.addEventListener("click", () => {
+      reportsBottomTab = "heatmap";
+      draw();
+    });
+    qs("#tab-btn-members")?.addEventListener("click", () => {
+      reportsBottomTab = "members";
+      draw();
+    });
+
     bindMemberComparison(qs("#page-content"), {
       onSelectMember: (newMemberId) => {
         filterState.memberId = newMemberId;
+        reportsBottomTab = "members";
         draw();
       },
       onSelectStatus: (newStatus) => {
