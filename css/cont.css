@@ -8467,6 +8467,42 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   margin-bottom: 28px;
 }
 
+/* Reports Combined Subtab Switcher */
+.reports-subtab-switcher {
+  display: inline-flex;
+  background: #0d0f17;
+  border: 1px solid #282f48;
+  border-radius: 9px;
+  padding: 3px;
+  gap: 4px;
+}
+.reports-subtab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  min-height: 38px;
+}
+.reports-subtab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+}
+.reports-subtab-btn.is-active {
+  background: #1e2538;
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
 .heatmap-scroll-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -11031,6 +11067,91 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
   .data.team-table {
     min-width: 720px !important;
+  }
+}
+
+/* 4. Reports Page Demand Heatmap Mobile Fit (No Horizontal Scroll) */
+@media (max-width: 680px) {
+  .heatmap-card {
+    padding: 14px 10px !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+  .reports-combined-card {
+    padding: 14px 10px !important;
+    border-radius: 12px !important;
+  }
+  .reports-subtab-switcher {
+    width: 100% !important;
+    display: flex !important;
+    margin-top: 8px !important;
+    background: #090a10 !important;
+    border: 1px solid #282f48 !important;
+  }
+  .reports-subtab-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    font-size: 0.78rem !important;
+    padding: 8px 6px !important;
+  }
+  .heatmap-scroll-wrap {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+  }
+  .heatmap-grid-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 2px !important;
+  }
+  .heatmap-grid-table th {
+    font-size: 0.60rem !important;
+    padding: 2px 0 4px !important;
+    text-align: center !important;
+    color: #727a94 !important;
+  }
+  .heatmap-grid-table th.th-day-col {
+    width: 38px !important;
+  }
+  .heatmap-grid-table td.day-label {
+    width: 38px !important;
+    max-width: 38px !important;
+    font-size: 0.68rem !important;
+    padding: 0 2px 0 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    color: #8b92ad !important;
+    font-weight: 600 !important;
+    text-align: right !important;
+  }
+  .heatmap-cell {
+    height: 24px !important;
+    border-radius: 3px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+  }
+  .heatmap-legend-wrap {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+  .heatmap-legend-items {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px 10px !important;
+  }
+  .heatmap-legend-item {
+    font-size: 0.68rem !important;
+  }
+  .reports-member-view-slot #member-comparison-section {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
   }
 }
 
