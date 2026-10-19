@@ -32,7 +32,6 @@ export const ROLE_LABELS = {
   designer: "Designer",
   supervisor: "Team Head",
   admin: "Team Head",
-  requester: "Requester",
   viewer: "Viewer",
 };
 export const PROJECT_STATUS_LABELS = { active: "กำลังดำเนินการ", archived: "เก็บถาวร", completed: "เสร็จแล้ว" };
