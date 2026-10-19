@@ -1,12 +1,44 @@
 import { api, auth } from "./supabase.js";
 import { roleLabel, avatar } from "./formatters.js";
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Role Permissions Matrix Integration (CONT_ROLE_PERMS)
+───────────────────────────────────────────────────────────────────────── */
+export const DEFAULT_ROLE_PERMS = {
+  create_task: { head: true, designer: true, requester: true, viewer: false },
+  work_task:   { head: true, designer: true, requester: false, viewer: false },
+  review_task: { head: true, designer: false, requester: false, viewer: false },
+  assign_task: { head: true, designer: false, requester: false, viewer: false },
+  request_rev: { head: true, designer: true, requester: true, viewer: false },
+  view_report: { head: true, designer: true, requester: false, viewer: false },
+  manage_role: { head: true, designer: false, requester: false, viewer: false },
+  download:    { head: true, designer: true, requester: true, viewer: true },
+};
+
+export function getRolePermissions() {
+  try {
+    const raw = localStorage.getItem("CONT_ROLE_PERMS");
+    if (raw) return { ...DEFAULT_ROLE_PERMS, ...JSON.parse(raw) };
+  } catch {}
+  return { ...DEFAULT_ROLE_PERMS };
+}
+
+export function hasPermission(member, permKey) {
+  if (!member) return false;
+  const role = member.role || "viewer";
+  if (["supervisor", "admin"].includes(role)) return true; // Team Head has omnipotent access
+  const perms = getRolePermissions();
+  const row = perms[permKey] || DEFAULT_ROLE_PERMS[permKey];
+  if (!row) return true;
+  return Boolean(row[role]);
+}
+
 export async function ensureAccess({ allowPublic = false } = {}) {
   const session = await auth.getSession();
   if (!session && !allowPublic) {
     const mount = document.querySelector("#page-content");
     if (mount) {
-      mount.innerHTML = `<div class="card"><div class="state"><div class="state-icon">↪</div><div class="state-title">กรุณาเข้าสู่ระบบก่อน</div><div class="state-text">หน้านี้ต้องใช้บัญชี Google ของสมาชิกทีม ให้กดเข้าสู่ระบบ แล้วเปิดหน้านี้จาก URL เดียวกันอีกครั้ง</div><a class="btn btn-primary" href="index.html">ไปหน้าเข้าสู่ระบบ</a></div></div>`;
+      mount.innerHTML = `<div class="card"><div class="state"><div class="state-icon">↪</div><div class="state-title">กรุณาเข้าสู่ระบบก่อน</div><div class="state-text">หน้านี้ต้องใช้บัญชี Google หรืออีเมลบริษัทของสมาชิกทีม ให้กดเข้าสู่ระบบ แล้วเปิดหน้านี้จาก URL เดียวกันอีกครั้ง</div><a class="btn btn-primary" href="index.html">ไปหน้าเข้าสู่ระบบ</a></div></div>`;
     }
     return { member: null };
   }
@@ -17,6 +49,27 @@ export async function ensureAccess({ allowPublic = false } = {}) {
       localStorage.removeItem("cont_session");
       throw new Error("ไม่พบสมาชิกในทีม หรือเซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่");
     }
+
+    // Role-based Page Route Guards
+    if (member && !allowPublic) {
+      const currentPage = document.body.dataset.page;
+      if (member.role === "requester") {
+        // Requester allowed pages: tasks, calendar, task (detail), intro (reel)
+        // Disallowed: dashboard, board, team
+        if (["dashboard", "board", "team"].includes(currentPage)) {
+          window.location.replace("tasks.html");
+          return { member: null };
+        }
+      } else if (member.role === "viewer") {
+        // Viewer allowed: dashboard, tasks, calendar, task (detail), intro (reel)
+        // Disallowed: board, team
+        if (["board", "team"].includes(currentPage)) {
+          window.location.replace("dashboard.html");
+          return { member: null };
+        }
+      }
+    }
+
     return { member };
   } catch (error) {
     localStorage.removeItem("cont_session");
@@ -43,26 +96,40 @@ export function canManage(member) { return ["supervisor", "admin"].includes(memb
 export function isAdmin(member) { return member?.role === "admin"; }
 export function isRequester(member) { return member?.role === "requester"; }
 export function isViewer(member) { return member?.role === "viewer"; }
-export function canMoveTask(member) { return isDesigner(member); }
+export function canMoveTask(member) {
+  if (!member || member.role === "viewer" || member.role === "requester") return false;
+  return hasPermission(member, "work_task");
+}
 export function canChangeTaskStatus(member, task) {
   if (canManage(member)) return true;
+  if (!hasPermission(member, "work_task")) return false;
   if (isDesigner(member) && task?.assignee_id === member?.id) return true;
   return false;
 }
-export function canCreateTask(member) { return member?.role !== "viewer"; }
+export function canCreateTask(member) {
+  if (!member || member.role === "viewer") return false;
+  return hasPermission(member, "create_task");
+}
 export function canEditTask(member, task) {
   if (canManage(member)) return true;
-  if (isDesigner(member) && task?.assignee_id === member?.id) return true;
-  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief") return true;
+  if (isDesigner(member) && task?.assignee_id === member?.id && hasPermission(member, "work_task")) return true;
+  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief" && hasPermission(member, "create_task")) return true;
   return false;
 }
 export function canDeleteTask(member, task) {
   if (canManage(member)) return true;
-  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief") return true;
+  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief" && hasPermission(member, "create_task")) return true;
   return false;
 }
 export function canUploadArtwork(member, task) {
+  if (!hasPermission(member, "work_task")) return false;
   return canManage(member) || (isDesigner(member) && task?.assignee_id === member?.id);
+}
+export function canDownload(member) {
+  return hasPermission(member, "download");
+}
+export function canViewReport(member) {
+  return hasPermission(member, "view_report");
 }
 
 export function errorMessage(error) {
