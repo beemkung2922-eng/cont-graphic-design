@@ -2,6 +2,15 @@
 @media(max-width:900px){.dashboard-grid,.dashboard-grid.equal,.detail-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:760px){.topbar .search-inline{min-width:34px;width:34px;height:34px;padding:0;justify-content:center;background:transparent;border:0}.topbar .search-inline input{display:none}.topbar .search-inline svg{width:17px;height:17px}}
 
+/* Responsive Images & Media Standards (Rule 3) */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+canvas, svg {
+  max-width: 100%;
+}
+
 /* --- Illustration & Motion Styles (CONT Motion System - Dark Theme) --- */
 .state-illustration {
   width: 100%;
@@ -7371,8 +7380,11 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
   .btn-overview-action, .btn-overview-primary {
     justify-content: center !important;
-    padding: 8px 12px !important;
+    padding: 10px 14px !important;
     font-size: 0.78rem !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
   }
 
   /* 2. Overview Top Grid: Put 4 Stat Cards First (Immediate KPI visibility) */
@@ -7538,7 +7550,8 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
     align-items: center !important;
     justify-content: center !important;
     gap: 6px !important;
-    padding: 7px 10px !important;
+    padding: 10px 10px !important;
+    min-height: 44px !important;
     border-radius: 7px !important;
     border: none !important;
     background: transparent !important;
