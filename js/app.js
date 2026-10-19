@@ -266,11 +266,16 @@ function sidebarHtml(page, member) {
   return `
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <a class="brand-mark" href="${config.homeHref}" style="text-decoration:none;color:inherit;">
-          <div class="brand-logo">C</div>
-          <div>
-            <div class="brand-name">CONT</div>
-            <div class="brand-sub">Graphic Design Workflow<br />Management System</div>
+        <a class="brand-mark" href="${config.homeHref}" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;">
+          <div class="pixel-logo-badge" style="width:36px;height:36px;">
+            ${pixelIcons.penTool}
+          </div>
+          <div class="pixel-brand-info">
+            <div class="pixel-brand-heading">
+              <span class="pixel-brand-name" style="font-size:1.2rem;">CONT</span>
+              <span class="pixel-brand-tag">STUDIO</span>
+            </div>
+            <span class="pixel-brand-sub" style="font-size:0.58rem;">GRAPHIC DESIGN</span>
           </div>
         </a>
       </div>
@@ -317,15 +322,23 @@ function topbarHtml(page, member) {
         </svg>
       </button>
 
-      <!-- Left: Logo = Red badge with white pixel skull + wordmark CONT -->
-      <a class="pixel-brand" href="${config.homeHref}" title="CONT Graphic Design Workflow">
-        <div class="pixel-logo-badge">
-          ${pixelIcons.skull}
-        </div>
-        <span class="pixel-brand-name">CONT</span>
-      </a>
+      <!-- Left: Logo = Pen Tool Badge + CONT STUDIO + GRAPHIC DESIGN -->
+      <div class="pixel-brand-wrapper">
+        <a class="pixel-brand" href="${config.homeHref}" title="CONT Graphic Design Workflow">
+          <div class="pixel-logo-badge">
+            ${pixelIcons.penTool}
+          </div>
+          <div class="pixel-brand-info">
+            <div class="pixel-brand-heading">
+              <span class="pixel-brand-name">CONT</span>
+              <span class="pixel-brand-tag">STUDIO</span>
+            </div>
+            <span class="pixel-brand-sub">GRAPHIC DESIGN</span>
+          </div>
+        </a>
+      </div>
 
-      <!-- Center: Role-filtered Top Nav Links (Desktop) -->
+      <!-- Center: Role-filtered Top Nav Links in Centered Dock (Desktop) -->
       <nav class="pixel-nav-links">
         ${config.desktopNavHtml}
       </nav>
@@ -369,9 +382,15 @@ function topbarHtml(page, member) {
       <div class="mobile-drawer-header">
         <div class="pixel-brand">
           <div class="pixel-logo-badge">
-            ${pixelIcons.skull}
+            ${pixelIcons.penTool}
           </div>
-          <span class="pixel-brand-name">CONT</span>
+          <div class="pixel-brand-info">
+            <div class="pixel-brand-heading">
+              <span class="pixel-brand-name">CONT</span>
+              <span class="pixel-brand-tag">STUDIO</span>
+            </div>
+            <span class="pixel-brand-sub">GRAPHIC DESIGN</span>
+          </div>
         </div>
         <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Close Navigation" title="Close Menu">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
