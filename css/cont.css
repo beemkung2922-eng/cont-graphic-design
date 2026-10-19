@@ -3401,25 +3401,32 @@ html, body {
   overflow-x: hidden !important;
 }
 
-/* High-Contrast Universal Topbar */
+/* High-Contrast Universal Topbar - Reorganized Spacing & Centered Dock */
 .pixel-topbar {
   height: 64px !important;
   min-height: 64px !important;
-  background: #0f1016 !important;
-  border-bottom: 1.5px solid #252838 !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+  background: #0d0f17 !important;
+  border-bottom: 1px solid #1f2335 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 0 20px !important;
+  padding: 0 24px !important;
   position: sticky !important;
   top: 0 !important;
   z-index: 100 !important;
-  gap: 12px !important;
+  gap: 16px !important;
   font-family: var(--font) !important;
   width: 100% !important;
   box-sizing: border-box !important;
   overflow: visible !important;
+}
+
+.pixel-brand-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex-shrink: 0 !important;
 }
 
 .pixel-brand {
@@ -3428,46 +3435,100 @@ html, body {
   gap: 10px !important;
   text-decoration: none !important;
   flex-shrink: 0 !important;
+  transition: opacity 0.15s ease !important;
+}
+.pixel-brand:hover {
+  opacity: 0.9 !important;
 }
 
 .pixel-logo-badge {
-  width: 36px !important;
-  height: 36px !important;
-  background: var(--red, #e62e2e) !important;
-  border: 1.5px solid #0a0a0a !important;
-  box-shadow: 0 2px 0 #8b0000 !important;
+  width: 38px !important;
+  height: 38px !important;
+  background: linear-gradient(135deg, #FF2E4D 0%, #D41432 60%, #9B0B20 100%) !important;
+  border: 1.5px solid #FF8093 !important;
+  box-shadow: 0 3px 0 #5E0613, 0 0 14px rgba(230, 40, 70, 0.35) !important;
   display: grid !important;
   place-items: center !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   flex-shrink: 0 !important;
+  transition: transform 0.15s ease !important;
+}
+.pixel-brand:hover .pixel-logo-badge {
+  transform: translateY(-1px) scale(1.02) !important;
+}
+
+.pixel-brand-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.pixel-brand-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
 }
 
 .pixel-brand-name {
   font-family: var(--font-pixel) !important;
-  font-size: 1.35rem !important;
+  font-size: 1.32rem !important;
   font-weight: 700 !important;
   color: #ffffff !important;
-  letter-spacing: 0.04em !important;
+  letter-spacing: 0.05em !important;
   line-height: 1 !important;
 }
 
+.pixel-brand-tag {
+  font-family: var(--font-mono, monospace) !important;
+  font-size: 0.60rem !important;
+  font-weight: 700 !important;
+  color: #FFD23F !important;
+  background: rgba(255, 210, 63, 0.15) !important;
+  border: 1px solid rgba(255, 210, 63, 0.35) !important;
+  padding: 1.5px 5px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1 !important;
+}
+
+.pixel-brand-sub {
+  font-size: 0.58rem !important;
+  font-weight: 600 !important;
+  color: #8F9BB3 !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  margin-top: 3px !important;
+  display: block !important;
+}
+
+/* Centered Navigation Deck */
 .pixel-nav-links {
   display: flex !important;
   align-items: center !important;
-  gap: 3px !important;
-  margin: 0 6px !important;
-  flex-shrink: 1 !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  margin: 0 auto !important;
+  flex: 1 1 auto !important;
   min-width: 0 !important;
+  max-width: 740px !important;
+  background: rgba(16, 18, 27, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 4px 6px !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 8px rgba(0, 0, 0, 0.25) !important;
 }
 
 .pixel-nav-link {
   font-family: var(--font) !important;
-  font-size: 0.82rem !important;
+  font-size: 0.80rem !important;
   font-weight: 600 !important;
-  color: #a4a9bd !important;
-  letter-spacing: 0.02em !important;
+  color: #9AA0B6 !important;
+  letter-spacing: 0.03em !important;
   padding: 6px 11px !important;
-  border-radius: 6px !important;
+  border-radius: 7px !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
@@ -3478,35 +3539,60 @@ html, body {
 }
 .pixel-nav-link:hover {
   color: #ffffff !important;
-  background: #1c1e2b !important;
+  background: rgba(255, 255, 255, 0.07) !important;
   transform: translateY(-1px) !important;
 }
 .pixel-nav-link.is-active {
   color: #ffffff !important;
-  background: #202334 !important;
-  border: 1px solid var(--yellow, #ffc61a) !important;
-  box-shadow: 0 2px 0 #b38600 !important;
+  background: rgba(255, 210, 63, 0.14) !important;
+  border: 1px solid rgba(255, 210, 63, 0.45) !important;
+  box-shadow: 0 0 12px rgba(255, 210, 63, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+.pixel-nav-link .nav-count-badge {
+  background: #e62846 !important;
+  color: #ffffff !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  padding: 1px 6px !important;
+  border-radius: 10px !important;
+  line-height: 1.2 !important;
+  box-shadow: 0 0 8px rgba(230, 40, 70, 0.5) !important;
 }
 
 .pixel-topbar-right {
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
-  margin-left: auto !important;
+  gap: 12px !important;
+  margin-left: 0 !important;
   flex-shrink: 0 !important;
+  justify-content: flex-end !important;
 }
 
 .search-inline {
-  width: 170px !important;
-  transition: width 0.2s ease !important;
+  width: 190px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   flex-shrink: 1 !important;
+  background: #141724 !important;
+  border: 1px solid #282D42 !important;
+  border-radius: 20px !important;
+  padding: 0 12px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
 .search-inline:focus-within {
-  width: 220px !important;
+  width: 240px !important;
+  border-color: rgba(255, 210, 63, 0.5) !important;
+  box-shadow: 0 0 12px rgba(255, 210, 63, 0.15) !important;
 }
 .search-inline input {
   font-size: 0.82rem !important;
-  padding: 6px 10px 6px 30px !important;
+  padding: 6px 0 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #ffffff !important;
 }
 
 /* User Capsule in Topbar */
