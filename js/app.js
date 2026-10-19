@@ -1,5 +1,5 @@
 import { NAV_ITEMS, STATUS_LABELS } from "./constants.js";
-import { ensureAccess, mountUser, canManage, errorMessage } from "./auth.js";
+import { ensureAccess, mountUser, canManage, canCreateTask, isRequester, isViewer, errorMessage } from "./auth.js";
 import { api, auth } from "./supabase.js";
 import { escapeHtml, avatar, relativeDeadline, formatDateTime } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
@@ -88,29 +88,200 @@ export function closeModal() {
   qs("#modal-backdrop")?.remove();
 }
 
+function getRoleNavConfig(member, page) {
+  const role = member?.role || "viewer";
+  const isReq = role === "requester";
+  const isView = role === "viewer";
+  const canCreate = canCreateTask(member);
+
+  const homeHref = isReq ? "tasks.html" : "dashboard.html";
+
+  // Desktop nav items dictionary
+  const allDesktopLinks = {
+    dashboard: `
+      <a class="pixel-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html" title="Dashboard Overview">
+        ${pixelIcons.cubeBlue}
+        <span>DASHBOARD</span>
+      </a>`,
+    tasks: `
+      <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="${isReq ? "งานที่ฉันส่งคำขอ (My Requests)" : "My Tasks"}">
+        ${pixelIcons.cubeGreen}
+        <span>TASKS</span>
+        <span class="nav-count-badge" id="nav-task-count-top">0</span>
+      </a>`,
+    board: `
+      <a class="pixel-nav-link ${page === "board" ? "is-active" : ""}" href="board.html" title="Kanban Board">
+        ${pixelIcons.cubeGreen}
+        <span>BOARD</span>
+      </a>`,
+    calendar: `
+      <a class="pixel-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html" title="Calendar Schedule">
+        ${pixelIcons.smiley}
+        <span>CALENDAR</span>
+      </a>`,
+    team: `
+      <a class="pixel-nav-link ${page === "team" ? "is-active" : ""}" href="team.html" title="Team & Workload">
+        ${pixelIcons.code}
+        <span>TEAM</span>
+      </a>`,
+    guide: `
+      <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="แนะนำระบบและคู่มือการใช้งาน (System Guide)">
+        ${pixelIcons.book}
+        <span>GUIDE</span>
+      </a>`,
+    reel: `
+      <a class="pixel-nav-link" href="intro.html" title="Watch Brand Intro Video Reel">
+        ${pixelIcons.rocket}
+        <span>REEL</span>
+      </a>`,
+  };
+
+  // Mobile drawer nav items dictionary
+  const allDrawerLinks = {
+    dashboard: `
+      <a class="mobile-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html">
+        ${pixelIcons.cubeBlue}
+        <span>DASHBOARD</span>
+      </a>`,
+    tasks: `
+      <a class="mobile-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html">
+        ${pixelIcons.cubeGreen}
+        <span>TASKS</span>
+        <span class="nav-count-badge" id="nav-task-count-drawer">0</span>
+      </a>`,
+    board: `
+      <a class="mobile-nav-link ${page === "board" ? "is-active" : ""}" href="board.html">
+        ${pixelIcons.cubeGreen}
+        <span>BOARD</span>
+      </a>`,
+    calendar: `
+      <a class="mobile-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html">
+        ${pixelIcons.smiley}
+        <span>CALENDAR</span>
+      </a>`,
+    team: `
+      <a class="mobile-nav-link ${page === "team" ? "is-active" : ""}" href="team.html">
+        ${pixelIcons.code}
+        <span>TEAM</span>
+      </a>`,
+    guide: `
+      <a class="mobile-nav-link" href="#" id="drawer-workflow-guide-link">
+        ${pixelIcons.book}
+        <span>WORKFLOW GUIDE</span>
+      </a>`,
+    reel: `
+      <a class="mobile-nav-link" href="intro.html">
+        ${pixelIcons.rocket}
+        <span>INTRO VIDEO REEL</span>
+      </a>`,
+  };
+
+  // Sidebar items dictionary
+  const allSidebarLinks = {
+    dashboard: `
+      <a class="nav-item ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html">
+        ${icons.grid}
+        <span>ภาพรวม</span>
+      </a>`,
+    tasks: `
+      <a class="nav-item ${page === "tasks" ? "is-active" : ""}" href="tasks.html">
+        ${icons.check}
+        <span>${isReq ? "งานที่ฉันส่งคำขอ" : "งานของฉัน"}</span>
+        <span class="nav-count" id="nav-task-count">—</span>
+      </a>`,
+    board: `
+      <a class="nav-item ${page === "board" ? "is-active" : ""}" href="board.html">
+        ${icons.columns}
+        <span>บอร์ดงาน</span>
+      </a>`,
+    calendar: `
+      <a class="nav-item ${page === "calendar" ? "is-active" : ""}" href="calendar.html">
+        ${icons.calendar}
+        <span>ปฏิทิน</span>
+      </a>`,
+    team: `
+      <a class="nav-item ${page === "team" ? "is-active" : ""}" href="team.html">
+        ${icons.users}
+        <span>ทีม & กำลังงาน</span>
+      </a>`,
+    reel: `
+      <a class="nav-item" href="intro.html">
+        ${pixelIcons.rocket}
+        <span>คลังผลงาน</span>
+      </a>`,
+  };
+
+  // Role permissions filtering
+  let allowedKeys = [];
+  let sidebarKeys = [];
+  if (isReq) {
+    // Requester: TASKS · CALENDAR · REEL · GUIDE (ซ่อน DASHBOARD, BOARD และ TEAM)
+    allowedKeys = ["tasks", "calendar", "reel", "guide"];
+    sidebarKeys = ["tasks", "calendar", "reel"];
+  } else if (isView) {
+    // Viewer: DASHBOARD · TASKS · CALENDAR · REEL (ซ่อน BOARD, TEAM และซ่อนปุ่ม + สร้างงาน)
+    allowedKeys = ["dashboard", "tasks", "calendar", "reel"];
+    sidebarKeys = ["dashboard", "tasks", "calendar", "reel"];
+  } else {
+    // Designer / Team Head: see all
+    allowedKeys = ["dashboard", "tasks", "board", "calendar", "team", "guide", "reel"];
+    sidebarKeys = ["dashboard", "tasks", "board", "calendar", "team", "reel"];
+  }
+
+  const desktopNavHtml = allowedKeys.map((k) => allDesktopLinks[k]).filter(Boolean).join("");
+  const drawerNavHtml = allowedKeys.map((k) => allDrawerLinks[k]).filter(Boolean).join("");
+  const sidebarNavHtml = sidebarKeys.map((k) => allSidebarLinks[k]).filter(Boolean).join("");
+
+  let createBtnHtml = "";
+  let drawerCreateBtnHtml = "";
+  if (canCreate && !isView) {
+    const btnLabel = isReq ? "ส่งบรีฟงาน" : "สร้างงาน";
+    const btnTitle = isReq ? "ส่งคำของาน / บรีฟงานใหม่" : "สร้างงานใหม่ (Create New Task)";
+    createBtnHtml = `
+      <button class="btn-pixel btn-pixel-red" id="quick-create" title="${escapeHtml(btnTitle)}">
+        ${pixelIcons.plus}
+        <span>${escapeHtml(btnLabel)}</span>
+      </button>
+    `;
+    drawerCreateBtnHtml = `
+      <div class="mobile-drawer-actions">
+        <button class="btn-pixel btn-pixel-red" id="drawer-quick-create" style="width:100%;justify-content:center;">
+          ${pixelIcons.plus}
+          <span>${isReq ? "ส่งบรีฟงานใหม่" : "NEW TASK"}</span>
+        </button>
+      </div>
+    `;
+  }
+
+  return {
+    homeHref,
+    desktopNavHtml,
+    drawerNavHtml,
+    sidebarNavHtml,
+    createBtnHtml,
+    drawerCreateBtnHtml,
+    isReq,
+    isView,
+  };
+}
+
 function sidebarHtml(page, member) {
-  const links = NAV_ITEMS.map((item) => `
-    <a class="nav-item ${item.page === page ? "is-active" : ""}" href="${item.href}">
-      ${icons[item.icon]}
-      <span>${item.label}</span>
-      ${item.page === "tasks" ? `<span class="nav-count" id="nav-task-count">—</span>` : ""}
-    </a>
-  `).join("");
+  const config = getRoleNavConfig(member, page);
 
   return `
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-mark">
+        <a class="brand-mark" href="${config.homeHref}" style="text-decoration:none;color:inherit;">
           <div class="brand-logo">C</div>
           <div>
             <div class="brand-name">CONT</div>
             <div class="brand-sub">Graphic Design Workflow<br />Management System</div>
           </div>
-        </div>
+        </a>
       </div>
       <nav class="nav">
         <div class="nav-label">Workspace</div>
-        ${links}
+        ${config.sidebarNavHtml}
         <div class="nav-label">Help & Guide</div>
         <a class="nav-item" href="#" id="workflow-guide-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px">
@@ -138,6 +309,7 @@ function sidebarHtml(page, member) {
 
 function topbarHtml(page, member) {
   const memberInitials = (member?.name || "U").trim().slice(0, 2).toUpperCase();
+  const config = getRoleNavConfig(member, page);
 
   return `
     <header class="topbar pixel-topbar">
@@ -151,44 +323,16 @@ function topbarHtml(page, member) {
       </button>
 
       <!-- Left: Logo = Red badge with white pixel skull + wordmark CONT -->
-      <a class="pixel-brand" href="dashboard.html" title="CONT Graphic Design Workflow">
+      <a class="pixel-brand" href="${config.homeHref}" title="CONT Graphic Design Workflow">
         <div class="pixel-logo-badge">
           ${pixelIcons.skull}
         </div>
         <span class="pixel-brand-name">CONT</span>
       </a>
 
-      <!-- Center: Universal Top Nav Links (Desktop) -->
+      <!-- Center: Role-filtered Top Nav Links (Desktop) -->
       <nav class="pixel-nav-links">
-        <a class="pixel-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html" title="Dashboard Overview">
-          ${pixelIcons.cubeBlue}
-          <span>DASHBOARD</span>
-        </a>
-        <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="My Tasks">
-          ${pixelIcons.cubeGreen}
-          <span>TASKS</span>
-          <span class="nav-count-badge" id="nav-task-count-top">0</span>
-        </a>
-        <a class="pixel-nav-link ${page === "board" ? "is-active" : ""}" href="board.html" title="Kanban Board">
-          ${pixelIcons.cubeGreen}
-          <span>BOARD</span>
-        </a>
-        <a class="pixel-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html" title="Calendar Schedule">
-          ${pixelIcons.smiley}
-          <span>CALENDAR</span>
-        </a>
-        <a class="pixel-nav-link ${page === "team" ? "is-active" : ""}" href="team.html" title="Team & Workload">
-          ${pixelIcons.code}
-          <span>TEAM</span>
-        </a>
-        <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="แนะนำระบบและคู่มือการใช้งาน (System Guide)">
-          ${pixelIcons.book}
-          <span>GUIDE</span>
-        </a>
-        <a class="pixel-nav-link" href="intro.html" title="Watch Brand Intro Video Reel">
-          ${pixelIcons.rocket}
-          <span>REEL</span>
-        </a>
+        ${config.desktopNavHtml}
       </nav>
 
       <!-- Right: Search, Notifications, User Capsule, and Create CTA -->
@@ -219,11 +363,8 @@ function topbarHtml(page, member) {
           </button>
         </div>
 
-        <!-- Create Task Button -->
-        <button class="btn-pixel btn-pixel-red" id="quick-create" title="สร้างงานใหม่ (Create New Task)">
-          ${pixelIcons.plus}
-          <span>สร้างงาน</span>
-        </button>
+        <!-- Role-based Create Task Button (Hidden for Viewer) -->
+        ${config.createBtnHtml}
       </div>
     </header>
 
@@ -253,43 +394,10 @@ function topbarHtml(page, member) {
         </div>
       </div>
 
-      <div class="mobile-drawer-actions">
-        <button class="btn-pixel btn-pixel-red" id="drawer-quick-create" style="width:100%;justify-content:center;">
-          ${pixelIcons.plus}
-          <span>NEW TASK</span>
-        </button>
-      </div>
+      ${config.drawerCreateBtnHtml}
 
       <nav class="mobile-drawer-nav">
-        <a class="mobile-nav-link ${page === "dashboard" ? "is-active" : ""}" href="dashboard.html">
-          ${pixelIcons.cubeBlue}
-          <span>DASHBOARD</span>
-        </a>
-        <a class="mobile-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html">
-          ${pixelIcons.cubeGreen}
-          <span>TASKS</span>
-          <span class="nav-count-badge" id="nav-task-count-drawer">0</span>
-        </a>
-        <a class="mobile-nav-link ${page === "board" ? "is-active" : ""}" href="board.html">
-          ${pixelIcons.cubeGreen}
-          <span>BOARD</span>
-        </a>
-        <a class="mobile-nav-link ${page === "calendar" ? "is-active" : ""}" href="calendar.html">
-          ${pixelIcons.smiley}
-          <span>CALENDAR</span>
-        </a>
-        <a class="mobile-nav-link ${page === "team" ? "is-active" : ""}" href="team.html">
-          ${pixelIcons.code}
-          <span>TEAM</span>
-        </a>
-        <a class="mobile-nav-link" href="#" id="drawer-workflow-guide-link">
-          ${pixelIcons.book}
-          <span>WORKFLOW GUIDE</span>
-        </a>
-        <a class="mobile-nav-link" href="intro.html">
-          ${pixelIcons.rocket}
-          <span>INTRO VIDEO REEL</span>
-        </a>
+        ${config.drawerNavHtml}
       </nav>
 
       <div class="mobile-drawer-footer">
@@ -623,5 +731,5 @@ const pageModules = {
 };
 
 if (currentPage && pageModules[currentPage]) {
-  import(`./${pageModules[currentPage]}.js?v=20261019-04`).then(({ render }) => boot(render));
+  import(`./${pageModules[currentPage]}.js?v=20261020-01`).then(({ render }) => boot(render));
 }
