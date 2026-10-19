@@ -4060,7 +4060,7 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   .pixel-nav-links {
     display: none !important;
   }
-  .search-inline {
+  .pixel-topbar .search-inline {
     display: none !important;
   }
   .pixel-topbar {
@@ -9566,9 +9566,38 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .team-stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+  .team-stat-card {
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+  }
+  .team-stat-card .stat-label {
+    font-size: 0.72rem !important;
+    margin-bottom: 2px !important;
+  }
+  .team-stat-card .stat-num {
+    font-size: 1.4rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 2px !important;
+  }
+  .team-stat-card .stat-sub {
+    font-size: 0.68rem !important;
+    line-height: 1.3 !important;
+  }
+  .team-stat-card:last-child {
+    grid-column: span 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+  }
+  .team-stat-card:last-child .stat-sub {
+    margin-top: 0 !important;
   }
 }
 
@@ -10692,6 +10721,316 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
   .overlay-text-row > div {
     width: 100% !important;
+  }
+}
+
+/* ==========================================================================
+   Responsive Design Expert: Tasks, Board, Team & Dashboard Mobile Overhauls
+   ========================================================================== */
+
+/* 1. Tasks Page Mobile Optimization */
+@media (max-width: 680px) {
+  .tasks-filter-bar {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 14px !important;
+    border-radius: 12px !important;
+    background: #141828 !important;
+    border: 1px solid #2b344c !important;
+  }
+  .tasks-search-field {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .tasks-search-field label {
+    display: block !important;
+    margin-bottom: 6px !important;
+    font-size: 0.78rem !important;
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+  }
+  .tasks-search-box {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    background: #1a2034 !important;
+    border: 1px solid #2d3650 !important;
+    border-radius: 8px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+  }
+  .tasks-search-box span {
+    color: #94a3b8 !important;
+    margin-right: 8px !important;
+    font-size: 1rem !important;
+  }
+  .tasks-search-box input {
+    width: 100% !important;
+    height: 40px !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 0.88rem !important;
+    color: #ffffff !important;
+    font-family: inherit !important;
+  }
+  .tasks-filter-bar .field {
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  .tasks-filter-bar .field label {
+    display: block !important;
+    margin-bottom: 4px !important;
+    font-size: 0.74rem !important;
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+  }
+  .tasks-filter-bar .field select,
+  .tasks-filter-bar .field input[type="date"] {
+    width: 100% !important;
+    height: 44px !important;
+    font-size: 0.82rem !important;
+    border-radius: 8px !important;
+    background: #1a2034 !important;
+    border: 1px solid #2d3650 !important;
+    color: #ffffff !important;
+    padding: 0 10px !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+  }
+  .tasks-reset-field {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+  }
+  .tasks-reset-field button {
+    width: 100% !important;
+    height: 44px !important;
+    border-radius: 8px !important;
+    background: #1a2034 !important;
+    border: 1px solid #3b425b !important;
+    color: #cbd5e1 !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* 2. Board Page Mobile Optimization */
+@media (max-width: 680px) {
+  .board-toolbar {
+    padding: 12px 14px !important;
+    gap: 10px !important;
+    border-radius: 12px !important;
+    background: #141828 !important;
+    border: 1px solid #2b344c !important;
+  }
+  .board-toolbar-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .board-toolbar-row .filter-pills {
+    display: flex !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .board-toolbar-row .filter-pill {
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    border-radius: 8px !important;
+    font-size: 0.82rem !important;
+  }
+  .board-search-box {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .board-search-box input {
+    height: 44px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+    background: #1a2034 !important;
+    border: 1px solid #2d3650 !important;
+    color: #ffffff !important;
+  }
+  .board-filters {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .board-filter-select {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    height: 44px !important;
+    font-size: 0.78rem !important;
+    border-radius: 8px !important;
+    background: #1a2034 !important;
+    border: 1px solid #2d3650 !important;
+    color: #ffffff !important;
+    padding: 0 8px !important;
+  }
+  .board-completed-toggle {
+    grid-column: 1 / -1 !important;
+    justify-content: center !important;
+    min-height: 42px !important;
+    border-radius: 8px !important;
+    background: #1a2034 !important;
+    border: 1px solid #2d3650 !important;
+    font-size: 0.82rem !important;
+  }
+  #board-reset-filters {
+    width: 100% !important;
+    height: 44px !important;
+    border-radius: 8px !important;
+    margin-top: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.82rem !important;
+  }
+  .kanban-wrap {
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 16px !important;
+  }
+  .kanban {
+    display: flex !important;
+    gap: 12px !important;
+    width: max-content !important;
+  }
+  .kcol {
+    min-width: 84vw !important;
+    max-width: 84vw !important;
+    flex: 0 0 84vw !important;
+    scroll-snap-align: start !important;
+    border-radius: 12px !important;
+  }
+  .mobile-kanban-nav {
+    display: flex !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 4px 0 12px !important;
+    scrollbar-width: none !important;
+  }
+  .mobile-kanban-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+  .mobile-kanban-tab {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    min-height: 40px !important;
+    padding: 0 14px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    background: #141828 !important;
+    border: 1px solid #2b344c !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .mobile-kanban-tab.is-active {
+    background: #1e2538 !important;
+    color: #ffffff !important;
+    border-color: #38bdf8 !important;
+  }
+}
+
+/* 3. Team Page Mobile Optimization */
+@media (max-width: 768px) {
+  .team-workload-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+  }
+  .team-workload-bar .field.grow {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .team-workload-bar .search-inline {
+    width: 100% !important;
+    min-height: 44px !important;
+    background: #1a2034 !important;
+    border: 1px solid #2d3650 !important;
+    border-radius: 8px !important;
+    padding: 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+  .team-workload-bar .search-inline input {
+    height: 40px !important;
+    font-size: 0.88rem !important;
+    color: #ffffff !important;
+  }
+  .team-workload-bar .filter-pills {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 6px !important;
+    padding-bottom: 6px !important;
+    width: 100% !important;
+    scrollbar-width: none !important;
+  }
+  .team-workload-bar .filter-pills::-webkit-scrollbar {
+    display: none !important;
+  }
+  .team-workload-bar .filter-pill {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    min-height: 42px !important;
+    padding: 0 14px !important;
+    font-size: 0.78rem !important;
+    border-radius: 8px !important;
+  }
+  .team-view-toggle {
+    width: 100% !important;
+    display: flex !important;
+    background: #0f121d !important;
+    border: 1px solid #242c40 !important;
+    border-radius: 8px !important;
+    padding: 3px !important;
+    gap: 4px !important;
+  }
+  .team-view-btn {
+    flex: 1 !important;
+    min-height: 42px !important;
+    justify-content: center !important;
+    display: flex !important;
+    align-items: center !important;
+    text-align: center !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    border: none !important;
+  }
+  .team-table-card {
+    border-radius: 12px !important;
+    border: 1px solid #2b344c !important;
+  }
+  .team-table-card .table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .data.team-table {
+    min-width: 720px !important;
   }
 }
 
