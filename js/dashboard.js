@@ -176,7 +176,8 @@ export async function render(ctx) {
     const revision  = filtered.filter(t => t.status === "revision");
     const completed = filtered.filter(t => t.status === "completed");
     const lateCount = active.filter(t => relativeDeadline(t.deadline_at || t.deadline).className === "is-overdue").length;
-    const onTimeRate = filtered.length ? ((completed.length / filtered.length) * 100).toFixed(1) : "100.0";
+    const onTimeRate = filtered.length ? (((filtered.length - lateCount) / filtered.length) * 100).toFixed(1) : "100.0";
+    const completionRate = filtered.length ? ((completed.length / filtered.length) * 100).toFixed(1) : "100.0";
 
     /* ── 1. Pipeline Status Breakdown ── */
     const briefCount = filtered.filter(t => t.status === "brief").length;
@@ -498,7 +499,7 @@ export async function render(ctx) {
               </div>
               <div class="stat-bento-val count-up-num" data-final="${completed.length}">0</div>
               <div class="stat-bento-delta text-green">
-                <span>↑ อัตราส่งมอบสำเร็จ 99.6%</span>
+                <span>↑ อัตราส่งมอบสำเร็จ ${completionRate}%</span>
               </div>
               <div class="stat-bento-sparkline">
                 ${renderSparklineSvg(sparkDeliv, "#22c55e", 36, 130)}
@@ -538,7 +539,7 @@ export async function render(ctx) {
               </div>
               <div class="stat-bento-val count-up-num" data-final="${onTimeRate}" data-is-percent="true">0%</div>
               <div class="stat-bento-delta text-yellow">
-                <span>↑ ส่งมอบตรงเวลา 99.6% ตามเป้า</span>
+                <span>↑ ส่งมอบตรงเวลา ${onTimeRate}% ตามเป้า</span>
               </div>
               <div class="stat-bento-sparkline">
                 ${renderSparklineSvg(sparkSla, "#ffc61a", 36, 130)}
