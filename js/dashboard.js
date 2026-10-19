@@ -3,7 +3,7 @@ import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast, openModal } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isViewer, canCreateTask, canDownload } from "./auth.js";
-import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
+import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
 import { cleanupStudio3D } from "./studio-3d.js?v=20261016-18";
 import { openExportSummaryModal } from "./export-summary.js?v=20261019-03";
@@ -194,11 +194,11 @@ export async function render(ctx) {
 
     /* ── 2. Task Category Breakdown (Channels / Types) ── */
     const categories = [
-      { name: "Social & Online Ads", icon: "📱", count: 0, color: "#ffc61a" },
-      { name: "Key Visual & Campaign", icon: "✨", count: 0, color: "#19c3eb" },
-      { name: "Print & Branch Media", icon: "🖨️", count: 0, color: "#22c55e" },
-      { name: "Resize & Adaptation", icon: "📐", count: 0, color: "#a855f7" },
-      { name: "General / Internal", icon: "📁", count: 0, color: "#64748b" }
+      { name: "Social & Online Ads", count: 0, color: "#ffc61a" },
+      { name: "Key Visual & Campaign", count: 0, color: "#19c3eb" },
+      { name: "Print & Branch Media", count: 0, color: "#22c55e" },
+      { name: "Resize & Adaptation", count: 0, color: "#a855f7" },
+      { name: "General / Internal", count: 0, color: "#64748b" }
     ];
 
     filtered.forEach(t => {
@@ -229,7 +229,7 @@ export async function render(ctx) {
         <div class="cat-bar-item">
           <div class="bar-item-header">
             <span class="cat-bar-label">
-              <span class="bar-icon">${cat.icon}</span>
+              <span class="cat-dot" style="background:${cat.color};"></span>
               <span>${escapeHtml(cat.name)}</span>
             </span>
             <span class="cat-bar-val"><strong>${cat.count}</strong> งาน <small>(${share}%)</small></span>
@@ -250,7 +250,7 @@ export async function render(ctx) {
     const totalProjTasks = filtered.length || 1;
     const top5Projects = projectCounts.slice(0, 5);
     const maxProjCount = top5Projects[0]?.count || 1;
-    const rankBadges = ["🥇", "🥈", "🥉", "4", "5"];
+    const rankBadges = ["1", "2", "3", "4", "5"];
 
     const topProjectsHtml = top5Projects.map((p, idx) => {
       const pct = Math.round((p.count / maxProjCount) * 100);
@@ -616,10 +616,10 @@ export async function render(ctx) {
           <!-- Mobile Bento Switcher (Only visible on mobile <= 680px) -->
           <div class="mobile-bento-switcher" id="bento-switcher">
             <button type="button" class="mobile-bento-tab ${mobileBottomTab === 'card-categories' ? 'is-active' : ''}" data-target="card-categories">
-              <span>📂 แยกตามประเภท</span>
+              <span>แยกตามประเภท</span>
             </button>
             <button type="button" class="mobile-bento-tab ${mobileBottomTab === 'card-projects' ? 'is-active' : ''}" data-target="card-projects">
-              <span>🏆 โครงการยอดนิยม</span>
+              <span>โครงการยอดนิยม</span>
             </button>
           </div>
 
@@ -654,20 +654,7 @@ export async function render(ctx) {
           </div>
         </div>
 
-        <!-- 5. Deep-Dive Member Overview (เจาะลึกภาระงานรายคน & สัดส่วนงานแต่ละโปรเจกต์) -->
-        ${renderMemberComparisonHtml({
-          memberStats: analytics.memberStats,
-          teamTotals: analytics.teamTotals,
-          selectedMemberId: filterState.memberId,
-          selectedStatus: filterState.status,
-          projects,
-          filteredTasks: filtered,
-          allTasks: tasks,
-          members,
-          weekOffset: heatmapWeekOffset,
-        })}
-
-        <!-- 6. Activity + Deadlines Row -->
+        <!-- 5. Activity + Deadlines Row -->
         <div class="dash-two-col" style="margin-top:24px;">
           <div class="chart-card" style="border:1px solid #262a3e;background:#131522;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
             <div class="chart-card-header">
@@ -808,22 +795,6 @@ export async function render(ctx) {
         draw();
       });
     }
-
-    // Bind Member Comparison drilldowns and actions
-    bindMemberComparison(qs("#page-content"), {
-      onSelectMember: (newMemberId) => {
-        filterState.memberId = newMemberId;
-        draw();
-      },
-      onSelectStatus: (newStatus) => {
-        filterState.status = newStatus;
-        draw();
-      },
-      onToggleWeek: (newOffset) => {
-        heatmapWeekOffset = newOffset;
-        draw();
-      }
-    });
 
     // Bind Task Cards
     bindTaskCards(qs("#page-content"));
