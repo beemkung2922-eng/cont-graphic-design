@@ -1,7 +1,7 @@
 import { openModal, closeModal, toast, qs, qsa } from "./app.js";
 import { api } from "./supabase.js";
 import { escapeHtml, roleLabel } from "./formatters.js";
-import { canManage, canCreateTask, isRequester, isViewer } from "./auth.js";
+import { canManage, canCreateTask, isViewer } from "./auth.js";
 import { renderImageUploaderHtml, bindImageUploader } from "./image-uploader.js";
 
 export function bindTaskCards(root = document) {
@@ -269,7 +269,6 @@ export function openCreateTask(ctx = {}, defaults = {}) {
     </form>
   `;
 
-  const isReq = isRequester(ctx.member);
   const modal = openModal({
     title: `
       <div class="create-task-modal-header">
@@ -277,12 +276,12 @@ export function openCreateTask(ctx = {}, defaults = {}) {
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
         <div class="modal-header-text">
-          <div class="modal-header-title">${isReq ? "ส่งคำของานออกแบบใหม่ (Request Design Work)" : "สร้างงานใหม่ (Create Design Task)"}</div>
+          <div class="modal-header-title">สร้างงานใหม่ (Create Design Task)</div>
           <div class="modal-header-subtitle">กรอกรายละเอียดบรีฟเพื่อเปิดคำขอและลงทะเบียนคิวงานของทีม Creative Operations</div>
         </div>
       </div>
     `,
-    body: (isReq ? `<div class="requester-info-strip"><span>👤 ผู้ส่งบรีฟ (Requester): <strong>${escapeHtml(ctx.member?.name || "")}</strong></span></div>` : "") + body,
+    body,
     size: "lg",
     footer: `
       <div class="modal-footer-wrap">
@@ -293,7 +292,7 @@ export function openCreateTask(ctx = {}, defaults = {}) {
           <button class="btn btn-secondary" data-close-modal>ยกเลิก</button>
           <button class="btn btn-primary btn-save-task" id="submit-create-task">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            <span>${isReq ? "ส่งคำของานออกแบบ" : "สร้างงานและบันทึก"}</span>
+            <span>สร้างงานและบันทึก</span>
           </button>
         </div>
       </div>
