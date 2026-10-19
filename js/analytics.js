@@ -1321,6 +1321,7 @@ export function renderMemberComparisonHtml({
   allTasks = [],
   members = [],
   weekOffset = 0,
+  showProjectBreakdown = true,
 } = {}) {
   const isIndividual = selectedMemberId !== "all";
   const activeMember = isIndividual ? memberStats.find((s) => s.member.id === selectedMemberId) : null;
@@ -1632,11 +1633,11 @@ export function renderMemberComparisonHtml({
       ${deepDivePanelHtml}
 
       <!-- สัดส่วนงานแยกตามโปรเจกต์ & สำรวจงานรายโปรเจกต์ (Project Explorer) -->
-      ${renderProjectBreakdownHtml({
+      ${showProjectBreakdown ? renderProjectBreakdownHtml({
         breakdown: projectBreakdown,
         projects,
         members: members.length ? members : memberStats.map((s) => s.member),
-      })}
+      }) : ""}
     </section>
   `;
 }
