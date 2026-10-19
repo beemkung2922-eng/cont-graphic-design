@@ -142,27 +142,27 @@ export async function render(ctx) {
           <div class="board-filters">
             <!-- Member Filter -->
             <select class="board-filter-select" id="filter-member" title="กรองตามสมาชิก">
-              <option value="">👤 สมาชิกทุกคน</option>
+              <option value="">สมาชิกทุกคน</option>
               ${ctx.members.map((m) => `<option value="${escapeHtml(m.id)}" ${filterMemberId === m.id ? "selected" : ""}>${escapeHtml(m.name)}</option>`).join("")}
             </select>
 
             <!-- Project Filter -->
             <select class="board-filter-select" id="filter-project" title="กรองตามโปรเจกต์">
-              <option value="">📁 ทุกโปรเจกต์</option>
+              <option value="">ทุกโปรเจกต์</option>
               ${ctx.projects.map((p) => `<option value="${escapeHtml(p.id)}" ${filterProjectId === p.id ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("")}
             </select>
 
             <!-- Urgency Filter -->
             <select class="board-filter-select" id="filter-urgency" title="กรองตามกำหนดส่ง">
-              <option value="all" ${filterUrgency === "all" ? "selected" : ""}>⏰ ทุกกำหนดส่ง</option>
-              <option value="overdue" ${filterUrgency === "overdue" ? "selected" : ""}>⚠️ เลยกำหนด (Overdue)</option>
-              <option value="due_soon" ${filterUrgency === "due_soon" ? "selected" : ""}>⚡ ใกล้กำหนดส่ง (< 2 ชม.)</option>
+              <option value="all" ${filterUrgency === "all" ? "selected" : ""}>ทุกกำหนดส่ง</option>
+              <option value="overdue" ${filterUrgency === "overdue" ? "selected" : ""}>เลยกำหนด (Overdue)</option>
+              <option value="due_soon" ${filterUrgency === "due_soon" ? "selected" : ""}>ใกล้กำหนดส่ง (< 2 ชม.)</option>
               <option value="normal" ${filterUrgency === "normal" ? "selected" : ""}>ปกติ</option>
             </select>
 
             <!-- Date Period Filter -->
             <select class="board-filter-select" id="filter-period" title="กรองตามช่วงเวลา">
-              <option value="all" ${filterPeriod === "all" ? "selected" : ""}>📅 ทุกช่วงเวลา</option>
+              <option value="all" ${filterPeriod === "all" ? "selected" : ""}>ทุกช่วงเวลา</option>
               <option value="today" ${filterPeriod === "today" ? "selected" : ""}>วันนี้</option>
               <option value="7days" ${filterPeriod === "7days" ? "selected" : ""}>7 วันล่าสุด</option>
               <option value="month" ${filterPeriod === "month" ? "selected" : ""}>เดือนนี้</option>
@@ -171,7 +171,7 @@ export async function render(ctx) {
 
             <!-- Month Filter -->
             <select class="board-filter-select" id="filter-month" title="กรองตามเดือน">
-              <option value="all" ${filterMonth === "all" ? "selected" : ""}>🗓️ ทุกเดือน</option>
+              <option value="all" ${filterMonth === "all" ? "selected" : ""}>ทุกเดือน</option>
               ${MONTH_NAMES_TH.map((name, idx) => `<option value="${idx + 1}" ${String(filterMonth) === String(idx + 1) ? "selected" : ""}>${name}</option>`).join("")}
             </select>
 
@@ -192,12 +192,25 @@ export async function render(ctx) {
           ${interactiveEmptyState({ title: "ไม่มีการ์ดงานในมุมมองนี้", subtitle: "พักหัวปากกาได้สักครู่ หรือกด 'ล้างตัวกรอง' เพื่อกลับมาดูงานทั้งหมดในบอร์ด" })}
         </div>
       ` : `
-        <div class="kanban-wrap">
+        <!-- Mobile Quick Column Navigator -->
+        <div class="mobile-kanban-nav">
+          ${columnsToDisplay.map((status, idx) => {
+            const rows = visibleTasks.filter((t) => t.status === status);
+            return `
+              <button type="button" class="mobile-kanban-tab ${idx === 0 ? 'is-active' : ''}" data-target-status="${status}">
+                <span>${STATUS_LABELS[status]}</span>
+                <span class="chip" style="font-size:0.65rem;padding:1px 5px;background:#242c40;">${rows.length}</span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+
+        <div class="kanban-wrap" id="board-kanban-wrap">
           <div class="kanban" style="grid-template-columns: repeat(${columnsToDisplay.length}, minmax(260px, 1fr))">
             ${columnsToDisplay.map((status) => {
               const rows = visibleTasks.filter((t) => t.status === status);
               return `
-                <section class="kcol" data-status="${status}">
+                <section class="kcol" data-status="${status}" id="kcol-${status}">
                   <div class="kcol-head">
                     <div class="kcol-title">
                       ${statusMotionIcon(status, 16)}
@@ -256,6 +269,19 @@ export async function render(ctx) {
       filterMonth = "all";
       showCompleted = false;
       draw();
+    });
+
+    // Mobile Kanban Column Tab Clicks
+    document.querySelectorAll(".mobile-kanban-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const targetStatus = tab.dataset.targetStatus;
+        const col = qs(`#kcol-${targetStatus}`);
+        if (col) {
+          col.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+          document.querySelectorAll(".mobile-kanban-tab").forEach((t) => t.classList.remove("is-active"));
+          tab.classList.add("is-active");
+        }
+      });
     });
 
     // Task Card Clicks
