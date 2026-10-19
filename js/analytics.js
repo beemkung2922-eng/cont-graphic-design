@@ -682,10 +682,9 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
         <div>
           <div class="analytics-chart-title">
             <span>สัดส่วนงานแยกตามโปรเจกต์ (Project Workload & Explorer)</span>
-            <span class="analytics-chart-tag tag-comparison">Horizontal Bar</span>
           </div>
           <div class="analytics-chart-sub">
-            กราฟแท่งแนวนอนแสดงสัดส่วนงานแยกตามโปรเจกต์ · คลิกแท่งกราฟหรือเลือกแท็บเพื่อดูงาน · กรองตามดีไซเนอร์ · คลิกดูรายละเอียดงานได้ทันที
+            เลือกโปรเจกต์เพื่อดูสัดส่วนงานและกรองรายละเอียดงานของดีไซเนอร์
           </div>
         </div>
       </div>
@@ -706,14 +705,32 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
 
       <!-- 2 คอลัมน์สมดุลกัน พอดีขอบ ไม่โบ๋ -->
       <div class="project-breakdown-grid">
-        <!-- ซ้าย: กราฟแท่งแนวนอน (Horizontal Bar Chart) -->
+        <!-- ซ้าย: กราฟแท่งแนวนอน (Desktop Canvas + Mobile Responsive Progress List) -->
         <div class="project-pie-column">
           <div style="font-size:0.82rem;font-weight:700;color:var(--cyan);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
             <span>📊 10 โปรเจกต์ที่มีงานมากที่สุด (Top 10 Projects)</span>
-            <span style="font-size:0.72rem;color:#8a90a4;">คลิกที่แท่งเพื่อเลือกดู</span>
+            <span style="font-size:0.72rem;color:#8a90a4;">แตะเพื่อดูงาน</span>
           </div>
+          <!-- Desktop Canvas Chart -->
           <div class="project-pie-chart-wrap" style="height:330px;">
             <canvas id="chart-project-visual"></canvas>
+          </div>
+          <!-- Mobile Responsive HTML Progress Bar List (100% Full Text, No Truncation) -->
+          <div class="mobile-project-bar-list">
+            ${breakdown.projects.slice(0, 10).map((p, idx) => `
+              <div class="mobile-proj-bar-item" data-pick-project="${escapeHtml(p.id)}">
+                <div class="mobile-proj-bar-head">
+                  <div class="mobile-proj-bar-title">
+                    <span class="mobile-proj-rank">${idx + 1}</span>
+                    <span class="mobile-proj-name">${escapeHtml(p.name)}</span>
+                  </div>
+                  <span class="mobile-proj-val">${p.count} งาน (${p.percentageStr})</span>
+                </div>
+                <div class="mobile-proj-bar-track">
+                  <div class="mobile-proj-bar-fill" style="width:${p.percentage}%;background:${p.color};"></div>
+                </div>
+              </div>
+            `).join("")}
           </div>
         </div>
 
@@ -1609,6 +1626,39 @@ export function renderMemberComparisonHtml({
         </div>
       </section>
     `;
+  } else {
+    deepDivePanelHtml = `
+      <div class="mobile-team-summary-overview">
+        <div class="mobile-team-cards-grid">
+          ${memberStats.map((stat) => {
+            const m = stat.member;
+            const activeCount = stat.tasks.filter((t) => t.status !== "completed").length;
+            const capacity = Number(m.capacity_points || 10);
+            const activePts = stat.tasks.filter((t) => t.status !== "completed").reduce((sum, t) => sum + Number(t.workload_points || 1), 0);
+            const loadPercent = capacity > 0 ? Math.round((activePts / capacity) * 100) : 0;
+            const isOver = capacity > 0 && activePts > capacity;
+
+            return `
+              <div class="m-member-overview-card" data-select-member="${escapeHtml(m.id)}">
+                <div class="m-member-overview-left">
+                  ${avatar(m, "avatar-sm")}
+                  <div class="m-member-overview-meta">
+                    <span class="m-member-name">${escapeHtml(m.name)}</span>
+                    <span class="m-member-role">${escapeHtml(roleLabel(m.role))}</span>
+                  </div>
+                </div>
+                <div class="m-member-overview-right">
+                  <span class="m-member-badge ${isOver ? 'is-over' : (loadPercent >= 80 ? 'is-warn' : 'is-ok')}">
+                    ${activeCount} งาน
+                  </span>
+                  <span class="m-member-chevron">›</span>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
   }
 
   return `
@@ -1621,7 +1671,7 @@ export function renderMemberComparisonHtml({
             <span>เจาะลึกภาระงานรายคน (Team Members Overview)</span>
           </h3>
           <p>
-            คลิกเลือกชื่อดีไซเนอร์เพื่อดูรายละเอียดงานและ KPI ประจำบุคคล
+            แตะเลือกดีไซเนอร์เพื่อดูรายละเอียดงานและ KPI ประจำบุคคล
           </p>
         </div>
         <div class="comparison-toolbar">
