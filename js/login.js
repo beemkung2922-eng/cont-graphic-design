@@ -169,7 +169,6 @@ if (urlError) {
 const params = searchParams;
 
 function getPostLoginUrl(member) {
-  if (member?.role === "requester") return "tasks.html";
   return "dashboard.html";
 }
 
