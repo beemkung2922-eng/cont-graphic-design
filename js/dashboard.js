@@ -2,7 +2,7 @@ import { taskCard, interactiveEmptyState, formatDate, relativeDeadline, avatar, 
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast, openModal } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
-import { isRequester, isViewer, canCreateTask, canDownload } from "./auth.js";
+import { isViewer, canCreateTask, canDownload } from "./auth.js";
 import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
 import { cleanupStudio3D } from "./studio-3d.js?v=20261016-18";
@@ -146,9 +146,6 @@ function getHeroChartData(tasks, period = "30days") {
 export async function render(ctx) {
   const { tasks, members, projects, subtasks } = ctx;
   window.openCreateTask = () => openCreateTask(ctx);
-  const isReq = isRequester(ctx.member);
-  const canCreate = canCreateTask(ctx.member);
-  const canExport = canDownload(ctx.member);
 
   localStorage.setItem("cont_dashboard_view", "classic");
   let currentView = "classic";
@@ -169,6 +166,8 @@ export async function render(ctx) {
   let mobileFilterOpen = false;
 
   const draw = () => {
+    const canCreate = canCreateTask(ctx.member);
+    const canExport = canDownload(ctx.member);
     const filtered = filterTasksByTimeRange(tasks, filterState);
     const analytics = calculateTeamAnalytics(filtered, members, filterState.memberId);
     const active    = filtered.filter(t => t.status !== "completed");
@@ -687,6 +686,10 @@ export async function render(ctx) {
     // Top action buttons
     qs("#btn-overview-new-task")?.addEventListener("click", () => window.openCreateTask?.());
     qs("#btn-export-overview")?.addEventListener("click", () => {
+      if (!canDownload(ctx.member)) {
+        toast("คุณไม่มีสิทธิ์ส่งออกรายงานสรุป (ปิดการใช้งานสำหรับบทบาทของคุณ)", "warn");
+        return;
+      }
       openExportSummaryModal({
         tasks: filtered,
         allTasks: tasks,
