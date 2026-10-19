@@ -7359,6 +7359,129 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   position: relative;
 }
 
+/* --- Quality & SLA Metrics in Right Card --- */
+.rep-quality-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.rep-quality-item {
+  background: #181b2a;
+  border: 1px solid #282d42;
+  border-radius: 10px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.15s ease;
+}
+
+.rep-quality-item:hover {
+  background: #1c2032;
+  border-color: #3b4363;
+  transform: translateY(-1px);
+}
+
+.rep-quality-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rep-quality-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #e2e6f4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rep-quality-sub {
+  font-size: 0.72rem;
+  color: #8b92ad;
+}
+
+.rep-quality-val {
+  font-family: var(--font-mono, "Space Mono", monospace);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffc61a;
+  white-space: nowrap;
+}
+
+.rep-quality-val.is-green {
+  color: #22c55e;
+}
+
+.rep-quality-val.is-cyan {
+  color: #19c3eb;
+}
+
+.report-kpi-unit {
+  font-size: 0.88rem;
+  color: #8e95b0;
+  font-weight: 500;
+  font-family: var(--font, "IBM Plex Sans Thai", sans-serif);
+}
+
+.reports-data-chip {
+  background: #181b2a;
+  border: 1px solid #2e334a;
+  color: #cdd3e8;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.heatmap-legend-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  color: #8b92ad;
+}
+
+.heatmap-legend-items {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.heatmap-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.heatmap-legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
 /* --- Category List in Right Card --- */
 .rep-cat-list {
   display: flex;
