@@ -1284,18 +1284,18 @@ input:focus, select:focus, textarea:focus {
 
 /* 1. Time & Date Filter Card */
 .time-filter-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(46, 42, 59, 0.04);
+  background: #131522 !important;
+  border: 1px solid #262a3e !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  margin-bottom: 22px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22) !important;
   transition: all 0.2s ease;
 }
 
 .time-filter-card:hover {
-  border-color: var(--purple-200);
-  box-shadow: 0 4px 16px rgba(46, 42, 59, 0.06);
+  border-color: #3b4260 !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28) !important;
 }
 
 .time-filter-header {
@@ -1313,24 +1313,24 @@ input:focus, select:focus, textarea:focus {
   gap: 8px;
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--ink-900);
+  color: #ffffff !important;
 }
 
 .time-filter-title svg {
-  color: var(--royal-purple);
+  color: #ffc61a !important;
 }
 
 .time-filter-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--purple-50);
-  border: 1px solid var(--purple-200);
+  background: #1c2032 !important;
+  border: 1px solid #2e3550 !important;
   border-radius: 20px;
-  padding: 4px 12px;
+  padding: 5px 14px;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--royal-purple);
+  color: #ffc61a !important;
 }
 
 .time-pills {
@@ -1341,9 +1341,9 @@ input:focus, select:focus, textarea:focus {
 }
 
 .time-pill {
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  color: var(--ink-600);
+  background: #181b2a !important;
+  border: 1px solid #2a2f45 !important;
+  color: #a2a8c2 !important;
   padding: 6px 14px;
   border-radius: 8px;
   font-size: 0.82rem;
@@ -1353,17 +1353,17 @@ input:focus, select:focus, textarea:focus {
 }
 
 .time-pill:hover {
-  background: var(--purple-100);
-  color: var(--royal-purple);
-  border-color: var(--purple-200);
+  background: #23283e !important;
+  color: #ffffff !important;
+  border-color: #3b4260 !important;
 }
 
 .time-pill.is-active {
-  background: var(--royal-purple);
-  color: #ffffff;
-  border-color: var(--royal-purple);
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(97, 91, 153, 0.25);
+  background: #ffc61a !important;
+  color: #0c0d14 !important;
+  border-color: #ffc61a !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(255, 198, 26, 0.3) !important;
 }
 
 .time-controls-grid {
@@ -1371,43 +1371,84 @@ input:focus, select:focus, textarea:focus {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
   align-items: flex-end;
-  padding-top: 12px;
-  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+  border-top: 1px dashed #262a3e !important;
 }
 
 .time-control-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .time-control-group label {
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--ink-500);
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  color: #8b92ad !important;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
 }
 
 .time-control-group select,
-.time-control-group input[type="date"] {
-  width: 100%;
-  height: 38px;
-  padding: 0 10px;
-  border-radius: 8px;
-  border: 1px solid var(--line-strong);
-  background: #ffffff;
-  font-family: inherit;
-  font-size: 0.85rem;
-  color: var(--ink-800);
-  transition: all 0.15s ease;
+.time-control-group input[type="date"],
+.time-control-group input[type="text"] {
+  width: 100% !important;
+  height: 40px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  border: 1px solid #2e344e !important;
+  background-color: #181b2a !important;
+  font-family: inherit !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.15s ease !important;
+}
+
+.time-control-group select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffc61a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: calc(100% - 12px) center !important;
+  padding-right: 32px !important;
+  cursor: pointer;
+}
+
+.time-control-group select option {
+  background-color: #181b2a !important;
+  color: #ffffff !important;
+  padding: 8px !important;
+}
+
+.time-control-group input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+  cursor: pointer;
 }
 
 .time-control-group select:focus,
-.time-control-group input[type="date"]:focus {
-  outline: none;
-  border-color: var(--royal-purple);
-  box-shadow: 0 0 0 3px rgba(97, 91, 153, 0.12);
+.time-control-group input[type="date"]:focus,
+.time-control-group input[type="text"]:focus {
+  outline: none !important;
+  border-color: #ffc61a !important;
+  background-color: #1c2032 !important;
+  box-shadow: 0 0 0 2px rgba(255, 198, 26, 0.25) !important;
+}
+
+#tf-reset-btn {
+  background: #202438 !important;
+  border: 1px solid #333a54 !important;
+  color: #cbd2e8 !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.15s ease !important;
+}
+
+#tf-reset-btn:hover {
+  background: #2a3048 !important;
+  color: #ffffff !important;
+  border-color: #4a547a !important;
 }
 
 /* 2. Member Workload & Status Comparison Section */
