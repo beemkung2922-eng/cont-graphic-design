@@ -2,14 +2,13 @@ import { taskCard, escapeHtml, projectFor, memberFor, interactiveEmptyState } fr
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
-import { isRequester, isViewer, canCreateTask } from "./auth.js";
+import { isViewer, canCreateTask } from "./auth.js";
 import { filterTasksByTimeRange, MONTH_NAMES_TH } from "./analytics.js";
 
 export async function render(ctx) {
   window.openCreateTask = () => openCreateTask(ctx);
   const params = new URLSearchParams(window.location.search);
   const initialQuery = params.get("q") || "";
-  const isReq = isRequester(ctx.member);
   const isView = isViewer(ctx.member);
   const canCreate = canCreateTask(ctx.member);
 
@@ -17,17 +16,17 @@ export async function render(ctx) {
   const years = [currentYear, currentYear - 1, currentYear - 2];
 
   const createBtnHtml = canCreate
-    ? `<button class="btn btn-primary" id="tasks-create">${isReq ? "＋ ส่งคำของาน / บรีฟงานใหม่" : "＋ สร้างงานใหม่"}</button>`
+    ? `<button class="btn btn-primary" id="tasks-create">＋ สร้างงานใหม่</button>`
     : "";
 
   qs("#page-content").innerHTML = `
     <div class="page-header">
       <div>
         <div class="row-wrap" style="gap:8px; align-items:center; margin-bottom:4px">
-          <h2 style="margin:0">${isReq ? "งานที่ส่งคำขอ & ติดตามสถานะ" : "งานที่อยู่ในความรับผิดชอบ"}</h2>
-          ${isReq ? `<span class="badge badge-info" style="font-weight:600">Requester</span>` : isView ? `<span class="badge badge-neutral" style="font-weight:600">Viewer</span>` : ""}
+          <h2 style="margin:0">${isView ? "รายการงานทั้งหมด (Tasks Overview)" : "งานที่อยู่ในความรับผิดชอบ"}</h2>
+          ${isView ? `<span class="badge badge-neutral" style="font-weight:600">Viewer</span>` : ""}
         </div>
-        <p class="page-desc">${isReq ? "ติดตามสถานะงานที่คุณบรีฟให้ทีม Visual & Design ดำเนินการ" : "ดูงานของตัวเองหรือสลับเป็นมุมมองงานทั้งทีมตามสิทธิ์"}</p>
+        <p class="page-desc">${isView ? "ดูภาพรวมงานทั้งหมดและติดตามสถานะความคืบหน้าของงานในระบบ" : "ดูงานของตัวเองหรือสลับเป็นมุมมองงานทั้งทีมตามสิทธิ์"}</p>
       </div>
       ${createBtnHtml}
     </div>
@@ -52,9 +51,14 @@ export async function render(ctx) {
       <div class="field">
         <label>มุมมอง</label>
         <select id="task-scope">
-          <option value="mine">${isReq ? "งานที่ฉันส่งบรีฟ" : "งานของฉัน"}</option>
-          <option value="team">งานทั้งทีม</option>
-          <option value="history">Work History</option>
+          ${isView ? `
+            <option value="team" selected>งานทั้งทีม</option>
+            <option value="history">งานที่ส่งมอบแล้ว (History)</option>
+          ` : `
+            <option value="mine">งานของฉัน</option>
+            <option value="team">งานทั้งทีม</option>
+            <option value="history">Work History</option>
+          `}
         </select>
       </div>
 
@@ -111,7 +115,7 @@ export async function render(ctx) {
 
     // Scope
     if (scope === "mine") {
-      filtered = filtered.filter((task) => task.assignee_id === ctx.member?.id || (isReq && task.created_by === ctx.member?.id));
+      filtered = filtered.filter((task) => task.assignee_id === ctx.member?.id);
     }
     if (scope === "history") {
       filtered = filtered.filter((task) => task.status === "completed");
