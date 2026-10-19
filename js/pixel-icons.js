@@ -5,6 +5,25 @@
    ========================================================================== */
 
 export const pixelIcons = {
+  penTool: `
+    <svg class="pixel-art" width="22" height="22" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+      <!-- Tip -->
+      <rect x="7" y="1" width="2" height="2" fill="#FFFFFF"/>
+      <!-- Nib body flare -->
+      <rect x="6" y="3" width="4" height="2" fill="#FFFFFF"/>
+      <rect x="5" y="5" width="6" height="2" fill="#FFFFFF"/>
+      <rect x="4" y="7" width="8" height="3" fill="#FFFFFF"/>
+      <!-- Ink slit & Breather hole cutout -->
+      <rect x="7" y="2" width="2" height="4" fill="#C91834"/>
+      <rect x="7" y="7" width="2" height="2" fill="#C91834"/>
+      <!-- Gold ferrule ring -->
+      <rect x="4" y="10" width="8" height="2" fill="#FFD23F"/>
+      <!-- Cyan studio shaft -->
+      <rect x="5" y="12" width="6" height="3" fill="#1CE0D8"/>
+      <rect x="6" y="15" width="4" height="1" fill="#1CE0D8"/>
+    </svg>
+  `,
+
   skull: `
     <svg class="pixel-art" width="22" height="22" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
       <rect x="4" y="2" width="8" height="2" fill="#FFFFFF"/>
