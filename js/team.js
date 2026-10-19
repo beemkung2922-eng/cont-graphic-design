@@ -178,7 +178,7 @@ export async function render(ctx) {
   const idleMembersAll = analyzed.filter((a) => a.activeTasks.length === 0);
   const totalItemsAll = activeAll.reduce((sum, task) => sum + Number(task.item_count || 1), 0);
 
-  let currentView = "table"; // "table" | "cards"
+  let currentView = typeof window !== "undefined" && window.innerWidth <= 768 ? "cards" : "table"; // Responsive default
   let currentFilter = "all"; // "all" | "working" | "today" | "review" | "overdue" | "available"
   let currentSearch = "";
 
@@ -475,7 +475,7 @@ export async function render(ctx) {
     </div>
 
     <!-- Filter Bar for Workload -->
-    <div class="filter-bar" style="justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div class="filter-bar team-workload-bar" style="justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div class="field grow" style="min-width:240px">
         <div class="search-inline" style="min-width:0">
           <span>⌕</span>
