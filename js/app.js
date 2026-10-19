@@ -123,6 +123,11 @@ function getRoleNavConfig(member, page) {
         ${pixelIcons.code}
         <span>TEAM</span>
       </a>`,
+    taxonomy: `
+      <a class="pixel-nav-link ${page === "taxonomy" ? "is-active" : ""}" href="taxonomy.html" title="Visual Design Taxonomy (คลังหลักการออกแบบภาพ)">
+        ${pixelIcons.wand}
+        <span>TAXONOMY</span>
+      </a>`,
     guide: `
       <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="แนะนำระบบและคู่มือการใช้งาน (System Guide)">
         ${pixelIcons.book}
@@ -162,6 +167,11 @@ function getRoleNavConfig(member, page) {
       <a class="mobile-nav-link ${page === "team" ? "is-active" : ""}" href="team.html">
         ${pixelIcons.code}
         <span>TEAM</span>
+      </a>`,
+    taxonomy: `
+      <a class="mobile-nav-link ${page === "taxonomy" ? "is-active" : ""}" href="taxonomy.html">
+        ${pixelIcons.wand}
+        <span>VISUAL TAXONOMY</span>
       </a>`,
     guide: `
       <a class="mobile-nav-link" href="#" id="drawer-workflow-guide-link">
@@ -203,6 +213,11 @@ function getRoleNavConfig(member, page) {
         ${icons.users}
         <span>ทีม & กำลังงาน</span>
       </a>`,
+    taxonomy: `
+      <a class="nav-item ${page === "taxonomy" ? "is-active" : ""}" href="taxonomy.html">
+        ${icons.grid}
+        <span>หลักการออกแบบ</span>
+      </a>`,
     reel: `
       <a class="nav-item" href="intro.html">
         ${pixelIcons.rocket}
@@ -219,8 +234,8 @@ function getRoleNavConfig(member, page) {
     sidebarKeys = ["dashboard", "tasks", "calendar", "reel"];
   } else {
     // Designer / Team Head: see all
-    allowedKeys = ["dashboard", "tasks", "board", "calendar", "team", "guide", "reel"];
-    sidebarKeys = ["dashboard", "tasks", "board", "calendar", "team", "reel"];
+    allowedKeys = ["dashboard", "tasks", "board", "calendar", "team", "taxonomy", "guide", "reel"];
+    sidebarKeys = ["dashboard", "tasks", "board", "calendar", "team", "taxonomy", "reel"];
   }
 
   const desktopNavHtml = allowedKeys.map((k) => allDesktopLinks[k]).filter(Boolean).join("");
@@ -722,7 +737,8 @@ const pageModules = {
   calendar: "calendar",
   team: "team",
   reports: "reports",
-  trends: "trends"
+  trends: "trends",
+  taxonomy: "taxonomy"
 };
 
 if (currentPage && pageModules[currentPage]) {
