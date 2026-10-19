@@ -1,5 +1,5 @@
 import { NAV_ITEMS, STATUS_LABELS } from "./constants.js";
-import { ensureAccess, mountUser, canManage, canCreateTask, isRequester, isViewer, errorMessage } from "./auth.js";
+import { ensureAccess, mountUser, canManage, canCreateTask, isViewer, errorMessage } from "./auth.js";
 import { api, auth } from "./supabase.js";
 import { escapeHtml, avatar, relativeDeadline, formatDateTime } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
@@ -90,11 +90,10 @@ export function closeModal() {
 
 function getRoleNavConfig(member, page) {
   const role = member?.role || "viewer";
-  const isReq = role === "requester";
-  const isView = role === "viewer";
+  const isView = isViewer(member);
   const canCreate = canCreateTask(member);
 
-  const homeHref = isReq ? "tasks.html" : "dashboard.html";
+  const homeHref = "dashboard.html";
 
   // Desktop nav items dictionary
   const allDesktopLinks = {
@@ -104,7 +103,7 @@ function getRoleNavConfig(member, page) {
         <span>DASHBOARD</span>
       </a>`,
     tasks: `
-      <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="${isReq ? "งานที่ฉันส่งคำขอ (My Requests)" : "My Tasks"}">
+      <a class="pixel-nav-link ${page === "tasks" ? "is-active" : ""}" href="tasks.html" title="${isView ? "รายการงานทั้งหมด (Tasks Overview)" : "My Tasks"}">
         ${pixelIcons.cubeGreen}
         <span>TASKS</span>
         <span class="nav-count-badge" id="nav-task-count-top">0</span>
@@ -186,7 +185,7 @@ function getRoleNavConfig(member, page) {
     tasks: `
       <a class="nav-item ${page === "tasks" ? "is-active" : ""}" href="tasks.html">
         ${icons.check}
-        <span>${isReq ? "งานที่ฉันส่งคำขอ" : "งานของฉัน"}</span>
+        <span>${isView ? "รายการงานทั้งหมด" : "งานของฉัน"}</span>
         <span class="nav-count" id="nav-task-count">—</span>
       </a>`,
     board: `
@@ -214,11 +213,7 @@ function getRoleNavConfig(member, page) {
   // Role permissions filtering
   let allowedKeys = [];
   let sidebarKeys = [];
-  if (isReq) {
-    // Requester: TASKS · CALENDAR · REEL · GUIDE (ซ่อน DASHBOARD, BOARD และ TEAM)
-    allowedKeys = ["tasks", "calendar", "reel", "guide"];
-    sidebarKeys = ["tasks", "calendar", "reel"];
-  } else if (isView) {
+  if (isView) {
     // Viewer: DASHBOARD · TASKS · CALENDAR · REEL (ซ่อน BOARD, TEAM และซ่อนปุ่ม + สร้างงาน)
     allowedKeys = ["dashboard", "tasks", "calendar", "reel"];
     sidebarKeys = ["dashboard", "tasks", "calendar", "reel"];
@@ -235,8 +230,8 @@ function getRoleNavConfig(member, page) {
   let createBtnHtml = "";
   let drawerCreateBtnHtml = "";
   if (canCreate && !isView) {
-    const btnLabel = isReq ? "ส่งบรีฟงาน" : "สร้างงาน";
-    const btnTitle = isReq ? "ส่งคำของาน / บรีฟงานใหม่" : "สร้างงานใหม่ (Create New Task)";
+    const btnLabel = "สร้างงาน";
+    const btnTitle = "สร้างงานใหม่ (Create New Task)";
     createBtnHtml = `
       <button class="btn-pixel btn-pixel-red" id="quick-create" title="${escapeHtml(btnTitle)}">
         ${pixelIcons.plus}
@@ -247,7 +242,7 @@ function getRoleNavConfig(member, page) {
       <div class="mobile-drawer-actions">
         <button class="btn-pixel btn-pixel-red" id="drawer-quick-create" style="width:100%;justify-content:center;">
           ${pixelIcons.plus}
-          <span>${isReq ? "ส่งบรีฟงานใหม่" : "NEW TASK"}</span>
+          <span>NEW TASK</span>
         </button>
       </div>
     `;
