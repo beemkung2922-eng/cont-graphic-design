@@ -3,7 +3,7 @@ import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast, openModal } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
 import { isViewer, canCreateTask, canDownload } from "./auth.js";
-import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, initAdvancedCharts } from "./analytics.js";
+import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
 import { cleanupStudio3D } from "./studio-3d.js?v=20261016-18";
 import { openExportSummaryModal } from "./export-summary.js?v=20261019-03";
@@ -654,7 +654,20 @@ export async function render(ctx) {
           </div>
         </div>
 
-        <!-- 5. Activity + Deadlines Row -->
+        <!-- 5. Deep-Dive Member Overview (เจาะลึกภาระงานรายคน & สัดส่วนงานแต่ละโปรเจกต์) -->
+        ${renderMemberComparisonHtml({
+          memberStats: analytics.memberStats,
+          teamTotals: analytics.teamTotals,
+          selectedMemberId: filterState.memberId,
+          selectedStatus: filterState.status,
+          projects,
+          filteredTasks: filtered,
+          allTasks: tasks,
+          members,
+          weekOffset: heatmapWeekOffset,
+        })}
+
+        <!-- 6. Activity + Deadlines Row -->
         <div class="dash-two-col" style="margin-top:24px;">
           <div class="chart-card" style="border:1px solid #262a3e;background:#131522;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
             <div class="chart-card-header">
@@ -795,6 +808,22 @@ export async function render(ctx) {
         draw();
       });
     }
+
+    // Bind Member Comparison drilldowns and actions
+    bindMemberComparison(qs("#page-content"), {
+      onSelectMember: (newMemberId) => {
+        filterState.memberId = newMemberId;
+        draw();
+      },
+      onSelectStatus: (newStatus) => {
+        filterState.status = newStatus;
+        draw();
+      },
+      onToggleWeek: (newOffset) => {
+        heatmapWeekOffset = newOffset;
+        draw();
+      }
+    });
 
     // Bind Task Cards
     bindTaskCards(qs("#page-content"));
