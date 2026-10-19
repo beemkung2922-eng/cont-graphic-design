@@ -31,17 +31,19 @@ const STATUS_CHART_COLORS = {
   completed: { bg: "#22C55E" },
 };
 
-const STATUS_EN = {
-  brief: "Brief Intake",
-  drafting: "Drafting",
-  review: "In Review",
-  revision: "Revision",
-  completed: "Delivered",
+const STATUS_TH = {
+  brief: "รอรับบรีฟ",
+  drafting: "กำลังดราฟต์",
+  review: "รอตรวจ/คอมเมนต์",
+  revision: "แก้ไขงาน",
+  completed: "ส่งมอบสำเร็จ",
 };
 
-const MONTH_NAMES_EN = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+const STATUS_EN = STATUS_TH;
+
+const MONTH_NAMES_TH_SHORT = [
+  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
 ];
 
 /* ─── Destroy existing Chart.js instances before redraw ─── */
@@ -112,9 +114,9 @@ function getHeroChartData(tasks, period = "30days") {
 
   for (let i = numBuckets; i >= 0; i--) {
     const d = new Date(now.getTime() - i * stepDays * 24 * 60 * 60 * 1000);
-    const month = d.toLocaleString("en-US", { month: "short" });
+    const month = MONTH_NAMES_TH_SHORT[d.getMonth()] || "";
     const day = d.getDate();
-    labels.push(`${month} ${day}`);
+    labels.push(`${day} ${month}`);
 
     const bucketStart = new Date(d.getTime() - stepDays * 24 * 60 * 60 * 1000);
     const inBucket = tasks.filter(t => {
@@ -279,12 +281,12 @@ export async function render(ctx) {
     } else {
       urgentMiniItemsHtml = `
         <div class="mini-list-row">
-          <span class="mini-list-title">All tasks in queue</span>
-          <span class="mini-list-tag is-cyan">On track</span>
+          <span class="mini-list-title">ทุกงานในคิว</span>
+          <span class="mini-list-tag is-cyan">ตามกำหนด</span>
         </div>
         <div class="mini-list-row">
-          <span class="mini-list-title">No SLA bottlenecks</span>
-          <span class="mini-list-tag" style="color:#22c55e;">Smooth</span>
+          <span class="mini-list-title">ไม่มีงานติดขัด</span>
+          <span class="mini-list-tag" style="color:#22c55e;">ราบรื่น</span>
         </div>
       `;
     }
@@ -309,11 +311,11 @@ export async function render(ctx) {
       <div class="dash-filter-bar" id="dash-filter-bar" style="margin-bottom:20px;border-radius:10px;">
         <div class="dfb-top-row">
           <div class="dfb-chips-group">
-            <span class="dfb-label">Timeframe</span>
+            <span class="dfb-label">ช่วงเวลา</span>
             <div class="dfb-chips">
               ${["all","today","7days","month","year"].map(p => `
                 <button type="button" class="dfb-chip${filterState.period===p?" is-active":""}" data-period="${p}">
-                  ${{ all:"All Time", today:"Today", "7days":"7 Days", month:"This Month", year:"This Year" }[p]}
+                  ${{ all:"ทั้งหมด", today:"วันนี้", "7days":"7 วัน", month:"เดือนนี้", year:"ปีนี้" }[p]}
                 </button>`).join("")}
             </div>
           </div>
@@ -327,39 +329,39 @@ export async function render(ctx) {
         <div class="dfb-advanced-panel${isFilterExpanded ? " is-open" : ""}" id="dfb-advanced-panel">
           <div class="dfb-fields-grid">
             <div class="dfb-group">
-              <label class="dfb-label">Year</label>
+              <label class="dfb-label">ปี</label>
               <select class="dfb-select" id="dfb-year">
-                <option value="all"${filterState.year==="all"?" selected":""}>All Years</option>
+                <option value="all"${filterState.year==="all"?" selected":""}>ทุกปี</option>
                 ${allYears.map(y => `<option value="${y}"${filterState.year==y?" selected":""}>${y}</option>`).join("")}
               </select>
             </div>
             <div class="dfb-group">
-              <label class="dfb-label">Month</label>
+              <label class="dfb-label">เดือน</label>
               <select class="dfb-select" id="dfb-month">
-                <option value="all"${filterState.month==="all"?" selected":""}>All Months</option>
-                ${MONTH_NAMES_EN.map((m, i) => `<option value="${i+1}"${filterState.month==i+1?" selected":""}>${m}</option>`).join("")}
+                <option value="all"${filterState.month==="all"?" selected":""}>ทุกเดือน</option>
+                ${MONTH_NAMES_TH.map((m, i) => `<option value="${i+1}"${filterState.month==i+1?" selected":""}>${m}</option>`).join("")}
               </select>
             </div>
             <div class="dfb-group">
-              <label class="dfb-label">Member</label>
+              <label class="dfb-label">สมาชิก</label>
               <select class="dfb-select" id="dfb-member">
-                <option value="all"${filterState.memberId==="all"?" selected":""}>All Members</option>
+                <option value="all"${filterState.memberId==="all"?" selected":""}>ทุกคน</option>
                 ${members.map(m => `<option value="${m.id}"${filterState.memberId===m.id?" selected":""}>${escapeHtml(m.name)}</option>`).join("")}
               </select>
             </div>
             <div class="dfb-group">
-              <label class="dfb-label">Status</label>
+              <label class="dfb-label">สถานะ</label>
               <select class="dfb-select" id="dfb-status">
-                <option value="all"${filterState.status==="all"?" selected":""}>All Statuses</option>
-                ${STATUS_ORDER.map(s => `<option value="${s}"${filterState.status===s?" selected":""}>${STATUS_EN[s]}</option>`).join("")}
+                <option value="all"${filterState.status==="all"?" selected":""}>ทุกสถานะ</option>
+                ${STATUS_ORDER.map(s => `<option value="${s}"${filterState.status===s?" selected":""}>${STATUS_TH[s] || s}</option>`).join("")}
               </select>
             </div>
             <div class="dfb-group dfb-range">
-              <label class="dfb-label">Date Range</label>
+              <label class="dfb-label">ช่วงวันที่</label>
               <div class="dfb-range-inputs">
-                <input type="date" class="dfb-input" id="dfb-start" value="${filterState.startDate}" placeholder="Start Date">
+                <input type="date" class="dfb-input" id="dfb-start" value="${filterState.startDate}" placeholder="วันที่เริ่มต้น">
                 <span class="dfb-sep">–</span>
-                <input type="date" class="dfb-input" id="dfb-end" value="${filterState.endDate}" placeholder="End Date">
+                <input type="date" class="dfb-input" id="dfb-end" value="${filterState.endDate}" placeholder="วันที่สิ้นสุด">
               </div>
             </div>
             <div class="dfb-reset-wrap">
@@ -378,14 +380,14 @@ export async function render(ctx) {
           <div class="activity-dot" style="background:${STATUS_CHART_COLORS[task.status]?.bg || BRAND.cyan};"></div>
           <div class="activity-main">
             <div class="activity-name"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title)}</a></div>
-            <div class="activity-task">${escapeHtml(m?.name || "Unassigned")} · ${STATUS_EN[task.status] || task.status}</div>
+            <div class="activity-task">${escapeHtml(m?.name || "ยังไม่มอบหมาย")} · ${STATUS_TH[task.status] || STATUS_LABELS[task.status] || task.status}</div>
           </div>
           <div class="activity-right">
             <span class="pixel-badge" style="color:var(--text-dim);border-color:var(--line);">${formatDate(task.created_at)}</span>
           </div>
         </div>
       `;
-    }).join("") || `<div class="state-empty" style="color:#8c91a8;">No recent activity in this period</div>`;
+    }).join("") || `<div class="state-empty" style="color:#8c91a8;">ไม่มีความเคลื่อนไหวในช่วงเวลานี้</div>`;
 
     const deadlinesHtml = dueSoon.slice(0, 5).map(task => {
       const urgency = relativeDeadline(task.deadline_at || task.deadline);
@@ -394,16 +396,16 @@ export async function render(ctx) {
         <div class="deadline-item">
           <div class="deadline-date" style="border-color:var(--line);background:#1a1a1a;">
             <span class="day" style="font-family:var(--font);font-weight:700;">${d ? d.getDate() : "—"}</span>
-            <span class="month">${d ? MONTH_NAMES_EN[d.getMonth()].slice(0, 3) : "—"}</span>
+            <span class="month">${d ? MONTH_NAMES_TH_SHORT[d.getMonth()] : "—"}</span>
           </div>
           <div class="deadline-main">
             <div class="deadline-title"><a href="task.html?id=${encodeURIComponent(task.id)}" style="color:inherit;text-decoration:none;">${escapeHtml(task.title)}</a></div>
             <div class="deadline-sub">${escapeHtml(urgency.label)}</div>
           </div>
-          <span class="badge ${urgency.className}">${urgency.className === "is-overdue" ? "Overdue" : "Due Soon"}</span>
+          <span class="badge ${urgency.className}">${urgency.className === "is-overdue" ? "เลยกำหนด" : "ใกล้กำหนด"}</span>
         </div>
       `;
-    }).join("") || `<div class="state-empty" style="color:#8c91a8;">No upcoming deadlines in this period</div>`;
+    }).join("") || `<div class="state-empty" style="color:#8c91a8;">ไม่มีงานใกล้ถึงกำหนดส่งในช่วงเวลานี้</div>`;
 
     /* ─────────── Render Full Bento Overview Page HTML ─────────── */
     qs("#page-content").innerHTML = `
@@ -436,22 +438,22 @@ export async function render(ctx) {
           <div class="overview-hero-card">
             <div class="hero-card-head">
               <div class="hero-metric-info">
-                <div class="hero-metric-label">Total Jobs · ปริมาณงานทั้งหมด</div>
-                <div class="hero-metric-sub">Net delivered vs active queue across all projects</div>
+                <div class="hero-metric-label">ปริมาณงานทั้งหมด · Total Jobs</div>
+                <div class="hero-metric-sub">ปริมาณงานส่งมอบสำเร็จ เทียบกับงานกำลังทำในทุกโครงการ</div>
                 <div class="hero-metric-row">
                   <span class="hero-metric-val count-up-num" data-final="${filtered.length}">0</span>
                   <span class="hero-metric-unit">งาน</span>
                   <span class="hero-delta-badge">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-                    <span>+8.3% vs previous period</span>
+                    <span>+8.3% เทียบกับช่วงก่อนหน้า</span>
                   </span>
                 </div>
               </div>
               <div class="hero-time-tabs">
-                <button type="button" class="hero-time-tab ${filterState.period === '7days' ? 'is-active' : ''}" data-period="7days">7 days</button>
-                <button type="button" class="hero-time-tab ${filterState.period === 'month' ? 'is-active' : ''}" data-period="month">30 days</button>
-                <button type="button" class="hero-time-tab ${filterState.period === 'year' ? 'is-active' : ''}" data-period="year">90 days</button>
-                <button type="button" class="hero-time-tab ${filterState.period === 'all' ? 'is-active' : ''}" data-period="all">All</button>
+                <button type="button" class="hero-time-tab ${filterState.period === '7days' ? 'is-active' : ''}" data-period="7days">7 วัน</button>
+                <button type="button" class="hero-time-tab ${filterState.period === 'month' ? 'is-active' : ''}" data-period="month">30 วัน</button>
+                <button type="button" class="hero-time-tab ${filterState.period === 'year' ? 'is-active' : ''}" data-period="year">90 วัน</button>
+                <button type="button" class="hero-time-tab ${filterState.period === 'all' ? 'is-active' : ''}" data-period="all">ทั้งหมด</button>
               </div>
             </div>
             <div class="hero-chart-canvas-wrap">
@@ -468,13 +470,13 @@ export async function render(ctx) {
                   <span class="stat-bento-icon icon-cyan">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
                   </span>
-                  <span class="stat-bento-label">In Progress</span>
+                  <span class="stat-bento-label">กำลังทำ</span>
                 </div>
                 <span class="stat-bento-chevron">›</span>
               </div>
               <div class="stat-bento-val count-up-num" data-final="${active.length}">0</div>
               <div class="stat-bento-delta text-cyan">
-                <span>↑ ${active.length} Active in queue</span>
+                <span>↑ ${active.length} งานกำลังทำในคิว</span>
               </div>
               <div class="stat-bento-sparkline">
                 ${renderSparklineSvg(sparkInProg, "#19c3eb", 36, 130)}
@@ -488,13 +490,13 @@ export async function render(ctx) {
                   <span class="stat-bento-icon icon-green">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                   </span>
-                  <span class="stat-bento-label">Delivered</span>
+                  <span class="stat-bento-label">ส่งมอบแล้ว</span>
                 </div>
                 <span class="stat-bento-chevron">›</span>
               </div>
               <div class="stat-bento-val count-up-num" data-final="${completed.length}">0</div>
               <div class="stat-bento-delta text-green">
-                <span>↑ 99.6% completion rate</span>
+                <span>↑ อัตราส่งมอบสำเร็จ 99.6%</span>
               </div>
               <div class="stat-bento-sparkline">
                 ${renderSparklineSvg(sparkDeliv, "#22c55e", 36, 130)}
@@ -508,13 +510,13 @@ export async function render(ctx) {
                   <span class="stat-bento-icon icon-warn">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                   </span>
-                  <span class="stat-bento-label">Due Soon / Urgent</span>
+                  <span class="stat-bento-label">ใกล้กำหนด / ด่วน</span>
                 </div>
                 <span class="stat-bento-chevron">›</span>
               </div>
               <div class="stat-bento-val count-up-num" data-final="${dueSoon.length}">0</div>
               <div class="stat-bento-subtext">
-                ${lateCount > 0 ? `<span class="text-danger">${lateCount} overdue</span>` : "0 overdue, all on track"}
+                ${lateCount > 0 ? `<span class="text-danger">เลยกำหนด ${lateCount} งาน</span>` : "ไม่มีงานเลยกำหนด ตามแผนทั้งหมด"}
               </div>
               <div class="stat-bento-mini-list">
                 ${urgentMiniItemsHtml}
@@ -528,13 +530,13 @@ export async function render(ctx) {
                   <span class="stat-bento-icon icon-yellow">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   </span>
-                  <span class="stat-bento-label">On-Time SLA</span>
+                  <span class="stat-bento-label">ตรงตามกำหนด (SLA)</span>
                 </div>
                 <span class="stat-bento-chevron">›</span>
               </div>
               <div class="stat-bento-val count-up-num" data-final="${onTimeRate}" data-is-percent="true">0%</div>
               <div class="stat-bento-delta text-yellow">
-                <span>↑ 99.6% SLA timely target</span>
+                <span>↑ ส่งมอบตรงเวลา 99.6% ตามเป้า</span>
               </div>
               <div class="stat-bento-sparkline">
                 ${renderSparklineSvg(sparkSla, "#ffc61a", 36, 130)}
@@ -549,40 +551,40 @@ export async function render(ctx) {
           <div class="overview-bottom-card">
             <div class="bottom-card-head">
               <div>
-                <h3 class="bottom-card-title">Task Pipeline</h3>
-                <p class="bottom-card-sub">Open tasks by stage</p>
+                <h3 class="bottom-card-title">สถานะงานใน Pipeline</h3>
+                <p class="bottom-card-sub">สัดส่วนงานตามขั้นตอนการดำเนินงาน</p>
               </div>
-              <a href="board.html" class="bottom-card-link">All tasks ›</a>
+              <a href="board.html" class="bottom-card-link">บอร์ดงานทั้งหมด ›</a>
             </div>
             
             <!-- Multi-color Segmented Progress Bar -->
             <div class="pipeline-stacked-bar">
-              <div class="pipeline-bar-seg seg-brief" style="width: ${briefPct}%;" title="Brief Intake: ${briefCount} งาน"></div>
-              <div class="pipeline-bar-seg seg-drafting" style="width: ${draftingPct}%;" title="Drafting: ${draftingCount} งาน"></div>
-              <div class="pipeline-bar-seg seg-review" style="width: ${reviewPct}%;" title="In Review: ${reviewCount} งาน"></div>
-              <div class="pipeline-bar-seg seg-completed" style="width: ${completedPct}%;" title="Delivered: ${completedCount} งาน"></div>
+              <div class="pipeline-bar-seg seg-brief" style="width: ${briefPct}%;" title="รอรับบรีฟ: ${briefCount} งาน"></div>
+              <div class="pipeline-bar-seg seg-drafting" style="width: ${draftingPct}%;" title="กำลังดราฟต์: ${draftingCount} งาน"></div>
+              <div class="pipeline-bar-seg seg-review" style="width: ${reviewPct}%;" title="รอตรวจ/คอมเมนต์: ${reviewCount} งาน"></div>
+              <div class="pipeline-bar-seg seg-completed" style="width: ${completedPct}%;" title="ส่งมอบสำเร็จ: ${completedCount} งาน"></div>
             </div>
 
             <!-- Legend Key 2-columns -->
             <div class="pipeline-legend-grid">
               <div class="pipeline-legend-item">
                 <span class="leg-dot bg-yellow"></span>
-                <span class="leg-label">Brief Intake</span>
+                <span class="leg-label">รอรับบรีฟ</span>
                 <span class="leg-val">${briefCount}</span>
               </div>
               <div class="pipeline-legend-item">
                 <span class="leg-dot bg-cyan"></span>
-                <span class="leg-label">Drafting</span>
+                <span class="leg-label">กำลังดราฟต์</span>
                 <span class="leg-val">${draftingCount}</span>
               </div>
               <div class="pipeline-legend-item">
                 <span class="leg-dot bg-red"></span>
-                <span class="leg-label">In Review</span>
+                <span class="leg-label">รอตรวจ/คอมเมนต์</span>
                 <span class="leg-val">${reviewCount}</span>
               </div>
               <div class="pipeline-legend-item">
                 <span class="leg-dot bg-green"></span>
-                <span class="leg-label">Delivered</span>
+                <span class="leg-label">ส่งมอบสำเร็จ</span>
                 <span class="leg-val">${completedCount}</span>
               </div>
             </div>
@@ -596,10 +598,10 @@ export async function render(ctx) {
           <div class="overview-bottom-card">
             <div class="bottom-card-head">
               <div>
-                <h3 class="bottom-card-title">Tasks by Category</h3>
+                <h3 class="bottom-card-title">งานแยกตามประเภท</h3>
                 <p class="bottom-card-sub">สัดส่วนประเภทงาน / แชนเนล</p>
               </div>
-              <a href="reports.html" class="bottom-card-link">Reports ›</a>
+              <a href="reports.html" class="bottom-card-link">รายงาน ›</a>
             </div>
 
             <div class="cat-bar-list">
@@ -611,10 +613,10 @@ export async function render(ctx) {
           <div class="overview-bottom-card">
             <div class="bottom-card-head">
               <div>
-                <h3 class="bottom-card-title">Top Projects</h3>
-                <p class="bottom-card-sub">โครงการที่มีงานมากที่สุด</p>
+                <h3 class="bottom-card-title">โครงการยอดนิยม (Top Projects)</h3>
+                <p class="bottom-card-sub">โครงการที่มีปริมาณงานมากที่สุด</p>
               </div>
-              <a href="#project-workload-section" class="bottom-card-link">Catalogue ›</a>
+              <a href="#project-workload-section" class="bottom-card-link">ดูทั้งหมด ›</a>
             </div>
 
             <div class="top-ranked-list">
@@ -641,10 +643,10 @@ export async function render(ctx) {
           <div class="chart-card" style="border:1px solid #262a3e;background:#131522;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
             <div class="chart-card-header">
               <div>
-                <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:#fff;">Recent Activity</div>
-                <div class="chart-card-sub">Tasks currently moving in the pipeline</div>
+                <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:#fff;">กิจกรรมล่าสุด</div>
+                <div class="chart-card-sub">งานที่มีความเคลื่อนไหวล่าสุดในระบบ</div>
               </div>
-              <a class="btn-pixel btn-pixel-dark" href="board.html" style="font-size:0.75rem;padding:6px 12px;">KANBAN BOARD →</a>
+              <a class="btn-pixel btn-pixel-dark" href="board.html" style="font-size:0.75rem;padding:6px 12px;">บอร์ด KANBAN →</a>
             </div>
             <div class="feed-list">${activityHtml}</div>
           </div>
@@ -652,10 +654,10 @@ export async function render(ctx) {
           <div class="chart-card" style="border:1px solid #262a3e;background:#131522;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
             <div class="chart-card-header">
               <div>
-                <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:#fff;">Upcoming Deadlines</div>
-                <div class="chart-card-sub">Deliveries requiring SLA focus</div>
+                <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:#fff;">กำหนดส่งเร็วๆ นี้</div>
+                <div class="chart-card-sub">งานที่ใกล้ถึงกำหนดส่งหรือต้องติดตาม SLA</div>
               </div>
-              <a class="btn-pixel btn-pixel-dark" href="calendar.html" style="font-size:0.75rem;padding:6px 12px;">CALENDAR →</a>
+              <a class="btn-pixel btn-pixel-dark" href="calendar.html" style="font-size:0.75rem;padding:6px 12px;">ปฏิทินงาน →</a>
             </div>
             <div class="deadline-list">${deadlinesHtml}</div>
           </div>
@@ -665,13 +667,13 @@ export async function render(ctx) {
         <div class="chart-card" style="margin-top:24px;border:1px solid #262a3e;background:#131522;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
           <div class="chart-card-header">
             <div>
-              <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:var(--red);">Urgent Focus</div>
-              <div class="chart-card-sub">Tasks nearing SLA target or awaiting review</div>
+              <div class="chart-card-title" style="font-family:var(--font);font-weight:700;color:var(--red);">งานด่วนที่ต้องโฟกัส</div>
+              <div class="chart-card-sub">งานที่ใกล้ถึงกำหนดหรืออยู่ระหว่างรอตรวจ/แก้ไข</div>
             </div>
-            <a class="btn-pixel btn-pixel-dark" href="tasks.html" style="font-size:0.75rem;padding:6px 12px;">ALL TASKS →</a>
+            <a class="btn-pixel btn-pixel-dark" href="tasks.html" style="font-size:0.75rem;padding:6px 12px;">งานทั้งหมด →</a>
           </div>
           <div class="task-grid" style="grid-template-columns:repeat(auto-fill,minmax(290px,1fr))">
-            ${dueSoon.slice(0, 3).map(task => taskCard(task, { projects, members, subtasks })).join("") || interactiveEmptyState({ title: "No urgent tasks", subtitle: "All creative sprints are progressing on schedule", small: true })}
+            ${dueSoon.slice(0, 3).map(task => taskCard(task, { projects, members, subtasks })).join("") || interactiveEmptyState({ title: "ไม่มีงานด่วน", subtitle: "ทุกงานดำเนินไปตามแผนงานอย่างราบรื่น", small: true })}
           </div>
         </div>
       </div>
@@ -785,7 +787,7 @@ export async function render(ctx) {
           data: {
             labels: chartData.labels,
             datasets: [{
-              label: "Tasks Created / Delivered",
+              label: "ปริมาณงานที่สร้าง / ส่งมอบแล้ว",
               data: chartData.counts,
               borderColor: "#ffc61a",
               borderWidth: 2.5,
@@ -816,7 +818,7 @@ export async function render(ctx) {
                 displayColors: false,
                 callbacks: {
                   title: (items) => items[0]?.label || "",
-                  label: (item) => `${item.parsed.y} งาน (Throughput)`
+                  label: (item) => `${item.parsed.y} งาน (ปริมาณงาน)`
                 }
               }
             },
