@@ -623,5 +623,5 @@ const pageModules = {
 };
 
 if (currentPage && pageModules[currentPage]) {
-  import(`./${pageModules[currentPage]}.js?v=20261019-02`).then(({ render }) => boot(render));
+  import(`./${pageModules[currentPage]}.js?v=20261019-03`).then(({ render }) => boot(render));
 }
