@@ -12,12 +12,12 @@ import {
   initAdvancedCharts,
 } from "./analytics.js";
 
-const STATUS_EN = {
-  brief: "Brief Intake",
-  drafting: "Drafting",
-  review: "In Review",
-  revision: "Revision",
-  completed: "Delivered",
+const STATUS_EXPORT = {
+  brief: "รอรับบรีฟ (Brief)",
+  drafting: "กำลังดราฟต์ (Drafting)",
+  review: "รอตรวจคอมเมนต์ (In Review)",
+  revision: "แก้ไขงาน (Revision)",
+  completed: "ส่งมอบสำเร็จ (Delivered)",
 };
 
 /* ─── Destroy Chart.js instances ─── */
@@ -62,7 +62,7 @@ function exportToExcel(tasks, members, projects) {
       `"${proj.replace(/"/g, '""')}"`,
       `"${mem.replace(/"/g, '""')}"`,
       `"${taskTypeLabel(t.task_type || "").replace(/"/g, '""')}"`,
-      `"${(STATUS_EN[t.status] || t.status || "").replace(/"/g, '""')}"`,
+      `"${(STATUS_EXPORT[t.status] || t.status || "").replace(/"/g, '""')}"`,
       Number(t.item_count || 1),
       `"${(t.dimensions || "").replace(/"/g, '""')}"`,
       `"${(t.channel || "").replace(/"/g, '""')}"`,
@@ -157,55 +157,17 @@ export async function render(ctx) {
     const bestWeekCount = currentWeekCounts[maxWeekIdx];
     const bestWeekLabel = weekLabels[maxWeekIdx];
     const avgWeeklyOutput = (currentWeekCounts.reduce((a, b) => a + b, 0) / 12).toFixed(1);
-    const revisionRate = tasks.length ? ((tasks.filter((t) => (t.revision_count || 0) > 0).length / tasks.length) * 100).toFixed(1) : "2.5";
+    const revisionRate = tasks.length ? ((tasks.filter((t) => (t.revision_count || 0) > 0).length / tasks.length) * 100).toFixed(1) : "0.0";
+    const completionRate = tasks.length ? ((completed.length / tasks.length) * 100).toFixed(1) : "100.0";
+    const firstPassCount = tasks.filter((t) => Number(t.revision_count || 0) === 0).length;
+    const firstPassRate = tasks.length ? ((firstPassCount / tasks.length) * 100).toFixed(1) : "100.0";
+    const onTimeRate = tasks.length ? (((tasks.length - late.length) / tasks.length) * 100).toFixed(1) : "100.0";
+    const avgItemsPerTask = tasks.length ? (itemTotal / tasks.length).toFixed(1) : "1.0";
 
-    /* ── 2. Category Breakdown (6 Categories matching reference) ── */
-    const categories = [
-      { name: "Social & Online Ads", count: 0, color: "#ffc61a" },
-      { name: "Key Visual & Campaign", count: 0, color: "#ffc61a" },
-      { name: "Print & Branch Media", count: 0, color: "#ffc61a" },
-      { name: "Resize & Adaptation", count: 0, color: "#ffc61a" },
-      { name: "Merchandise & Branding", count: 0, color: "#ffc61a" },
-      { name: "General / Internal Media", count: 0, color: "#ffc61a" }
-    ];
-
-    tasks.forEach((t) => {
-      const type = (t.task_type || "").toLowerCase();
-      const title = (t.title || "").toLowerCase();
-      const ch = (t.channel || "").toLowerCase();
-
-      if (type === "resize" || title.includes("resize") || title.includes("ปรับขยาย")) {
-        categories[3].count++;
-      } else if (type.includes("print") || title.includes("สิ่งพิมพ์") || title.includes("a4") || ch.includes("print") || ch.includes("branch")) {
-        categories[2].count++;
-      } else if (title.includes("key visual") || title.includes("kv") || title.includes("campaign") || title.includes("แคมเปญ")) {
-        categories[1].count++;
-      } else if (ch.includes("facebook") || ch.includes("gdn") || ch.includes("social") || title.includes("แบนเนอร์") || title.includes("banner")) {
-        categories[0].count++;
-      } else if (title.includes("merch") || title.includes("ci") || title.includes("โลโก้")) {
-        categories[4].count++;
-      } else {
-        categories[5].count++;
-      }
-    });
-
-    const maxCatCount = Math.max(...categories.map((c) => c.count), 1);
-    const categoriesHtml = categories.map((cat) => {
-      const pct = Math.round((cat.count / maxCatCount) * 100);
-      return `
-        <div class="rep-cat-item">
-          <span class="rep-cat-label" title="${escapeHtml(cat.name)}">${escapeHtml(cat.name)}</span>
-          <div class="rep-cat-track">
-            <div class="rep-cat-fill" style="width:${pct}%;"></div>
-          </div>
-          <span class="rep-cat-val">${cat.count} งาน</span>
-        </div>
-      `;
-    }).join("");
-
-    /* ── 3. Heatmap Matrix (When requests arrive: 7 Weekdays x 8 Hours) ── */
-    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    const hourLabels = ["6a", "8a", "10a", "12p", "2p", "4p", "6p", "8p"];
+    /* ── 2. Heatmap Matrix (When requests arrive: 7 Weekdays x 8 Hours) ── */
+    const dayNames = ["จันทร์", "อังคาร", "พุธ", "พฤหัสฯ", "ศุกร์", "เสาร์", "อาทิตย์"];
+    const dayNamesFull = ["จันทร์ (Mon)", "อังคาร (Tue)", "พุธ (Wed)", "พฤหัสบดี (Thu)", "ศุกร์ (Fri)", "เสาร์ (Sat)", "อาทิตย์ (Sun)"];
+    const hourLabels = ["06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"];
     const heatMatrix = Array.from({ length: 7 }, () => Array(8).fill(0));
 
     tasks.forEach((t) => {
@@ -251,7 +213,7 @@ export async function render(ctx) {
       const cellsHtml = hourLabels.map((hLabel, hIdx) => {
         const val = heatMatrix[dIdx][hIdx];
         const lvl = getHeatLevel(val);
-        return `<td class="heatmap-cell lvl-${lvl}" title="${dayName} ${hLabel}: ${val} งานที่บรีฟเข้ามา"></td>`;
+        return `<td class="heatmap-cell lvl-${lvl}" title="วัน${dayNamesFull[dIdx]} เวลา ${hLabel}: มีงานเปิดบรีฟ ${val} งาน"></td>`;
       }).join("");
 
       return `
@@ -270,12 +232,12 @@ export async function render(ctx) {
         <!-- 1. Header with Title + PDF / Excel Download Actions -->
         <div class="reports-header">
           <div>
-            <h1 class="reports-title">Performance & Workload Reports</h1>
-            <p class="reports-subtitle">วิเคราะห์ประสิทธิภาพการผลิต, Throughput รายสัปดาห์, สัดส่วนประเภทงาน และช่วงเวลาบรีฟงาน</p>
+            <h1 class="reports-title">รายงานประสิทธิภาพและภาระงาน</h1>
+            <p class="reports-subtitle">วิเคราะห์ความเร็วการส่งมอบ (Throughput), ดัชนีคุณภาพ, และช่วงเวลาเปิดบรีฟเพื่อวางแผนกำลังคน</p>
           </div>
           <div class="reports-header-actions">
-            <span class="chip" style="background:#181b2a;border:1px solid #2e334a;color:#cdd3e8;padding:8px 14px;border-radius:8px;font-weight:600;">
-              ข้อมูล ${tasks.length} งาน (${itemTotal} ชิ้น)
+            <span class="reports-data-chip">
+              <span class="pulse-dot"></span> ข้อมูลที่ประมวลผล ${tasks.length} งาน (${itemTotal} ชิ้นงาน)
             </span>
             ${canDl ? `
             <button class="btn-overview-action" id="btn-export-pdf" title="พิมพ์รายงานหรือบันทึกเป็น PDF">
@@ -284,7 +246,7 @@ export async function render(ctx) {
             </button>
             <button class="btn-overview-primary" id="btn-export-excel" title="ดาวน์โหลดไฟล์สเปรดชีต Excel (.csv)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>ดาวน์โหลด Excel</span>
+              <span>ส่งออก Excel</span>
             </button>` : ""}
           </div>
         </div>
@@ -292,60 +254,60 @@ export async function render(ctx) {
         <!-- Filter Toolbar -->
         ${renderTimeFilterBarHtml({ ...filterState, matchCount: tasks.length })}
 
-        <!-- 2. Top Row: 4 KPI Stat Cards (Matching Reference Layout) -->
+        <!-- 2. Top Row: 4 Executive KPI Stat Cards (No duplicates with Dashboard) -->
         <div class="reports-top-grid">
           <div class="report-kpi-card">
-            <div class="report-kpi-label">Production volume, 12 weeks</div>
-            <div class="report-kpi-val count-up-num" data-final="${tasks.length}">0</div>
+            <div class="report-kpi-label">อัตราส่งมอบงานสำเร็จ (Completion Rate)</div>
+            <div class="report-kpi-val">${completionRate}%</div>
             <div class="report-kpi-delta">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-              <span>↑ 27.9% vs previous quarter</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>ส่งมอบแล้ว ${completed.length} จาก ${tasks.length} งาน</span>
             </div>
           </div>
 
           <div class="report-kpi-card">
-            <div class="report-kpi-label">Best week</div>
-            <div class="report-kpi-val count-up-num" data-final="${bestWeekCount}">0</div>
+            <div class="report-kpi-label">กำลังการผลิตเฉลี่ย (Weekly Throughput)</div>
+            <div class="report-kpi-val">${avgWeeklyOutput} <span class="report-kpi-unit">งาน/สัปดาห์</span></div>
+            <div class="report-kpi-delta">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              <span>ความเร็วเฉลี่ยรอบ 12 สัปดาห์</span>
+            </div>
+          </div>
+
+          <div class="report-kpi-card">
+            <div class="report-kpi-label">สัปดาห์ที่ส่งมอบสูงสุด (Peak Output Week)</div>
+            <div class="report-kpi-val">${bestWeekCount} <span class="report-kpi-unit">งาน</span></div>
             <div class="report-kpi-delta text-dim">
-              <span>Week of ${bestWeekLabel}</span>
+              <span>รอบสัปดาห์วันที่ ${bestWeekLabel}</span>
             </div>
           </div>
 
           <div class="report-kpi-card">
-            <div class="report-kpi-label">Average throughput</div>
-            <div class="report-kpi-val">${avgWeeklyOutput} <span style="font-size:1rem;color:#8e95b0;font-weight:500;">งาน/สัปดาห์</span></div>
-            <div class="report-kpi-delta">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-              <span>↑ 6.6% delivery speed</span>
-            </div>
-          </div>
-
-          <div class="report-kpi-card">
-            <div class="report-kpi-label">Returned / Revision rate</div>
+            <div class="report-kpi-label">อัตราการส่งกลับแก้ไข (Revision Rate)</div>
             <div class="report-kpi-val">${revisionRate}%</div>
-            <div class="report-kpi-delta text-warn">
-              <span>↓ of tasks, down from 3.9%</span>
+            <div class="report-kpi-delta ${Number(revisionRate) > 5 ? "text-warn" : ""}">
+              <span>งานแก้ ${tasks.filter((t) => (t.revision_count || 0) > 0).length} งาน (รวมแก้ ${totalRevision} ครั้ง)</span>
             </div>
           </div>
         </div>
 
-        <!-- 3. Middle Row: Weekly Throughput Bar Chart + Tasks by Category -->
+        <!-- 3. Middle Row: Weekly Throughput Dual Bar Chart + Quality & SLA Metrics -->
         <div class="reports-mid-grid">
           <!-- Left: Weekly Throughput Dual Bar Chart -->
           <div class="reports-card">
             <div class="reports-card-head">
               <div>
-                <h3 class="reports-card-title">Weekly throughput</h3>
-                <p class="reports-card-sub">This quarter in colour, last quarter behind it</p>
+                <h3 class="reports-card-title">แนวโน้มการส่งมอบงานรายสัปดาห์ (Weekly Throughput)</h3>
+                <p class="reports-card-sub">สถิติเปรียบเทียบผลผลิตย้อนหลัง 12 สัปดาห์</p>
               </div>
               <div class="chart-legend-pills">
                 <span class="legend-pill-item">
                   <span class="legend-color-box" style="background:#ffc61a;"></span>
-                  <span>This quarter</span>
+                  <span>ไตรมาสปัจจุบัน</span>
                 </span>
                 <span class="legend-pill-item">
                   <span class="legend-color-box" style="background:#333852;"></span>
-                  <span>Last quarter</span>
+                  <span>ไตรมาสก่อนหน้า</span>
                 </span>
               </div>
             </div>
@@ -354,33 +316,85 @@ export async function render(ctx) {
             </div>
           </div>
 
-          <!-- Right: Tasks by Category -->
+          <!-- Right: Quality & SLA Performance Metrics (Replaces redundant Categories) -->
           <div class="reports-card">
             <div class="reports-card-head">
               <div>
-                <h3 class="reports-card-title">Tasks by category</h3>
-                <p class="reports-card-sub">12 weeks</p>
+                <h3 class="reports-card-title">ดัชนีคุณภาพและความรวดเร็ว</h3>
+                <p class="reports-card-sub">มาตรฐานการส่งมอบและคุณภาพงาน (Quality & SLA)</p>
               </div>
             </div>
-            <div class="rep-cat-list">
-              ${categoriesHtml}
+            <div class="rep-quality-list">
+              <div class="rep-quality-item">
+                <div class="rep-quality-info">
+                  <div class="rep-quality-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>ผ่านตรวจดราฟต์แรก (First-Pass Yield)</span>
+                  </div>
+                  <div class="rep-quality-sub">${firstPassCount} จาก ${tasks.length} งาน ผ่านโดยไม่ต้องแก้ไข</div>
+                </div>
+                <div class="rep-quality-val is-green">${firstPassRate}%</div>
+              </div>
+
+              <div class="rep-quality-item">
+                <div class="rep-quality-info">
+                  <div class="rep-quality-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc61a" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>ส่งมอบตรงตามกำหนด (On-Time SLA)</span>
+                  </div>
+                  <div class="rep-quality-sub">${late.length === 0 ? "ทุกงานส่งมอบตรงเวลา ไม่มีงานค้างเลท" : `มีงานเกินกำหนด ${late.length} งาน`}</div>
+                </div>
+                <div class="rep-quality-val">${onTimeRate}%</div>
+              </div>
+
+              <div class="rep-quality-item">
+                <div class="rep-quality-info">
+                  <div class="rep-quality-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#19c3eb" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <span>ผลผลิตเฉลี่ยต่อบรีฟ (Items / Task)</span>
+                  </div>
+                  <div class="rep-quality-sub">รวมผลิตทั้งหมด ${itemTotal} ชิ้นงานย่อย</div>
+                </div>
+                <div class="rep-quality-val is-cyan">${avgItemsPerTask} ชิ้น</div>
+              </div>
+
+              <div class="rep-quality-item">
+                <div class="rep-quality-info">
+                  <div class="rep-quality-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c5cadc" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>งานที่กำลังทำอยู่ในคิว (Active Workload)</span>
+                  </div>
+                  <div class="rep-quality-sub">กระจายภาระงานในทีม ${analytics.memberStats.length} คน</div>
+                </div>
+                <div class="rep-quality-val" style="color:#ffffff;">${active.length} งาน</div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 4. Bottom Row: When requests arrive Heatmap -->
         <div class="heatmap-card">
-          <div class="reports-card-head" style="margin-bottom:8px;">
+          <div class="reports-card-head" style="margin-bottom:12px;">
             <div>
-              <h3 class="reports-card-title">When requests arrive (ช่วงเวลาที่งานเข้ามาในระบบ)</h3>
-              <p class="reports-card-sub">Requests per hour, by weekday, 12 weeks</p>
+              <h3 class="reports-card-title">ช่วงเวลาที่เปิดบรีฟเข้ามาในระบบ (Demand Intake Heatmap)</h3>
+              <p class="reports-card-sub">ความหนาแน่นของการเปิดบรีฟงานแยกตามช่วงเวลาและวันในสัปดาห์ (รอบ 12 สัปดาห์)</p>
+            </div>
+            <div class="heatmap-legend-wrap">
+              <span>ระดับความหนาแน่น:</span>
+              <div class="heatmap-legend-items">
+                <span class="heatmap-legend-item"><span class="heatmap-legend-dot lvl-0"></span> ว่าง (0)</span>
+                <span class="heatmap-legend-item"><span class="heatmap-legend-dot lvl-1"></span> น้อย (1-2)</span>
+                <span class="heatmap-legend-item"><span class="heatmap-legend-dot lvl-2"></span> ปานกลาง (3-4)</span>
+                <span class="heatmap-legend-item"><span class="heatmap-legend-dot lvl-3"></span> หนาแน่น (5-6)</span>
+                <span class="heatmap-legend-item"><span class="heatmap-legend-dot lvl-4"></span> สูงสุด (7+)</span>
+              </div>
             </div>
           </div>
           <div class="heatmap-scroll-wrap">
             <table class="heatmap-grid-table">
               <thead>
                 <tr>
-                  <th style="width:40px;"></th>
+                  <th style="width:50px;"></th>
                   ${hourLabels.map((h) => `<th>${h}</th>`).join("")}
                 </tr>
               </thead>
@@ -391,7 +405,7 @@ export async function render(ctx) {
           </div>
         </div>
 
-        <!-- 5. Advanced Workload & 6 Charts Suite -->
+        <!-- 5. Designer Capacity & Workload Deep-Dive (No duplicate Project Explorer) -->
         ${renderMemberComparisonHtml({
           memberStats: analytics.memberStats,
           teamTotals: analytics.teamTotals,
@@ -402,6 +416,7 @@ export async function render(ctx) {
           allTasks,
           members,
           weekOffset: heatmapWeekOffset,
+          showProjectBreakdown: false,
         })}
       </div>
     `;
@@ -456,7 +471,7 @@ export async function render(ctx) {
             labels: weekLabels,
             datasets: [
               {
-                label: "This quarter",
+                label: "ไตรมาสปัจจุบัน",
                 data: currentWeekCounts,
                 backgroundColor: "#ffc61a",
                 borderRadius: 4,
@@ -464,7 +479,7 @@ export async function render(ctx) {
                 categoryPercentage: 0.7,
               },
               {
-                label: "Last quarter",
+                label: "ไตรมาสก่อนหน้า",
                 data: prevWeekCounts,
                 backgroundColor: "#2a2e44",
                 borderRadius: 4,
