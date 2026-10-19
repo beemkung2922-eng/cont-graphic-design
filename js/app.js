@@ -255,7 +255,7 @@ function getRoleNavConfig(member, page) {
     sidebarNavHtml,
     createBtnHtml,
     drawerCreateBtnHtml,
-    isReq,
+    isReq: false,
     isView,
   };
 }
