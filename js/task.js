@@ -2,7 +2,7 @@ import { STATUS_LABELS, STATUS_ORDER, TRANSITIONS, canTransition } from "./const
 import { formatDateLong, formatDateTime, statusBadge, avatar, escapeHtml, progressInfo, projectFor, memberFor, roleLabel, taskTypeLabel, relativeDeadline, statusMotionIcon } from "./formatters.js";
 import { qs, toast, openModal, closeModal, errorState } from "./app.js";
 import { api } from "./supabase.js";
-import { canManage, canEditTask, canDeleteTask, isDesigner, isRequester, isViewer, canUploadArtwork, canChangeTaskStatus } from "./auth.js";
+import { canManage, canEditTask, canDeleteTask, isDesigner, isViewer, canUploadArtwork, canChangeTaskStatus, canRequestRevision } from "./auth.js";
 import { renderImageUploaderHtml, bindImageUploader } from "./image-uploader.js";
 
 export async function render(ctx) {
@@ -111,10 +111,10 @@ export async function render(ctx) {
     const allowed = TRANSITIONS[task.status] || [];
 
     const isDes = isDesigner(ctx.member);
-    const isReq = isRequester(ctx.member);
     const isView = isViewer(ctx.member);
     const canUpload = canUploadArtwork(ctx.member, task);
     const canChangeStatus = canChangeTaskStatus(ctx.member, task);
+    const canReqRev = canRequestRevision(ctx.member, task);
 
     const stepper = STATUS_ORDER.map((status, index) => `
       <div class="status-step ${status === task.status ? "is-current" : STATUS_ORDER.indexOf(task.status) > index ? "is-completed" : ""}">
@@ -130,15 +130,10 @@ export async function render(ctx) {
           ${next === "completed" ? "✓ " : ""}${STATUS_LABELS[next]}
         </button>
       `).join("");
-    } else if (isReq && task.status === "review") {
-      actions = `
-        <button class="btn btn-danger btn-sm" id="request-revision">ขอแก้ไขงาน (Revision)</button>
-        <button class="btn btn-success btn-sm" data-next-status="completed">✓ อนุมัติแบบและรับมอบงาน</button>
-      `;
-    } else if (!canChangeStatus) {
+    } else {
       actions = `
         <span class="chip" style="font-weight:500; color:var(--ink-600)">
-          งานของ ${escapeHtml(member?.name || "ดีไซเนอร์ท่านอื่น")} (ดูได้อย่างเดียว)
+          งานของ ${escapeHtml(member?.name || "ดีไซเนอร์ในทีม")} (ดูได้อย่างเดียว)
         </span>
       `;
     }
@@ -322,7 +317,7 @@ export async function render(ctx) {
                 <div class="card-title" style="font-weight:700">ประวัติรอบการแก้งาน (Versions)</div>
                 <div class="card-sub" style="font-weight:400">ปัจจุบัน: Version ${Number(task.revision_count || 0) + 1}</div>
               </div>
-              ${task.status === "review" || task.status === "completed" ? `<button class="btn btn-danger btn-sm" id="request-revision">ขอแก้ไขงาน</button>` : ""}
+              ${canReqRev && (task.status === "review" || task.status === "completed") ? `<button class="btn btn-danger btn-sm" id="request-revision">ขอแก้ไขงาน</button>` : ""}
             </div>
             <div class="stack" style="gap:8px">
               ${Number(task.revision_count || 0) >= 2 ? `
@@ -456,6 +451,10 @@ export async function render(ctx) {
     });
 
     qs("#request-revision")?.addEventListener("click", () => {
+      if (!canRequestRevision(ctx.member, task)) {
+        toast("คุณไม่มีสิทธิ์ขอแก้ไขงานนี้ (ต้องเป็น Team Head หรือดีไซเนอร์ที่ได้รับอนุญาต)", "warn");
+        return;
+      }
       const modal = openModal({
         title: `ขอแก้ไขงาน (สร้าง Version ${Number(task.revision_count || 0) + 2})`,
         body: `
