@@ -168,6 +168,11 @@ if (urlError) {
 }
 const params = searchParams;
 
+function getPostLoginUrl(member) {
+  if (member?.role === "requester") return "tasks.html";
+  return "dashboard.html";
+}
+
 // 2. Check token_hash in URL query params
 const tokenHash = params.get("token_hash");
 const tokenType = params.get("type") || "email";
@@ -175,11 +180,12 @@ if (tokenHash) {
   showInfo("กำลังยืนยันตัวตนจากอีเมล…");
   try {
     await auth.verifyOtpHash(tokenHash, tokenType);
+    const member = await auth.currentMember().catch(() => null);
     showInfo("ยืนยันตัวตนสำเร็จ กำลังเข้าสู่ระบบ…");
     localStorage.removeItem(COOLDOWN_KEY);
     localStorage.removeItem(SAVED_EMAIL_KEY);
     window.setTimeout(() => {
-      window.location.href = "dashboard.html";
+      window.location.href = getPostLoginUrl(member);
     }, 400);
   } catch (err) {
     showError(formatAuthError(err));
@@ -202,7 +208,7 @@ if (authCode) {
       localStorage.removeItem(COOLDOWN_KEY);
       localStorage.removeItem(SAVED_EMAIL_KEY);
       window.setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = getPostLoginUrl(member);
       }, 500);
     }
   } catch (err) {
@@ -239,7 +245,7 @@ if (window.location.hash.includes("access_token=")) {
       localStorage.removeItem(COOLDOWN_KEY);
       localStorage.removeItem(SAVED_EMAIL_KEY);
       window.setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = getPostLoginUrl(member);
       }, 500);
     }
   } catch (err) {
@@ -318,11 +324,12 @@ const handleVerify = async () => {
 
   try {
     const session = await auth.verifyOtp(email, token);
+    const member = await auth.currentMember().catch(() => null);
     showInfo("ยืนยันรหัสถูกต้อง! กำลังเข้าสู่ระบบ…");
     localStorage.removeItem(COOLDOWN_KEY);
     localStorage.removeItem(SAVED_EMAIL_KEY);
     window.setTimeout(() => {
-      window.location.href = "dashboard.html";
+      window.location.href = getPostLoginUrl(member);
     }, 400);
   } catch (error) {
     showError(formatAuthError(error));
