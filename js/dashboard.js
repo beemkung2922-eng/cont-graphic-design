@@ -2,7 +2,7 @@ import { taskCard, interactiveEmptyState, formatDate, relativeDeadline, avatar, 
 import { STATUS_LABELS, STATUS_ORDER } from "./constants.js";
 import { qs, toast, openModal } from "./app.js";
 import { openCreateTask, bindTaskCards } from "./task-actions.js";
-import { isRequester, isViewer, canCreateTask } from "./auth.js";
+import { isRequester, isViewer, canCreateTask, canDownload } from "./auth.js";
 import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
 import { cleanupStudio3D } from "./studio-3d.js?v=20261016-18";
@@ -148,6 +148,7 @@ export async function render(ctx) {
   window.openCreateTask = () => openCreateTask(ctx);
   const isReq = isRequester(ctx.member);
   const canCreate = canCreateTask(ctx.member);
+  const canExport = canDownload(ctx.member);
 
   localStorage.setItem("cont_dashboard_view", "classic");
   let currentView = "classic";
@@ -418,15 +419,16 @@ export async function render(ctx) {
             <p class="overview-subtitle">ภาพรวมงานดีไซน์ สถิติการผลิต และสถานะงานทั้งหมดใน Pipeline</p>
           </div>
           <div class="overview-header-actions">
-
+            ${canExport ? `
             <button type="button" class="btn-overview-action" id="btn-export-overview" title="ส่งออกรายงานสรุป">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Export สรุป</span>
-            </button>
+            </button>` : ""}
+            ${canCreate ? `
             <button type="button" class="btn-overview-primary" id="btn-overview-new-task">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               <span>สร้างงานใหม่</span>
-            </button>
+            </button>` : ""}
           </div>
         </div>
 
