@@ -5,31 +5,42 @@ import { roleLabel, avatar } from "./formatters.js";
    Role Permissions Matrix Integration (CONT_ROLE_PERMS)
 ───────────────────────────────────────────────────────────────────────── */
 export const DEFAULT_ROLE_PERMS = {
-  create_task: { head: true, designer: true, requester: true, viewer: false },
-  work_task:   { head: true, designer: true, requester: false, viewer: false },
-  review_task: { head: true, designer: false, requester: false, viewer: false },
-  assign_task: { head: true, designer: false, requester: false, viewer: false },
-  request_rev: { head: true, designer: true, requester: true, viewer: false },
-  view_report: { head: true, designer: true, requester: false, viewer: false },
-  manage_role: { head: true, designer: false, requester: false, viewer: false },
-  download:    { head: true, designer: true, requester: true, viewer: true },
+  create_task: { head: true, designer: true, viewer: false },
+  work_task:   { head: true, designer: true, viewer: false },
+  review_task: { head: true, designer: false, viewer: false },
+  assign_task: { head: true, designer: false, viewer: false },
+  request_rev: { head: true, designer: true, viewer: false },
+  view_report: { head: true, designer: true, viewer: false },
+  manage_role: { head: true, designer: false, viewer: false },
+  download:    { head: true, designer: true, viewer: false },
 };
 
 export function getRolePermissions() {
   try {
     const raw = localStorage.getItem("CONT_ROLE_PERMS");
-    if (raw) return { ...DEFAULT_ROLE_PERMS, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const merged = { ...DEFAULT_ROLE_PERMS };
+      for (const [key, val] of Object.entries(parsed)) {
+        if (merged[key] && typeof val === "object") {
+          merged[key] = { ...merged[key], ...val };
+          delete merged[key].requester;
+        }
+      }
+      return merged;
+    }
   } catch {}
   return { ...DEFAULT_ROLE_PERMS };
 }
 
 export function hasPermission(member, permKey) {
   if (!member) return false;
-  const role = member.role || "viewer";
+  let role = member.role || "viewer";
+  if (role === "requester") role = "viewer"; // Normalize legacy requester to viewer
   if (["supervisor", "admin"].includes(role)) return true; // Team Head has omnipotent access
   const perms = getRolePermissions();
   const row = perms[permKey] || DEFAULT_ROLE_PERMS[permKey];
-  if (!row) return true;
+  if (!row) return false;
   return Boolean(row[role]);
 }
 
@@ -53,14 +64,8 @@ export async function ensureAccess({ allowPublic = false } = {}) {
     // Role-based Page Route Guards
     if (member && !allowPublic) {
       const currentPage = document.body.dataset.page;
-      if (member.role === "requester") {
-        // Requester allowed pages: tasks, calendar, task (detail), intro (reel)
-        // Disallowed: dashboard, board, team
-        if (["dashboard", "board", "team"].includes(currentPage)) {
-          window.location.replace("tasks.html");
-          return { member: null };
-        }
-      } else if (member.role === "viewer") {
+      const role = member.role || "viewer";
+      if (role === "viewer" || role === "requester") {
         // Viewer allowed: dashboard, tasks, calendar, task (detail), intro (reel)
         // Disallowed: board, team
         if (["board", "team"].includes(currentPage)) {
@@ -94,39 +99,47 @@ export function mountUser(member) {
 export function isDesigner(member) { return ["designer", "supervisor", "admin"].includes(member?.role); }
 export function canManage(member) { return ["supervisor", "admin"].includes(member?.role); }
 export function isAdmin(member) { return member?.role === "admin"; }
-export function isRequester(member) { return member?.role === "requester"; }
-export function isViewer(member) { return member?.role === "viewer"; }
+export function isRequester(member) { return false; } // Deprecated; treated as viewer
+export function isViewer(member) { return !member || member.role === "viewer" || member.role === "requester"; }
 export function canMoveTask(member) {
-  if (!member || member.role === "viewer" || member.role === "requester") return false;
+  if (isViewer(member)) return false;
   return hasPermission(member, "work_task");
 }
 export function canChangeTaskStatus(member, task) {
+  if (isViewer(member)) return false;
   if (canManage(member)) return true;
   if (!hasPermission(member, "work_task")) return false;
   if (isDesigner(member) && task?.assignee_id === member?.id) return true;
   return false;
 }
 export function canCreateTask(member) {
-  if (!member || member.role === "viewer") return false;
+  if (isViewer(member)) return false;
   return hasPermission(member, "create_task");
 }
 export function canEditTask(member, task) {
+  if (isViewer(member)) return false;
   if (canManage(member)) return true;
   if (isDesigner(member) && task?.assignee_id === member?.id && hasPermission(member, "work_task")) return true;
-  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief" && hasPermission(member, "create_task")) return true;
   return false;
 }
 export function canDeleteTask(member, task) {
+  if (isViewer(member)) return false;
   if (canManage(member)) return true;
-  if (isRequester(member) && task?.created_by === member?.id && task?.status === "brief" && hasPermission(member, "create_task")) return true;
   return false;
 }
 export function canUploadArtwork(member, task) {
+  if (isViewer(member)) return false;
   if (!hasPermission(member, "work_task")) return false;
   return canManage(member) || (isDesigner(member) && task?.assignee_id === member?.id);
 }
 export function canDownload(member) {
+  if (!member) return false;
   return hasPermission(member, "download");
+}
+export function canRequestRevision(member, task) {
+  if (!member || isViewer(member)) return false;
+  if (canManage(member)) return true;
+  return hasPermission(member, "request_rev");
 }
 export function canViewReport(member) {
   return hasPermission(member, "view_report");
