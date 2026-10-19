@@ -164,6 +164,7 @@ export async function render(ctx) {
 
   let heatmapWeekOffset = 0;
   let mobileFilterOpen = false;
+  let mobileBottomTab = "card-categories";
 
   const draw = () => {
     const canCreate = canCreateTask(ctx.member);
@@ -193,11 +194,11 @@ export async function render(ctx) {
 
     /* ── 2. Task Category Breakdown (Channels / Types) ── */
     const categories = [
-      { name: "Social & Online Ads", count: 0, color: "#ffc61a" },
-      { name: "Key Visual & Campaign", count: 0, color: "#19c3eb" },
-      { name: "Print & Branch Media", count: 0, color: "#22c55e" },
-      { name: "Resize & Adaptation", count: 0, color: "#a855f7" },
-      { name: "General / Internal", count: 0, color: "#64748b" }
+      { name: "Social & Online Ads", icon: "📱", count: 0, color: "#ffc61a" },
+      { name: "Key Visual & Campaign", icon: "✨", count: 0, color: "#19c3eb" },
+      { name: "Print & Branch Media", icon: "🖨️", count: 0, color: "#22c55e" },
+      { name: "Resize & Adaptation", icon: "📐", count: 0, color: "#a855f7" },
+      { name: "General / Internal", icon: "📁", count: 0, color: "#64748b" }
     ];
 
     filtered.forEach(t => {
@@ -219,16 +220,23 @@ export async function render(ctx) {
       }
     });
 
+    const totalCatTasks = categories.reduce((sum, c) => sum + c.count, 0) || 1;
     const maxCatCount = Math.max(...categories.map(c => c.count), 1);
     const categoriesHtml = categories.map(cat => {
       const pct = Math.round((cat.count / maxCatCount) * 100);
+      const share = ((cat.count / totalCatTasks) * 100).toFixed(1);
       return `
         <div class="cat-bar-item">
-          <span class="cat-bar-label" title="${escapeHtml(cat.name)}">${escapeHtml(cat.name)}</span>
+          <div class="bar-item-header">
+            <span class="cat-bar-label">
+              <span class="bar-icon">${cat.icon}</span>
+              <span>${escapeHtml(cat.name)}</span>
+            </span>
+            <span class="cat-bar-val"><strong>${cat.count}</strong> งาน <small>(${share}%)</small></span>
+          </div>
           <div class="cat-bar-track">
             <div class="cat-bar-fill" style="width:${pct}%;background:${cat.color};"></div>
           </div>
-          <span class="cat-bar-val">${cat.count} งาน</span>
         </div>
       `;
     }).join("");
@@ -239,18 +247,26 @@ export async function render(ctx) {
       return { id: p.id, name: p.name, count };
     }).sort((a, b) => b.count - a.count);
 
+    const totalProjTasks = filtered.length || 1;
     const top5Projects = projectCounts.slice(0, 5);
     const maxProjCount = top5Projects[0]?.count || 1;
+    const rankBadges = ["🥇", "🥈", "🥉", "4", "5"];
+
     const topProjectsHtml = top5Projects.map((p, idx) => {
       const pct = Math.round((p.count / maxProjCount) * 100);
+      const share = ((p.count / totalProjTasks) * 100).toFixed(1);
       return `
-        <div class="top-ranked-item">
-          <span class="top-ranked-num">${idx + 1}</span>
-          <span class="top-ranked-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+        <div class="top-ranked-item" data-proj-id="${escapeHtml(p.id)}">
+          <div class="bar-item-header">
+            <span class="top-ranked-name">
+              <span class="rank-badge">${rankBadges[idx]}</span>
+              <span>${escapeHtml(p.name)}</span>
+            </span>
+            <span class="top-ranked-val"><strong>${p.count}</strong> งาน <small>(${share}%)</small></span>
+          </div>
           <div class="top-ranked-track">
             <div class="top-ranked-fill" style="width:${pct}%;"></div>
           </div>
-          <span class="top-ranked-val">${p.count} งาน</span>
         </div>
       `;
     }).join("");
@@ -597,8 +613,18 @@ export async function render(ctx) {
             </div>
           </div>
 
+          <!-- Mobile Bento Switcher (Only visible on mobile <= 680px) -->
+          <div class="mobile-bento-switcher" id="bento-switcher">
+            <button type="button" class="mobile-bento-tab ${mobileBottomTab === 'card-categories' ? 'is-active' : ''}" data-target="card-categories">
+              <span>📂 แยกตามประเภท</span>
+            </button>
+            <button type="button" class="mobile-bento-tab ${mobileBottomTab === 'card-projects' ? 'is-active' : ''}" data-target="card-projects">
+              <span>🏆 โครงการยอดนิยม</span>
+            </button>
+          </div>
+
           <!-- Card 2: Tasks by Category (Revenue by channel) -->
-          <div class="overview-bottom-card">
+          <div class="overview-bottom-card ${mobileBottomTab !== 'card-categories' ? 'is-mobile-hidden' : ''}" id="card-categories">
             <div class="bottom-card-head">
               <div>
                 <h3 class="bottom-card-title">งานแยกตามประเภท</h3>
@@ -613,7 +639,7 @@ export async function render(ctx) {
           </div>
 
           <!-- Card 3: Top Projects (Top sellers) -->
-          <div class="overview-bottom-card">
+          <div class="overview-bottom-card ${mobileBottomTab !== 'card-projects' ? 'is-mobile-hidden' : ''}" id="card-projects">
             <div class="bottom-card-head">
               <div>
                 <h3 class="bottom-card-title">โครงการยอดนิยม (Top Projects)</h3>
@@ -700,6 +726,27 @@ export async function render(ctx) {
         analytics,
       });
     });
+
+    // Mobile switcher tabs for bottom cards
+    const switcher = qs("#bento-switcher");
+    if (switcher) {
+      switcher.querySelectorAll(".mobile-bento-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          mobileBottomTab = tab.dataset.target;
+          switcher.querySelectorAll(".mobile-bento-tab").forEach(t => t.classList.remove("is-active"));
+          tab.classList.add("is-active");
+          const cardCat = qs("#card-categories");
+          const cardProj = qs("#card-projects");
+          if (mobileBottomTab === "card-categories") {
+            cardCat?.classList.remove("is-mobile-hidden");
+            cardProj?.classList.add("is-mobile-hidden");
+          } else {
+            cardCat?.classList.add("is-mobile-hidden");
+            cardProj?.classList.remove("is-mobile-hidden");
+          }
+        });
+      });
+    }
 
     // Time tabs on Hero card
     qs("#page-content")?.querySelectorAll(".hero-time-tab").forEach(tab => {
