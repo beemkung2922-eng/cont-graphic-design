@@ -4,7 +4,7 @@ import { api, auth } from "./supabase.js";
 import { escapeHtml, avatar, relativeDeadline, formatDateTime } from "./formatters.js";
 import { pixelIcons } from "./pixel-icons.js";
 import { openCreateTask } from "./task-actions.js?v=20261015-02";
-import { startProductTour } from "./onboarding.js";
+import { startProductTour } from "./onboarding.js?v=20261019-02";
 
 const icons = {
   grid: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>`,
@@ -181,7 +181,7 @@ function topbarHtml(page, member) {
           ${pixelIcons.code}
           <span>TEAM</span>
         </a>
-        <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="Workflow Guide">
+        <a class="pixel-nav-link" href="#" id="top-workflow-guide-link" title="แนะนำระบบและคู่มือการใช้งาน (System Guide)">
           ${pixelIcons.book}
           <span>GUIDE</span>
         </a>
@@ -623,5 +623,5 @@ const pageModules = {
 };
 
 if (currentPage && pageModules[currentPage]) {
-  import(`./${pageModules[currentPage]}.js?v=20261019-01`).then(({ render }) => boot(render));
+  import(`./${pageModules[currentPage]}.js?v=20261019-02`).then(({ render }) => boot(render));
 }
