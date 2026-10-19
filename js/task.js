@@ -364,7 +364,7 @@ export async function render(ctx) {
 
     document.querySelectorAll("[data-next-status]").forEach((button) =>
       button.addEventListener("click", async () => {
-        if (!canChangeStatus && !(isReq && task.status === "review" && button.dataset.nextStatus === "completed")) {
+        if (!canChangeStatus) {
           toast("คุณสามารถเปลี่ยนสถานะได้เฉพาะงานที่ได้รับมอบหมายเท่านั้น", "warn");
           return;
         }
