@@ -27,10 +27,44 @@ export function formatDateTime(value) {
 
 export function relativeDeadline(value) {
   if (!value) return { label: "ไม่มีกำหนด", className: "" };
-  const raw = String(value); const deadline = raw.includes("T") ? new Date(raw) : new Date(`${raw}T23:59:59`); const now = new Date(); const minutes = Math.round((deadline - now) / 60000);
-  if (minutes < 0) { const late = Math.abs(minutes); const hours = Math.floor(late / 60); const mins = late % 60; return { label: `เลท ${hours} ชม. ${mins} นาที`, className: "is-overdue", lateMinutes: late }; }
-  if (minutes <= 120) return { label: minutes < 60 ? `เหลือ ${minutes} นาที` : `เหลือ ${Math.floor(minutes / 60)} ชม. ${minutes % 60} นาที`, className: "is-due-soon", lateMinutes: 0 };
-  const days = Math.floor(minutes / 1440); return { label: days ? `อีก ${days} วัน` : `เหลือ ${Math.floor(minutes / 60)} ชม. ${minutes % 60} นาที`, className: "" , lateMinutes: 0};
+  const raw = String(value);
+  const deadline = raw.includes("T") ? new Date(raw) : new Date(`${raw}T23:59:59`);
+  const now = new Date();
+  const minutes = Math.round((deadline - now) / 60000);
+
+  if (minutes < 0) {
+    const late = Math.abs(minutes);
+    const totalHours = Math.floor(late / 60);
+    const mins = late % 60;
+
+    let label = "";
+    if (totalHours >= 24) {
+      const days = Math.floor(totalHours / 24);
+      const remHours = totalHours % 24;
+      label = `เลท ${days} วัน ${remHours} ชม. ${mins} นาที`;
+    } else if (totalHours > 0) {
+      label = `เลท ${totalHours} ชม. ${mins} นาที`;
+    } else {
+      label = `เลท ${mins} นาที`;
+    }
+
+    return { label, className: "is-overdue", lateMinutes: late };
+  }
+
+  if (minutes <= 120) {
+    return {
+      label: minutes < 60 ? `เหลือ ${minutes} นาที` : `เหลือ ${Math.floor(minutes / 60)} ชม. ${minutes % 60} นาที`,
+      className: "is-due-soon",
+      lateMinutes: 0
+    };
+  }
+
+  const days = Math.floor(minutes / 1440);
+  return {
+    label: days ? `อีก ${days} วัน` : `เหลือ ${Math.floor(minutes / 60)} ชม. ${minutes % 60} นาที`,
+    className: "",
+    lateMinutes: 0
+  };
 }
 
 export function statusMotionIcon(status, size = 15) {
