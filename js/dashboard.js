@@ -6,6 +6,7 @@ import { isRequester, isViewer, canCreateTask } from "./auth.js";
 import { filterTasksByTimeRange, getTaskDate, MONTH_NAMES_TH, calculateTeamAnalytics, renderMemberComparisonHtml, bindMemberComparison, initAdvancedCharts } from "./analytics.js";
 import { pixelIcons } from "./pixel-icons.js";
 import { cleanupStudio3D } from "./studio-3d.js?v=20261016-18";
+import { openExportSummaryModal } from "./export-summary.js?v=20261019-03";
 
 /* ─────────────────────────────────────────────────────────────────────────
    Brand Tokens & Status Mappings
@@ -684,10 +685,14 @@ export async function render(ctx) {
     // Top action buttons
     qs("#btn-overview-new-task")?.addEventListener("click", () => window.openCreateTask?.());
     qs("#btn-export-overview")?.addEventListener("click", () => {
-      toast("กำลังสร้างรายงานสรุปภาพรวมผู้บริหาร...", "info");
-      setTimeout(() => {
-        window.print?.();
-      }, 350);
+      openExportSummaryModal({
+        tasks: filtered,
+        allTasks: tasks,
+        members,
+        projects,
+        filterState,
+        analytics,
+      });
     });
 
     // Time tabs on Hero card
