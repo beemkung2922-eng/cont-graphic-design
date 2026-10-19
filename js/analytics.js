@@ -692,7 +692,7 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
       <!-- แถบเลือกโปรเจกต์ (Project Selection Tabs Bar) เต็มตา เลื่อนแนวนอนง่าย -->
       <div class="project-tabs-scroll" id="project-tabs-bar" style="margin-bottom:18px;">
         <button type="button" class="btn-proj-tab is-active" data-proj-tab="all">
-          <span>📁 ทุกโปรเจกต์ (${allCount} งาน)</span>
+          <span>ทุกโปรเจกต์ (${allCount} งาน)</span>
         </button>
         ${breakdown.projects.map((p) => `
           <button type="button" class="btn-proj-tab" data-proj-tab="${escapeHtml(p.id)}">
@@ -708,7 +708,7 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
         <!-- ซ้าย: กราฟแท่งแนวนอน (Desktop Canvas + Mobile Responsive Progress List) -->
         <div class="project-pie-column">
           <div style="font-size:0.82rem;font-weight:700;color:var(--cyan);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-            <span>📊 10 โปรเจกต์ที่มีงานมากที่สุด (Top 10 Projects)</span>
+            <span>10 โปรเจกต์ที่มีงานมากที่สุด (Top 10 Projects)</span>
             <span style="font-size:0.72rem;color:#8a90a4;">แตะเพื่อดูงาน</span>
           </div>
           <!-- Desktop Canvas Chart -->
@@ -746,7 +746,6 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
       <div class="project-tasks-explorer" id="project-tasks-explorer">
         <div class="proj-filter-head">
           <div class="proj-filter-label">
-            <span>👤</span>
             <span>เลือกคนในโปรเจกต์ (Filter by Designer):</span>
           </div>
           <div class="proj-filter-member-chips" id="proj-filter-member-chips">
@@ -758,7 +757,6 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
         <div class="proj-date-filter-section">
           <div class="proj-date-filter-row">
             <div class="proj-date-filter-title">
-              <span>📅</span>
               <span>ช่วงวันที่ของงาน (Date Range):</span>
             </div>
             <div class="proj-date-preset-buttons" id="proj-date-preset-buttons">
@@ -768,20 +766,24 @@ export function renderProjectBreakdownHtml({ breakdown, projects = [], members =
               <button type="button" class="btn-proj-date-pill" data-proj-date-preset="month">เดือนนี้</button>
             </div>
             <div class="proj-date-inputs-wrap">
-              <div class="proj-date-field-group">
-                <label for="proj-date-start">จาก:</label>
-                <input type="date" id="proj-date-start" class="proj-date-input" />
+              <div class="proj-date-fields-subrow">
+                <div class="proj-date-field-group">
+                  <label for="proj-date-start">จาก:</label>
+                  <input type="date" id="proj-date-start" class="proj-date-input" />
+                </div>
+                <div class="proj-date-field-group">
+                  <label for="proj-date-end">ถึง:</label>
+                  <input type="date" id="proj-date-end" class="proj-date-input" />
+                </div>
               </div>
-              <div class="proj-date-field-group">
-                <label for="proj-date-end">ถึง:</label>
-                <input type="date" id="proj-date-end" class="proj-date-input" />
+              <div class="proj-date-actions-subrow">
+                <button type="button" id="btn-proj-date-today-range" class="btn-proj-quick-action" title="ตั้งค่าช่วงวันเป็น วันนี้ถึงวันนี้">
+                  วันนี้ถึงวันนี้
+                </button>
+                <button type="button" id="btn-proj-date-clear" class="btn-proj-quick-action btn-proj-clear-action" title="ล้างตัวกรองวันที่">
+                  ✕ ล้าง
+                </button>
               </div>
-              <button type="button" id="btn-proj-date-today-range" class="btn-proj-quick-action" title="ตั้งค่าช่วงวันเป็น วันนี้ถึงวันนี้">
-                ⚡ วันนี้ถึงวันนี้
-              </button>
-              <button type="button" id="btn-proj-date-clear" class="btn-proj-quick-action btn-proj-clear-action" title="ล้างตัวกรองวันที่">
-                ✕ ล้าง
-              </button>
             </div>
           </div>
         </div>
@@ -963,11 +965,11 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
 
     chipsWrap.innerHTML = `
       <button type="button" class="proj-member-pill ${currentMemberId === "all" ? "is-active" : ""}" data-proj-member="all">
-        <span>👥 ทุกคน (${totalInScope})</span>
+        <span>ทุกคน (${totalInScope})</span>
       </button>
       ${availableMembers.map((item) => `
         <button type="button" class="proj-member-pill ${currentMemberId === item.member.id ? "is-active" : ""}" data-proj-member="${escapeHtml(item.member.id)}">
-          <span>${item.member.avatar_url ? avatar(item.member, "avatar-xs") : "👤"}</span>
+          <span>${avatar(item.member, "avatar-xs")}</span>
           <span>${escapeHtml(item.member.name)}</span>
           <span class="member-pill-count">${item.count}</span>
         </button>
@@ -1022,7 +1024,6 @@ export function bindProjectExplorer(container, { tasks = [], projects = [], memb
     if (enriched.length === 0) {
       listWrap.innerHTML = `
         <div style="text-align:center;padding:36px 16px;background:#151622;border:1px dashed #2e3247;border-radius:6px;color:#8f95ae;">
-          <div style="font-size:1.8rem;margin-bottom:8px;">📁</div>
           <div style="font-weight:600;color:#ffffff;font-size:0.95rem;">ไม่พบงานตามเงื่อนไขที่เลือก</div>
           <div style="font-size:0.8rem;margin-top:4px;">ลองเลือกดูสมาชิกคนอื่น หรือเลือกดูงานทั้งหมดในโปรเจกต์นี้</div>
         </div>
