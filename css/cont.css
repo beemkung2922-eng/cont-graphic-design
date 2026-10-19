@@ -7244,121 +7244,466 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   }
 }
 
+@media (min-width: 681px) {
+  .mobile-team-summary-overview {
+    display: none !important;
+  }
+  .mobile-project-bar-list {
+    display: none !important;
+  }
+}
+
 @media (max-width: 680px) {
-  .overview-stat-cards-2x2 {
-    grid-template-columns: repeat(2, 1fr) !important;
+  /* Dashboard Shell Spacing */
+  body[data-page="dashboard"] .page {
+    padding: 12px 10px 48px !important;
+  }
+  .overview-shell {
+    gap: 12px !important;
+  }
+
+  /* 1. Header & Actions */
+  .overview-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+  }
+  .overview-title {
+    font-size: 1.55rem !important;
+    margin-bottom: 2px !important;
+  }
+  .overview-subtitle {
+    font-size: 0.75rem !important;
+    color: #8c92a4 !important;
+  }
+  .overview-header-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .btn-overview-action, .btn-overview-primary {
+    justify-content: center !important;
+    padding: 8px 12px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* 2. Overview Top Grid: Put 4 Stat Cards First (Immediate KPI visibility) */
+  .overview-top-grid {
+    display: flex !important;
+    flex-direction: column !important;
     gap: 10px !important;
   }
+  .overview-stat-cards-2x2 {
+    order: 1 !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 2px !important;
+  }
+  .overview-hero-card {
+    order: 2 !important;
+    padding: 14px 14px 12px !important;
+    border-radius: 12px !important;
+    background: #131522 !important;
+    border: 1px solid #23273c !important;
+  }
+
+  /* 4 KPI Stat Cards */
   .stat-bento-card {
-    padding: 12px 14px 10px !important;
-    min-height: 120px !important;
+    padding: 10px 12px !important;
+    min-height: 100px !important;
+    border-radius: 12px !important;
+    background: #141724 !important;
+    border: 1px solid #23273c !important;
+  }
+  .stat-bento-head {
+    margin-bottom: 4px !important;
+  }
+  .stat-bento-icon {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 6px !important;
+  }
+  .stat-bento-icon svg {
+    width: 13px !important;
+    height: 13px !important;
   }
   .stat-bento-val {
-    font-size: 1.65rem !important;
-    margin: 4px 0 2px !important;
+    font-size: 1.55rem !important;
+    margin: 2px 0 2px !important;
+    font-weight: 700 !important;
   }
   .stat-bento-label {
-    font-size: 0.74rem !important;
+    font-size: 0.72rem !important;
   }
   .stat-bento-chevron {
     display: none !important;
   }
   .stat-bento-delta {
-    font-size: 0.68rem !important;
+    font-size: 0.65rem !important;
   }
   .stat-bento-mini-list {
-    display: none !important; /* Hide mini list on mobile for balanced 2x2 cards and clean layout */
+    display: none !important;
   }
   .stat-bento-sparkline svg {
-    height: 24px !important;
+    height: 20px !important;
   }
+
+  /* Throughput Hero Line Chart Card */
   .hero-card-head {
     flex-direction: column !important;
-    gap: 10px !important;
-  }
-  .overview-hero-card {
-    padding: 16px 16px 14px !important;
+    gap: 8px !important;
   }
   .hero-metric-val {
-    font-size: 2rem !important;
+    font-size: 1.8rem !important;
   }
   .hero-metric-label {
-    line-height: 1.5 !important;
-    padding-top: 2px !important;
-    overflow: visible !important;
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+  }
+  .hero-metric-sub {
+    font-size: 0.68rem !important;
   }
   .hero-time-tabs {
     width: 100% !important;
     justify-content: space-between !important;
-    margin-top: 8px !important;
+    margin-top: 6px !important;
+    gap: 4px !important;
   }
   .hero-time-tab {
     flex: 1 !important;
     text-align: center !important;
-    padding: 6px 4px !important;
-    font-size: 0.72rem !important;
+    padding: 5px 2px !important;
+    font-size: 0.70rem !important;
   }
-  .hero-chart-container {
-    height: 220px !important;
+  .hero-chart-canvas-wrap {
+    height: 180px !important;
+    margin-top: 8px !important;
+  }
+
+  /* 3. Bottom Grid (Pipeline + Category + Top Projects) */
+  .overview-bottom-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
     margin-top: 10px !important;
   }
-
-  /* Tasks by Category & Top Projects Responsive Progress Bars (No Label Truncation) */
-  .cat-bar-item {
-    flex-wrap: wrap !important;
-    gap: 4px 8px !important;
-    margin-bottom: 2px !important;
+  .overview-bottom-card {
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+    background: #131522 !important;
+    border: 1px solid #23273c !important;
   }
-  .cat-bar-label {
-    width: auto !important;
-    max-width: calc(100% - 60px) !important;
-    white-space: normal !important;
-    font-size: 0.78rem !important;
-    line-height: 1.3 !important;
+  .bottom-card-head {
+    margin-bottom: 10px !important;
   }
-  .cat-bar-val {
-    margin-left: auto !important;
-    font-size: 0.76rem !important;
+  .bottom-card-title {
+    font-size: 0.90rem !important;
+    font-weight: 700 !important;
   }
-  .cat-bar-track {
-    width: 100% !important;
-    flex-basis: 100% !important;
-    height: 6px !important;
+  .bottom-card-sub {
+    font-size: 0.70rem !important;
+    color: #8c92a4 !important;
+  }
+  .bottom-card-link {
+    font-size: 0.70rem !important;
   }
 
-  .top-ranked-item {
-    flex-wrap: wrap !important;
-    gap: 4px 8px !important;
-    margin-bottom: 2px !important;
+  /* Pipeline Bar & Legend */
+  .pipeline-stacked-bar {
+    height: 12px !important;
+    border-radius: 6px !important;
+    margin-bottom: 10px !important;
   }
-  .top-ranked-name {
-    width: auto !important;
-    max-width: calc(100% - 75px) !important;
-    white-space: normal !important;
-    font-size: 0.78rem !important;
-    line-height: 1.3 !important;
-  }
-  .top-ranked-val {
-    margin-left: auto !important;
-    font-size: 0.76rem !important;
-  }
-  .top-ranked-track {
-    width: 100% !important;
-    flex-basis: 100% !important;
-    height: 6px !important;
-  }
-
   .pipeline-legend-grid {
-    gap: 8px 12px !important;
+    gap: 6px 10px !important;
   }
   .pipeline-legend-item {
-    font-size: 0.76rem !important;
+    font-size: 0.74rem !important;
   }
   .pipeline-legend-item .leg-val {
     margin-left: auto !important;
     font-family: var(--font-mono) !important;
     font-weight: 700 !important;
     color: #ffffff !important;
+  }
+  .pipeline-footer-note {
+    font-size: 0.68rem !important;
+    margin-top: 8px !important;
+    padding-top: 8px !important;
+    border-top: 1px solid #1e2235 !important;
+  }
+
+  /* Categories & Top Projects Progress Bars */
+  .cat-bar-list, .top-ranked-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+  }
+  .cat-bar-item, .top-ranked-item {
+    padding: 8px 10px !important;
+    background: #171a27 !important;
+    border: 1px solid #252a3c !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px 6px !important;
+    margin-bottom: 0 !important;
+  }
+  .cat-bar-label, .top-ranked-name {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    line-height: 1.3 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  .cat-bar-val, .top-ranked-val {
+    margin-left: auto !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    flex-shrink: 0 !important;
+  }
+  .cat-bar-track, .top-ranked-track {
+    width: 100% !important;
+    flex-basis: 100% !important;
+    height: 5px !important;
+    background: #0c0e17 !important;
+    border-radius: 3px !important;
+    overflow: hidden !important;
+  }
+
+  /* 4. Team Members Section */
+  .analytics-suite-wrap {
+    margin-top: 10px !important;
+  }
+  .analytics-header-banner {
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+    background: #131522 !important;
+    border: 1px solid #23273c !important;
+  }
+  .analytics-title-group h3 {
+    font-size: 0.92rem !important;
+    margin-bottom: 2px !important;
+  }
+  .analytics-title-group p {
+    font-size: 0.70rem !important;
+    color: #8c92a4 !important;
+  }
+  .comparison-toolbar {
+    margin-top: 8px !important;
+  }
+
+  /* Mobile Team Summary Overview Cards */
+  .mobile-team-summary-overview {
+    display: block !important;
+    margin-top: 10px !important;
+  }
+  .mobile-team-cards-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+  .m-member-overview-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 9px 12px !important;
+    background: #171a27 !important;
+    border: 1px solid #262b3d !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+  }
+  .m-member-overview-card:active {
+    background: #202436 !important;
+  }
+  .m-member-overview-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    min-width: 0 !important;
+  }
+  .m-member-overview-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    line-height: 1.2 !important;
+    min-width: 0 !important;
+  }
+  .m-member-name {
+    font-size: 0.80rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .m-member-role {
+    font-size: 0.68rem !important;
+    color: #8c92a4 !important;
+    margin-top: 1px !important;
+  }
+  .m-member-overview-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .m-member-badge {
+    font-size: 0.70rem !important;
+    font-weight: 700 !important;
+    padding: 2px 7px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+  .m-member-badge.is-ok {
+    background: rgba(34, 197, 94, 0.15) !important;
+    color: #4ade80 !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+  }
+  .m-member-badge.is-warn {
+    background: rgba(255, 198, 26, 0.15) !important;
+    color: #fde047 !important;
+    border-color: rgba(255, 198, 26, 0.3) !important;
+  }
+  .m-member-badge.is-over {
+    background: rgba(230, 40, 70, 0.18) !important;
+    color: #ff6b81 !important;
+    border-color: rgba(230, 40, 70, 0.4) !important;
+  }
+  .m-member-chevron {
+    color: #64748b !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* 5. Project Breakdown & Explorer */
+  .project-breakdown-card {
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+    background: #131522 !important;
+    border: 1px solid #23273c !important;
+    margin-top: 10px !important;
+  }
+  .project-breakdown-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  /* Hide truncated canvas chart on mobile */
+  .project-pie-chart-wrap {
+    display: none !important;
+  }
+  /* Show clean mobile responsive project list */
+  .mobile-project-bar-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+  }
+  .mobile-proj-bar-item {
+    padding: 9px 12px !important;
+    background: #171a27 !important;
+    border: 1px solid #262b3d !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+  }
+  .mobile-proj-bar-item:active {
+    background: #202436 !important;
+  }
+  .mobile-proj-bar-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 5px !important;
+    gap: 8px !important;
+  }
+  .mobile-proj-bar-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+  .mobile-proj-rank {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    color: var(--yellow, #ffc61a) !important;
+    width: 14px !important;
+    text-align: center !important;
+    flex-shrink: 0 !important;
+  }
+  .mobile-proj-name {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    white-space: normal !important;
+    line-height: 1.3 !important;
+  }
+  .mobile-proj-val {
+    font-size: 0.70rem !important;
+    color: #8c92a4 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .mobile-proj-bar-track {
+    height: 4px !important;
+    background: #0c0e17 !important;
+    border-radius: 3px !important;
+    overflow: hidden !important;
+  }
+  .mobile-proj-bar-fill {
+    height: 100% !important;
+    border-radius: 3px !important;
+  }
+
+  /* 6. Activity, Deadlines & Urgent Tasks */
+  .dash-two-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+  }
+  .chart-card {
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+    background: #131522 !important;
+    border: 1px solid #23273c !important;
+  }
+  .chart-card-header {
+    margin-bottom: 8px !important;
+  }
+  .chart-card-title {
+    font-size: 0.90rem !important;
+  }
+  .chart-card-sub {
+    font-size: 0.70rem !important;
+  }
+
+  /* Urgent Tasks */
+  .task-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .task-card {
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+  .task-card .task-thumb-wrap {
+    max-height: 130px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    margin-bottom: 8px !important;
+  }
+  .task-card img {
+    max-height: 130px !important;
+    width: 100% !important;
+    object-fit: cover !important;
   }
 }
 
