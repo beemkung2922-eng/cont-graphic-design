@@ -1374,7 +1374,7 @@ export function renderMemberComparisonHtml({
   const memberPillsHtml = `
     <div class="member-select-pills">
       <button type="button" class="member-pill-btn ${selectedMemberId === "all" ? "is-active" : ""}" data-select-member="all">
-        <span>👥</span> <span>ทุกคนในทีม (${memberStats.length})</span>
+        <span>ทุกคนในทีม (${memberStats.length})</span>
       </button>
       ${memberStats.map((stat) => {
         const activeCount = stat.tasks.filter((t) => t.status !== "completed").length;
@@ -1384,7 +1384,7 @@ export function renderMemberComparisonHtml({
 
         return `
           <button type="button" class="member-pill-btn ${selectedMemberId === stat.member.id ? "is-active" : ""}" data-select-member="${stat.member.id}">
-            <span>${stat.member.avatar_url ? avatar(stat.member, "avatar-xs") : "👤"}</span>
+            <span>${avatar(stat.member, "avatar-xs")}</span>
             <span>${escapeHtml(stat.member.name)}</span>
             <span class="chart-count-pill ${isOver ? "badge-danger" : ""}" style="${isOver ? "background:var(--red);color:#fff;" : ""}">${activeCount}</span>
           </button>
@@ -1627,38 +1627,7 @@ export function renderMemberComparisonHtml({
       </section>
     `;
   } else {
-    deepDivePanelHtml = `
-      <div class="mobile-team-summary-overview">
-        <div class="mobile-team-cards-grid">
-          ${memberStats.map((stat) => {
-            const m = stat.member;
-            const activeCount = stat.tasks.filter((t) => t.status !== "completed").length;
-            const capacity = Number(m.capacity_points || 10);
-            const activePts = stat.tasks.filter((t) => t.status !== "completed").reduce((sum, t) => sum + Number(t.workload_points || 1), 0);
-            const loadPercent = capacity > 0 ? Math.round((activePts / capacity) * 100) : 0;
-            const isOver = capacity > 0 && activePts > capacity;
-
-            return `
-              <div class="m-member-overview-card" data-select-member="${escapeHtml(m.id)}">
-                <div class="m-member-overview-left">
-                  ${avatar(m, "avatar-sm")}
-                  <div class="m-member-overview-meta">
-                    <span class="m-member-name">${escapeHtml(m.name)}</span>
-                    <span class="m-member-role">${escapeHtml(roleLabel(m.role))}</span>
-                  </div>
-                </div>
-                <div class="m-member-overview-right">
-                  <span class="m-member-badge ${isOver ? 'is-over' : (loadPercent >= 80 ? 'is-warn' : 'is-ok')}">
-                    ${activeCount} งาน
-                  </span>
-                  <span class="m-member-chevron">›</span>
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      </div>
-    `;
+    deepDivePanelHtml = "";
   }
 
   return `
@@ -1667,7 +1636,6 @@ export function renderMemberComparisonHtml({
       <div class="analytics-header-banner">
         <div class="analytics-title-group">
           <h3>
-            <span>👥</span>
             <span>เจาะลึกภาระงานรายคน (Team Members Overview)</span>
           </h3>
           <p>
