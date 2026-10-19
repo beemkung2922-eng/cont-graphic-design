@@ -7,76 +7,83 @@
 
 import { escapeHtml } from "./formatters.js";
 
-const STORAGE_KEY = "cont_product_tour_v3";
+const STORAGE_KEY = "cont_product_tour_v4";
+const VISITED_KEY = "cont_has_visited_system";
 
 // All core sections to introduce (Filtered dynamically by what's present on the current page)
 const ALL_SECTION_STEPS = [
   {
     id: "nav_menu",
     selector: ".pixel-nav-links",
-    fallbackSelector: ".topbar",
-    title: "แถบเมนูหลัก (Main Navigation)",
-    body: "ใช้สลับหน้าระหว่าง แดชบอร์ด, คลังงานทั้งหมด, บอร์ดคันบัง, ปฏิทินกำหนดส่ง และทีมงาน",
+    fallbackSelector: ".pixel-topbar, .topbar",
+    title: "แถบเมนูหลัก & ปุ่ม GUIDE (Main Navigation)",
+    body: "ใช้สลับหน้าระหว่าง แดชบอร์ด, งานของฉัน, บอร์ด Kanban, ปฏิทินกำหนดส่ง, ทีมงาน และสามารถคลิกปุ่ม GUIDE ตรงนี้เพื่อเปิดดูคำแนะนำการใช้งานระบบได้ตลอดเวลา",
+  },
+  {
+    id: "create_btn",
+    selector: "#quick-create, #btn-overview-new-task, .btn-pixel-red",
+    title: "ปุ่มเปิดบรีฟงานใหม่ (+ สร้างงาน)",
+    body: "กดเพื่อเปิดแบบฟอร์มส่งบรีฟงานใหม่ กรอกรายละเอียด เลือกขนาดไฟล์ และแนบ Reference เพื่อส่งงานเข้าสู่กระบวนการผลิตได้ทันทีใน 30 วินาที",
   },
   {
     id: "search_notif",
     selector: ".pixel-topbar-right",
     fallbackSelector: ".search-inline",
-    title: "ค้นหา & แจ้งเตือน (Search & Alerts)",
-    body: "พิมพ์ค้นหาชื่องานหรือโปรเจกต์ได้ทันที พร้อมตรวจเช็กการแจ้งเตือนคอมเมนต์และเดดไลน์",
-  },
-  {
-    id: "create_btn",
-    selector: "#hero-create-btn, #top-create-btn, #board-create, .btn-pixel-red",
-    title: "ปุ่มเปิดบรีฟงานใหม่ (+ NEW TASK)",
-    body: "กดเพื่อส่งคำขอเปิดงานใหม่ พร้อมเลือกขนาดและเทมเพลตมาตรฐาน KKP ได้ใน 30 วินาที",
-  },
-  {
-    id: "hero_actions",
-    selector: ".pixel-hero-actions",
-    title: "ปุ่มลัดเริ่มงาน (Quick Actions)",
-    body: "ทางลัดสำหรับเปิดงานใหม่ทันที หรือคลิกเพื่อสลับไปยังหน้ากระดาน Kanban Board",
-  },
-  {
-    id: "stats_bar",
-    selector: ".pixel-stats-bar, .grid-4, .report-card",
-    title: "แถบสรุปสถิติงาน (Live Stats)",
-    body: "แสดงยอดงานทั้งหมด, งานที่กำลังทำ, งานที่ส่งมอบสำเร็จ และงานไฮไลต์เด่นของทีมแบบเรียลไทม์",
+    title: "ค้นหา & การแจ้งเตือน (Search & Alerts)",
+    body: "พิมพ์ค้นหาชื่องานหรือโปรเจกต์ได้รวดเร็ว พร้อมกระดิ่งแจ้งเตือนสถานะงานใหม่ คอมเมนต์ และงานที่ใกล้ถึงกำหนดส่ง",
   },
   {
     id: "filter_bar",
-    selector: "#dash-filter-bar, .board-toolbar, .filter-bar",
-    title: "ตัวกรองงาน (Smart Filters)",
-    body: "คัดกรองดูงานตามช่วงเวลา วันนี้, 7 วัน, เดือนนี้, รายปี หรือเลือกดูเจาะจงเฉพาะคน",
+    selector: "#dash-filter-bar, .dash-filter-bar, .board-toolbar",
+    title: "ตัวกรองช่วงเวลาอัจฉริยะ (Timeframe Filters)",
+    body: "เลือกดูข้อมูลสถิติตาม วันนี้, 7 วัน, เดือนนี้, ปีนี้ หรือกดปุ่ม 'ตัวกรองละเอียด' เพื่อคัดกรองเฉพาะรายบุคคลและสถานะงาน",
   },
   {
-    id: "charts_row",
-    selector: ".charts-row, #chart-trend",
-    title: "กราฟแนวโน้ม & สเตตัส (Charts)",
-    body: "ดูกำลังการส่งมอบงานย้อนหลัง และสัดส่วนงานที่ค้างในแต่ละขั้นตอน (บรีฟ, กำลังดราฟต์, รอตรวจ, ส่งมอบ)",
+    id: "hero_chart",
+    selector: ".overview-hero-card, #overview-hero-chart",
+    title: "ปริมาณงานทั้งหมด & แนวโน้ม (Throughput Trends)",
+    body: "ดูกราฟแนวโน้มปริมาณงานดีไซน์ที่ผลิตและส่งมอบ เปรียบเทียบกับช่วงก่อนหน้า พร้อมสลับดู 7 วัน, 30 วัน, 90 วัน หรือทั้งหมด",
+  },
+  {
+    id: "stats_bento",
+    selector: ".overview-stat-cards-2x2, .stat-bento-card",
+    title: "4 กล่องสรุปสถานะหลัก (Core Metrics)",
+    body: "ตรวจเช็กยอดงานกำลังทำ, งานที่ส่งมอบสำเร็จ, งานด่วน/เลยกำหนดส่ง และอัตราการส่งมอบตรงเวลา (On-Time SLA) แบบเรียลไทม์",
+  },
+  {
+    id: "pipeline_categories",
+    selector: ".overview-bottom-grid, .overview-bottom-card",
+    title: "สถานะงานใน Pipeline & ประเภทงาน",
+    body: "ติดตามงานในแต่ละขั้นตอน (รอรับบรีฟ ➔ กำลังดราฟต์ ➔ รอตรวจ/คอมเมนต์ ➔ ส่งมอบ) และดูสัดส่วนงานแยกตามประเภทสื่อ",
   },
   {
     id: "workload_suite",
     selector: "#member-comparison-section, #chart-workload-bar",
     title: "วิเคราะห์ภาระงานรายคน (Workload Analytics)",
-    body: "ดูว่าใครงานแน่น ใครพร้อมรับงาน, เช็ก Throughput รายสัปดาห์, และคลิกดูตารางงานของแต่ละคน",
+    body: "ตรวจเช็กกำลังการทำงานของดีไซเนอร์แต่ละคน ใครงานแน่น ใครพร้อมรับงานใหม่ เพื่อการกระจายงานที่สมดุลและรวดเร็ว",
   },
   {
     id: "activity_deadlines",
     selector: ".dash-two-col, .feed-list, .deadline-list",
-    title: "อัปเดตล่าสุด & กำหนดส่ง (Activity & Deadlines)",
-    body: "ติดตามการขยับสถานะงานล่าสุดของทีม และเช็กงานที่ใกล้ถึงกำหนดส่งเพื่อป้องกันงานล่าช้า",
+    title: "กิจกรรมล่าสุด & กำหนดส่ง (Activity & Deadlines)",
+    body: "ติดตามการอัปเดตสถานะงานล่าสุดในทีม และตรวจเช็กเดดไลน์ที่ต้องระวังเพื่อป้องกันงานล่าช้า",
   },
   {
     id: "kanban_board",
-    selector: ".kanban-wrap, .kanban",
+    selector: ".kanban-board-container, .kanban-wrap, .kanban",
     title: "กระดานงาน (Kanban Board)",
-    body: "ลากและวางการ์ดเพื่อย้ายขั้นตอนงานจาก รอรับบรีฟ ➔ กำลังดราฟต์ ➔ รอคอมเมนต์ ➔ แก้ไขงาน ➔ ส่งมอบ",
+    body: "ลากและวางการ์ดเพื่อย้ายขั้นตอนงานจาก รอรับบรีฟ ➔ กำลังดราฟต์ ➔ รอคอมเมนต์ ➔ แก้ไขงาน ➔ ส่งมอบ พร้อมฟิลเตอร์งานรายบุคคล",
+  },
+  {
+    id: "calendar_view",
+    selector: "#calendar-mount, .calendar-view, .calendar-grid",
+    title: "ปฏิทินงาน (Calendar Schedule)",
+    body: "ดูภาพรวมกำหนดส่งรายวันและรายเดือน เพื่อวางแผนและติดตามงานของทีมได้อย่างแม่นยำ",
   },
   {
     id: "member_cards",
-    selector: "#team-view-results, .grid-2",
-    title: "การ์ดสมาชิกทีม (Team Members)",
+    selector: "#team-grid, .team-grid, #team-view-results",
+    title: "การ์ดสมาชิกทีม (Team Management)",
     body: "เช็กสถานะการทำงานของดีไซเนอร์แต่ละคน พร้อมปุ่มด่วนสำหรับมอบหมายงานให้คนที่ว่างได้ทันที",
   },
 ];
@@ -98,7 +105,10 @@ class CompactTour {
     // Find all steps whose elements exist on this page
     this.steps = ALL_SECTION_STEPS.filter((step) => {
       const el = document.querySelector(step.selector) || (step.fallbackSelector && document.querySelector(step.fallbackSelector));
-      return el && el.offsetParent !== null; // element is visible
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return (rect.width > 0 || rect.height > 0) && style.display !== "none" && style.visibility !== "hidden";
     });
 
     if (!this.steps.length) return;
@@ -143,7 +153,7 @@ class CompactTour {
 
     window.setTimeout(() => {
       this.position(target, step, index);
-    }, 160);
+    }, 220);
   }
 
   position(target, step, index) {
@@ -167,7 +177,7 @@ class CompactTour {
       <div class="tour-tooltip-header">
         <div class="tour-step-pill">
           <span class="step-dot"></span>
-          <span>จุดที่ ${index + 1} จาก ${this.steps.length}</span>
+          <span>จุดสำคัญที่ ${index + 1} จาก ${this.steps.length}</span>
         </div>
         <button class="tour-tooltip-close" id="tour-close-btn" title="ปิด (Esc)">×</button>
       </div>
@@ -179,31 +189,36 @@ class CompactTour {
 
       <div class="tour-tooltip-footer">
         <button class="tour-btn-link" id="tour-skip-btn">
-          ข้าม (Skip)
+          ข้ามคำแนะนำ (Skip)
         </button>
         <div class="tour-tooltip-nav">
           ${index > 0 ? `
             <button class="btn-pixel btn-pixel-dark" id="tour-prev-btn">
-              ← ก่อนหน้า
+              ← ย้อนกลับ
             </button>
           ` : ""}
           <button class="btn-pixel btn-pixel-cyan" id="tour-next-btn">
-            ${isLast ? "เข้าใจแล้ว ✓" : "ถัดไป →"}
+            ${isLast ? "เข้าใจแล้ว เริ่มใช้งาน ✓" : "ถัดไป →"}
           </button>
         </div>
       </div>
     `;
 
     // Calculate position
-    const ttWidth = Math.min(360, window.innerWidth - 32);
+    const ttWidth = Math.min(380, window.innerWidth - 32);
     this.tooltipEl.style.width = `${ttWidth}px`;
 
+    const ttHeight = this.tooltipEl.offsetHeight || 190;
     let ttTop = sTop + sHeight + 12;
     let ttLeft = Math.max(16, Math.min(window.innerWidth - ttWidth - 16, sLeft + (sWidth / 2) - (ttWidth / 2)));
 
-    // If bottom runs off screen, position above the target
-    if (ttTop + 180 > window.innerHeight && sTop > 180) {
-      ttTop = Math.max(16, sTop - 180);
+    // If bottom runs off screen, position above the target or anchor safely
+    if (ttTop + ttHeight > window.innerHeight - 16) {
+      if (sTop - ttHeight - 12 >= 16) {
+        ttTop = sTop - ttHeight - 12;
+      } else {
+        ttTop = Math.max(16, window.innerHeight - ttHeight - 20);
+      }
     }
 
     this.tooltipEl.style.top = `${ttTop}px`;
@@ -235,6 +250,7 @@ class CompactTour {
 
   finish() {
     this.cleanup();
+    localStorage.setItem(VISITED_KEY, "true");
     localStorage.setItem(STORAGE_KEY, "completed");
   }
 
@@ -277,9 +293,21 @@ class CompactTour {
 let tourInstance = null;
 
 export function startProductTour(force = true) {
+  const hasVisited =
+    localStorage.getItem(VISITED_KEY) === "true" ||
+    localStorage.getItem(STORAGE_KEY) === "completed" ||
+    localStorage.getItem("cont_product_tour_v3") === "completed" ||
+    localStorage.getItem("cont_product_tour_v2") === "completed" ||
+    localStorage.getItem("cont_dashboard_view") !== null ||
+    localStorage.getItem("cont_user_profile") !== null;
+
   if (!force) {
-    const status = localStorage.getItem(STORAGE_KEY);
-    if (status === "completed") return;
+    // If returning user who has already visited or used the system, do not auto-trigger
+    if (hasVisited) return;
+
+    // Immediately mark as visited on first-time arrival so it will NEVER auto-trigger again on refresh or page navigation
+    localStorage.setItem(VISITED_KEY, "true");
+    localStorage.setItem(STORAGE_KEY, "completed");
   }
 
   if (!tourInstance) {
