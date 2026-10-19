@@ -1,4 +1,5 @@
 import { qs, toast } from "./app.js";
+import { canDownload } from "./auth.js";
 import { escapeHtml, projectFor, memberFor, formatDate, taskTypeLabel, relativeDeadline } from "./formatters.js";
 import {
   filterTasksByTimeRange,
@@ -261,6 +262,8 @@ export async function render(ctx) {
       `;
     }).join("");
 
+    const canDl = canDownload(ctx.member);
+
     /* ─────────── Render Full Reports Page HTML ─────────── */
     qs("#page-content").innerHTML = `
       <div class="reports-shell">
@@ -274,6 +277,7 @@ export async function render(ctx) {
             <span class="chip" style="background:#181b2a;border:1px solid #2e334a;color:#cdd3e8;padding:8px 14px;border-radius:8px;font-weight:600;">
               ข้อมูล ${tasks.length} งาน (${itemTotal} ชิ้น)
             </span>
+            ${canDl ? `
             <button class="btn-overview-action" id="btn-export-pdf" title="พิมพ์รายงานหรือบันทึกเป็น PDF">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
               <span>ดาวน์โหลด PDF</span>
@@ -281,7 +285,7 @@ export async function render(ctx) {
             <button class="btn-overview-primary" id="btn-export-excel" title="ดาวน์โหลดไฟล์สเปรดชีต Excel (.csv)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>ดาวน์โหลด Excel</span>
-            </button>
+            </button>` : ""}
           </div>
         </div>
 
@@ -405,11 +409,19 @@ export async function render(ctx) {
     /* ─────────── Event Bindings ─────────── */
     // PDF and Excel Export
     qs("#btn-export-pdf")?.addEventListener("click", () => {
+      if (!canDownload(ctx.member)) {
+        toast("คุณไม่มีสิทธิ์ส่งออกหรือดาวน์โหลดรายงาน", "warn");
+        return;
+      }
       toast("กำลังเตรียมพิมพ์และส่งออกเป็น PDF...", "info");
       setTimeout(() => window.print(), 350);
     });
 
     qs("#btn-export-excel")?.addEventListener("click", () => {
+      if (!canDownload(ctx.member)) {
+        toast("คุณไม่มีสิทธิ์ส่งออกหรือดาวน์โหลดรายงาน", "warn");
+        return;
+      }
       exportToExcel(tasks, members, projects);
     });
 
