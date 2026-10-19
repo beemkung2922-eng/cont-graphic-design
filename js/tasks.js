@@ -31,10 +31,10 @@ export async function render(ctx) {
       ${createBtnHtml}
     </div>
 
-    <div class="filter-bar" style="flex-wrap:wrap; gap:10px;">
-      <div class="field grow" style="min-width:220px;">
+    <div class="filter-bar tasks-filter-bar" style="flex-wrap:wrap; gap:10px;">
+      <div class="field grow tasks-search-field" style="min-width:220px;">
         <label>ค้นหา Task / Project / Member</label>
-        <div class="search-inline" style="min-width:0">
+        <div class="search-inline tasks-search-box" style="min-width:0">
           <span>⌕</span>
           <input id="task-search" value="${escapeHtml(initialQuery)}" placeholder="พิมพ์เพื่อค้นหา…">
         </div>
@@ -94,7 +94,7 @@ export async function render(ctx) {
         <input type="date" id="task-day">
       </div>
 
-      <div class="field" style="align-self:flex-end;">
+      <div class="field tasks-reset-field" style="align-self:flex-end;">
         <button class="btn" id="task-reset" style="height:38px;">ล้างตัวกรอง</button>
       </div>
     </div>
