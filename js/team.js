@@ -166,7 +166,7 @@ export async function render(ctx) {
   const projects = Array.isArray(ctx.projects) ? ctx.projects : [];
 
   const designers = members.filter((m) => ["designer", "supervisor", "admin"].includes(m.role));
-  const requesters = members.filter((m) => ["requester", "viewer"].includes(m.role));
+  const viewers = members.filter((m) => ["viewer", "requester"].includes(m.role));
 
   const analyzed = designers.map((m) => analyzeMember(m, tasks, projects));
 
@@ -567,17 +567,11 @@ const ROLE_INFO = {
     color: "#38bdf8",
     desc: "รับบรีฟ ดราฟต์งาน ส่งตรวจแก้ไข และผลิตชิ้นงานกราฟิก",
   },
-  requester: {
-    label: "Requester",
-    badge: "📝 Requester",
-    color: "#22c55e",
-    desc: "เปิดบรีฟคำขอชิ้นงาน ตรวจสอบผลงาน และส่งคอมเมนต์ตรวจแก้",
-  },
   viewer: {
     label: "Viewer",
     badge: "👁️ Viewer",
     color: "#94a3b8",
-    desc: "เข้าชมความคืบหน้างาน และดาวน์โหลดไฟล์ชิ้นงานที่เสร็จแล้วอย่างเดียว",
+    desc: "เข้าชมภาพรวมความคืบหน้างาน และดูผลงานในระบบ (โหมดดูอย่างเดียว)",
   },
 };
 
@@ -643,14 +637,14 @@ const MODAL_PERMISSIONS_CATEGORIES = [
 ];
 
 const MODAL_DEFAULT_PERMS = {
-  create_task: { head: true, designer: true, requester: true, viewer: false },
-  work_task:   { head: true, designer: true, requester: false, viewer: false },
-  review_task: { head: true, designer: false, requester: false, viewer: false },
-  assign_task: { head: true, designer: false, requester: false, viewer: false },
-  request_rev: { head: true, designer: true, requester: true, viewer: false },
-  view_report: { head: true, designer: true, requester: false, viewer: false },
-  manage_role: { head: true, designer: false, requester: false, viewer: false },
-  download:    { head: true, designer: true, requester: true, viewer: true },
+  create_task: { head: true, designer: true, viewer: false },
+  work_task:   { head: true, designer: true, viewer: false },
+  review_task: { head: true, designer: false, viewer: false },
+  assign_task: { head: true, designer: false, viewer: false },
+  request_rev: { head: true, designer: true, viewer: false },
+  view_report: { head: true, designer: true, viewer: false },
+  manage_role: { head: true, designer: false, viewer: false },
+  download:    { head: true, designer: true, viewer: false },
 };
 
 function getSavedModalPerms() {
@@ -676,7 +670,7 @@ function renderModalPermsRows() {
   return MODAL_PERMISSIONS_CATEGORIES.map((cat) => {
     const catHeader = `
       <tr class="role-matrix-category-row">
-        <td colspan="5">
+        <td colspan="4">
           <div style="display:inline-flex;align-items:center;gap:8px;">
             ${cat.icon}
             <span>${escapeHtml(cat.category)}</span>
@@ -686,7 +680,7 @@ function renderModalPermsRows() {
     `;
 
     const rows = cat.perms.map((p) => {
-      const row = perms[p.key] || MODAL_DEFAULT_PERMS[p.key] || { head: true, designer: false, requester: false, viewer: false };
+      const row = perms[p.key] || MODAL_DEFAULT_PERMS[p.key] || { head: true, designer: false, viewer: false };
       return `
         <tr>
           <td>
@@ -702,12 +696,6 @@ function renderModalPermsRows() {
           <td>
             <label class="role-toggle-switch" title="สลับสิทธิ์ Designer สำหรับ ${escapeHtml(p.title)}">
               <input type="checkbox" class="modal-perm-toggle" data-key="${p.key}" data-role="designer" ${row.designer ? "checked" : ""}>
-              <span class="role-toggle-slider"></span>
-            </label>
-          </td>
-          <td>
-            <label class="role-toggle-switch" title="สลับสิทธิ์ Requester สำหรับ ${escapeHtml(p.title)}">
-              <input type="checkbox" class="modal-perm-toggle" data-key="${p.key}" data-role="requester" ${row.requester ? "checked" : ""}>
               <span class="role-toggle-slider"></span>
             </label>
           </td>
@@ -736,12 +724,11 @@ export function openManageTeamModal(ctx) {
     all: ctx.members.length,
     supervisor: ctx.members.filter((m) => ["supervisor", "admin"].includes(m.role)).length,
     designer: ctx.members.filter((m) => m.role === "designer").length,
-    requester: ctx.members.filter((m) => m.role === "requester").length,
-    viewer: ctx.members.filter((m) => m.role === "viewer").length,
+    viewer: ctx.members.filter((m) => ["viewer", "requester"].includes(m.role)).length,
   };
 
   const memberRows = ctx.members.map((m) => {
-    const curRole = ["supervisor", "admin"].includes(m.role) ? "supervisor" : (m.role || "designer");
+    const curRole = ["supervisor", "admin"].includes(m.role) ? "supervisor" : (m.role === "designer" ? "designer" : "viewer");
     const roleMeta = ROLE_INFO[curRole] || ROLE_INFO.designer;
     return `
       <tr data-member-row="${escapeHtml(m.id)}" data-member-role="${escapeHtml(curRole)}" data-search="${escapeHtml((m.name + ' ' + (m.email || '')).toLowerCase())}">
@@ -759,7 +746,6 @@ export function openManageTeamModal(ctx) {
             <select class="modal-role-select" data-role-select="${escapeHtml(m.id)}" data-initial-role="${escapeHtml(curRole)}">
               <option value="supervisor" ${curRole === "supervisor" ? "selected" : ""}>Team Head (Owner)</option>
               <option value="designer" ${curRole === "designer" ? "selected" : ""}>Designer</option>
-              <option value="requester" ${curRole === "requester" ? "selected" : ""}>Requester</option>
               <option value="viewer" ${curRole === "viewer" ? "selected" : ""}>Viewer</option>
             </select>
             <div class="modal-role-hint" data-role-hint="${escapeHtml(m.id)}">${roleMeta.desc}</div>
@@ -813,8 +799,7 @@ export function openManageTeamModal(ctx) {
             <button type="button" class="modal-role-chip is-active" data-filter-role="all">ทั้งหมด (${countRoles.all})</button>
             <button type="button" class="modal-role-chip" data-filter-role="supervisor">👑 Team Head (${countRoles.supervisor})</button>
             <button type="button" class="modal-role-chip" data-filter-role="designer">🎨 Designer (${countRoles.designer})</button>
-            <button type="button" class="modal-role-chip" data-filter-role="requester">📝 Requester (${countRoles.requester})</button>
-            ${countRoles.viewer > 0 ? `<button type="button" class="modal-role-chip" data-filter-role="viewer">👁️ Viewer (${countRoles.viewer})</button>` : ""}
+            <button type="button" class="modal-role-chip" data-filter-role="viewer">👁️ Viewer (${countRoles.viewer})</button>
           </div>
         </div>
 
@@ -851,17 +836,14 @@ export function openManageTeamModal(ctx) {
             <table class="role-matrix-table">
               <thead>
                 <tr>
-                  <th style="width:40%;">ฟังก์ชันการทำงาน</th>
-                  <th style="width:15%;">
+                  <th style="width:52%;">ฟังก์ชันการทำงาน</th>
+                  <th style="width:16%;">
                     <span class="role-col-badge role-col-head">👑 Team Head</span>
                   </th>
-                  <th style="width:15%;">
+                  <th style="width:16%;">
                     <span class="role-col-badge role-col-designer">🎨 Designer</span>
                   </th>
-                  <th style="width:15%;">
-                    <span class="role-col-badge role-col-requester">📝 Requester</span>
-                  </th>
-                  <th style="width:15%;">
+                  <th style="width:16%;">
                     <span class="role-col-badge role-col-viewer">👁️ Viewer</span>
                   </th>
                 </tr>
@@ -904,7 +886,6 @@ export function openManageTeamModal(ctx) {
                 <select id="new-member-role" class="modal-role-select" style="padding:10px 14px;">
                   <option value="designer" selected>Designer (ผู้ออกแบบ)</option>
                   <option value="supervisor">Team Head (หัวหน้าทีม)</option>
-                  <option value="requester">Requester (ผู้ขอเปิดงาน)</option>
                   <option value="viewer">Viewer (ผู้เข้าชมอย่างเดียว)</option>
                 </select>
               </div>
@@ -1015,7 +996,7 @@ export function openManageTeamModal(ctx) {
             break;
           }
         }
-        const roleName = role === "designer" ? "Designer" : role === "requester" ? "Requester" : "Viewer";
+        const roleName = role === "designer" ? "Designer" : "Viewer";
         toast(`อัปเดตสิทธิ์ "${permTitle}" สำหรับ ${roleName}: ${isChecked ? 'เปิดใช้งาน ✓' : 'ปิดการใช้งาน'}`, "success");
       });
     });
@@ -1045,7 +1026,7 @@ export function openManageTeamModal(ctx) {
       if (btnText) btnText.textContent = "กำลังบันทึก…";
 
       try {
-        const cap = ["requester", "viewer"].includes(newRole) ? 0 : 10;
+        const cap = newRole === "viewer" ? 0 : 10;
         await api.updateMember(memberId, { role: newRole, capacity_points: cap });
         
         select.dataset.initialRole = newRole;
@@ -1100,7 +1081,7 @@ export function openManageTeamModal(ctx) {
     if (errNode) errNode.textContent = "";
 
     try {
-      const cap = ["requester", "viewer"].includes(role) ? 0 : 10;
+      const cap = role === "viewer" ? 0 : 10;
       await api.createMember({
         email,
         name: name || "Team Member",
