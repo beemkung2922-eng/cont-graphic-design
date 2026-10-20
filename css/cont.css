@@ -8514,6 +8514,11 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   margin-bottom: 5px;
   letter-spacing: 0.02em;
 }
+.reports-custom-select-box-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .reports-custom-select-box {
   position: relative;
   display: flex;
@@ -8525,30 +8530,28 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   padding: 0 14px;
   height: 42px;
   min-height: 42px;
+  width: 100%;
   box-sizing: border-box;
   cursor: pointer;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: #ffffff;
+  text-align: left;
   transition: all 0.15s ease;
+  user-select: none;
 }
+
 .reports-custom-select-box.is-active {
   border-color: #ffc61a;
   box-shadow: 0 0 10px rgba(255, 198, 26, 0.15);
 }
+
 .reports-custom-select-box:hover,
-.reports-custom-select-box:focus-within {
+.reports-custom-select-box:focus {
   border-color: rgba(255, 198, 26, 0.6);
+  outline: none;
 }
-.reports-member-select-input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-}
+
 .reports-select-display-val {
   font-size: 0.88rem;
   font-weight: 700;
@@ -8559,6 +8562,7 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   padding-right: 22px;
   pointer-events: none;
 }
+
 .reports-select-chevron {
   position: absolute;
   right: 12px;
@@ -8569,6 +8573,75 @@ button, a, input, select, textarea, .btn, .btn-pixel, .nav-item, .cal-cell, .kan
   align-items: center;
   justify-content: center;
   color: #ffc61a;
+}
+
+.reports-custom-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  min-width: 190px;
+  background: #161a2e !important;
+  border: 1px solid #2e3650 !important;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  padding: 6px;
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.reports-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 6px;
+  color: #ffffff !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.reports-menu-item:hover {
+  background: #252c48 !important;
+  color: #ffc61a !important;
+}
+
+.reports-menu-item.is-selected {
+  background: rgba(255, 198, 26, 0.15) !important;
+  color: #ffc61a !important;
+  font-weight: 700;
+}
+
+.reports-menu-item-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reports-menu-divider {
+  height: 1px;
+  background: #232840;
+  margin: 5px 0;
+}
+
+.item-check {
+  color: #ffc61a;
+  font-weight: bold;
+  font-size: 0.88rem;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* Fallback: Enforce dark color scheme for native selects everywhere */
+select, option, optgroup {
+  color-scheme: dark !important;
+  background-color: #141726 !important;
+  color: #ffffff !important;
 }
 
 .heatmap-scroll-wrap {
