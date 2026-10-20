@@ -385,17 +385,33 @@ export async function render(ctx) {
               </p>
             </div>
 
-            <!-- Segmented Subtab Switcher -->
-            <div class="reports-subtab-switcher">
-              <button type="button" class="reports-subtab-btn ${reportsBottomTab === "heatmap" ? "is-active" : ""}" id="tab-btn-heatmap">
+            <!-- Switcher & Dropdown Controls matching reference image -->
+            <div class="reports-card-actions-group">
+              <button type="button" class="btn-heatmap-view-toggle ${reportsBottomTab === "heatmap" ? "is-active" : ""}" id="tab-btn-heatmap">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 <span>ช่วงเวลาเปิดบรีฟ</span>
               </button>
-              <button type="button" class="reports-subtab-btn ${reportsBottomTab === "members" ? "is-active" : ""}" id="tab-btn-members">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span>เจาะลึกภาระงานรายคน</span>
-                ${filterState.memberId !== "all" ? `<span class="chip" style="font-size:0.65rem;padding:1px 5px;background:#38bdf8;color:#000;">1 คน</span>` : `<span class="chip" style="font-size:0.65rem;padding:1px 5px;background:#242c40;">${analytics.memberStats.length}</span>`}
-              </button>
+
+              <div class="reports-member-select-field">
+                <label class="reports-member-select-label">เจาะลึกภาระงานรายคน</label>
+                <div class="reports-custom-select-box ${reportsBottomTab === "members" ? "is-active" : ""}">
+                  <select id="reports-member-dropdown" class="reports-member-select-input">
+                    <option value="all" ${reportsBottomTab === "members" && filterState.memberId === "all" ? "selected" : ""}>ทุกคนในทีม (${analytics.memberStats.length})</option>
+                    ${members.map(m => {
+                      const isSel = reportsBottomTab === "members" && filterState.memberId === m.id;
+                      return `<option value="${escapeHtml(m.id)}" ${isSel ? "selected" : ""}>${escapeHtml(m.name)}</option>`;
+                    }).join("")}
+                  </select>
+                  <div class="reports-select-display-val">
+                    ${reportsBottomTab === "members" && filterState.memberId !== "all"
+                      ? escapeHtml(members.find(m => m.id === filterState.memberId)?.name || `ทุกคนในทีม (${analytics.memberStats.length})`)
+                      : `ทุกคนในทีม (${analytics.memberStats.length})`}
+                  </div>
+                  <span class="reports-select-chevron">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffc61a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -467,12 +483,13 @@ export async function render(ctx) {
       onChange: () => draw(),
     });
 
-    // Subtab Switcher Handlers
+    // Subtab Switcher & Member Dropdown Handlers
     qs("#tab-btn-heatmap")?.addEventListener("click", () => {
       reportsBottomTab = "heatmap";
       draw();
     });
-    qs("#tab-btn-members")?.addEventListener("click", () => {
+    qs("#reports-member-dropdown")?.addEventListener("change", (e) => {
+      filterState.memberId = e.target.value;
       reportsBottomTab = "members";
       draw();
     });
