@@ -394,22 +394,33 @@ export async function render(ctx) {
 
               <div class="reports-member-select-field">
                 <label class="reports-member-select-label">เจาะลึกภาระงานรายคน</label>
-                <div class="reports-custom-select-box ${reportsBottomTab === "members" ? "is-active" : ""}">
-                  <select id="reports-member-dropdown" class="reports-member-select-input">
-                    <option value="all" ${reportsBottomTab === "members" && filterState.memberId === "all" ? "selected" : ""}>ทุกคนในทีม (${analytics.memberStats.length})</option>
+                <div class="reports-custom-select-box-wrapper">
+                  <button type="button" class="reports-custom-select-box ${reportsBottomTab === "members" ? "is-active" : ""}" id="reports-member-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="reports-select-display-val">
+                      ${reportsBottomTab === "members" && filterState.memberId !== "all"
+                        ? escapeHtml(members.find(m => m.id === filterState.memberId)?.name || `ทุกคนในทีม (${analytics.memberStats.length})`)
+                        : `ทุกคนในทีม (${analytics.memberStats.length})`}
+                    </span>
+                    <span class="reports-select-chevron">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffc61a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </span>
+                  </button>
+                  <div class="reports-custom-menu" id="reports-custom-member-menu" role="listbox" style="display:none;">
+                    <div class="reports-menu-item ${filterState.memberId === 'all' && reportsBottomTab === 'members' ? 'is-selected' : ''}" data-member-id="all" role="option">
+                      <span class="reports-menu-item-text">ทุกคนในทีม (${analytics.memberStats.length})</span>
+                      ${filterState.memberId === 'all' && reportsBottomTab === 'members' ? `<span class="item-check">✓</span>` : ''}
+                    </div>
+                    <div class="reports-menu-divider"></div>
                     ${members.map(m => {
-                      const isSel = reportsBottomTab === "members" && filterState.memberId === m.id;
-                      return `<option value="${escapeHtml(m.id)}" ${isSel ? "selected" : ""}>${escapeHtml(m.name)}</option>`;
+                      const isSel = reportsBottomTab === 'members' && filterState.memberId === m.id;
+                      return `
+                        <div class="reports-menu-item ${isSel ? 'is-selected' : ''}" data-member-id="${escapeHtml(m.id)}" role="option">
+                          <span class="reports-menu-item-text">${escapeHtml(m.name)}</span>
+                          ${isSel ? `<span class="item-check">✓</span>` : ''}
+                        </div>
+                      `;
                     }).join("")}
-                  </select>
-                  <div class="reports-select-display-val">
-                    ${reportsBottomTab === "members" && filterState.memberId !== "all"
-                      ? escapeHtml(members.find(m => m.id === filterState.memberId)?.name || `ทุกคนในทีม (${analytics.memberStats.length})`)
-                      : `ทุกคนในทีม (${analytics.memberStats.length})`}
                   </div>
-                  <span class="reports-select-chevron">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffc61a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                  </span>
                 </div>
               </div>
             </div>
@@ -483,16 +494,44 @@ export async function render(ctx) {
       onChange: () => draw(),
     });
 
-    // Subtab Switcher & Member Dropdown Handlers
+    // Subtab Switcher & Custom Member Dropdown Handlers
     qs("#tab-btn-heatmap")?.addEventListener("click", () => {
       reportsBottomTab = "heatmap";
       draw();
     });
-    qs("#reports-member-dropdown")?.addEventListener("change", (e) => {
-      filterState.memberId = e.target.value;
-      reportsBottomTab = "members";
-      draw();
-    });
+
+    const triggerBtn = qs("#reports-member-select-trigger");
+    const customMenu = qs("#reports-custom-member-menu");
+
+    if (triggerBtn && customMenu) {
+      triggerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = customMenu.style.display !== "none";
+        customMenu.style.display = isOpen ? "none" : "block";
+        triggerBtn.setAttribute("aria-expanded", isOpen ? "false" : "true");
+      });
+
+      customMenu.querySelectorAll(".reports-menu-item").forEach((item) => {
+        item.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const memberId = item.getAttribute("data-member-id");
+          filterState.memberId = memberId;
+          reportsBottomTab = "members";
+          customMenu.style.display = "none";
+          triggerBtn.setAttribute("aria-expanded", "false");
+          draw();
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!triggerBtn.contains(e.target) && !customMenu.contains(e.target)) {
+          if (customMenu.style.display !== "none") {
+            customMenu.style.display = "none";
+            triggerBtn.setAttribute("aria-expanded", "false");
+          }
+        }
+      });
+    }
 
     bindMemberComparison(qs("#page-content"), {
       onSelectMember: (newMemberId) => {
